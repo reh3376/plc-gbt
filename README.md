@@ -23,8 +23,8 @@ PLC-Savvy GPT is an enterprise-grade AI assistant that understands PLC programmi
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd PLC_GPT
+   git clone https://github.com/reh3376/plc-gpt_build.git
+   cd plc-gpt_build
    ```
 
 2. **Configure environment**

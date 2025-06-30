@@ -354,6 +354,16 @@ This roadmap tracks the implementation of a PLC-Savvy GPT system combining Neo4j
   - Set up actual .env file with credentials
   - Test Docker stack deployment
 
+### 2025-06-30 - GitHub Repository Connected
+- Task: Connected local repository to GitHub remote
+- Version: 0.1.0
+- Completed:
+  - ✅ Added remote origin: https://github.com/reh3376/plc-gpt_build.git
+  - ✅ Pushed initial commit to main branch
+  - ✅ Updated documentation with repository URL
+- Issues: None
+- Next: Continue with Phase 1 environment setup tasks
+
 ### [DATE] - Update Template
 - Task: [What was done]
 - Version: [Version number if applicable]
@@ -368,7 +378,7 @@ This roadmap tracks the implementation of a PLC-Savvy GPT system combining Neo4j
 - Docker Compose: `plc-gpt-stack/docker-compose.yml`
 - OpenAI Fine-tuning: https://platform.openai.com/docs/guides/fine-tuning
 - Neo4j Documentation: https://neo4j.com/docs/
-- Project Repository: [YOUR_REPO_URL]
+- Project Repository: https://github.com/reh3376/plc-gpt_build
 
 ---
 
