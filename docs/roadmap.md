@@ -396,7 +396,7 @@ This roadmap tracks the implementation of a PLC-Savvy GPT system combining Neo4j
 ## Resources & References
 
 - Original Guide: `plc_gpt_full_guide.md`
-- Docker Compose: `plc-gpt-stack/docker-compose.yml`
+- Docker Compose: `../plc-gpt-stack/docker-compose.yml`
 - OpenAI Fine-tuning: https://platform.openai.com/docs/guides/fine-tuning
 - Neo4j Documentation: https://neo4j.com/docs/
 - Project Repository: https://github.com/reh3376/plc-gpt_build
