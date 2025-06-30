@@ -1,0 +1,99 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+
+# Docker volumes (local data)
+plc-gpt-stack/neo4j_data/
+plc-gpt-stack/qdrant_data/
+plc-gpt-stack/postgres_data/
+
+# Logs
+*.log
+logs/
+
+# Backups
+*.backup
+*.bak
+*.dump
+
+# Processed documents
+plc-gpt-stack/processed/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Security - Never commit these
+*.pem
+*.key
+*.cert
+*.crt
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Model files (large binaries)
+*.bin
+*.onnx
+*.pt
+*.pth
+*.h5
+
+# Documentation build
+docs/_build/
+site/
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.pytest_cache/
+
+# Node (if frontend is added later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 
