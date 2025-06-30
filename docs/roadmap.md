@@ -49,7 +49,7 @@ Each phase includes comprehensive testing to ensure reliability and quality:
 - 📝 [Naming Conventions](naming-conventions.md) - Consistent naming patterns across all components
 - 📐 [Coding Standards](coding-standards.md) - Development best practices and style guidelines
 - 📁 [Project Structure](../README.md) - Repository organization and setup instructions
-- 🧪 **Testing**: Documentation review and standards validation
+- 🧪 **Testing**: Documentation review and standards validation → [Phase 0 & 1 Testing Summary](../summaries/2025-06-30-phase-0-1-testing-summary.md)
 
 ---
 
@@ -87,7 +87,7 @@ Each phase includes comprehensive testing to ensure reliability and quality:
 - 🚀 [Gateway API](../plc-gpt-stack/gateway/) - FastAPI service implementation
 - ⚙️ [ETL Worker](../plc-gpt-stack/workers/) - Document processing service
 - 📊 [Implementation Summary](../summaries/2025-06-30-initial-setup-summary.md) - Detailed progress report
-- 🧪 **Testing**: Container health checks, API endpoint tests, service integration tests
+- 🧪 **Testing**: Container health checks, API endpoint tests, service integration tests → [Phase 0 & 1 Testing Summary](../summaries/2025-06-30-phase-0-1-testing-summary.md)
 
 ---
 
@@ -477,6 +477,7 @@ Each phase includes comprehensive testing to ensure reliability and quality:
 - [Coding Standards](coding-standards.md) - Development best practices
 - [Implementation Guide](plc_gpt_full_guide.md) - Complete deployment guide
 - [Project Summaries](../summaries/) - Implementation progress reports
+  - [Phase 0 & 1 Testing Summary](../summaries/2025-06-30-phase-0-1-testing-summary.md) - Comprehensive testing results
 
 ### Technical Resources
 - Docker Compose: `../plc-gpt-stack/docker-compose.yml`
