@@ -51,19 +51,19 @@ This roadmap tracks the implementation of a PLC-Savvy GPT system combining Neo4j
   - [x] Vector DB credentials
 
 ### Container Stack
-- [ ] Pull/load Docker images
+- [x] Pull/load Docker images
 - [x] Verify Docker Compose configuration
-- [ ] Test container orchestration:
-  - [ ] Neo4j container
-  - [ ] Qdrant/Vector DB container
+- [x] Test container orchestration:
+  - [x] Neo4j container
+  - [x] Qdrant/Vector DB container
   - [ ] ETL worker container
-  - [ ] Gateway container
+  - [x] Gateway container
 
 ### Initial Database Setup
 - [ ] Copy initial Neo4j backup to `/seed`
 - [x] Run `./scripts/init_neo4j.sh`
-- [ ] Verify Neo4j is accessible
-- [ ] Test Gateway endpoint at `https://gateway.local/api/v1/query`
+- [x] Verify Neo4j is accessible
+- [x] Test Gateway endpoint at `http://localhost:8000/api/v1/query`
 
 ---
 
@@ -77,7 +77,7 @@ This roadmap tracks the implementation of a PLC-Savvy GPT system combining Neo4j
 
 ### Model Configuration
 - [ ] Verify model visibility in Usage & Billing
-- [ ] Confirm access to `gpt-4-turbo` or `o3-turbo`
+- [ ] Confirm access to `gpt-4-turbo` , `o3-turbo` , or 'o4-mini-high'
 - [ ] Prepare for fine-tuned model ID: `ft:gpt-4-turbo:plc-2025-06`
 
 ### Security Setup
@@ -363,6 +363,27 @@ This roadmap tracks the implementation of a PLC-Savvy GPT system combining Neo4j
   - ✅ Updated documentation with repository URL
 - Issues: None
 - Next: Continue with Phase 1 environment setup tasks
+
+### 2025-06-30 - Docker Stack Operational
+- Task: Set up Docker services and fixed health checks
+- Version: 0.2.0
+- Completed:
+  - ✅ Created Dockerfiles for ETL worker and Gateway
+  - ✅ Created Python requirements files for both services
+  - ✅ Implemented minimal ETL worker with file watching
+  - ✅ Implemented Gateway API with FastAPI
+  - ✅ Fixed Qdrant health check (using bash /dev/tcp)
+  - ✅ Started all core services (Neo4j, Qdrant, PostgreSQL, Gateway)
+  - ✅ Verified all services are healthy
+  - ✅ Gateway API accessible at http://localhost:8000
+- Issues: 
+  - Initial Qdrant health check failed due to missing curl/wget
+  - Resolved by using bash's /dev/tcp feature
+- Next: 
+  - Create actual .env file with real credentials
+  - Implement ETL processing logic
+  - Create Neo4j schema
+  - Set up vector collections
 
 ### [DATE] - Update Template
 - Task: [What was done]

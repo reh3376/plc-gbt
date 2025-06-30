@@ -16,8 +16,9 @@ NEO4J_PASSWORD="${NEO4J_PASSWORD:-defaultpassword}"
 # Check if backup file exists
 if [ ! -f "../seed/neo4j.backup" ]; then
     echo "⚠️  Warning: No backup file found at ../seed/neo4j.backup"
-    echo "   Please place your initial Neo4j backup in the seed directory"
-    exit 1
+    echo "   Skipping restore - Neo4j will start with empty database"
+    echo "   Place your initial Neo4j backup in the seed directory to restore it"
+    exit 0
 fi
 
 # Wait for Neo4j to be ready

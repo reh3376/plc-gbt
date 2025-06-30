@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Neo4j Knowledge Graph Database
   neo4j:
@@ -40,7 +38,7 @@ services:
     networks:
       - plc-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/"]
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/6333"]
       interval: 30s
       timeout: 10s
       retries: 5

@@ -1,0 +1,38 @@
+# Core dependencies
+python-dotenv==1.0.1
+pydantic==2.7.4
+pydantic-settings==2.3.4
+
+# Neo4j
+neo4j==5.21.0
+
+# OpenAI
+openai==1.35.7
+
+# Document processing
+pdfplumber==0.11.0
+lxml==5.2.2
+pypdf==4.2.0
+
+# Vector database clients
+qdrant-client==1.9.2
+langchain==0.2.6
+langchain-community==0.2.6
+langchain-openai==0.1.8
+
+# Data processing
+pandas==2.2.2
+numpy==1.26.4
+
+# Async and concurrency
+asyncio==3.4.3
+aiofiles==23.2.1
+
+# Logging and monitoring
+structlog==24.2.0
+rich==13.7.1
+
+# Utils
+click==8.1.7
+watchdog==4.0.1
+tenacity==8.4.2 
