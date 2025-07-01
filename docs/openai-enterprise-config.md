@@ -1,0 +1,289 @@
+# OpenAI Enterprise Configuration Guide
+
+**Phase 2 Implementation** | **Version**: 1.0.0 | **Date**: July 1, 2025
+
+## Overview
+This document provides step-by-step instructions for configuring OpenAI Enterprise for the PLC-Savvy GPT project, including workspace setup, model access, and security configuration.
+
+## Prerequisites
+- [ ] OpenAI Enterprise account with admin privileges
+- [ ] Domain ownership verification
+- [ ] Access to organization billing settings
+- [ ] Admin access to workspace permissions
+
+---
+
+## 1. Admin Settings Configuration
+
+### 1.1 Domain Allow-List Setup
+**Objective**: Configure domain allow-list for secure API access
+
+#### Steps:
+1. **Access Admin Console**
+   - Navigate to OpenAI Enterprise Admin Console
+   - Go to Settings → Security → Domain Allow-list
+
+2. **Add Gateway Domain**
+   ```
+   Domain to Add: [TO BE CONFIGURED]
+   Purpose: PLC-Savvy GPT Gateway API
+   Access Level: API Access Only
+   ```
+
+3. **Verification**
+   - [ ] Domain successfully added to allow-list
+   - [ ] DNS verification completed
+   - [ ] API access confirmed from domain
+
+#### Configuration Template:
+```json
+{
+  "domain_allowlist": {
+    "domains": [
+      {
+        "domain": "PLACEHOLDER_DOMAIN",
+        "purpose": "PLC-Savvy GPT Gateway",
+        "access_type": "api_only",
+        "added_date": "2025-07-01",
+        "verified": false
+      }
+    ]
+  }
+}
+```
+
+### 1.2 GPTs & Plugins Configuration
+**Objective**: Enable custom GPT creation and plugin functionality
+
+#### Settings to Configure:
+- [ ] **Custom GPT Creation**: Enabled for workspace
+- [ ] **Plugin Access**: Enabled for custom actions
+- [ ] **Third-party Integrations**: Configured for Neo4j/Qdrant access
+- [ ] **Workspace Visibility**: Set appropriate sharing levels
+
+#### Access Levels:
+| Feature | Setting | Justification |
+|---------|---------|---------------|
+| GPT Creation | Workspace Admin Only | Security and control |
+| Plugin Installation | Admin Approval Required | Audit trail |
+| Action Configuration | Admin + Selected Users | Development flexibility |
+| Model Access | Controlled Distribution | Cost management |
+
+### 1.3 Workspace Permissions Setup
+**Objective**: Configure role-based access control
+
+#### Permission Matrix:
+| Role | GPT Access | Model Access | Admin Functions | API Keys |
+|------|------------|--------------|-----------------|----------|
+| **Admin** | Full | All Models | Full | Generate/Revoke |
+| **Developer** | Development GPTs | Standard Models | Limited | View Only |
+| **End User** | Production GPT | Via GPT Only | None | None |
+| **Auditor** | Read Only | None | Audit Logs | None |
+
+---
+
+## 2. Model Configuration
+
+### 2.1 Model Visibility Verification
+**Objective**: Confirm access to required models for PLC-Savvy GPT
+
+#### Required Models:
+- [ ] `gpt-4-turbo` - Primary model for complex PLC queries
+- [ ] `o3-turbo` - Alternative high-performance model
+- [ ] `o4-mini-high` - Lightweight model for simple queries
+- [ ] `text-embedding-3-large` - For vector embeddings (3072 dimensions)
+
+#### Verification Checklist:
+- [ ] Models visible in Usage & Billing dashboard
+- [ ] Rate limits confirmed and documented
+- [ ] Pricing structure understood
+- [ ] Usage monitoring configured
+
+### 2.2 Fine-Tuning Preparation
+**Objective**: Prepare for custom model creation
+
+#### Fine-Tuned Model Configuration:
+```
+Model ID Format: ft:gpt-4-turbo:plc-2025-{MM}
+Base Model: gpt-4-turbo
+Purpose: PLC domain specialization
+Training Data: PLC Q&A pairs, manuals, code examples
+Expected Completion: Phase 4
+```
+
+#### Prerequisites for Fine-Tuning:
+- [ ] Training data prepared (300-1000 Q&A pairs)
+- [ ] Data format validated (JSONL)
+- [ ] Billing configured for fine-tuning costs
+- [ ] Training compute quota available
+
+---
+
+## 3. Security Framework
+
+### 3.1 Workspace Secrets Vault Configuration
+**Objective**: Secure storage of API keys and sensitive configuration
+
+#### Secrets to Store:
+| Secret Name | Type | Purpose | Rotation Schedule |
+|-------------|------|---------|-------------------|
+| `OPENAI_API_KEY` | API Key | Primary model access | 90 days |
+| `GATEWAY_BEARER` | Bearer Token | Gateway authentication | 30 days |
+| `NEO4J_PASSWORD` | Database Password | Graph database access | 90 days |
+| `QDRANT_API_KEY` | API Key | Vector database access | 90 days |
+
+#### Security Requirements:
+- [ ] All secrets encrypted at rest
+- [ ] Access logging enabled
+- [ ] Audit trail configured
+- [ ] Automatic rotation alerts
+
+### 3.2 API Key Management
+**Objective**: Implement secure API key lifecycle management
+
+#### Current API Key Configuration:
+```bash
+# Primary API Key
+OPENAI_API_KEY=[TO BE CONFIGURED]
+OPENAI_ORG_ID=[TO BE CONFIGURED]
+
+# Gateway Authentication
+GATEWAY_BEARER=[TO BE CONFIGURED]
+```
+
+#### Rotation Policy:
+1. **Frequency**: Every 90 days for production, 30 days for development
+2. **Process**: Automated with 7-day overlap period
+3. **Notification**: 14-day advance warning
+4. **Emergency Rotation**: Within 1 hour if compromise suspected
+
+### 3.3 Access Control Documentation
+
+#### Network Security:
+- [ ] HTTPS enforced on all endpoints
+- [ ] IP allowlisting for admin functions
+- [ ] Rate limiting configured
+- [ ] DDoS protection enabled
+
+#### Authentication Flow:
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant G as Gateway
+    participant O as OpenAI API
+    participant N as Neo4j
+    participant Q as Qdrant
+
+    U->>G: Query with Bearer Token
+    G->>G: Validate Bearer Token
+    G->>N: Fetch Context (authenticated)
+    G->>Q: Vector Search (authenticated)
+    G->>O: LLM Query (API Key)
+    O->>G: Response
+    G->>U: Formatted Response
+```
+
+---
+
+## 4. Implementation Checklist
+
+### Phase 2.1: Initial Setup
+- [ ] OpenAI Enterprise workspace accessed
+- [ ] Admin permissions verified
+- [ ] Domain allow-list configured
+- [ ] Initial API key generated
+
+### Phase 2.2: Configuration
+- [ ] GPT creation permissions set
+- [ ] Model access verified
+- [ ] Secrets vault configured
+- [ ] Access controls implemented
+
+### Phase 2.3: Testing & Validation
+- [ ] API connectivity tested
+- [ ] Model access confirmed
+- [ ] Security controls validated
+- [ ] Documentation completed
+
+---
+
+## 5. Testing & Validation
+
+### 5.1 Enterprise Workspace Validation
+```bash
+# Test API access
+curl -H "Authorization: Bearer $OPENAI_API_KEY" \
+     -H "OpenAI-Organization: $OPENAI_ORG_ID" \
+     https://api.openai.com/v1/models
+
+# Expected: List of available models including gpt-4-turbo
+```
+
+### 5.2 Model Access Verification
+```python
+import openai
+
+# Test model access
+def test_model_access():
+    models = ["gpt-4-turbo", "o3-turbo", "text-embedding-3-large"]
+    for model in models:
+        try:
+            response = openai.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": "Test"}],
+                max_tokens=10
+            )
+            print(f"✅ {model}: Access confirmed")
+        except Exception as e:
+            print(f"❌ {model}: Access denied - {e}")
+```
+
+### 5.3 Security Validation
+- [ ] Bearer token authentication working
+- [ ] API key rotation process tested
+- [ ] Access logs captured correctly
+- [ ] Unauthorized access properly blocked
+
+---
+
+## 6. Troubleshooting
+
+### Common Issues:
+1. **Domain Verification Failed**
+   - Check DNS records
+   - Verify domain ownership
+   - Contact OpenAI support if needed
+
+2. **Model Access Denied**
+   - Verify enterprise subscription includes model
+   - Check usage quotas
+   - Review billing status
+
+3. **API Authentication Errors**
+   - Verify API key format
+   - Check organization ID
+   - Ensure key hasn't expired
+
+---
+
+## 7. Configuration Status
+
+### Admin Settings
+- [ ] Domain allow-list configured
+- [ ] GPTs & Plugins enabled
+- [ ] Workspace permissions set
+
+### Model Configuration  
+- [ ] Model visibility verified
+- [ ] Access confirmed for required models
+- [ ] Fine-tuning preparation complete
+
+### Security Setup
+- [ ] Secrets vault configured
+- [ ] API key management implemented
+- [ ] Access controls documented
+
+---
+
+*Last Updated: July 1, 2025*  
+*Next Review: Weekly during Phase 2 implementation* 
