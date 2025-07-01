@@ -38,12 +38,13 @@ class OpenAIConfigTester:
                 openai.organization = self.org_id
 
         self.test_results = {}
+        # Use models from environment configuration
         self.required_models = [
-            'gpt-4-turbo',
-            'gpt-4',
-            'gpt-3.5-turbo', 
-            'text-embedding-3-large',
-            'text-embedding-ada-002'
+            os.getenv('OPENAI_PRIMARY_MODEL', 'gpt-4o'),
+            os.getenv('OPENAI_FALLBACK_MODEL', 'gpt-4o-mini'),
+            os.getenv('OPENAI_REASONING_MODEL', 'o1-mini'),
+            os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-large'),
+            'text-embedding-ada-002'  # Keep as backup
         ]
 
     def print_header(self):
@@ -165,7 +166,12 @@ class OpenAIConfigTester:
                 print("  ℹ️  No fine-tuned models found")
             
             success = all(model_results.values())
-            self.test_results['model_access'] = model_results
+            self.test_results['model_access'] = {
+                'success': success,
+                'models': model_results,
+                'available_count': sum(model_results.values()),
+                'total_count': len(model_results)
+            }
             return success
             
         except Exception as e:
@@ -183,8 +189,8 @@ class OpenAIConfigTester:
             return False
         
         try:
-            # Test with GPT-4 or fallback to GPT-3.5
-            model = 'gpt-4-turbo' if 'gpt-4-turbo' in str(self.test_results.get('model_access', {})) else 'gpt-3.5-turbo'
+            # Use configured primary model
+            model = os.getenv('OPENAI_PRIMARY_MODEL', 'gpt-4o')
             
             start_time = time.time()
             response = openai.chat.completions.create(
@@ -229,7 +235,7 @@ class OpenAIConfigTester:
             return False
         
         try:
-            model = 'text-embedding-3-large'
+            model = os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-large')
             text = "This is a test document for PLC programming and industrial automation."
             
             start_time = time.time()
@@ -280,10 +286,11 @@ class OpenAIConfigTester:
         try:
             # Make several quick requests to test rate limiting
             request_times = []
+            test_model = os.getenv('OPENAI_FALLBACK_MODEL', 'gpt-4o-mini')
             for i in range(3):
                 start_time = time.time()
                 response = openai.chat.completions.create(
-                    model='gpt-3.5-turbo',
+                    model=test_model,
                     messages=[{"role": "user", "content": f"Test message {i+1}"}],
                     max_tokens=10
                 )
@@ -443,13 +450,18 @@ def main():
     """Main function to run OpenAI configuration tests."""
     print("🚀 Starting OpenAI Enterprise Configuration Tests...\n")
     
-    # Check if .env file exists
+    # Check if .env file exists and load it
     env_file = '.env'
     if os.path.exists(env_file):
         print(f"📁 Loading environment from {env_file}")
-        # Note: In production, use python-dotenv
-        # from dotenv import load_dotenv
-        # load_dotenv()
+        try:
+            from dotenv import load_dotenv
+            load_dotenv(env_file)
+            print("✅ Environment variables loaded successfully")
+        except ImportError:
+            print("⚠️  python-dotenv not installed. Install with: pip install python-dotenv")
+        except Exception as e:
+            print(f"⚠️  Error loading .env file: {e}")
     else:
         print("⚠️  No .env file found. Using system environment variables.")
         print("💡 Tip: Create a .env file with your OpenAI credentials for easier testing.")
