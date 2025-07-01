@@ -14,7 +14,7 @@ This roadmap tracks the implementation of a PLC-Savvy GPT system combining Neo4j
 📊 **Phase Status Overview**:
 - ✅ Phase 0: Completed (100%)
 - ✅ Phase 1: Completed (100%) 
-- 🟡 Phase 2: In Progress (50%)
+- 🟡 Phase 2: Nearly Complete (85%)
 - 🎯 Phase 3: Ready to Start (0%)
 - ⏳ Phase 4: Waiting (0%)
 - ⏳ Phase 5: Waiting (0%)
@@ -106,7 +106,7 @@ Each phase includes comprehensive testing to ensure reliability and quality:
 ---
 
 ## Phase 2: OpenAI Enterprise Configuration
-**Target**: Week 1-2 | **Status**: 🟡 In Progress
+**Target**: Week 1-2 | **Status**: 🟡 Nearly Complete (85%)
 
 ### Admin Settings
 - [ ] Add `gateway.yourcorp.com` to domain allow-list
