@@ -92,6 +92,10 @@ coverage.xml
 *.cover
 .pytest_cache/
 
+# Test reports
+*_test_report_*.json
+openai_test_report_*.json
+
 # Node (if frontend is added later)
 node_modules/
 npm-debug.log*
