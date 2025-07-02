@@ -11,6 +11,7 @@ Each summary file follows the naming convention: `YYYY-MM-DD-description.md`
 - [2025-06-30-initial-setup-summary.md](2025-06-30-initial-setup-summary.md) - Initial project setup including repository, Docker stack, and basic services
 - [2025-06-30-phase-0-1-testing-summary.md](2025-06-30-phase-0-1-testing-summary.md) - Phase 0-1 environment setup and testing completion
 - [2025-01-01-phase-2-openai-enterprise-completion.md](2025-01-01-phase-2-openai-enterprise-completion.md) - Phase 2 OpenAI Enterprise configuration with 100% success rate
+- [2025-01-01-python-312-plc-library-setup.md](2025-01-01-python-312-plc-library-setup.md) - Python 3.12 upgrade and PLC file parsing library setup for Phase 3.5
 
 ## Purpose
 

@@ -113,28 +113,51 @@ async def query_knowledge(
                 max_results=request.max_results)
     
     try:
-        # TODO: Implement actual query logic
-        # 1. Vector similarity search
-        # 2. Graph neighborhood query
-        # 3. Combine contexts
-        # 4. Call GPT with RAG context
+        # Import query service
+        import sys
+        import os
+        sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'query'))
+        from query_service import QueryService
         
-        # Mock response for now
+        # Initialize query service
+        query_service = QueryService(
+            neo4j_uri=os.environ.get("NEO4J_URI", "bolt://localhost:7687"),
+            neo4j_user=os.environ.get("NEO4J_USER", "neo4j"),
+            neo4j_password=os.environ.get("NEO4J_PASSWORD", "password"),
+            qdrant_host=os.environ.get("QDRANT_HOST", "localhost"),
+            qdrant_port=int(os.environ.get("QDRANT_PORT", "6333")),
+            openai_api_key=os.environ.get("OPENAI_API_KEY")
+        )
+        
+        # Execute query using the service
+        query_result = await query_service.query(
+            question=request.question,
+            strategy="hybrid" if request.include_graph and request.include_vectors else (
+                "graph" if request.include_graph else "vector"
+            ),
+            max_results=request.max_results,
+            vector_threshold=0.7,
+            expand_graph=True
+        )
+        
+        # Convert query result to response format
         response = QueryResponse(
             question=request.question,
-            answer="This is a placeholder response. The actual implementation will query Neo4j and vector store.",
-            graph_context={"nodes": [], "relationships": []},
-            vector_context=[{"text": "Sample context", "score": 0.95}],
+            answer=query_result.answer,
+            graph_context=query_result.graph_context,
+            vector_context=query_result.vector_context,
             citations=[
                 Citation(
-                    source="PLC Programming Manual",
-                    relevance=0.92,
-                    snippet="Relevant information would appear here"
-                )
+                    source=citation.get("source", "Unknown"),
+                    relevance=citation.get("relevance", 0.0),
+                    snippet=citation.get("snippet", "")
+                ) for citation in query_result.citations
             ],
-            processing_time_ms=(datetime.utcnow() - start_time).total_seconds() * 1000,
-            timestamp=datetime.utcnow()
+            processing_time_ms=query_result.processing_time_ms,
+            timestamp=query_result.timestamp
         )
+        
+        query_service.close()
         
         logger.info("query_completed",
                    question=request.question,
