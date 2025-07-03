@@ -13,7 +13,7 @@ import structlog
 
 from ..formats.acd_handler import ACDHandler
 from ..formats.l5x_handler import L5XHandler
-from ..utils.validation import validate_conversion, validate_round_trip
+from ..utils.validation import PLCValidator
 from .models import (
     ConversionError,
     ConversionResult,
@@ -45,6 +45,7 @@ class PLCConverter:
         self.strict_mode = strict_mode
         self.acd_handler = ACDHandler()
         self.l5x_handler = L5XHandler()
+        self.validator = PLCValidator()
         
         logger.info(
             "PLCConverter initialized",
@@ -104,7 +105,7 @@ class PLCConverter:
             project = self._load_project(source_path, source_format)
             
             # Validate project before conversion
-            validation_result = validate_conversion(project, target_format)
+            validation_result = self.validator.validate_project(project)
             
             # Convert project
             result = self._convert_project(
@@ -128,11 +129,16 @@ class PLCConverter:
             
             # Update final status
             result.conversion_time = time.time() - start_time
-            result.success = not result.has_errors
             
-            if result.has_errors:
+            # Check validation result for errors/warnings
+            errors = [issue for issue in result.issues if hasattr(issue, 'severity') and issue.severity.value == 'ERROR']
+            warnings = [issue for issue in result.issues if hasattr(issue, 'severity') and issue.severity.value == 'WARNING']
+            
+            result.success = len(errors) == 0
+            
+            if errors:
                 result.status = ConversionStatus.ERROR
-            elif result.has_warnings:
+            elif warnings:
                 result.status = ConversionStatus.WARNING
             else:
                 result.status = ConversionStatus.SUCCESS
@@ -225,11 +231,11 @@ class PLCConverter:
         
         try:
             project = self._load_project(file_path, source_format)
-            validation_result = validate_conversion(project, source_format)
+            validation_result = self.validator.validate_project(project)
             
             return ConversionResult(
-                success=not validation_result.has_errors,
-                status=validation_result.status,
+                success=validation_result.is_valid,
+                status=ConversionStatus.SUCCESS if validation_result.is_valid else ConversionStatus.ERROR,
                 source_format=source_format,
                 target_format=source_format,
                 source_file=str(file_path),
@@ -345,13 +351,15 @@ class PLCConverter:
             converted_project = self._load_project(converted_file, result.target_format)
             
             # Validate round-trip
-            validation_result = validate_round_trip(original_project, converted_project)
+            validation_result = self.validator.validate_round_trip(original_project, converted_project)
             result.issues.extend(validation_result.issues)
             
-            if validation_result.has_errors:
-                logger.warning("Round-trip validation found errors")
-            elif validation_result.has_warnings:
-                logger.info("Round-trip validation found warnings")
+            if not validation_result.is_valid:
+                errors = validation_result.get_errors()
+                if errors:
+                    logger.warning("Round-trip validation found errors")
+                else:
+                    logger.info("Round-trip validation found warnings")
             else:
                 logger.info("Round-trip validation passed")
                 

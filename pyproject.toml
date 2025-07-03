@@ -1,0 +1,6 @@
+[project.urls]
+Homepage = "https://github.com/reh3376/acd-l5x-tool-lib"
+Documentation = "https://github.com/reh3376/acd-l5x-tool-lib/blob/main/docs/"
+Repository = "https://github.com/reh3376/acd-l5x-tool-lib.git"
+Issues = "https://github.com/reh3376/acd-l5x-tool-lib/issues"
+Changelog = "https://github.com/reh3376/acd-l5x-tool-lib/blob/main/CHANGELOG.md" 

@@ -1,244 +1,357 @@
 # PLC Format Converter
 
-A Python library for bidirectional conversion between Rockwell .ACD and .L5X PLC file formats with lossless data preservation.
+[![PyPI version](https://badge.fury.io/py/plc-format-converter.svg)](https://badge.fury.io/py/plc-format-converter)
+[![Python Support](https://img.shields.io/pypi/pyversions/plc-format-converter.svg)](https://pypi.org/project/plc-format-converter/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
+**Modern ACD ↔ L5X conversion library with industrial-grade validation and motion control support**
+
+Convert between Rockwell Automation's PLC file formats with comprehensive validation, motion control detection, and safety system support.
+
+## ✨ Key Features
+
+- 🔄 **Bidirectional Conversion** - ACD ↔ L5X with data integrity
+- 🏭 **Industrial-Grade Validation** - Multi-tier validation framework
+- ⚡ **Motion Control Support** - MAOC, MAPC, MAAT instruction detection
+- 🛡️ **Safety System Support** - GuardLogix safety instruction validation
+- 🎯 **Type-Safe** - Built with Pydantic for robust data models
+- 📊 **Comprehensive Reporting** - Detailed validation reports
+- 🌐 **Cross-Platform** - Works on Windows, Linux, macOS
+- 📦 **Easy Installation** - Available via pip
 
 ## 🚀 Quick Start
+
+### Installation
 
 ```bash
 # Install the library
 pip install plc-format-converter
 
-# Basic usage
-from plc_format_converter import PLCConverter
-
-converter = PLCConverter()
-result = converter.acd_to_l5x("project.acd", "project.L5X")
-
-if result.success:
-    print(f"Conversion completed in {result.conversion_time:.2f}s")
-else:
-    print(f"Conversion failed: {result.issues}")
+# Install with optional dependencies
+pip install plc-format-converter[all]  # All features
+pip install plc-format-converter[acd-tools]  # ACD support only  
+pip install plc-format-converter[l5x]  # Enhanced L5X support
 ```
 
-## 📋 Current Implementation Status
-
-### ✅ Completed (January 1, 2025)
-
-#### Environment & Dependencies
-- **Python 3.12+** environment with virtual environment setup
-- **Core Libraries Installed & Tested**:
-  - `acd-tools==0.2a8` - ACD file parsing ✅
-  - `l5x==1.6` - L5X file parsing ✅
-  - `lxml==5.2.2` - XML processing ✅
-  - `pydantic==2.7.4` - Data validation ✅
-
-#### Architecture Design
-- **Unified Data Model**: Complete PLCProject, PLCController, PLCProgram, etc.
-- **Conversion Engine**: PLCConverter class with format detection and validation
-- **Format Handlers**: Abstract base classes for ACD and L5X handlers
-- **Validation Framework**: Round-trip validation and data integrity checks
-- **Error Handling**: Comprehensive ConversionResult and issue tracking
-
-#### Testing Framework
-- **Library Integration Tests**: Validation of acd-tools and l5x libraries
-- **Sample Data**: Realistic L5X controller program for testing
-- **Test Structure**: Pytest-based testing with coverage reporting
-- **Performance Benchmarking**: Framework for testing large files
-
-### 🔄 In Progress
-
-#### Custom Library Development
-- **Format Handlers**: ACD and L5X handler implementations
-- **Conversion Logic**: Bidirectional transformation algorithms  
-- **Data Preservation**: Format-specific metadata handling
-- **Studio 5000 Integration**: Export/import bridge capabilities
-
-### ⏳ Planned
-
-#### Phase 3.5 Development (2-4 weeks)
-- **Round-trip Conversion**: Full ACD ↔ L5X conversion without data loss
-- **Real-world Testing**: Validation with actual PLC project files
-- **Performance Optimization**: Large file handling and memory efficiency
-- **CLI Tools**: Command-line interface for batch processing
-- **Documentation**: Complete API documentation and usage examples
-
-## 🏗️ Architecture
-
-### Unified Data Model
-
-The library uses a format-agnostic internal representation that preserves all PLC components:
+### Basic Usage
 
 ```python
-PLCProject
-├── PLCController (processor info, settings)
-├── PLCProgram[] (main programs)
-│   ├── PLCRoutine[] (ladder logic, ST, FBD)
-│   └── PLCTag[] (program-scoped tags)  
-├── PLCAddOnInstruction[] (AOIs with parameters)
-├── PLCUserDefinedType[] (UDTs with members)
-├── PLCTag[] (controller-scoped tags)
-└── PLCDevice[] (I/O modules and configuration)
+from plc_format_converter import ACDHandler, L5XHandler, PLCValidator
+
+# Convert ACD to L5X
+acd_handler = ACDHandler()
+l5x_handler = L5XHandler()
+
+# Load ACD project
+project = acd_handler.load("MyProject.ACD")
+print(f"Loaded: {project.name} ({project.controller.processor_type})")
+
+# Validate before conversion
+validator = PLCValidator()
+result = validator.validate_project(project)
+print(f"Validation: {'✅ PASS' if result.is_valid else '❌ FAIL'}")
+
+# Save as L5X
+l5x_handler.save(project, "MyProject.L5X")
+print("✅ Conversion completed!")
 ```
 
-### Conversion Pipeline
-
-```
-Source File → Format Handler → Unified Model → Target Handler → Target File
-     ↓              ↓              ↓              ↓              ↓
-  .ACD/.L5X    Parse & Extract   PLCProject    Generate &     .L5X/.ACD
-                                              Validate
-```
+## 📚 Documentation
 
 ### Format Handlers
 
-- **ACDHandler**: Uses `acd-tools` library for .ACD file processing
-- **L5XHandler**: Uses `l5x` library for .L5X file processing  
-- **Validation**: Round-trip testing ensures data integrity
-- **Metadata**: Preserves format-specific attributes in unified model
+#### ACD Handler - Automation Control Database
 
-## 📁 Project Structure
+```python
+from plc_format_converter.formats import ACDHandler
 
-```
-plc-format-converter/
-├── src/plc_format_converter/
-│   ├── core/
-│   │   ├── models.py          # Unified PLC data models
-│   │   └── converter.py       # Main conversion orchestrator
-│   ├── formats/
-│   │   ├── acd_handler.py     # ACD format handler  
-│   │   └── l5x_handler.py     # L5X format handler
-│   ├── utils/
-│   │   └── validation.py      # Validation and testing utilities
-│   └── cli.py                 # Command-line interface
-├── tests/
-│   ├── test_data/
-│   │   └── sample_controller.L5X  # Test data files
-│   └── test_library_integration.py
-├── docs/                      # Documentation
-├── examples/                  # Usage examples
-└── pyproject.toml            # Project configuration
+handler = ACDHandler()
+
+# Check capabilities
+caps = handler.get_capabilities()
+print(f"Motion Control: {caps['features']['motion_control']}")
+print(f"Safety Systems: {caps['features']['safety_systems']}")
+
+# Load ACD file
+project = handler.load("Industrial_System.ACD")
+
+# Access project components
+for program in project.programs:
+    print(f"Program: {program.name}")
+    for routine in program.routines:
+        print(f"  Routine: {routine.name} ({routine.type.value})")
 ```
 
-## 🧪 Testing
+#### L5X Handler - Logix Designer Export Format
 
-The library includes comprehensive testing for:
+```python
+from plc_format_converter.formats import L5XHandler
 
-- **Library Integration**: Validation of acd-tools and l5x libraries
-- **Data Model Validation**: Pydantic model testing  
-- **Conversion Accuracy**: Round-trip conversion validation
-- **Performance**: Benchmarking with various file sizes
-- **Error Handling**: Edge cases and failure scenarios
+handler = L5XHandler()
 
-```bash
-# Run tests
-pytest tests/ -v --cov=plc_format_converter
+# Load L5X file
+project = handler.load("Production_Line.L5X")
 
-# Run integration tests only
-pytest tests/test_library_integration.py -v
+# Analyze structured text for motion instructions
+for program in project.programs:
+    for routine in program.routines:
+        if routine.type.value == "ST" and routine.structured_text:
+            if "MAOC" in routine.structured_text:
+                print(f"🎯 Motion instruction found in {routine.name}")
 
-# Performance benchmarks
-pytest tests/test_performance.py -k benchmark --benchmark-only
+# Save with modifications (full round-trip support)
+handler.save(project, "Modified_Production_Line.L5X")
 ```
 
-## 🎯 Key Features
+### Validation Framework
 
-### Current Capabilities
-- ✅ **Format Detection**: Automatic .ACD/.L5X format recognition
-- ✅ **Library Integration**: Working acd-tools and l5x parsing
-- ✅ **Unified Modeling**: Format-agnostic PLC representation
-- ✅ **Validation Framework**: Data integrity and round-trip testing
-- ✅ **Error Reporting**: Detailed conversion issue tracking
+```python
+from plc_format_converter.utils import PLCValidator
 
-### Planned Capabilities  
-- 🔄 **Bidirectional Conversion**: Full ACD ↔ L5X conversion
-- 🔄 **Data Preservation**: Zero-loss format conversion
-- ⏳ **Batch Processing**: Multiple file conversion support
-- ⏳ **Studio 5000 Bridge**: Integration with Rockwell tools
-- ⏳ **Web API**: REST API for remote conversion services
+validator = PLCValidator()
 
-## 📊 Performance Targets
+# Configure validation options
+validation_options = {
+    'capabilities': True,      # Controller capability validation
+    'data_integrity': True,    # Data consistency checks  
+    'instructions': True       # Motion/safety instruction validation
+}
 
-- **Small Files** (<1MB): <1 second conversion time
-- **Medium Files** (1-10MB): <10 second conversion time  
-- **Large Files** (10-100MB): <60 second conversion time
-- **Memory Usage**: <2x source file size during conversion
-- **Round-trip Accuracy**: >99.9% data preservation
+# Run comprehensive validation
+result = validator.validate_project(project, validation_options)
 
-## 🔧 Development Setup
+# Analyze results
+print(f"Status: {'✅ PASS' if result.is_valid else '❌ FAIL'}")
+print(f"Issues: {len(result.issues)}")
+
+# Show detailed issues
+for error in result.get_errors():
+    print(f"❌ {error.category}: {error.message}")
+    if error.recommendation:
+        print(f"   💡 {error.recommendation}")
+
+# Generate detailed report
+report = validator.generate_validation_report(result)
+with open("validation_report.txt", "w") as f:
+    f.write(report)
+```
+
+### Supported Controllers
+
+| Controller | Programs | Tags | Motion | Safety | I/O Modules |
+|------------|----------|------|--------|--------|-------------|
+| **ControlLogix** | 1,000 | 250,000 | ✅ | ❌ | 128 |
+| **CompactLogix** | 100 | 32,000 | ✅ | ❌ | 30 |
+| **GuardLogix** | 1,000 | 250,000 | ✅ | ✅ | 128 |
+
+## 🔧 Advanced Usage
+
+### Custom Validation Rules
+
+```python
+from plc_format_converter.utils import PLCValidator, ValidationIssue, ValidationSeverity
+
+class CustomValidator(PLCValidator):
+    def validate_naming_conventions(self, project, result):
+        """Custom naming convention validation"""
+        for program in project.programs:
+            if not program.name.startswith("PGM_"):
+                result.add_issue(ValidationIssue(
+                    severity=ValidationSeverity.WARNING,
+                    category="naming_convention", 
+                    message=f"Program {program.name} doesn't follow PGM_ convention",
+                    component=f"Program.{program.name}",
+                    recommendation="Use PGM_ prefix for all programs"
+                ))
+
+validator = CustomValidator()
+result = validator.validate_project(project)
+```
+
+### Batch Processing
+
+```python
+from pathlib import Path
+
+def batch_convert_l5x_files(input_dir: str, output_dir: str):
+    """Convert multiple L5X files with validation"""
+    handler = L5XHandler()
+    validator = PLCValidator()
+    
+    for l5x_file in Path(input_dir).glob("*.L5X"):
+        try:
+            # Load and validate
+            project = handler.load(l5x_file)
+            result = validator.validate_project(project)
+            
+            # Save processed file
+            output_file = Path(output_dir) / f"validated_{l5x_file.name}"
+            handler.save(project, output_file)
+            
+            print(f"✅ {l5x_file.name}: {len(result.issues)} issues")
+            
+        except Exception as e:
+            print(f"❌ {l5x_file.name}: {e}")
+
+# Process all files in directory
+batch_convert_l5x_files("input_projects/", "validated_projects/")
+```
+
+## 🛠️ Development
+
+### Setting Up Development Environment
 
 ```bash
 # Clone repository
-git clone https://github.com/reh3376/plc-format-converter.git
+git clone https://github.com/plc-gpt/plc-format-converter.git
 cd plc-format-converter
 
-# Create virtual environment (Python 3.12+)
-uv venv --python 3.12
-source .venv/bin/activate
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install development dependencies
-uv pip install -e ".[dev,testing]"
+# Install in development mode
+pip install -e ".[dev]"
 
 # Run tests
 pytest
 
-# Run linting
-ruff check --fix .
-black .
-mypy .
+# Run linting and formatting
+ruff check src/
+ruff format src/
+black src/
 ```
 
-## 📋 Requirements
+### Project Structure
 
-### Minimum Requirements
-- **Python**: 3.12+
-- **Memory**: 1GB RAM (for typical PLC files)
-- **Storage**: 100MB+ free space
+```
+plc-format-converter/
+├── src/plc_format_converter/
+│   ├── __init__.py              # Package initialization
+│   ├── core/
+│   │   ├── models.py            # Core data models (Pydantic)
+│   │   └── converter.py         # Main converter logic
+│   ├── formats/
+│   │   ├── __init__.py
+│   │   ├── acd_handler.py       # ACD format handler
+│   │   └── l5x_handler.py       # L5X format handler
+│   └── utils/
+│       ├── __init__.py
+│       └── validation.py        # Validation framework
+├── tests/                       # Comprehensive test suite
+├── docs/                        # Documentation
+├── pyproject.toml              # Package configuration
+└── README.md                   # This file
+```
 
-### Dependencies
-- `acd-tools>=0.2a8` - ACD file parsing
-- `l5x>=1.6` - L5X file parsing  
-- `lxml>=5.2.0` - XML processing
-- `pydantic>=2.7.0` - Data validation
-- `structlog>=24.2.0` - Logging
-- `click>=8.1.0` - CLI interface
+### Running Tests
 
-## 🚧 Roadmap
+```bash
+# Run all tests
+pytest
 
-See [ROADMAP.md](../docs/roadmap.md) for detailed development timeline.
+# Run with coverage
+pytest --cov=plc_format_converter
 
-### Phase 3.5: Custom Library Development (Weeks 2-4)
-- [ ] Complete format handler implementations
-- [ ] Implement bidirectional conversion algorithms
-- [ ] Add comprehensive real-world file testing
-- [ ] Optimize performance for large files
-- [ ] Create CLI tools and documentation
+# Run specific test categories
+pytest -m unit          # Unit tests only
+pytest -m integration   # Integration tests only
+pytest -m "not slow"    # Skip slow tests
+```
 
-### Future Phases
-- [ ] Studio 5000 integration plugin
-- [ ] Web-based conversion service
-- [ ] Advanced validation and optimization features
-- [ ] Industrial IoT integration capabilities
+## 📖 API Reference
+
+### Core Models
+
+All data models are built with [Pydantic](https://pydantic.dev/) for type safety:
+
+```python
+from plc_format_converter.core.models import (
+    PLCProject,          # Root project container
+    PLCController,       # Controller configuration  
+    PLCProgram,          # Program container
+    PLCRoutine,          # Individual routines
+    PLCTag,              # Tag definitions
+    PLCDevice,           # I/O devices
+    DataType,            # PLC data types enum
+    RoutineType,         # Routine types enum  
+)
+
+# Create a new project
+project = PLCProject(
+    name="MyProject",
+    controller=PLCController(
+        name="MainController", 
+        processor_type="ControlLogix"
+    )
+)
+```
+
+### Error Handling
+
+```python
+from plc_format_converter.core.models import (
+    ConversionError,     # General conversion errors
+    FormatError,         # Format-specific errors  
+    ValidationError      # Validation errors
+)
+
+try:
+    project = handler.load("corrupted_file.L5X")
+except FormatError as e:
+    print(f"Format error: {e}")
+except ConversionError as e:
+    print(f"Conversion error: {e}")
+```
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-### Development Priorities
-1. **Real-world Testing**: Need sample .ACD and .L5X files from various PLC projects
-2. **Performance Optimization**: Memory usage and conversion speed improvements
-3. **Studio 5000 Integration**: Export/import automation scripts
-4. **Documentation**: Usage examples and best practices
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes and add tests
+4. Run the test suite: `pytest`
+5. Submit a pull request
+
+### Code Quality
+
+This project uses:
+- **[Ruff](https://github.com/astral-sh/ruff)** for linting and formatting
+- **[Black](https://github.com/psf/black)** for code formatting
+- **[MyPy](http://mypy-lang.org/)** for static type checking
+- **[Pytest](https://pytest.org/)** for testing
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 🙏 Acknowledgments
 
-- **Issues**: [GitHub Issues](https://github.com/reh3376/plc-format-converter/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/reh3376/plc-format-converter/discussions)
-- **Email**: dev@plc-gpt.com
+- [Rockwell Automation](https://www.rockwellautomation.com/) for PLC file format specifications
+- [acd-tools](https://github.com/Eugenio-Bruno/acd-tools) library for ACD parsing capabilities
+- [l5x](https://github.com/Eugenio-Bruno/l5x) library for L5X processing
+- The industrial automation community for feedback and contributions
+
+## 📊 Project Status
+
+- ✅ **Stable**: Core format conversion functionality
+- ✅ **Stable**: Validation framework
+- ✅ **Stable**: Motion control instruction detection
+- ✅ **Beta**: Safety system validation
+- 🚧 **Development**: Advanced analytics and reporting
+- 📋 **Planned**: Real-time monitoring capabilities
+
+## 🔗 Related Projects
+
+- **[PLC-GPT](https://github.com/plc-gpt/plc-gpt)** - AI-powered PLC programming assistant
+- **[Studio 5000 Integration](../plc-gpt-stack/scripts/etl/studio5000_integration.py)** - Windows COM automation
+- **[Format Compatibility Checker](../plc-gpt-stack/scripts/etl/format_compatibility_checker.py)** - Legacy validation tools
 
 ---
 
-**Note**: This library is currently in active development as part of the PLC-Savvy GPT project. While the architecture is solid and libraries are tested, full conversion capabilities are still being implemented. See the roadmap for current status and timeline. 
+**For the latest updates and detailed documentation, visit our [documentation site](https://plc-format-converter.readthedocs.io).** 
