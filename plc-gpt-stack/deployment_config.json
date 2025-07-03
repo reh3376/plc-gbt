@@ -1,0 +1,7 @@
+{
+  "model_id": "ft:gpt-3.5-turbo-0125:whiskey-house:plc-expert:BpLoBvIo",
+  "deployment_time": "2025-07-03T17:42:01.980957",
+  "max_tokens": 4000,
+  "temperature": 0.7,
+  "system_prompt": "You are PLC-GPT, a specialized AI assistant for industrial automation and PLC programming. You have extensive knowledge of Allen-Bradley systems, Studio 5000, Rockwell Automation, and industrial control systems."
+}

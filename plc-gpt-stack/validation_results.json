@@ -1,0 +1,44 @@
+{
+  "model_id": "ft:gpt-3.5-turbo-0125:whiskey-house:plc-expert:BpLoBvIo",
+  "validation_time": "2025-07-03T17:42:01.981686",
+  "tests_passed": 5,
+  "tests_failed": 0,
+  "overall_score": 100.0,
+  "test_results": [
+    {
+      "category": "PLC Basics",
+      "question": "What is an AOI in PLC programming?",
+      "answer": "An AOI (Add-On Instruction) is a reusable custom instruction in Studio 5000 that encapsulates logic for a specific function. It allows for modular programming, reusability, and easier maintenance in the PLC code.",
+      "score": 0.825,
+      "passed": true
+    },
+    {
+      "category": "Hardware",
+      "question": "How do you configure a CompactLogix controller?",
+      "answer": "To configure a CompactLogix controller, you need to open the Studio 5000 software, create a new project, select the CompactLogix controller model, configure the I/O modules, set up communication, program the logic, and then download the project to the controller.",
+      "score": 0.6499999999999999,
+      "passed": true
+    },
+    {
+      "category": "Programming",
+      "question": "What's the difference between ST and ladder logic?",
+      "answer": "Structured Text (ST) is a high-level textual programming language in IEC 61131-3 used for complex algorithms and calculations. Ladder Logic is a graphical programming language that represents logic control circuits with rungs and contacts.",
+      "score": 1.0,
+      "passed": true
+    },
+    {
+      "category": "Troubleshooting",
+      "question": "How do you troubleshoot communication errors in Studio 5000?",
+      "answer": "To troubleshoot communication errors in Studio 5000, first verify the network settings, check device connections, ensure proper IP addressing, review firewall configurations, and monitor network traffic.",
+      "score": 0.825,
+      "passed": true
+    },
+    {
+      "category": "Best Practices",
+      "question": "What are the best practices for PLC tag naming?",
+      "answer": "When naming tags in Studio 5000, follow a consistent and descriptive naming convention. Use prefixes to indicate data type, location, and purpose. Keep names short but meaningful, avoiding abbreviations and acronyms.",
+      "score": 0.825,
+      "passed": true
+    }
+  ]
+}

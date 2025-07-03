@@ -62,6 +62,23 @@ services:
       timeout: 10s
       retries: 5
 
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: plc-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "1gb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - plc-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   # ETL Worker
   etl-worker:
     build:
@@ -105,6 +122,8 @@ services:
         condition: service_healthy
       qdrant:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - NEO4J_BOLT_URL=${NEO4J_BOLT_URL}
@@ -113,11 +132,19 @@ services:
       - QDRANT_HOST=${QDRANT_HOST}
       - QDRANT_PORT=${QDRANT_PORT}
       - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
       - GATEWAY_HOST=${GATEWAY_HOST}
       - GATEWAY_PORT=${GATEWAY_PORT}
       - GATEWAY_BEARER_TOKEN=${GATEWAY_BEARER_TOKEN}
       - GATEWAY_CORS_ORIGINS=${GATEWAY_CORS_ORIGINS}
       - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_EXPIRATION_HOURS=${JWT_EXPIRATION_HOURS}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED}
+      - RATE_LIMIT_REQUESTS=${RATE_LIMIT_REQUESTS}
+      - RATE_LIMIT_WINDOW=${RATE_LIMIT_WINDOW}
       - LOG_LEVEL=${LOG_LEVEL}
     networks:
       - plc-network
@@ -133,6 +160,7 @@ volumes:
   neo4j_import:
   qdrant_data:
   postgres_data:
+  redis_data:
 
 networks:
   plc-network:
