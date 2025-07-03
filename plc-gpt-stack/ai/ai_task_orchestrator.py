@@ -28,7 +28,7 @@ import re
 sys.path.append(str(Path(__file__).parent))
 
 try:
-    import ai_agent_resources as ai_resources
+    from . import ai_agent_resources as ai_resources
     AI_RESOURCES_AVAILABLE = True
 except ImportError:
     AI_RESOURCES_AVAILABLE = False

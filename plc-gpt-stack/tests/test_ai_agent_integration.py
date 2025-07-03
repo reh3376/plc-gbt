@@ -18,6 +18,13 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent))
 
 # Import AI agent tools
+import sys
+from pathlib import Path
+
+# Add ai directory to path
+ai_dir = Path(__file__).parent.parent / "ai"
+sys.path.insert(0, str(ai_dir))
+
 import ai_agent_resources as ai_resources
 from ai_task_orchestrator import get_task_guidance, validate_task_completion, AITaskOrchestrator
 

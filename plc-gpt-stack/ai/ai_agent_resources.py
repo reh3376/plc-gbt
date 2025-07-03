@@ -31,7 +31,7 @@ def get_available_ai_resources() -> Dict[str, Any]:
         "knowledge_graph": {
             "available": False,
             "interface": "scripts/query/knowledge_graph_interface.py",
-            "guide": "AI_KNOWLEDGE_GRAPH_GUIDE.md",
+            "guide": "../docs/AI_KNOWLEDGE_GRAPH_GUIDE.md",
             "connection": "bolt://localhost:7687",
             "description": "Neo4j knowledge graph with PLC domain expertise",
             "types": []
@@ -207,7 +207,7 @@ def get_tool_recommendations(task_description: str) -> Dict[str, Any]:
 
 # Constants for AI agents
 PLC_KNOWLEDGE_GRAPH_INTERFACE = "scripts/query/knowledge_graph_interface.py"
-AI_AGENT_GUIDE = "AI_KNOWLEDGE_GRAPH_GUIDE.md"
+AI_AGENT_GUIDE = "../docs/AI_KNOWLEDGE_GRAPH_GUIDE.md"
 NEO4J_CONNECTION = "bolt://localhost:7687"
 
 # Quick access functions

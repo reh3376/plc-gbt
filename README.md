@@ -31,7 +31,7 @@ All project documentation has been organized into the following directories:
 
 **🔌 Access Interface**: [`plc-gpt-stack/scripts/query/knowledge_graph_interface.py`](plc-gpt-stack/scripts/query/knowledge_graph_interface.py)
 
-**📖 AI Agent Guide**: [`plc-gpt-stack/AI_KNOWLEDGE_GRAPH_GUIDE.md`](plc-gpt-stack/AI_KNOWLEDGE_GRAPH_GUIDE.md)
+**📖 AI Agent Guide**: [`plc-gpt-stack/docs/AI_KNOWLEDGE_GRAPH_GUIDE.md`](plc-gpt-stack/docs/AI_KNOWLEDGE_GRAPH_GUIDE.md)
 
 ```python
 # Quick availability check for AI systems
@@ -51,13 +51,13 @@ print(f"Knowledge graph available: {summary['knowledge_graph_available']}")
 - Syntax validation and hallucination detection
 - Integration with knowledge graph and tools
 
-**🔧 Task Orchestrator**: [`plc-gpt-stack/ai_task_orchestrator.py`](plc-gpt-stack/ai_task_orchestrator.py)
+**🔧 Task Orchestrator**: [`plc-gpt-stack/ai/ai_task_orchestrator.py`](plc-gpt-stack/ai/ai_task_orchestrator.py)
 
-**📋 Usage Guide**: [`plc-gpt-stack/AI_TASK_ORCHESTRATOR_GUIDE.md`](plc-gpt-stack/AI_TASK_ORCHESTRATOR_GUIDE.md)
+**📋 Usage Guide**: [`plc-gpt-stack/docs/AI_TASK_ORCHESTRATOR_GUIDE.md`](plc-gpt-stack/docs/AI_TASK_ORCHESTRATOR_GUIDE.md)
 
 ```python
 # Quick task guidance for AI systems
-from ai_task_orchestrator import get_task_guidance, validate_task_completion
+from plc_gpt_stack.ai.ai_task_orchestrator import get_task_guidance, validate_task_completion
 
 # Get structured guidance
 guidance = get_task_guidance("Create a Python script to parse L5X files")

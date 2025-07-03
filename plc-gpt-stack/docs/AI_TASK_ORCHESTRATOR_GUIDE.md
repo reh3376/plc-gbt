@@ -19,7 +19,7 @@ The AI Task Orchestrator provides a **structured framework** for AI agents and L
 
 ```python
 # Import the orchestrator
-from ai_task_orchestrator import get_task_guidance, validate_task_completion
+from plc_gpt_stack.ai.ai_task_orchestrator import get_task_guidance, validate_task_completion
 
 # 1. Get structured guidance for any task
 task_description = "Create a Python script that converts L5X files to JSON"
@@ -40,7 +40,7 @@ print(f"Validation Score: {validation['score']}%")
 ### Advanced Usage with Full Analysis
 
 ```python
-from ai_task_orchestrator import AITaskOrchestrator
+from plc_gpt_stack.ai.ai_task_orchestrator import AITaskOrchestrator
 
 # Create orchestrator instance
 orchestrator = AITaskOrchestrator()
@@ -320,6 +320,6 @@ The AI Task Orchestrator provides AI agents with:
 ## 🔗 Related Resources
 
 - **Knowledge Graph Guide**: [`AI_KNOWLEDGE_GRAPH_GUIDE.md`](AI_KNOWLEDGE_GRAPH_GUIDE.md)
-- **Agent Resources**: [`ai_agent_resources.py`](ai_agent_resources.py)
+- **Agent Resources**: [`../ai/ai_agent_resources.py`](../ai/ai_agent_resources.py)
 - **Integration Summary**: [`AI_SYSTEM_INTEGRATION.md`](AI_SYSTEM_INTEGRATION.md)
-- **Task Orchestrator**: [`ai_task_orchestrator.py`](ai_task_orchestrator.py) 
+- **Task Orchestrator**: [`../ai/ai_task_orchestrator.py`](../ai/ai_task_orchestrator.py) 

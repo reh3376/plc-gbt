@@ -28,7 +28,7 @@ The PLC-GPT project now includes **comprehensive AI agent support** with persist
 ### Discovery Pattern
 ```python
 # 1. Check what's available
-import ai_agent_resources as ai
+from plc_gpt_stack.ai import ai_agent_resources as ai
 resources = ai.get_available_ai_resources()
 
 # 2. Verify knowledge graph access

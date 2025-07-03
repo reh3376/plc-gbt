@@ -291,8 +291,8 @@ Each phase includes comprehensive testing to ensure reliability and quality:
 - ⚡ **Performance Optimizer** - Real-time monitoring and optimization (~500+ lines) ✅ Day 3
   - [scripts/performance/optimizer.py](../plc-gpt-stack/scripts/performance/optimizer.py) - Performance monitoring and optimization
 - 🧪 **Test Suite** - Comprehensive validation framework (~400+ lines) ✅ Day 3
-  - [scripts/tests/comprehensive_test_suite.py](../plc-gpt-stack/scripts/tests/comprehensive_test_suite.py) - End-to-end testing framework
-  - [scripts/run_phase3_tests.py](../plc-gpt-stack/scripts/run_phase3_tests.py) - Test runner utility
+  - [tests/comprehensive_test_suite.py](../plc-gpt-stack/tests/comprehensive_test_suite.py) - End-to-end testing framework
+- [tests/run_phase3_tests.py](../plc-gpt-stack/tests/run_phase3_tests.py) - Test runner utility
 - 📈 **Performance Benchmarks** - Query performance metrics and optimization ✅ Day 3
 - 🔧 **Master Initialization** - Complete system setup and orchestration
   - [scripts/init_all.py](../plc-gpt-stack/scripts/init_all.py) - Master initialization script
@@ -305,12 +305,12 @@ Each phase includes comprehensive testing to ensure reliability and quality:
   - [scripts/query/query_optimizer.py](../plc-gpt-stack/scripts/query/query_optimizer.py) - Intelligent query optimization with caching (~600 lines)
   - [scripts/monitoring/dashboard.py](../plc-gpt-stack/scripts/monitoring/dashboard.py) - Real-time monitoring dashboard with FastAPI (~400 lines)
   - [scripts/query/plc_query_dsl.py](../plc-gpt-stack/scripts/query/plc_query_dsl.py) - Natural language query DSL (~754 lines)
-  - [scripts/run_phase3_day4_tests.py](../plc-gpt-stack/scripts/run_phase3_day4_tests.py) - Day 4 test runner
-  - [scripts/run_phase3_day4_comprehensive_tests.py](../plc-gpt-stack/scripts/run_phase3_day4_comprehensive_tests.py) - Comprehensive Day 4 testing
+  - [tests/run_phase3_day4_tests.py](../plc-gpt-stack/tests/run_phase3_day4_tests.py) - Day 4 test runner
+- [tests/run_phase3_day4_comprehensive_tests.py](../plc-gpt-stack/tests/run_phase3_day4_comprehensive_tests.py) - Comprehensive Day 4 testing
 - 🏭 **Missing Task Implementation** - Completion of Phase 3.2 ETL Pipeline gaps (~1,500+ lines) ✅ Day 5
   - [scripts/etl/studio5000_integration.py](../plc-gpt-stack/scripts/etl/studio5000_integration.py) - Studio 5000 COM automation and batch processing (~800 lines)
   - [scripts/etl/format_compatibility_checker.py](../plc-gpt-stack/scripts/etl/format_compatibility_checker.py) - Cross-format compatibility validation (~700 lines)
-  - [scripts/test_phase3_missing_tasks.py](../plc-gpt-stack/scripts/test_phase3_missing_tasks.py) - Comprehensive test suite for missing tasks
+  - [tests/test_phase3_missing_tasks.py](../plc-gpt-stack/tests/test_phase3_missing_tasks.py) - Comprehensive test suite for missing tasks
 - 🧪 **Testing**: ETL pipeline validation, graph integrity tests, vector similarity accuracy, data quality checks, cross-format parsing validation, Studio 5000 integration tests → [Testing Suite](../plc-gpt-stack/scripts/run_phase3_tests.py)
 
 ---
