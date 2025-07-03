@@ -9,29 +9,39 @@
 
 // Core node type constraints (Day 1)
 CREATE CONSTRAINT plc_program_id IF NOT EXISTS 
-ON (p:PLCProgram) ASSERT p.id IS UNIQUE;
+FOR (p:PLCProgram) REQUIRE p.id IS UNIQUE;
 
 CREATE CONSTRAINT routine_id IF NOT EXISTS 
-ON (r:Routine) ASSERT r.id IS UNIQUE;
+FOR (r:Routine) REQUIRE r.id IS UNIQUE;
 
 CREATE CONSTRAINT aoi_id IF NOT EXISTS 
-ON (a:AOI) ASSERT a.id IS UNIQUE;
+FOR (a:AOI) REQUIRE a.id IS UNIQUE;
 
 // Additional node type constraints (Day 2)
 CREATE CONSTRAINT udt_id IF NOT EXISTS 
-ON (u:UDT) ASSERT u.id IS UNIQUE;
+FOR (u:UDT) REQUIRE u.id IS UNIQUE;
 
 CREATE CONSTRAINT tag_id IF NOT EXISTS 
-ON (t:Tag) ASSERT t.id IS UNIQUE;
+FOR (t:Tag) REQUIRE t.id IS UNIQUE;
 
 CREATE CONSTRAINT device_id IF NOT EXISTS 
-ON (d:Device) ASSERT d.id IS UNIQUE;
+FOR (d:Device) REQUIRE d.id IS UNIQUE;
 
 CREATE CONSTRAINT spec_doc_id IF NOT EXISTS 
-ON (s:SpecDoc) ASSERT s.id IS UNIQUE;
+FOR (s:SpecDoc) REQUIRE s.id IS UNIQUE;
 
 CREATE CONSTRAINT question_answer_id IF NOT EXISTS 
-ON (q:QuestionAnswer) ASSERT q.id IS UNIQUE;
+FOR (q:QuestionAnswer) REQUIRE q.id IS UNIQUE;
+
+// New node types for repositories and articles
+CREATE CONSTRAINT github_repo_id IF NOT EXISTS 
+FOR (r:GitHubRepo) REQUIRE r.id IS UNIQUE;
+
+CREATE CONSTRAINT research_article_id IF NOT EXISTS 
+FOR (a:ResearchArticle) REQUIRE a.id IS UNIQUE;
+
+CREATE CONSTRAINT concept_name IF NOT EXISTS 
+FOR (c:Concept) REQUIRE c.name IS UNIQUE;
 
 // ============================================
 // INDEXES - Optimize query performance
@@ -66,6 +76,31 @@ FOR (s:SpecDoc) ON (s.doc_type);
 // Embedding lookups
 CREATE INDEX question_embedding IF NOT EXISTS 
 FOR (q:QuestionAnswer) ON (q.embedding_id);
+
+// New node type indexes
+CREATE INDEX github_repo_name IF NOT EXISTS 
+FOR (r:GitHubRepo) ON (r.name);
+
+CREATE INDEX github_repo_owner IF NOT EXISTS 
+FOR (r:GitHubRepo) ON (r.owner);
+
+CREATE INDEX github_repo_language IF NOT EXISTS 
+FOR (r:GitHubRepo) ON (r.language);
+
+CREATE INDEX github_repo_plc_related IF NOT EXISTS 
+FOR (r:GitHubRepo) ON (r.plc_related);
+
+CREATE INDEX research_article_title IF NOT EXISTS 
+FOR (a:ResearchArticle) ON (a.title);
+
+CREATE INDEX research_article_source IF NOT EXISTS 
+FOR (a:ResearchArticle) ON (a.source);
+
+CREATE INDEX research_article_plc_related IF NOT EXISTS 
+FOR (a:ResearchArticle) ON (a.plc_related);
+
+CREATE INDEX concept_name_index IF NOT EXISTS 
+FOR (c:Concept) ON (c.name);
 
 // ============================================
 // NODE TYPE DEFINITIONS & EXAMPLES
@@ -146,6 +181,42 @@ FOR (q:QuestionAnswer) ON (q.embedding_id);
 // - embedding_id: Vector embedding reference
 // - confidence: Confidence score
 // - source_page: Source page number
+
+// GitHubRepo - GitHub repository information
+// Properties:
+// - id: Unique identifier (UUID)
+// - name: Repository name
+// - full_name: Owner/repository name
+// - owner: Repository owner
+// - description: Repository description
+// - url: GitHub URL
+// - language: Primary programming language
+// - created_at: Creation timestamp
+// - updated_at: Last update timestamp
+// - stars: Star count
+// - forks: Fork count
+// - topics: Array of topics/tags
+// - license: License name
+// - plc_related: Boolean flag for PLC relevance
+// - processed_date: Processing timestamp
+
+// ResearchArticle - Academic research articles
+// Properties:
+// - id: Unique identifier (UUID)
+// - title: Article title
+// - authors: Array of author names
+// - abstract: Article abstract
+// - publication_date: Publication date
+// - journal: Journal name
+// - url: Article URL
+// - source: Source platform (Semantic Scholar, ArXiv, etc.)
+// - plc_related: Boolean flag for PLC/control relevance
+// - processed_date: Processing timestamp
+
+// Concept - Abstract concepts discussed in articles
+// Properties:
+// - name: Concept name
+// - description: Optional concept description
 
 // ============================================
 // RELATIONSHIP DEFINITIONS
