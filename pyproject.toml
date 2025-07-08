@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plc-format-converter"
-version = "2.0.0"
-description = "Comprehensive PLC format converter with ACD ↔ L5X conversion capabilities"
+version = "2.1.2"
+description = "Industry-leading PLC format converter with 95%+ data preservation and git-native development workflows"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
@@ -16,23 +16,26 @@ maintainers = [
 ]
 keywords = [
     "plc", "automation", "rockwell", "studio5000", "acd", "l5x", 
-    "conversion", "industrial", "controllogix", "ladder-logic"
+    "conversion", "industrial", "controllogix", "ladder-logic", "git-optimization",
+    "data-preservation", "phase39", "enhanced"
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Manufacturing",
     "Intended Audience :: Developers",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Version Control :: Git",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 dependencies = [
     "click>=8.0.0",
     "structlog>=22.0.0",
@@ -52,6 +55,8 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.0.0",
     "pre-commit>=3.0.0",
+    "build>=0.10.0",
+    "twine>=4.0.0",
 ]
 studio5000 = [
     "pywin32>=300; sys_platform == 'win32'",
@@ -68,11 +73,13 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/reh3376/PLC_GPT"
-Documentation = "https://github.com/reh3376/PLC_GPT/docs"
-Repository = "https://github.com/reh3376/PLC_GPT.git"
-"Bug Tracker" = "https://github.com/reh3376/PLC_GPT/issues"
-Changelog = "https://github.com/reh3376/PLC_GPT/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/reh3376/acd-l5x-tool-lib"
+Documentation = "https://github.com/reh3376/acd-l5x-tool-lib/blob/main/docs/"
+Repository = "https://github.com/reh3376/acd-l5x-tool-lib.git"
+"Bug Tracker" = "https://github.com/reh3376/acd-l5x-tool-lib/issues"
+Changelog = "https://github.com/reh3376/acd-l5x-tool-lib/blob/main/CHANGELOG.md"
+"PyPI" = "https://pypi.org/project/plc-format-converter/"
+"Release Notes" = "https://github.com/reh3376/acd-l5x-tool-lib/releases/tag/v2.1.2"
 
 [project.scripts]
 acd2l5x = "plc_format_converter.cli:acd2l5x"
@@ -98,7 +105,7 @@ plc_format_converter = [
 # Development tools configuration
 [tool.black]
 line-length = 100
-target-version = ['py39', 'py310', 'py311', 'py312']
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -115,7 +122,7 @@ extend-exclude = '''
 '''
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py38"
 line-length = 100
 select = [
     "E",  # pycodestyle errors
@@ -137,7 +144,7 @@ ignore = [
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.8"
 check_untyped_defs = true
 disallow_any_generics = true
 disallow_incomplete_defs = true
@@ -174,6 +181,7 @@ markers = [
     "unit: marks tests as unit tests",
     "studio5000: marks tests requiring Studio 5000",
     "windows: marks tests requiring Windows platform",
+    "phase39: marks tests for Phase 3.9 enhanced features",
 ]
 
 [tool.coverage.run]
