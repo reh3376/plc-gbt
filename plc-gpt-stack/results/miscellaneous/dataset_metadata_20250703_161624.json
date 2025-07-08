@@ -1,0 +1,16 @@
+{
+  "generated_date": "2025-07-03T16:14:42.750750",
+  "target_total": 1000,
+  "categories": {
+    "component_identification": "Identifying PLC components and their purposes",
+    "configuration_guidance": "How to configure and set up PLC components",
+    "troubleshooting": "Diagnosing and fixing PLC issues",
+    "best_practices": "Industry best practices and recommendations",
+    "safety_procedures": "Safety protocols and requirements",
+    "integration_methods": "Connecting and integrating PLC systems",
+    "programming_concepts": "PLC programming fundamentals and advanced techniques",
+    "hardware_specifications": "Device specifications and compatibility"
+  },
+  "format": "OpenAI fine-tuning JSONL",
+  "model_target": "gpt-4o"
+}

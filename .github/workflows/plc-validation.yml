@@ -31,18 +31,18 @@ jobs:
         find . -name "*.L5X" -type f | while read file; do
           echo "Validating: $file"
           python -c "
-import xml.etree.ElementTree as ET
-import sys
-try:
-    tree = ET.parse('$file')
-    root = tree.getroot()
-    programs = len(root.findall('.//Program'))
-    routines = len(root.findall('.//Routine'))
-    print(f'✅ Valid L5X: {programs} programs, {routines} routines')
-except Exception as e:
-    print(f'❌ Invalid L5X: {e}')
-    sys.exit(1)
-"
+        import xml.etree.ElementTree as ET
+        import sys
+        try:
+            tree = ET.parse('$file')
+            root = tree.getroot()
+            programs = len(root.findall('.//Program'))
+            routines = len(root.findall('.//Routine'))
+            print('✅ Valid L5X: {} programs, {} routines'.format(programs, routines))
+        except Exception as e:
+            print('❌ Invalid L5X: {}'.format(e))
+            sys.exit(1)
+        "
         done
         
     - name: Check file sizes

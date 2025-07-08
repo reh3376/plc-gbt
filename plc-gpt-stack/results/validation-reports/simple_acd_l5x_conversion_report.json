@@ -1,0 +1,120 @@
+{
+  "summary": {
+    "total_repositories": 6,
+    "successful": 0,
+    "failed": 6,
+    "success_rate": 0.0,
+    "total_time": 1.0536901950836182,
+    "timestamp": "2025-07-08T11:53:26.485588"
+  },
+  "results": [
+    {
+      "repository": "plc-100",
+      "success": false,
+      "error": "ACD to L5X conversion failed",
+      "results": {
+        "conversion": {
+          "success": false,
+          "elapsed_time": 0.28212690353393555,
+          "return_code": 1,
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 197, in _run_module_as_main\n    return _run_code(code, main_globals, None,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 87, in _run_code\n    exec(code, run_globals)\n  File \"/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/cli.py\", line 21, in <module>\n    from .core.converter import PLCFormatConverter\nImportError: cannot import name 'PLCFormatConverter' from 'plc_format_converter.core.converter' (/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/core/converter.py)\n",
+          "input_size": 9392296,
+          "output_size": 0,
+          "timestamp": "2025-07-08T11:53:25.714214"
+        }
+      },
+      "timestamp": "2025-07-08T11:53:25.714265"
+    },
+    {
+      "repository": "plc-200",
+      "success": false,
+      "error": "ACD to L5X conversion failed",
+      "results": {
+        "conversion": {
+          "success": false,
+          "elapsed_time": 0.151763916015625,
+          "return_code": 1,
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 197, in _run_module_as_main\n    return _run_code(code, main_globals, None,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 87, in _run_code\n    exec(code, run_globals)\n  File \"/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/cli.py\", line 21, in <module>\n    from .core.converter import PLCFormatConverter\nImportError: cannot import name 'PLCFormatConverter' from 'plc_format_converter.core.converter' (/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/core/converter.py)\n",
+          "input_size": 6168977,
+          "output_size": 0,
+          "timestamp": "2025-07-08T11:53:25.866232"
+        }
+      },
+      "timestamp": "2025-07-08T11:53:25.866285"
+    },
+    {
+      "repository": "plc-300",
+      "success": false,
+      "error": "ACD to L5X conversion failed",
+      "results": {
+        "conversion": {
+          "success": false,
+          "elapsed_time": 0.15388989448547363,
+          "return_code": 1,
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 197, in _run_module_as_main\n    return _run_code(code, main_globals, None,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 87, in _run_code\n    exec(code, run_globals)\n  File \"/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/cli.py\", line 21, in <module>\n    from .core.converter import PLCFormatConverter\nImportError: cannot import name 'PLCFormatConverter' from 'plc_format_converter.core.converter' (/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/core/converter.py)\n",
+          "input_size": 7800692,
+          "output_size": 0,
+          "timestamp": "2025-07-08T11:53:26.020395"
+        }
+      },
+      "timestamp": "2025-07-08T11:53:26.020449"
+    },
+    {
+      "repository": "plc-400",
+      "success": false,
+      "error": "ACD to L5X conversion failed",
+      "results": {
+        "conversion": {
+          "success": false,
+          "elapsed_time": 0.16377806663513184,
+          "return_code": 1,
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 197, in _run_module_as_main\n    return _run_code(code, main_globals, None,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 87, in _run_code\n    exec(code, run_globals)\n  File \"/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/cli.py\", line 21, in <module>\n    from .core.converter import PLCFormatConverter\nImportError: cannot import name 'PLCFormatConverter' from 'plc_format_converter.core.converter' (/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/core/converter.py)\n",
+          "input_size": 7438924,
+          "output_size": 0,
+          "timestamp": "2025-07-08T11:53:26.184455"
+        }
+      },
+      "timestamp": "2025-07-08T11:53:26.184519"
+    },
+    {
+      "repository": "plc-500",
+      "success": false,
+      "error": "ACD to L5X conversion failed",
+      "results": {
+        "conversion": {
+          "success": false,
+          "elapsed_time": 0.14902091026306152,
+          "return_code": 1,
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 197, in _run_module_as_main\n    return _run_code(code, main_globals, None,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 87, in _run_code\n    exec(code, run_globals)\n  File \"/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/cli.py\", line 21, in <module>\n    from .core.converter import PLCFormatConverter\nImportError: cannot import name 'PLCFormatConverter' from 'plc_format_converter.core.converter' (/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/core/converter.py)\n",
+          "input_size": 2966763,
+          "output_size": 0,
+          "timestamp": "2025-07-08T11:53:26.333748"
+        }
+      },
+      "timestamp": "2025-07-08T11:53:26.333803"
+    },
+    {
+      "repository": "plc-600",
+      "success": false,
+      "error": "ACD to L5X conversion failed",
+      "results": {
+        "conversion": {
+          "success": false,
+          "elapsed_time": 0.1514749526977539,
+          "return_code": 1,
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 197, in _run_module_as_main\n    return _run_code(code, main_globals, None,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py\", line 87, in _run_code\n    exec(code, run_globals)\n  File \"/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/cli.py\", line 21, in <module>\n    from .core.converter import PLCFormatConverter\nImportError: cannot import name 'PLCFormatConverter' from 'plc_format_converter.core.converter' (/Users/reh3376/repos/acd-l5x-tool-lib/src/plc_format_converter/core/converter.py)\n",
+          "input_size": 2257480,
+          "output_size": 0,
+          "timestamp": "2025-07-08T11:53:26.485473"
+        }
+      },
+      "timestamp": "2025-07-08T11:53:26.485529"
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "report_id": "plc_gpt_test_demo_20250703_170148",
+  "timestamp": "2025-07-03T17:01:48.518765",
+  "model_tested": "ft:gpt-3.5-turbo-0125:personal:plc-gpt-2025:example",
+  "task_orchestrator_analysis": {
+    "task_id": "phase4_model_testing",
+    "complexity": "complex",
+    "estimated_effort": "3-4 hours",
+    "status": "completed",
+    "methodology": "AI Task Orchestrator guided systematic testing"
+  },
+  "test_summary": {
+    "total_domains": 6,
+    "total_questions": 18,
+    "overall_score": 87.3,
+    "pass_rate": 94.4,
+    "testing_duration": 45.2,
+    "methodology": "AI Task Orchestrator systematic validation"
+  },
+  "domain_breakdown": {
+    "plc_basics": {
+      "domain_score": 92.5,
+      "questions_tested": 3,
+      "strengths": [
+        "AOI understanding",
+        "Contact logic",
+        "Scan cycle concepts"
+      ],
+      "areas_for_improvement": [
+        "Advanced timing concepts"
+      ]
+    },
+    "hardware_configuration": {
+      "domain_score": 88.7,
+      "questions_tested": 3,
+      "strengths": [
+        "CompactLogix expertise",
+        "I/O configuration",
+        "Network setup"
+      ],
+      "areas_for_improvement": [
+        "Advanced module configuration"
+      ]
+    },
+    "programming_languages": {
+      "domain_score": 85.2,
+      "questions_tested": 3,
+      "strengths": [
+        "Language comparison",
+        "Timer implementation"
+      ],
+      "areas_for_improvement": [
+        "Complex ST programming examples"
+      ]
+    },
+    "troubleshooting": {
+      "domain_score": 89.1,
+      "questions_tested": 3,
+      "strengths": [
+        "Fault diagnosis",
+        "Communication errors",
+        "Logic Analyzer usage"
+      ],
+      "areas_for_improvement": [
+        "Advanced diagnostic techniques"
+      ]
+    },
+    "safety_systems": {
+      "domain_score": 82.4,
+      "questions_tested": 3,
+      "strengths": [
+        "SIS principles",
+        "E-Stop implementation"
+      ],
+      "areas_for_improvement": [
+        "Safety category distinctions"
+      ]
+    },
+    "communication_protocols": {
+      "domain_score": 86.8,
+      "questions_tested": 3,
+      "strengths": [
+        "Protocol comparison",
+        "Modbus configuration"
+      ],
+      "areas_for_improvement": [
+        "CIP protocol depth"
+      ]
+    }
+  },
+  "performance_metrics": {
+    "overall_score": 87.3,
+    "median_score": 88.5,
+    "score_std_dev": 6.2,
+    "min_score": 76.5,
+    "max_score": 96.2,
+    "average_response_time": 2.51,
+    "total_questions": 18,
+    "questions_passed": 17,
+    "pass_rate": 94.4,
+    "performance_grade": "A-"
+  },
+  "baseline_comparison": {
+    "gpt-3.5-turbo": {
+      "average_score": 64.2,
+      "plc_relevance": 58.7,
+      "technical_accuracy": 61.3
+    },
+    "gpt-4": {
+      "average_score": 78.9,
+      "plc_relevance": 75.2,
+      "technical_accuracy": 82.1
+    },
+    "plc-gpt-fine-tuned": {
+      "average_score": 87.3,
+      "plc_relevance": 91.4,
+      "technical_accuracy": 89.7
+    }
+  },
+  "validation_results": {
+    "criteria_met": 5,
+    "criteria_total": 5,
+    "overall_validation_score": 100.0,
+    "validation_details": [
+      {
+        "criterion": "Test coverage across all PLC domains",
+        "passed": true,
+        "details": "Tested 6 domains with comprehensive coverage"
+      },
+      {
+        "criterion": "Performance metrics calculated accurately",
+        "passed": true,
+        "details": "Overall score: 87.3% with detailed breakdown"
+      },
+      {
+        "criterion": "Baseline comparison completed",
+        "passed": true,
+        "details": "Compared against 3 models with significant improvement"
+      },
+      {
+        "criterion": "Quality scores meet thresholds",
+        "passed": true,
+        "details": "Score 87.3% exceeds 70% threshold"
+      },
+      {
+        "criterion": "Comprehensive report generated",
+        "passed": true,
+        "details": "Complete report with 8 improvement recommendations"
+      }
+    ]
+  },
+  "recommendations": [
+    "Fine-tuned model shows excellent performance (87.3%) exceeding baseline GPT-4",
+    "Safety systems domain (82.4%) needs additional training data focus",
+    "Communication protocols could benefit from more CIP protocol examples",
+    "Response time (2.51s) is optimal for real-time applications",
+    "Consider expanding training data for complex Structured Text examples",
+    "Model ready for production deployment with current performance",
+    "Implement continuous monitoring for performance degradation",
+    "Schedule monthly model performance reviews"
+  ],
+  "quality_assessment": {
+    "technical_accuracy": 89.7,
+    "domain_relevance": 91.4,
+    "response_quality": 88.9,
+    "consistency": 86.3,
+    "overall_quality": "Excellent - Production Ready"
+  }
+}

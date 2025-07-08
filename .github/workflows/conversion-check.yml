@@ -50,31 +50,31 @@ jobs:
         find . -name "*.L5X" | while read file; do
           echo "Validating structure: $file"
           python -c "
-import xml.etree.ElementTree as ET
-try:
-    tree = ET.parse('$file')
-    root = tree.getroot()
-    
-    # Check for required elements
-    controller = root.find('.//Controller')
-    if controller is not None:
-        print(f'✅ Valid controller found in $file')
-    else:
-        print(f'❌ No controller found in $file')
-        exit(1)
-        
-    # Count components
-    programs = len(root.findall('.//Program'))
-    routines = len(root.findall('.//Routine'))
-    aois = len(root.findall('.//AddOnInstructionDefinition'))
-    tags = len(root.findall('.//Tag'))
-    
-    print(f'📊 Components: {programs} programs, {routines} routines, {aois} AOIs, {tags} tags')
-    
-except Exception as e:
-    print(f'❌ Structure validation failed for $file: {e}')
-    exit(1)
-"
+        import xml.etree.ElementTree as ET
+        try:
+            tree = ET.parse('$file')
+            root = tree.getroot()
+            
+            # Check for required elements
+            controller = root.find('.//Controller')
+            if controller is not None:
+                print('✅ Valid controller found in $file')
+            else:
+                print('❌ No controller found in $file')
+                exit(1)
+                
+            # Count components
+            programs = len(root.findall('.//Program'))
+            routines = len(root.findall('.//Routine'))
+            aois = len(root.findall('.//AddOnInstructionDefinition'))
+            tags = len(root.findall('.//Tag'))
+            
+            print('📊 Components: {} programs, {} routines, {} AOIs, {} tags'.format(programs, routines, aois, tags))
+            
+        except Exception as e:
+            print('❌ Structure validation failed for $file: {}'.format(e))
+            exit(1)
+        "
         done
         
     - name: Generate conversion report
