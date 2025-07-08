@@ -358,7 +358,9 @@ jobs:
     - name: Test conversion capabilities
       run: |
         python -c "
-        from plc_format_converter.core.converter import PLCConverter
+        # Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
         converter = PLCConverter()
         print('PLCConverter initialized successfully')
         print(f'Supported formats: {converter.supported_formats}')

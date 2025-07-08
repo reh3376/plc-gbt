@@ -93,7 +93,9 @@ class TaskAnalyzer:
         
         # Check for existing PLC format converter
         try:
-            from plc_format_converter.core.converter import PLCConverter
+            # Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
             resources['existing_tools'].append('PLCConverter - Enhanced ACD processing')
             resources['available_libraries'].append('plc-format-converter[all]')
             print("✅ PLCConverter available - Enhanced ACD processing capability")

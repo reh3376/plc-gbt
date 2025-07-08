@@ -27,7 +27,9 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / 'src'))
 
 try:
-    from plc_format_converter.core.converter import PLCConverter
+    # Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
     from plc_format_converter.core.models import ConversionResult
     print("✅ Successfully imported PLCConverter with enhanced functionality")
 except ImportError as e:

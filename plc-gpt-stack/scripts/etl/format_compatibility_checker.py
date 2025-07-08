@@ -16,33 +16,36 @@ Features:
 - Performance impact analysis
 """
 
-import os
 import sys
-import json
-import hashlib
 import tempfile
-from typing import List, Dict, Any, Optional, Tuple, Set
-from pathlib import Path
+import json
+import time
+import hashlib
+import logging
 from datetime import datetime
-from dataclasses import dataclass, field
-from enum import Enum
-import difflib
-import xml.etree.ElementTree as ET
-import re
+from pathlib import Path
+from typing import Dict, List, Any, Optional, Tuple, Union
+from dataclasses import dataclass, asdict
 
 import structlog
 
-# Add parent directory to path for imports
-sys.path.append(str(Path(__file__).parent.parent.parent))
+# Add the utils directory to path for the import utility
+utils_path = Path(__file__).parent.parent / "utils"
+sys.path.insert(0, str(utils_path))
 
-# Import our custom PLC format converter
-try:
-    from plc_format_converter.core.converter import PLCConverter
-    from plc_format_converter.core.models import PLCProject, PLCController
-    PLC_CONVERTER_AVAILABLE = True
-except ImportError:
-    PLC_CONVERTER_AVAILABLE = False
-    PLCConverter = None
+from plc_converter_import import import_plc_converter, import_plc_models
+
+# Import the converter and models using the utility
+PLCConverter = import_plc_converter()
+models = import_plc_models()
+PLCProject = models.get('PLCProject')
+PLCController = models.get('PLCController')
+
+# Verify imports worked
+if not PLCConverter:
+    raise ImportError("Failed to import PLCConverter from acd-l5x-tool-lib")
+if not PLCProject:
+    raise ImportError("Failed to import PLCProject from acd-l5x-tool-lib")
 
 # Import existing components
 try:

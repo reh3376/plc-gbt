@@ -51,7 +51,9 @@ def validate_core_imports():
     
     try:
         # Test core imports
-        from plc_format_converter.core.models import PLCProject, PLCDevice, ConversionError
+        # Use import utility
+from plc_converter_import import import_plc_models
+models = import_plc_models()
         print("  ✅ Core models import successful")
         
         from plc_format_converter.core.converter import PLCFormatConverter
@@ -173,7 +175,9 @@ def test_simple_conversion():
     
     try:
         from plc_format_converter.core.converter import PLCFormatConverter
-        from plc_format_converter.core.models import PLCProject, PLCController
+        # Use import utility
+from plc_converter_import import import_plc_models
+models = import_plc_models()
         
         # Create test converter
         converter = PLCFormatConverter()

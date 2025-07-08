@@ -19,7 +19,9 @@ def test_enhanced_functionality():
     print("=" * 60)
     
     try:
-        from plc_format_converter.core.converter import PLCConverter
+        # Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
         
         # Create converter
         converter = PLCConverter()
@@ -62,7 +64,9 @@ def test_conversion_capabilities():
     print("\n🔄 Testing Conversion Capabilities:")
     
     try:
-        from plc_format_converter.core.converter import PLCConverter
+        # Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
         converter = PLCConverter()
         
         # Test method signatures

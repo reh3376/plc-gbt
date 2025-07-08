@@ -24,7 +24,9 @@ sys.path.insert(0, str(src_dir))
 def simple_convert_acd_to_l5x(acd_file: Path, l5x_file: Path) -> bool:
     """Simple ACD to L5X conversion"""
     try:
-        from plc_format_converter.core.converter import PLCConverter
+        # Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
         
         converter = PLCConverter()
         
@@ -90,7 +92,9 @@ if __name__ == "__main__":
     
     # Test imports
     try:
-        from plc_format_converter.core.converter import PLCConverter
+        # Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
         print("✅ Imports working")
         
         converter = PLCConverter()

@@ -23,8 +23,11 @@ from pathlib import Path
 from typing import Dict, List, Any
 from dataclasses import dataclass, asdict
 
-# Add the plc-gpt-stack to the path for imports
-sys.path.append('/Users/reh3376/repos/PLC_GPT/plc-gpt-stack')
+# Replace the old sys.path.append lines with the new repository path
+sys.path.append('/Users/reh3376/repos/acd-l5x-tool-lib/src')
+# Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
 
 @dataclass
 class WorkflowStatus:
@@ -205,8 +208,10 @@ jobs:
         # Use plc-format-converter for conversion
         python3 -c "
 import sys
-sys.path.append('/Users/reh3376/repos/PLC_GPT/plc-format-converter/src')
-from plc_format_converter.core.converter import PLCConverter
+sys.path.append('/Users/reh3376/repos/acd-l5x-tool-lib/src')
+# Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
 
 converter = PLCConverter()
 try:
@@ -238,8 +243,10 @@ except Exception as e:
         # Use plc-format-converter for conversion
         python3 -c "
 import sys
-sys.path.append('/Users/reh3376/repos/PLC_GPT/plc-format-converter/src')
-from plc_format_converter.core.converter import PLCConverter
+sys.path.append('/Users/reh3376/repos/acd-l5x-tool-lib/src')
+# Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
 
 converter = PLCConverter()
 try:
@@ -572,8 +579,10 @@ except Exception as e:
             
             python3 -c "
 import sys
-sys.path.append('/Users/reh3376/repos/PLC_GPT/plc-format-converter/src')
-from plc_format_converter.core.converter import PLCConverter
+sys.path.append('/Users/reh3376/repos/acd-l5x-tool-lib/src')
+# Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
 
 converter = PLCConverter()
 try:
@@ -598,8 +607,10 @@ except Exception as e:
             
             python3 -c "
 import sys
-sys.path.append('/Users/reh3376/repos/PLC_GPT/plc-format-converter/src')
-from plc_format_converter.core.converter import PLCConverter
+sys.path.append('/Users/reh3376/repos/acd-l5x-tool-lib/src')
+# Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
 
 converter = PLCConverter()
 try:

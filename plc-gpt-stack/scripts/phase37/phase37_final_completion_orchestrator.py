@@ -345,7 +345,9 @@ class TestPhase37EndToEnd:
         """Test format conversion functionality"""
         # Test ACD handler
         try:
-            from plc_format_converter.formats.acd_handler import ACDHandler
+            # Use import utility
+from plc_converter_import import import_plc_handlers
+handlers = import_plc_handlers()
             handler = ACDHandler()
             assert handler is not None, "ACD handler not accessible"
         except ImportError as e:

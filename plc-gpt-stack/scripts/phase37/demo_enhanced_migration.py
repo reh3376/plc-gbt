@@ -32,7 +32,9 @@ def demo_enhanced_capabilities():
     print("=" * 60)
     
     try:
-        from plc_format_converter.core.converter import PLCConverter
+        # Use import utility
+from plc_converter_import import import_plc_converter
+PLCConverter = import_plc_converter()
         
         # Initialize converter
         converter = PLCConverter()
