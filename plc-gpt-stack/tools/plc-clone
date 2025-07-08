@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""
+PLC Clone Tool - Repository cloning with automated setup
+Usage: plc-clone <repository-url> [target-directory]
+"""
+
+import os
+import sys
+import subprocess
+import argparse
+from pathlib import Path
+
+def run_command(cmd, cwd=None):
+    """Run shell command and return result"""
+    try:
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=cwd)
+        return result.returncode == 0, result.stdout, result.stderr
+    except Exception as e:
+        return False, "", str(e)
+
+def validate_plc_repository(repo_path):
+    """Validate PLC repository structure"""
+    required_dirs = ["plc-acd", "plc-l5x", "plc-acd-previous", "plc-l5x-previous"]
+    
+    for dir_name in required_dirs:
+        dir_path = repo_path / dir_name
+        if not dir_path.exists():
+            print(f"⚠️  Missing directory: {dir_name}")
+            return False
+        print(f"✅ Directory found: {dir_name}")
+    
+    return True
+
+def setup_git_lfs(repo_path):
+    """Setup Git LFS for PLC files"""
+    print("🔧 Setting up Git LFS...")
+    
+    # Install Git LFS hooks
+    success, stdout, stderr = run_command("git lfs install", cwd=repo_path)
+    if not success:
+        print(f"⚠️  Git LFS install warning: {stderr}")
+    
+    # Track PLC file types
+    lfs_patterns = ["*.acd", "*.ACD", "*.l5x", "*.L5X"]
+    for pattern in lfs_patterns:
+        success, stdout, stderr = run_command(f"git lfs track '{pattern}'", cwd=repo_path)
+        if success:
+            print(f"✅ Tracking with LFS: {pattern}")
+    
+    return True
+
+def main():
+    parser = argparse.ArgumentParser(description="Clone PLC repository with automated setup")
+    parser.add_argument("repository_url", help="Git repository URL")
+    parser.add_argument("target_directory", nargs="?", help="Target directory (optional)")
+    parser.add_argument("--no-lfs", action="store_true", help="Skip Git LFS setup")
+    parser.add_argument("--validate", action="store_true", help="Validate repository structure")
+    
+    args = parser.parse_args()
+    
+    print("🚀 PLC Repository Clone Tool")
+    print("=" * 40)
+    
+    # Determine target directory
+    if args.target_directory:
+        target_path = Path(args.target_directory)
+    else:
+        # Extract repo name from URL
+        repo_name = args.repository_url.split("/")[-1].replace(".git", "")
+        target_path = Path(repo_name)
+    
+    print(f"📁 Cloning to: {target_path}")
+    print(f"🌐 Repository: {args.repository_url}")
+    
+    # Clone repository
+    clone_cmd = f"git clone {args.repository_url} {target_path}"
+    success, stdout, stderr = run_command(clone_cmd)
+    
+    if not success:
+        print(f"❌ Clone failed: {stderr}")
+        return 1
+    
+    print("✅ Repository cloned successfully")
+    
+    # Setup Git LFS if requested
+    if not args.no_lfs:
+        setup_git_lfs(target_path)
+    
+    # Validate structure if requested
+    if args.validate:
+        print("\n🔍 Validating repository structure...")
+        if validate_plc_repository(target_path):
+            print("✅ Repository structure validation passed")
+        else:
+            print("⚠️  Repository structure validation warnings")
+    
+    print("\n🎯 Next Steps:")
+    print(f"1. cd {target_path}")
+    print("2. Open .acd files in Studio 5000")
+    print("3. Create feature branch: git checkout -b feature/your-changes")
+    print("4. Make changes and commit")
+    print("5. Push and create pull request")
+    
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

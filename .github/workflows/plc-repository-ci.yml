@@ -1,0 +1,67 @@
+name: PLC Repository CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-plc-files:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: [plc-100, plc-200, plc-300, plc-400, plc-500, plc-600]
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        lfs: true
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Download Git LFS files
+      run: git lfs pull
+      
+    - name: Validate ACD files
+      run: |
+        python -m plc_format_converter.cli validate --input-dir ./plc --format acd
+        
+    - name: Run conversion tests
+      run: |
+        python -m pytest tests/ -v
+        
+    - name: Generate validation report
+      run: |
+        python scripts/validation/generate_report.py --repo ${{ matrix.repo }}
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run security scan
+      uses: github/super-linter@v4
+      env:
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+  documentation-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check documentation
+      run: |
+        # Verify README exists
+        test -f README.md
+        # Verify documentation is up to date
+        python scripts/validation/check_docs.py

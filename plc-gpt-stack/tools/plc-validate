@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""
+PLC Validate Tool - Local file validation before commit
+Usage: plc-validate [files...]
+"""
+
+import os
+import sys
+import argparse
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+def validate_directory_structure():
+    """Validate PLC directory structure"""
+    required_dirs = ["plc-acd", "plc-l5x", "plc-acd-previous", "plc-l5x-previous"]
+    issues = []
+    
+    for dir_name in required_dirs:
+        if not Path(dir_name).exists():
+            issues.append(f"Missing directory: {dir_name}")
+    
+    # Check single file constraint
+    acd_files = list(Path("plc-acd").glob("*.acd")) + list(Path("plc-acd").glob("*.ACD"))
+    l5x_files = list(Path("plc-l5x").glob("*.l5x")) + list(Path("plc-l5x").glob("*.L5X"))
+    
+    if len(acd_files) > 1:
+        issues.append(f"Multiple ACD files in plc-acd/ (found {len(acd_files)}, limit 1)")
+    
+    if len(l5x_files) > 1:
+        issues.append(f"Multiple L5X files in plc-l5x/ (found {len(l5x_files)}, limit 1)")
+    
+    return issues
+
+def validate_acd_file(file_path):
+    """Validate ACD file"""
+    issues = []
+    
+    if not file_path.exists():
+        issues.append("File does not exist")
+        return issues
+    
+    # Check file size
+    size = file_path.stat().st_size
+    if size < 100:
+        issues.append("File too small (possible corruption)")
+    elif size > 100 * 1024 * 1024:  # 100MB
+        issues.append("File very large (may cause performance issues)")
+    
+    # Check file permissions
+    if not os.access(file_path, os.R_OK):
+        issues.append("File not readable")
+    
+    # Basic file content check
+    try:
+        with open(file_path, 'rb') as f:
+            header = f.read(100)
+            if len(header) < 10:
+                issues.append("File appears to be empty or corrupted")
+    except Exception as e:
+        issues.append(f"Cannot read file: {str(e)}")
+    
+    return issues
+
+def validate_l5x_file(file_path):
+    """Validate L5X file"""
+    issues = []
+    
+    if not file_path.exists():
+        issues.append("File does not exist")
+        return issues
+    
+    # Check file size
+    size = file_path.stat().st_size
+    if size < 100:
+        issues.append("File too small (possible corruption)")
+    
+    # Validate XML structure
+    try:
+        tree = ET.parse(file_path)
+        root = tree.getroot()
+        
+        # Check for RSLogix5000Content root element
+        if root.tag != 'RSLogix5000Content':
+            issues.append("Not a valid RSLogix 5000 L5X file (wrong root element)")
+        
+        # Check for required elements
+        controller = root.find('.//Controller')
+        if controller is None:
+            issues.append("No Controller element found")
+        
+        # Check version compatibility
+        schema_version = root.get('SchemaVersion')
+        if schema_version:
+            try:
+                version_parts = schema_version.split('.')
+                major_version = int(version_parts[0])
+                if major_version < 20:
+                    issues.append(f"Old schema version detected: {schema_version}")
+            except:
+                issues.append(f"Invalid schema version format: {schema_version}")
+        
+    except ET.ParseError as e:
+        issues.append(f"XML parsing error: {str(e)}")
+    except Exception as e:
+        issues.append(f"File validation error: {str(e)}")
+    
+    return issues
+
+def main():
+    parser = argparse.ArgumentParser(description="Validate PLC files before commit")
+    parser.add_argument("files", nargs="*", help="Specific files to validate")
+    parser.add_argument("--all", action="store_true", help="Validate all PLC files")
+    parser.add_argument("--structure", action="store_true", help="Validate directory structure only")
+    parser.add_argument("--strict", action="store_true", help="Strict validation mode")
+    
+    args = parser.parse_args()
+    
+    print("🔍 PLC File Validation")
+    print("=" * 40)
+    
+    total_issues = 0
+    
+    # Validate directory structure
+    if args.structure or not args.files:
+        print("\n📁 Directory Structure:")
+        structure_issues = validate_directory_structure()
+        if structure_issues:
+            for issue in structure_issues:
+                print(f"   ❌ {issue}")
+                total_issues += 1
+        else:
+            print("   ✅ Directory structure valid")
+    
+    # Determine files to validate
+    files_to_validate = []
+    
+    if args.files:
+        files_to_validate = [Path(f) for f in args.files]
+    elif args.all:
+        # Find all PLC files
+        for pattern in ["plc-acd/*.acd", "plc-acd/*.ACD", "plc-l5x/*.l5x", "plc-l5x/*.L5X"]:
+            files_to_validate.extend(Path(".").glob(pattern))
+    else:
+        # Default: validate current files only
+        for pattern in ["plc-acd/*.acd", "plc-acd/*.ACD", "plc-l5x/*.l5x", "plc-l5x/*.L5X"]:
+            files_to_validate.extend(Path(".").glob(pattern))
+    
+    # Validate each file
+    if files_to_validate:
+        print("\n📄 File Validation:")
+        
+        for file_path in files_to_validate:
+            print(f"   Validating: {file_path}")
+            
+            if file_path.suffix.lower() in ['.acd']:
+                issues = validate_acd_file(file_path)
+            elif file_path.suffix.lower() in ['.l5x']:
+                issues = validate_l5x_file(file_path)
+            else:
+                issues = ["Unknown file type"]
+            
+            if issues:
+                for issue in issues:
+                    print(f"      ❌ {issue}")
+                    total_issues += 1
+            else:
+                print(f"      ✅ Valid")
+    
+    # Summary
+    print(f"\n📊 Validation Summary:")
+    if total_issues == 0:
+        print("   ✅ All validations passed")
+        print("   🚀 Ready for commit")
+        return 0
+    else:
+        print(f"   ⚠️  {total_issues} issues found")
+        if args.strict:
+            print("   ❌ Strict mode: Fix all issues before committing")
+            return 1
+        else:
+            print("   ⚠️  Review issues before committing")
+            return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

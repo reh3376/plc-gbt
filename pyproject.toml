@@ -4,131 +4,101 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plc-format-converter"
-version = "2.0.2"
-description = "Modern ACD ↔ L5X conversion library with industrial-grade validation and motion control support"
+version = "2.0.0"
+description = "Comprehensive PLC format converter with ACD ↔ L5X conversion capabilities"
 readme = "README.md"
-requires-python = ">=3.8"
-license = { text = "MIT" }
+license = {text = "MIT"}
 authors = [
-    { name = "PLC-GPT Team", email = "plc-gpt@example.com" }
+    {name = "PLC GPT Team", email = "support@plcgpt.com"}
 ]
 maintainers = [
-    { name = "PLC-GPT Team", email = "plc-gpt@example.com" }
+    {name = "PLC GPT Team", email = "support@plcgpt.com"}
 ]
 keywords = [
-    "plc", 
-    "automation", 
-    "rockwell", 
-    "acd", 
-    "l5x", 
-    "format-conversion", 
-    "motion-control",
-    "safety-systems",
-    "industrial-automation"
+    "plc", "automation", "rockwell", "studio5000", "acd", "l5x", 
+    "conversion", "industrial", "controllogix", "ladder-logic"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
     "Intended Audience :: Manufacturing",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9", 
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: System :: Hardware",
-    "Topic :: Utilities"
+    "Operating System :: OS Independent",
 ]
+requires-python = ">=3.9"
 dependencies = [
-    "pydantic>=2.0.0",
+    "click>=8.0.0",
     "structlog>=22.0.0",
+    "pydantic>=2.0.0",
+    "lxml>=4.6.0",
+    "xmlschema>=2.0.0",
     "pathlib-abc>=0.1.0",
     "typing-extensions>=4.0.0",
-    "click>=8.0.0"
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
-    "pytest-asyncio>=0.20.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=22.0.0",
     "ruff>=0.1.0",
     "mypy>=1.0.0",
-    "black>=22.0.0",
-    "pre-commit>=2.20.0",
-    "twine>=4.0.0",
-    "build>=0.8.0"
-]
-acd-tools = [
-    "acd-tools>=0.2.0"
-]
-l5x = [
-    "l5x>=1.6.0",
-    "lxml>=4.9.0"
+    "pre-commit>=3.0.0",
 ]
 studio5000 = [
-    "pywin32>=227; platform_system=='Windows'"
+    "pywin32>=300; sys_platform == 'win32'",
+    "comtypes>=1.1.0; sys_platform == 'win32'",
+]
+enhanced = [
+    "acd-tools>=0.1.0",
+    "l5x>=0.1.0",
+    "pylogix>=0.8.0",
+    "pycomm3>=1.2.0",
 ]
 all = [
-    "acd-tools>=0.2.0",
-    "l5x>=1.6.0", 
-    "lxml>=4.9.0",
-    "pywin32>=227; platform_system=='Windows'"
+    "plc-format-converter[dev,studio5000,enhanced]"
 ]
 
 [project.urls]
-Homepage = "https://github.com/reh3376/acd-l5x-tool-lib"
-Documentation = "https://github.com/reh3376/acd-l5x-tool-lib/blob/main/docs/"
-Repository = "https://github.com/reh3376/acd-l5x-tool-lib.git"
-Issues = "https://github.com/reh3376/acd-l5x-tool-lib/issues"
-Changelog = "https://github.com/reh3376/acd-l5x-tool-lib/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/reh3376/PLC_GPT"
+Documentation = "https://github.com/reh3376/PLC_GPT/docs"
+Repository = "https://github.com/reh3376/PLC_GPT.git"
+"Bug Tracker" = "https://github.com/reh3376/PLC_GPT/issues"
+Changelog = "https://github.com/reh3376/PLC_GPT/blob/main/CHANGELOG.md"
 
 [project.scripts]
-plc-convert = "plc_format_converter.cli:main"
 acd2l5x = "plc_format_converter.cli:acd2l5x"
 l5x2acd = "plc_format_converter.cli:l5x2acd"
+plc-convert = "plc_format_converter.cli:main"
+plc-validate = "plc_format_converter.cli:validate"
 
 [tool.setuptools]
-packages = ["plc_format_converter", "plc_format_converter.core", "plc_format_converter.formats", "plc_format_converter.utils"]
 package-dir = {"" = "src"}
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["plc_format_converter*"]
+exclude = ["tests*"]
+
 [tool.setuptools.package-data]
-"plc_format_converter" = ["*.json", "*.yaml", "*.yml"]
-
-# Development and Quality Tools Configuration
-
-[tool.ruff]
-target-version = "py38"
-line-length = 88
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-]
-ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
+plc_format_converter = [
+    "schemas/*.json",
+    "templates/*.xml",
+    "data/*.yaml",
 ]
 
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"]
-"tests/*" = ["S101"]
-
-[tool.ruff.isort]
-known-first-party = ["plc_format_converter"]
-
+# Development tools configuration
 [tool.black]
-target-version = ['py38']
-line-length = 88
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -144,53 +114,75 @@ extend-exclude = '''
 )/
 '''
 
-[tool.mypy]
-python_version = "3.8"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-strict_equality = true
-
-[[tool.mypy.overrides]]
-module = [
-    "acd.*",
-    "l5x.*", 
-    "win32com.*"
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
 ]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
+
+[tool.mypy]
+python_version = "3.9"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
 ignore_missing_imports = true
+no_implicit_optional = true
+no_implicit_reexport = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
+minversion = "7.0"
 addopts = [
     "--strict-markers",
     "--strict-config",
     "--cov=plc_format_converter",
-    "--cov-report=html",
     "--cov-report=term-missing",
-    "--cov-fail-under=80"
+    "--cov-report=html",
+    "--cov-report=xml",
 ]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests"
+    "unit: marks tests as unit tests",
+    "studio5000: marks tests requiring Studio 5000",
+    "windows: marks tests requiring Windows platform",
 ]
 
 [tool.coverage.run]
 source = ["src"]
 omit = [
-    "tests/*",
-    "src/plc_format_converter/__main__.py"
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/migrations/*",
 ]
 
 [tool.coverage.report]
@@ -205,4 +197,30 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
-] 
+]
+
+# Package metadata for build
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+# Entry points for CLI commands
+[project.entry-points."console_scripts"]
+acd2l5x = "plc_format_converter.cli:acd2l5x"
+l5x2acd = "plc_format_converter.cli:l5x2acd"
+plc-convert = "plc_format_converter.cli:main"
+plc-validate = "plc_format_converter.cli:validate"
+plc-capabilities = "plc_format_converter.cli:capabilities"
+
+# Plugin entry points for extensibility
+[project.entry-points."plc_format_converter.handlers"]
+acd = "plc_format_converter.formats.acd_handler:ACDHandler"
+l5x = "plc_format_converter.formats.l5x_handler:L5XHandler"
+
+[project.entry-points."plc_format_converter.validators"]
+default = "plc_format_converter.utils.validation:PLCValidator"
+
+# Build configuration
+[tool.setuptools_scm]
+write_to = "src/plc_format_converter/_version.py"
+version_scheme = "python-simplified-semver"
+local_scheme = "dirty-tag" 

@@ -1,0 +1,101 @@
+name: Conversion Check
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - '**/*.ACD'
+      - '**/*.L5X'
+  workflow_dispatch:
+
+jobs:
+  conversion-integrity:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        lfs: true
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install PLC conversion tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install lxml requests
+        
+    - name: Check file integrity
+      run: |
+        echo "🔍 Checking file integrity..."
+        find . -name "*.ACD" | while read file; do
+          echo "Checking: $file"
+          size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+          
+          # Check if it's a Git LFS pointer
+          if head -n 1 "$file" | grep -q "version https://git-lfs.github.com"; then
+            echo "📦 LFS pointer detected: $file"
+          elif [ "$size" -gt 1048576 ]; then  # > 1MB
+            echo "✅ Valid ACD file: $file ($size bytes)"
+          else
+            echo "⚠️ Potentially invalid ACD: $file ($size bytes)"
+          fi
+        done
+        
+    - name: Validate L5X structure
+      run: |
+        echo "🏗️ Validating L5X structure..."
+        find . -name "*.L5X" | while read file; do
+          echo "Validating structure: $file"
+          python -c "
+import xml.etree.ElementTree as ET
+try:
+    tree = ET.parse('$file')
+    root = tree.getroot()
+    
+    # Check for required elements
+    controller = root.find('.//Controller')
+    if controller is not None:
+        print(f'✅ Valid controller found in $file')
+    else:
+        print(f'❌ No controller found in $file')
+        exit(1)
+        
+    # Count components
+    programs = len(root.findall('.//Program'))
+    routines = len(root.findall('.//Routine'))
+    aois = len(root.findall('.//AddOnInstructionDefinition'))
+    tags = len(root.findall('.//Tag'))
+    
+    print(f'📊 Components: {programs} programs, {routines} routines, {aois} AOIs, {tags} tags')
+    
+except Exception as e:
+    print(f'❌ Structure validation failed for $file: {e}')
+    exit(1)
+"
+        done
+        
+    - name: Generate conversion report
+      run: |
+        echo "📊 Generating conversion report..."
+        echo "# Conversion Integrity Report" > conversion-report.md
+        echo "Generated: $(date)" >> conversion-report.md
+        echo "" >> conversion-report.md
+        echo "## File Analysis" >> conversion-report.md
+        
+        acd_count=$(find . -name "*.ACD" | wc -l)
+        l5x_count=$(find . -name "*.L5X" | wc -l)
+        
+        echo "- ACD files: $acd_count" >> conversion-report.md
+        echo "- L5X files: $l5x_count" >> conversion-report.md
+        echo "" >> conversion-report.md
+        echo "## Validation Status" >> conversion-report.md
+        echo "All integrity checks completed successfully ✅" >> conversion-report.md
+        
+    - name: Upload conversion report
+      uses: actions/upload-artifact@v3
+      with:
+        name: conversion-report
+        path: conversion-report.md

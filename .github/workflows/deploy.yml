@@ -1,0 +1,90 @@
+name: PLC Repository Deployment
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        lfs: true
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        
+    - name: Validate all PLC files
+      run: |
+        python -c "
+        from pathlib import Path
+        import sys
+        
+        l5x_files = list(Path('.').rglob('*.L5X'))
+        errors = []
+        
+        for f in l5x_files:
+            if f.stat().st_size == 0:
+                errors.append(f'Empty file: {f}')
+            elif f.stat().st_size < 100:
+                errors.append(f'Suspiciously small file: {f} ({f.stat().st_size} bytes)')
+        
+        if errors:
+            print('Validation errors:')
+            for error in errors:
+                print(f'  - {error}')
+            sys.exit(1)
+        else:
+            print(f'All {len(l5x_files)} L5X files validated successfully')
+        "
+        
+    - name: Generate deployment manifest
+      run: |
+        python -c "
+        from pathlib import Path
+        import json
+        from datetime import datetime
+        
+        manifest = {
+            'deployment_id': '${{ github.run_id }}',
+            'timestamp': datetime.now().isoformat(),
+            'environment': '${{ github.event.inputs.environment || "production" }}',
+            'repository': '${{ github.repository }}',
+            'commit': '${{ github.sha }}',
+            'files': {
+                'l5x_files': [str(f) for f in Path('.').rglob('*.L5X')],
+                'total_size_mb': sum(f.stat().st_size for f in Path('.').rglob('*.L5X')) / 1024 / 1024
+            }
+        }
+        
+        with open('deployment_manifest.json', 'w') as f:
+            json.dump(manifest, f, indent=2)
+        
+        print(f'Deployment manifest created: {manifest}')
+        "
+        
+    - name: Upload deployment manifest
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-manifest
+        path: deployment_manifest.json
