@@ -266,18 +266,48 @@ Incident Response Team: [TO BE CONFIGURED]
 ### 10.2 API Security Configuration
 ```json
 {
-  "api_security": {
-    "rate_limiting": {
-      "requests_per_minute": 100,
-      "burst_allowance": 20
-    },
-    "authentication": {
-      "type": "bearer_token",
-      "rotation_days": 30
-    },
-    "monitoring": {
-      "failed_auth_threshold": 5,
-      "alert_escalation": "immediate"
+  "instance_name": "API_CONFIGURATION_001",
+  "schema_version": "1.0.0",
+  "metadata": {
+    "created_timestamp": "2025-07-09T13:45:59Z",
+    "updated_timestamp": "2025-07-09T13:45:59Z",
+    "schema_type": "api_configuration",
+    "created_by": "documentation_standardization_orchestrator",
+    "description": "Standardized api configuration configuration",
+    "tags": [
+      "api"
+    ],
+    "validation_status": {
+      "validated": true,
+      "validation_timestamp": "2025-07-09T13:45:59Z",
+      "validation_score": 1.0,
+      "issues": []
+    }
+  },
+  "variable_counts": {
+    "total_variables": 10,
+    "process_variables_count": 0,
+    "disturbance_variables_count": 0,
+    "control_variables_count": 0,
+    "validation_checks_count": 0,
+    "endpoints_count": 1,
+    "metrics_count": 0,
+    "configuration_items_count": 9
+  },
+  "data": {
+    "api_security": {
+      "rate_limiting": {
+        "requests_per_minute": 100,
+        "burst_allowance": 20
+      },
+      "authentication": {
+        "type": "bearer_token",
+        "rotation_days": 30
+      },
+      "monitoring": {
+        "failed_auth_threshold": 5,
+        "alert_escalation": "immediate"
+      }
     }
   }
 }

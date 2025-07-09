@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-gpt.com/schemas/master-framework.json",
+  "title": "PLC-GPT Master JSON Schema Framework",
+  "description": "Standardized JSON schema framework for all PLC-GPT JSON types",
+  "type": "object",
+  "required": [
+    "instance_name",
+    "schema_version",
+    "metadata",
+    "variable_counts",
+    "data"
+  ],
+  "properties": {
+    "instance_name": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*[A-Z0-9]$",
+      "minLength": 3,
+      "maxLength": 64,
+      "description": "Unique identifier for this specific instance (e.g., REACTOR_TEMP_001, PID_LOOP_MAIN_01)"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the schema (e.g., '1.0.0', '2.1.3')"
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "created_timestamp",
+        "schema_type",
+        "created_by"
+      ],
+      "properties": {
+        "created_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when instance was created"
+        },
+        "updated_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when instance was last updated"
+        },
+        "schema_type": {
+          "type": "string",
+          "enum": [
+            "phase8_pid_control",
+            "validation_framework",
+            "api_configuration",
+            "performance_metrics",
+            "workflow_definition",
+            "data_model",
+            "system_configuration",
+            "training_data",
+            "analysis_results"
+          ],
+          "description": "Type of JSON schema being used"
+        },
+        "created_by": {
+          "type": "string",
+          "description": "System or user that created this instance"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Human-readable description of this instance"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Categorization tags for filtering and organization"
+        },
+        "validation_status": {
+          "type": "object",
+          "properties": {
+            "validated": {
+              "type": "boolean"
+            },
+            "validation_timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "validation_score": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "issues": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "variable_counts": {
+      "type": "object",
+      "description": "Count of variables in each section for validation and parsing optimization",
+      "properties": {
+        "total_variables": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of variables across all sections"
+        }
+      },
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*_count$": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of variables in specific section"
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "description": "Schema-specific data content (varies by schema_type)"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "plc_tag_reference": {
+      "type": "object",
+      "required": [
+        "tagname",
+        "data_type"
+      ],
+      "properties": {
+        "tagname": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*[A-Z0-9](\\.[A-Za-z0-9_]+)?$",
+          "description": "PLC tag following industrial naming convention"
+        },
+        "data_type": {
+          "type": "string",
+          "enum": [
+            "BOOL",
+            "SINT",
+            "INT",
+            "DINT",
+            "LINT",
+            "REAL",
+            "LREAL",
+            "STRING",
+            "UDT"
+          ],
+          "description": "PLC data type"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Human-readable description of tag purpose"
+        }
+      }
+    },
+    "engineering_units": {
+      "type": "object",
+      "required": [
+        "value",
+        "units"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "\u00b0C",
+            "\u00b0F",
+            "K",
+            "\u00b0R",
+            "psi",
+            "bar",
+            "kPa",
+            "MPa",
+            "GPM",
+            "LPM",
+            "CFM",
+            "m\u00b3/h",
+            "%",
+            "ft",
+            "m",
+            "inches",
+            "Hz",
+            "RPM",
+            "mA",
+            "V",
+            "\u03a9"
+          ]
+        },
+        "precision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Number of decimal places for display"
+        }
+      }
+    },
+    "performance_threshold": {
+      "type": "object",
+      "required": [
+        "excellent",
+        "good",
+        "acceptable"
+      ],
+      "properties": {
+        "excellent": {
+          "type": "number"
+        },
+        "good": {
+          "type": "number"
+        },
+        "acceptable": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

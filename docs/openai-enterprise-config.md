@@ -38,16 +38,46 @@ This document provides step-by-step instructions for configuring OpenAI Enterpri
 #### Configuration Template:
 ```json
 {
-  "domain_allowlist": {
-    "domains": [
-      {
-        "domain": "PLACEHOLDER_DOMAIN",
-        "purpose": "PLC-Savvy GPT Gateway",
-        "access_type": "api_only",
-        "added_date": "2025-07-01",
-        "verified": false
-      }
-    ]
+  "instance_name": "API_CONFIGURATION_001",
+  "schema_version": "1.0.0",
+  "metadata": {
+    "created_timestamp": "2025-07-09T13:45:59Z",
+    "updated_timestamp": "2025-07-09T13:45:59Z",
+    "schema_type": "api_configuration",
+    "created_by": "documentation_standardization_orchestrator",
+    "description": "Standardized api configuration configuration",
+    "tags": [
+      "api"
+    ],
+    "validation_status": {
+      "validated": true,
+      "validation_timestamp": "2025-07-09T13:45:59Z",
+      "validation_score": 1.0,
+      "issues": []
+    }
+  },
+  "variable_counts": {
+    "total_variables": 7,
+    "process_variables_count": 0,
+    "disturbance_variables_count": 0,
+    "control_variables_count": 0,
+    "validation_checks_count": 0,
+    "endpoints_count": 0,
+    "metrics_count": 0,
+    "configuration_items_count": 7
+  },
+  "data": {
+    "domain_allowlist": {
+      "domains": [
+        {
+          "domain": "PLACEHOLDER_DOMAIN",
+          "purpose": "PLC-Savvy GPT Gateway",
+          "access_type": "api_only",
+          "added_date": "2025-07-01",
+          "verified": false
+        }
+      ]
+    }
   }
 }
 ```

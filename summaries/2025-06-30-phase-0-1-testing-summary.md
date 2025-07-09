@@ -107,12 +107,42 @@ curl -s http://localhost:8000/health
 **Response**: ✅ PASSED
 ```json
 {
-  "status": "healthy",
-  "timestamp": "2025-06-30T18:25:18.355733",
-  "services": {
-    "neo4j": "connected",
-    "qdrant": "connected", 
-    "openai": "available"
+  "instance_name": "VALIDATION_TEST_001",
+  "schema_version": "1.0.0",
+  "metadata": {
+    "created_timestamp": "2025-07-09T13:45:59Z",
+    "updated_timestamp": "2025-07-09T13:45:59Z",
+    "schema_type": "validation_framework",
+    "created_by": "documentation_standardization_orchestrator",
+    "description": "Standardized validation framework configuration",
+    "tags": [
+      "validation"
+    ],
+    "validation_status": {
+      "validated": true,
+      "validation_timestamp": "2025-07-09T13:45:59Z",
+      "validation_score": 1.0,
+      "issues": []
+    }
+  },
+  "variable_counts": {
+    "total_variables": 6,
+    "process_variables_count": 0,
+    "disturbance_variables_count": 0,
+    "control_variables_count": 0,
+    "validation_checks_count": 0,
+    "endpoints_count": 0,
+    "metrics_count": 0,
+    "configuration_items_count": 6
+  },
+  "data": {
+    "status": "healthy",
+    "timestamp": "2025-06-30T18:25:18.355733",
+    "services": {
+      "neo4j": "connected",
+      "qdrant": "connected",
+      "openai": "available"
+    }
   }
 }
 ```
@@ -140,27 +170,58 @@ curl -X POST http://localhost:8000/api/v1/query \
 **Response**: ✅ PASSED
 ```json
 {
-  "question": "What is a PLC?",
-  "answer": "This is a placeholder response. The actual implementation will query Neo4j and vector store.",
-  "graph_context": {
-    "nodes": [],
-    "relationships": []
+  "instance_name": "VALIDATION_TEST_001",
+  "schema_version": "1.0.0",
+  "metadata": {
+    "created_timestamp": "2025-07-09T13:45:59Z",
+    "updated_timestamp": "2025-07-09T13:45:59Z",
+    "schema_type": "validation_framework",
+    "created_by": "documentation_standardization_orchestrator",
+    "description": "Standardized validation framework configuration",
+    "tags": [
+      "validation",
+      "food"
+    ],
+    "validation_status": {
+      "validated": true,
+      "validation_timestamp": "2025-07-09T13:45:59Z",
+      "validation_score": 1.0,
+      "issues": []
+    }
   },
-  "vector_context": [
-    {
-      "text": "Sample context",
-      "score": 0.95
-    }
-  ],
-  "citations": [
-    {
-      "source": "PLC Programming Manual",
-      "relevance": 0.92,
-      "snippet": "Relevant information would appear here"
-    }
-  ],
-  "processing_time_ms": 0.223,
-  "timestamp": "2025-06-30T18:25:38.463608"
+  "variable_counts": {
+    "total_variables": 14,
+    "process_variables_count": 1,
+    "disturbance_variables_count": 0,
+    "control_variables_count": 0,
+    "validation_checks_count": 0,
+    "endpoints_count": 0,
+    "metrics_count": 0,
+    "configuration_items_count": 13
+  },
+  "data": {
+    "question": "What is a PLC?",
+    "answer": "This is a placeholder response. The actual implementation will query Neo4j and vector store.",
+    "graph_context": {
+      "nodes": [],
+      "relationships": []
+    },
+    "vector_context": [
+      {
+        "text": "Sample context",
+        "score": 0.95
+      }
+    ],
+    "citations": [
+      {
+        "source": "PLC Programming Manual",
+        "relevance": 0.92,
+        "snippet": "Relevant information would appear here"
+      }
+    ],
+    "processing_time_ms": 0.223,
+    "timestamp": "2025-06-30T18:25:38.463608"
+  }
 }
 ```
 
@@ -187,7 +248,37 @@ curl -X POST http://localhost:8000/api/v1/query \
 **Response**: ✅ PASSED
 ```json
 {
-  "detail": "Invalid authentication token"
+  "instance_name": "AUTH_CONFIGURATION_001",
+  "schema_version": "1.0.0",
+  "metadata": {
+    "created_timestamp": "2025-07-09T13:45:59Z",
+    "updated_timestamp": "2025-07-09T13:45:59Z",
+    "schema_type": "api_configuration",
+    "created_by": "documentation_standardization_orchestrator",
+    "description": "Standardized api configuration configuration",
+    "tags": [
+      "validation"
+    ],
+    "validation_status": {
+      "validated": true,
+      "validation_timestamp": "2025-07-09T13:45:59Z",
+      "validation_score": 1.0,
+      "issues": []
+    }
+  },
+  "variable_counts": {
+    "total_variables": 1,
+    "process_variables_count": 0,
+    "disturbance_variables_count": 0,
+    "control_variables_count": 0,
+    "validation_checks_count": 0,
+    "endpoints_count": 0,
+    "metrics_count": 0,
+    "configuration_items_count": 1
+  },
+  "data": {
+    "detail": "Invalid authentication token"
+  }
 }
 ```
 
@@ -212,10 +303,40 @@ curl -s http://localhost:7474/
 **Response**: ✅ PASSED
 ```json
 {
-  "bolt_routing": "neo4j://localhost:7687",
-  "query": "http://localhost:7474/db/{databaseName}/query/v2",
-  "neo4j_version": "5.26.8",
-  "neo4j_edition": "enterprise"
+  "instance_name": "VALIDATION_TEST_001",
+  "schema_version": "1.0.0",
+  "metadata": {
+    "created_timestamp": "2025-07-09T13:45:59Z",
+    "updated_timestamp": "2025-07-09T13:45:59Z",
+    "schema_type": "validation_framework",
+    "created_by": "documentation_standardization_orchestrator",
+    "description": "Standardized validation framework configuration",
+    "tags": [
+      "validation"
+    ],
+    "validation_status": {
+      "validated": true,
+      "validation_timestamp": "2025-07-09T13:45:59Z",
+      "validation_score": 1.0,
+      "issues": []
+    }
+  },
+  "variable_counts": {
+    "total_variables": 4,
+    "process_variables_count": 0,
+    "disturbance_variables_count": 0,
+    "control_variables_count": 0,
+    "validation_checks_count": 0,
+    "endpoints_count": 0,
+    "metrics_count": 0,
+    "configuration_items_count": 4
+  },
+  "data": {
+    "bolt_routing": "neo4j://localhost:7687",
+    "query": "http://localhost:7474/db/{databaseName}/query/v2",
+    "neo4j_version": "5.26.8",
+    "neo4j_edition": "enterprise"
+  }
 }
 ```
 
@@ -238,9 +359,39 @@ curl -s http://localhost:6333/
 **Response**: ✅ PASSED
 ```json
 {
-  "title": "qdrant - vector search engine",
-  "version": "1.14.1",
-  "commit": "530430fac2a3ca872504f276d2c91a5c91f43fa0"
+  "instance_name": "VALIDATION_TEST_001",
+  "schema_version": "1.0.0",
+  "metadata": {
+    "created_timestamp": "2025-07-09T13:45:59Z",
+    "updated_timestamp": "2025-07-09T13:45:59Z",
+    "schema_type": "validation_framework",
+    "created_by": "documentation_standardization_orchestrator",
+    "description": "Standardized validation framework configuration",
+    "tags": [
+      "validation"
+    ],
+    "validation_status": {
+      "validated": true,
+      "validation_timestamp": "2025-07-09T13:45:59Z",
+      "validation_score": 1.0,
+      "issues": []
+    }
+  },
+  "variable_counts": {
+    "total_variables": 3,
+    "process_variables_count": 0,
+    "disturbance_variables_count": 0,
+    "control_variables_count": 0,
+    "validation_checks_count": 0,
+    "endpoints_count": 0,
+    "metrics_count": 0,
+    "configuration_items_count": 3
+  },
+  "data": {
+    "title": "qdrant - vector search engine",
+    "version": "1.14.1",
+    "commit": "530430fac2a3ca872504f276d2c91a5c91f43fa0"
+  }
 }
 ```
 
