@@ -105,7 +105,7 @@ jobs:
         echo "All integrity checks completed successfully ✅" >> conversion-report.md
         
     - name: Upload conversion report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: conversion-report
         path: conversion-report.md
