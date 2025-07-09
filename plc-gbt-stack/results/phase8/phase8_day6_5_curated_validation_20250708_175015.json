@@ -1,0 +1,121 @@
+{
+  "phase": "8.6.5",
+  "task": "Curated Dataset AI Validation",
+  "start_time": "2025-07-08T17:50:14.394075",
+  "dataset_info": {
+    "dataset_loaded": true,
+    "total_rows": 50000,
+    "time_range": {
+      "start": "2025-03-03 00:00:02.020000",
+      "end": "2025-03-05 21:26:37.263700",
+      "duration_hours": 69.44312325
+    },
+    "process_variables": {
+      "pv01_range": [
+        75.86,
+        86.63
+      ],
+      "pv02_range": [
+        683.499,
+        780.536
+      ],
+      "cv01_range": [
+        42.84,
+        52.96
+      ],
+      "sp01_value": 79.0
+    },
+    "pid_parameters": {
+      "kc": 1.25,
+      "ti": 0.125,
+      "controller_type": "PI"
+    },
+    "data_quality": {
+      "missing_values": 43945,
+      "sampling_rate_seconds": 5,
+      "process_state": "Auto"
+    }
+  },
+  "validation_results": {
+    "ai_tuning": {
+      "task": "AI Tuning Recommendations Validation",
+      "real_data_input": {
+        "loop_id": "beer_feed_control",
+        "mae": 1.5246837324525184,
+        "oscillation_index": 2.824616104513929,
+        "cv_saturation": 0.0,
+        "performance_score": 79.10393046644695,
+        "current_parameters": {
+          "kc": 1.25,
+          "ti": 0.125,
+          "td": 0.0
+        },
+        "recent_trends": {
+          "pv_stability": "stable",
+          "data_points": 50000
+        }
+      },
+      "ai_analysis": {
+        "analysis_type": "ai_enhanced",
+        "problems_identified": [],
+        "root_causes": [
+          "Controller tuning not optimized for current process dynamics",
+          "Possible process changes affecting control performance"
+        ],
+        "tuning_recommendations": {},
+        "confidence_score": 0.85,
+        "expected_improvement": 15.0,
+        "risk_assessment": "low"
+      },
+      "recommendation_quality": {
+        "overall_quality": 20.0,
+        "quality_factors": [
+          "Appropriate confidence level"
+        ],
+        "recommendations_alignment": false
+      },
+      "confidence_score": 0.85,
+      "validation_score": 20.0
+    },
+    "predictive_modeling": {
+      "task": "Predictive Modeling Validation",
+      "real_metrics_used": {
+        "mae": 1.5246837324525184,
+        "oscillation_index": 2.824616104513929,
+        "cv_saturation": 0.0,
+        "performance_score": 79.10393046644695,
+        "response_time": 45.0
+      },
+      "patterns_found": 2,
+      "prediction_confidence": 0.895,
+      "predicted_improvement": {
+        "mae_improvement": 10.8741,
+        "oscillation_reduction": 14.498800000000001,
+        "performance_score_increase": 36.247
+      },
+      "prediction_quality": {
+        "accuracy_score": 70.0,
+        "accuracy_factors": [
+          "Reasonable prediction horizon",
+          "High confidence prediction",
+          "Comprehensive action recommendations"
+        ],
+        "prediction_reliability": true
+      },
+      "validation_score": 70.0
+    }
+  },
+  "status": "completed_needs_improvement",
+  "real_metrics": {
+    "mae": 1.5246837324525184,
+    "oscillation_index": 2.824616104513929,
+    "cv_saturation": 0.0,
+    "performance_score": 79.10393046644695,
+    "response_time": 45.0,
+    "data_points_analyzed": 50000,
+    "process_stability": "stable"
+  },
+  "overall_validation_score": 45.0,
+  "completion_time": "2025-07-08T17:50:15.252380",
+  "duration_minutes": 0.014305233333333334
+}

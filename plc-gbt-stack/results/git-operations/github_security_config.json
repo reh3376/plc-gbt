@@ -1,0 +1,27 @@
+{
+  "access_permissions": {
+    "private_repositories": true,
+    "read_access": [
+      "team:plc-developers"
+    ],
+    "write_access": [
+      "team:plc-engineers"
+    ],
+    "admin_access": [
+      "user:reh3376"
+    ]
+  },
+  "branch_protection_rules": {
+    "main": {
+      "required_status_checks": true,
+      "require_review": true,
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": false
+    }
+  },
+  "security_scanning": {
+    "dependency_scanning": true,
+    "secret_scanning": true,
+    "code_scanning": true
+  }
+}

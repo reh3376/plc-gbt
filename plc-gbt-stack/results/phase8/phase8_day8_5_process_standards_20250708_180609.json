@@ -1,0 +1,452 @@
+{
+  "phase": "8.8.5",
+  "task": "Process-Specific Performance Standards",
+  "start_time": "2025-07-08T18:06:09.359716",
+  "standards_database": {
+    "available_processes": [
+      "beer_feed_flow",
+      "temperature_control",
+      "pressure_control",
+      "level_control",
+      "ph_control"
+    ],
+    "total_standards": 5,
+    "example_beer_feed": {
+      "process_type": "ProcessType.BEER_FEED_FLOW",
+      "process_name": "Beer Feed Flow Control",
+      "mae_excellent": 0.15,
+      "mae_good": 0.25,
+      "mae_acceptable": 0.5,
+      "mae_poor": 1.0,
+      "mae_units": "gpm",
+      "oscillation_excellent": 1.0,
+      "oscillation_good": 2.0,
+      "oscillation_acceptable": 5.0,
+      "oscillation_poor": 10.0,
+      "deadband_optimal": 0.1,
+      "deadband_units": "gpm",
+      "response_time_target": 30.0,
+      "settling_time_target": 90.0,
+      "cv_saturation_limit": 5.0,
+      "cv_utilization_optimal": 60.0,
+      "setpoint_range": [
+        5.0,
+        50.0
+      ],
+      "process_gain_typical": 2.5,
+      "time_constant_typical": 45.0,
+      "mae_weight": 0.4,
+      "oscillation_weight": 0.3,
+      "response_weight": 0.2,
+      "cv_weight": 0.1
+    }
+  },
+  "validation_results": {
+    "beer_feed_revalidation": {
+      "task": "Beer Feed Control Re-validation",
+      "previous_assessment": {
+        "mae_assessment": "excellent (MAE=1.525 < 2.0 generic)",
+        "overall_score": 79.1,
+        "status": "stable"
+      },
+      "correct_assessment": {
+        "mae_assessment": "very_poor (MAE=1.525 >> 0.25 gpm required)",
+        "overall_score": 56.0,
+        "status": "poor",
+        "improvement_needed": {
+          "priority_actions": [
+            {
+              "action": "Reduce MAE",
+              "current": "1.525 gpm",
+              "target": "0.250 gpm",
+              "improvement_needed": "1.275 gpm",
+              "priority": "high"
+            }
+          ],
+          "tuning_adjustments": {
+            "kc": "increase_proportional_gain",
+            "ti": "decrease_integral_time"
+          },
+          "expected_improvements": {}
+        }
+      },
+      "validation_score": 56.0,
+      "performance_details": {
+        "process_type": "beer_feed_flow",
+        "process_name": "Beer Feed Flow Control",
+        "standards_applied": {
+          "process_type": "ProcessType.BEER_FEED_FLOW",
+          "process_name": "Beer Feed Flow Control",
+          "mae_excellent": 0.15,
+          "mae_good": 0.25,
+          "mae_acceptable": 0.5,
+          "mae_poor": 1.0,
+          "mae_units": "gpm",
+          "oscillation_excellent": 1.0,
+          "oscillation_good": 2.0,
+          "oscillation_acceptable": 5.0,
+          "oscillation_poor": 10.0,
+          "deadband_optimal": 0.1,
+          "deadband_units": "gpm",
+          "response_time_target": 30.0,
+          "settling_time_target": 90.0,
+          "cv_saturation_limit": 5.0,
+          "cv_utilization_optimal": 60.0,
+          "setpoint_range": [
+            5.0,
+            50.0
+          ],
+          "process_gain_typical": 2.5,
+          "time_constant_typical": 45.0,
+          "mae_weight": 0.4,
+          "oscillation_weight": 0.3,
+          "response_weight": 0.2,
+          "cv_weight": 0.1
+        },
+        "current_performance": {
+          "mae": 1.525,
+          "mae_units": "gpm",
+          "oscillation_index": 2.8,
+          "response_time": 45.0,
+          "cv_saturation": 0.0
+        },
+        "performance_rating": {
+          "mae": {
+            "rating": "very_poor",
+            "score": 20.0,
+            "current_value": 1.525,
+            "target_excellent": 0.15,
+            "target_good": 0.25,
+            "units": "gpm",
+            "improvement_needed": 1.275
+          },
+          "oscillation": {
+            "rating": "acceptable",
+            "score": 70.0,
+            "current_value": 2.8,
+            "target_excellent": 1.0,
+            "target_good": 2.0,
+            "units": "%",
+            "improvement_needed": 0.7999999999999998
+          },
+          "response_time": {
+            "rating": "good",
+            "score": 85.0,
+            "current_value": 45.0,
+            "target": 30.0,
+            "units": "seconds",
+            "improvement_needed": 15.0
+          },
+          "cv_utilization": {
+            "rating": "excellent",
+            "score": 100.0,
+            "current_value": 0.0,
+            "target_limit": 5.0,
+            "units": "%",
+            "improvement_needed": 0
+          }
+        },
+        "improvement_needed": {
+          "priority_actions": [
+            {
+              "action": "Reduce MAE",
+              "current": "1.525 gpm",
+              "target": "0.250 gpm",
+              "improvement_needed": "1.275 gpm",
+              "priority": "high"
+            }
+          ],
+          "tuning_adjustments": {
+            "kc": "increase_proportional_gain",
+            "ti": "decrease_integral_time"
+          },
+          "expected_improvements": {}
+        },
+        "validation_score": 56.0,
+        "overall_rating": "poor"
+      }
+    },
+    "standards_demonstration": {
+      "task": "Process-Specific Standards Demonstration",
+      "process_assessments": [
+        {
+          "process_type": "beer_feed_flow",
+          "assessment": {
+            "process_type": "beer_feed_flow",
+            "process_name": "Beer Feed Flow Control",
+            "standards_applied": {
+              "process_type": "ProcessType.BEER_FEED_FLOW",
+              "process_name": "Beer Feed Flow Control",
+              "mae_excellent": 0.15,
+              "mae_good": 0.25,
+              "mae_acceptable": 0.5,
+              "mae_poor": 1.0,
+              "mae_units": "gpm",
+              "oscillation_excellent": 1.0,
+              "oscillation_good": 2.0,
+              "oscillation_acceptable": 5.0,
+              "oscillation_poor": 10.0,
+              "deadband_optimal": 0.1,
+              "deadband_units": "gpm",
+              "response_time_target": 30.0,
+              "settling_time_target": 90.0,
+              "cv_saturation_limit": 5.0,
+              "cv_utilization_optimal": 60.0,
+              "setpoint_range": [
+                5.0,
+                50.0
+              ],
+              "process_gain_typical": 2.5,
+              "time_constant_typical": 45.0,
+              "mae_weight": 0.4,
+              "oscillation_weight": 0.3,
+              "response_weight": 0.2,
+              "cv_weight": 0.1
+            },
+            "current_performance": {
+              "mae": 1.525,
+              "mae_units": "gpm",
+              "oscillation_index": 2.8,
+              "response_time": 45.0,
+              "cv_saturation": 0.0
+            },
+            "performance_rating": {
+              "mae": {
+                "rating": "very_poor",
+                "score": 20.0,
+                "current_value": 1.525,
+                "target_excellent": 0.15,
+                "target_good": 0.25,
+                "units": "gpm",
+                "improvement_needed": 1.275
+              },
+              "oscillation": {
+                "rating": "acceptable",
+                "score": 70.0,
+                "current_value": 2.8,
+                "target_excellent": 1.0,
+                "target_good": 2.0,
+                "units": "%",
+                "improvement_needed": 0.7999999999999998
+              },
+              "response_time": {
+                "rating": "good",
+                "score": 85.0,
+                "current_value": 45.0,
+                "target": 30.0,
+                "units": "seconds",
+                "improvement_needed": 15.0
+              },
+              "cv_utilization": {
+                "rating": "excellent",
+                "score": 100.0,
+                "current_value": 0.0,
+                "target_limit": 5.0,
+                "units": "%",
+                "improvement_needed": 0
+              }
+            },
+            "improvement_needed": {
+              "priority_actions": [
+                {
+                  "action": "Reduce MAE",
+                  "current": "1.525 gpm",
+                  "target": "0.250 gpm",
+                  "improvement_needed": "1.275 gpm",
+                  "priority": "high"
+                }
+              ],
+              "tuning_adjustments": {
+                "kc": "increase_proportional_gain",
+                "ti": "decrease_integral_time"
+              },
+              "expected_improvements": {}
+            },
+            "validation_score": 56.0,
+            "overall_rating": "poor"
+          },
+          "score": 56.0
+        },
+        {
+          "process_type": "temperature_control",
+          "assessment": {
+            "process_type": "temperature_control",
+            "process_name": "Temperature Control",
+            "standards_applied": {
+              "process_type": "ProcessType.TEMPERATURE_CONTROL",
+              "process_name": "Temperature Control",
+              "mae_excellent": 0.5,
+              "mae_good": 1.0,
+              "mae_acceptable": 2.0,
+              "mae_poor": 5.0,
+              "mae_units": "\u00b0F",
+              "oscillation_excellent": 0.5,
+              "oscillation_good": 1.0,
+              "oscillation_acceptable": 3.0,
+              "oscillation_poor": 8.0,
+              "deadband_optimal": 0.2,
+              "deadband_units": "\u00b0F",
+              "response_time_target": 120.0,
+              "settling_time_target": 300.0,
+              "cv_saturation_limit": 3.0,
+              "cv_utilization_optimal": 70.0,
+              "setpoint_range": [
+                60.0,
+                220.0
+              ],
+              "process_gain_typical": 1.5,
+              "time_constant_typical": 180.0,
+              "mae_weight": 0.4,
+              "oscillation_weight": 0.3,
+              "response_weight": 0.2,
+              "cv_weight": 0.1
+            },
+            "current_performance": {
+              "mae": 1.2,
+              "mae_units": "\u00b0F",
+              "oscillation_index": 1.5,
+              "response_time": 150.0,
+              "cv_saturation": 2.0
+            },
+            "performance_rating": {
+              "mae": {
+                "rating": "acceptable",
+                "score": 70.0,
+                "current_value": 1.2,
+                "target_excellent": 0.5,
+                "target_good": 1.0,
+                "units": "\u00b0F",
+                "improvement_needed": 0.19999999999999996
+              },
+              "oscillation": {
+                "rating": "acceptable",
+                "score": 70.0,
+                "current_value": 1.5,
+                "target_excellent": 0.5,
+                "target_good": 1.0,
+                "units": "%",
+                "improvement_needed": 0.5
+              },
+              "response_time": {
+                "rating": "good",
+                "score": 85.0,
+                "current_value": 150.0,
+                "target": 120.0,
+                "units": "seconds",
+                "improvement_needed": 30.0
+              },
+              "cv_utilization": {
+                "rating": "excellent",
+                "score": 100.0,
+                "current_value": 2.0,
+                "target_limit": 3.0,
+                "units": "%",
+                "improvement_needed": 0
+              }
+            },
+            "improvement_needed": {
+              "priority_actions": [],
+              "tuning_adjustments": {},
+              "expected_improvements": {}
+            },
+            "validation_score": 76.0,
+            "overall_rating": "acceptable"
+          },
+          "score": 76.0
+        },
+        {
+          "process_type": "pressure_control",
+          "assessment": {
+            "process_type": "pressure_control",
+            "process_name": "Pressure Control",
+            "standards_applied": {
+              "process_type": "ProcessType.PRESSURE_CONTROL",
+              "process_name": "Pressure Control",
+              "mae_excellent": 0.1,
+              "mae_good": 0.25,
+              "mae_acceptable": 0.5,
+              "mae_poor": 1.0,
+              "mae_units": "psi",
+              "oscillation_excellent": 0.5,
+              "oscillation_good": 1.5,
+              "oscillation_acceptable": 4.0,
+              "oscillation_poor": 10.0,
+              "deadband_optimal": 0.05,
+              "deadband_units": "psi",
+              "response_time_target": 15.0,
+              "settling_time_target": 45.0,
+              "cv_saturation_limit": 2.0,
+              "cv_utilization_optimal": 65.0,
+              "setpoint_range": [
+                0.0,
+                50.0
+              ],
+              "process_gain_typical": 3.0,
+              "time_constant_typical": 25.0,
+              "mae_weight": 0.4,
+              "oscillation_weight": 0.3,
+              "response_weight": 0.2,
+              "cv_weight": 0.1
+            },
+            "current_performance": {
+              "mae": 0.3,
+              "mae_units": "psi",
+              "oscillation_index": 3.0,
+              "response_time": 20.0,
+              "cv_saturation": 1.0
+            },
+            "performance_rating": {
+              "mae": {
+                "rating": "acceptable",
+                "score": 70.0,
+                "current_value": 0.3,
+                "target_excellent": 0.1,
+                "target_good": 0.25,
+                "units": "psi",
+                "improvement_needed": 0.04999999999999999
+              },
+              "oscillation": {
+                "rating": "acceptable",
+                "score": 70.0,
+                "current_value": 3.0,
+                "target_excellent": 0.5,
+                "target_good": 1.5,
+                "units": "%",
+                "improvement_needed": 1.5
+              },
+              "response_time": {
+                "rating": "good",
+                "score": 85.0,
+                "current_value": 20.0,
+                "target": 15.0,
+                "units": "seconds",
+                "improvement_needed": 5.0
+              },
+              "cv_utilization": {
+                "rating": "excellent",
+                "score": 100.0,
+                "current_value": 1.0,
+                "target_limit": 2.0,
+                "units": "%",
+                "improvement_needed": 0
+              }
+            },
+            "improvement_needed": {
+              "priority_actions": [],
+              "tuning_adjustments": {},
+              "expected_improvements": {}
+            },
+            "validation_score": 76.0,
+            "overall_rating": "acceptable"
+          },
+          "score": 76.0
+        }
+      ],
+      "validation_score": 69.33333333333333
+    }
+  },
+  "status": "completed_needs_improvement",
+  "overall_validation_score": 62.666666666666664,
+  "completion_time": "2025-07-08T18:06:09.360130",
+  "duration_minutes": 6.933333333333333e-06
+}

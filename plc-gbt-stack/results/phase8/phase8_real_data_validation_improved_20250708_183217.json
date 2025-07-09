@@ -1,0 +1,27 @@
+{
+  "dataset_info": {
+    "error": "Performance calculation failed: 'ProcessPerformanceStandards' object has no attribute 'excellent_threshold'"
+  },
+  "process_dynamics": {
+    "error": "Performance calculation failed: 'ProcessPerformanceStandards' object has no attribute 'excellent_threshold'"
+  },
+  "current_performance": {
+    "error": "Performance calculation failed: 'ProcessPerformanceStandards' object has no attribute 'excellent_threshold'"
+  },
+  "pid_analysis": {
+    "error": "Performance calculation failed: 'ProcessPerformanceStandards' object has no attribute 'excellent_threshold'"
+  },
+  "timing_analysis": {
+    "error": "Performance calculation failed: 'ProcessPerformanceStandards' object has no attribute 'excellent_threshold'"
+  },
+  "strategy_analysis": {
+    "error": "Performance calculation failed: 'ProcessPerformanceStandards' object has no attribute 'excellent_threshold'"
+  },
+  "industrial_validation": {
+    "error": "Performance calculation failed: 'ProcessPerformanceStandards' object has no attribute 'excellent_threshold'"
+  },
+  "overall_validation_score": 0.0,
+  "improvement_potential": {
+    "error": "Performance calculation failed: 'ProcessPerformanceStandards' object has no attribute 'excellent_threshold'"
+  }
+}

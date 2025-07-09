@@ -1,0 +1,11 @@
+{
+  "backup_id": "neo4j_backup_20250707_090656_bebb70",
+  "method": "neo4j_admin",
+  "database": "neo4j",
+  "container": "plc-neo4j",
+  "backup_type": "full",
+  "created_at": "2025-07-07T09:06:58.014268",
+  "files": [
+    "neo4j backup files"
+  ]
+}

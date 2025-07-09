@@ -1,0 +1,526 @@
+{
+  "migration_info": {
+    "analysis_date": "2025-07-07T10:53:37.402211",
+    "total_repositories": 6,
+    "total_acd_files": 6,
+    "total_size_mb": 0.12000000000000001,
+    "phase": "3.7.1 - Repository Analysis & Preparation"
+  },
+  "repositories": {
+    "plc-100": {
+      "path": "/Users/reh3376/repos/plc-100",
+      "acd_files": 1,
+      "total_files": 15,
+      "size_mb": 0.02,
+      "git_status": {
+        "is_git_repo": true,
+        "current_branch": "main",
+        "last_commit": {
+          "hash": "762686c7ebd935be95d2955834ef30c567d351c5",
+          "message": "Chore: production to main sync after weekly hotfixes",
+          "author": "joeswein",
+          "date": "Fri May 30 09:12:46 2025 -0400"
+        },
+        "remote_url": "https://app.copia.io/WhiskeyHouse/PLC-100.git",
+        "status": {
+          "clean": true,
+          "modified_files": 0,
+          "changes": []
+        }
+      },
+      "structure": {
+        "directories": [
+          "plc",
+          "plc/eds",
+          "plc/aop",
+          "docs",
+          "docs/projects",
+          "docs/projects/sample-project",
+          "docs/projects/sample-project/1.0 - Project Initiation",
+          "docs/projects/sample-project/5.0 - Closeout & As-Built",
+          "docs/projects/sample-project/3.0 - Development",
+          "docs/projects/sample-project/2.0 - Requirements & Design",
+          "docs/projects/sample-project/4.0 - Testing",
+          "device-configuration"
+        ],
+        "file_types": {
+          ".md": 11,
+          "": 2,
+          ".toml": 1,
+          ".acd": 1
+        },
+        "depth_analysis": {
+          "0": 4,
+          "1": 4,
+          "2": 2,
+          "3": 0,
+          "4": 5
+        },
+        "large_files": []
+      },
+      "files": [
+        {
+          "filename": "PLC100_Mashing.ACD",
+          "filepath": "/Users/reh3376/repos/plc-100/plc/PLC100_Mashing.ACD",
+          "size_bytes": 132,
+          "size_mb": 0.0,
+          "modified_date": "2025-07-07T09:46:19.184783",
+          "created_date": "2025-07-07T09:46:19.184783",
+          "file_hash": "c237ea3f6679b4c206dd3c41d2e9d7e3d971c06fbd736cde4a99c87585e456ce",
+          "repository": "plc-100",
+          "relative_path": "plc/PLC100_Mashing.ACD",
+          "is_readable": true,
+          "error_message": null
+        }
+      ]
+    },
+    "plc-200": {
+      "path": "/Users/reh3376/repos/plc-200",
+      "acd_files": 1,
+      "total_files": 15,
+      "size_mb": 0.02,
+      "git_status": {
+        "is_git_repo": true,
+        "current_branch": "main",
+        "last_commit": {
+          "hash": "49f35f89c600dd9251751b795d55e78e59cfc36e",
+          "message": "Merge pull request 'Fermenter Drop and Rinse HWF cycle refactor' (#3) from bugs/ET-HD-103-FermenterHWFRefactor into main",
+          "author": "Patrick Mannion",
+          "date": "Wed Feb 26 15:35:07 2025 +0000"
+        },
+        "remote_url": "https://app.copia.io/WhiskeyHouse/PLC-200.git",
+        "status": {
+          "clean": true,
+          "modified_files": 0,
+          "changes": []
+        }
+      },
+      "structure": {
+        "directories": [
+          "plc",
+          "plc/eds",
+          "plc/aop",
+          "docs",
+          "docs/projects",
+          "docs/projects/sample-project",
+          "docs/projects/sample-project/1.0 - Project Initiation",
+          "docs/projects/sample-project/5.0 - Closeout & As-Built",
+          "docs/projects/sample-project/3.0 - Development",
+          "docs/projects/sample-project/2.0 - Requirements & Design",
+          "docs/projects/sample-project/4.0 - Testing",
+          "device-configuration"
+        ],
+        "file_types": {
+          ".md": 11,
+          "": 2,
+          ".toml": 1,
+          ".acd": 1
+        },
+        "depth_analysis": {
+          "0": 4,
+          "1": 4,
+          "2": 2,
+          "3": 0,
+          "4": 5
+        },
+        "large_files": []
+      },
+      "files": [
+        {
+          "filename": "PLC200_Fermentation.ACD",
+          "filepath": "/Users/reh3376/repos/plc-200/plc/PLC200_Fermentation.ACD",
+          "size_bytes": 132,
+          "size_mb": 0.0,
+          "modified_date": "2025-07-07T09:43:26.872148",
+          "created_date": "2025-07-07T09:43:26.872148",
+          "file_hash": "124a49c9e20ff98cc25790cb9fae852055e14403d4d6b5a4d4bb973e3c8b325f",
+          "repository": "plc-200",
+          "relative_path": "plc/PLC200_Fermentation.ACD",
+          "is_readable": true,
+          "error_message": null
+        }
+      ]
+    },
+    "plc-300": {
+      "path": "/Users/reh3376/repos/plc-300",
+      "acd_files": 1,
+      "total_files": 15,
+      "size_mb": 0.02,
+      "git_status": {
+        "is_git_repo": true,
+        "current_branch": "main",
+        "last_commit": {
+          "hash": "b3ca4cab554a53d916b16505e3179a4db4e2165b",
+          "message": "Merge pull request 'production' (#14) from production into main",
+          "author": "Chris Summers",
+          "date": "Tue May 13 12:57:21 2025 +0000"
+        },
+        "remote_url": "https://app.copia.io/WhiskeyHouse/PLC-300.git",
+        "status": {
+          "clean": true,
+          "modified_files": 0,
+          "changes": []
+        }
+      },
+      "structure": {
+        "directories": [
+          "plc",
+          "plc/eds",
+          "plc/aop",
+          "docs",
+          "docs/projects",
+          "docs/projects/sample-project",
+          "docs/projects/sample-project/1.0 - Project Initiation",
+          "docs/projects/sample-project/5.0 - Closeout & As-Built",
+          "docs/projects/sample-project/3.0 - Development",
+          "docs/projects/sample-project/2.0 - Requirements & Design",
+          "docs/projects/sample-project/4.0 - Testing",
+          "device-configuration"
+        ],
+        "file_types": {
+          ".md": 10,
+          "": 2,
+          ".toml": 1,
+          ".l5x": 1,
+          ".acd": 1
+        },
+        "depth_analysis": {
+          "0": 4,
+          "1": 4,
+          "2": 2,
+          "3": 0,
+          "4": 5
+        },
+        "large_files": []
+      },
+      "files": [
+        {
+          "filename": "PLC300_Still.ACD",
+          "filepath": "/Users/reh3376/repos/plc-300/plc/PLC300_Still.ACD",
+          "size_bytes": 132,
+          "size_mb": 0.0,
+          "modified_date": "2025-07-07T09:42:34.831373",
+          "created_date": "2025-07-07T09:42:34.831373",
+          "file_hash": "7f4b48d1db952ab1512697355c7278bade0b21b059044f2adfff92fbe76d7465",
+          "repository": "plc-300",
+          "relative_path": "plc/PLC300_Still.ACD",
+          "is_readable": true,
+          "error_message": null
+        }
+      ]
+    },
+    "plc-400": {
+      "path": "/Users/reh3376/repos/plc-400",
+      "acd_files": 1,
+      "total_files": 15,
+      "size_mb": 0.02,
+      "git_status": {
+        "is_git_repo": true,
+        "current_branch": "main",
+        "last_commit": {
+          "hash": "1bc04f6d78997e219de455df8dc8050bef9fdfbd",
+          "message": "Merge pull request 'WCSD-11-Hose-Reel-Booster-Pump-Integration' (#4) from WCSD-11-Hose-Reel-Booster-Pump-Integration into main",
+          "author": "James Oeswein",
+          "date": "Mon Jun 30 14:28:08 2025 +0000"
+        },
+        "remote_url": "https://app.copia.io/WhiskeyHouse/PLC-400.git",
+        "status": {
+          "clean": true,
+          "modified_files": 0,
+          "changes": []
+        }
+      },
+      "structure": {
+        "directories": [
+          "plc",
+          "plc/eds",
+          "plc/aop",
+          "docs",
+          "docs/projects",
+          "docs/projects/sample-project",
+          "docs/projects/sample-project/1.0 - Project Initiation",
+          "docs/projects/sample-project/5.0 - Closeout & As-Built",
+          "docs/projects/sample-project/3.0 - Development",
+          "docs/projects/sample-project/2.0 - Requirements & Design",
+          "docs/projects/sample-project/4.0 - Testing",
+          "device-configuration"
+        ],
+        "file_types": {
+          ".md": 11,
+          "": 2,
+          ".toml": 1,
+          ".acd": 1
+        },
+        "depth_analysis": {
+          "0": 4,
+          "1": 4,
+          "2": 2,
+          "3": 0,
+          "4": 5
+        },
+        "large_files": []
+      },
+      "files": [
+        {
+          "filename": "PLC400_Utilities.ACD",
+          "filepath": "/Users/reh3376/repos/plc-400/plc/PLC400_Utilities.ACD",
+          "size_bytes": 132,
+          "size_mb": 0.0,
+          "modified_date": "2025-07-07T09:42:35.662943",
+          "created_date": "2025-07-07T09:42:35.662943",
+          "file_hash": "03261cd101e6539e4963ea5f03cce01f384b30e05dfe6824b018dcbb35028b65",
+          "repository": "plc-400",
+          "relative_path": "plc/PLC400_Utilities.ACD",
+          "is_readable": true,
+          "error_message": null
+        }
+      ]
+    },
+    "plc-500": {
+      "path": "/Users/reh3376/repos/plc-500",
+      "acd_files": 1,
+      "total_files": 15,
+      "size_mb": 0.02,
+      "git_status": {
+        "is_git_repo": true,
+        "current_branch": "main",
+        "last_commit": {
+          "hash": "4a575ca8d18e79dbd93e7cbd72b7425fd71854ea",
+          "message": "Merge pull request 'chore: initial commit' (#1) from chore/initial-commit into main",
+          "author": "Patrick Mannion",
+          "date": "Sat Jan 25 20:29:34 2025 +0000"
+        },
+        "remote_url": "https://app.copia.io/WhiskeyHouse/PLC-500.git",
+        "status": {
+          "clean": true,
+          "modified_files": 0,
+          "changes": []
+        }
+      },
+      "structure": {
+        "directories": [
+          "plc",
+          "plc/eds",
+          "plc/aop",
+          "docs",
+          "docs/projects",
+          "docs/projects/sample-project",
+          "docs/projects/sample-project/1.0 - Project Initiation",
+          "docs/projects/sample-project/5.0 - Closeout & As-Built",
+          "docs/projects/sample-project/3.0 - Development",
+          "docs/projects/sample-project/2.0 - Requirements & Design",
+          "docs/projects/sample-project/4.0 - Testing",
+          "device-configuration"
+        ],
+        "file_types": {
+          ".md": 11,
+          "": 2,
+          ".toml": 1,
+          ".acd": 1
+        },
+        "depth_analysis": {
+          "0": 4,
+          "1": 4,
+          "2": 2,
+          "3": 0,
+          "4": 5
+        },
+        "large_files": []
+      },
+      "files": [
+        {
+          "filename": "PLC500_Barreling.ACD",
+          "filepath": "/Users/reh3376/repos/plc-500/plc/PLC500_Barreling.ACD",
+          "size_bytes": 132,
+          "size_mb": 0.0,
+          "modified_date": "2025-07-07T09:42:36.393908",
+          "created_date": "2025-07-07T09:42:36.393908",
+          "file_hash": "f333676ed869d8d86919db55c503f1c1cc44fa35d286a2088c7965912c32f2ff",
+          "repository": "plc-500",
+          "relative_path": "plc/PLC500_Barreling.ACD",
+          "is_readable": true,
+          "error_message": null
+        }
+      ]
+    },
+    "plc-600": {
+      "path": "/Users/reh3376/repos/plc-600",
+      "acd_files": 1,
+      "total_files": 15,
+      "size_mb": 0.02,
+      "git_status": {
+        "is_git_repo": true,
+        "current_branch": "main",
+        "last_commit": {
+          "hash": "62e82e9aa1222e87d4d8ba1c71d703a345f3e399",
+          "message": "hotfix: instrument scaling",
+          "author": "joeswein",
+          "date": "Tue May 13 15:24:47 2025 -0400"
+        },
+        "remote_url": "https://app.copia.io/WhiskeyHouse/PLC-600.git",
+        "status": {
+          "clean": true,
+          "modified_files": 0,
+          "changes": []
+        }
+      },
+      "structure": {
+        "directories": [
+          "plc",
+          "plc/eds",
+          "plc/aop",
+          "docs",
+          "docs/projects",
+          "docs/projects/sample-project",
+          "docs/projects/sample-project/1.0 - Project Initiation",
+          "docs/projects/sample-project/5.0 - Closeout & As-Built",
+          "docs/projects/sample-project/3.0 - Development",
+          "docs/projects/sample-project/2.0 - Requirements & Design",
+          "docs/projects/sample-project/4.0 - Testing",
+          "device-configuration"
+        ],
+        "file_types": {
+          ".md": 11,
+          "": 2,
+          ".toml": 1,
+          ".acd": 1
+        },
+        "depth_analysis": {
+          "0": 4,
+          "1": 4,
+          "2": 2,
+          "3": 0,
+          "4": 5
+        },
+        "large_files": []
+      },
+      "files": [
+        {
+          "filename": "PLC600_RO.ACD",
+          "filepath": "/Users/reh3376/repos/plc-600/plc/PLC600_RO.ACD",
+          "size_bytes": 132,
+          "size_mb": 0.0,
+          "modified_date": "2025-07-07T09:42:37.388859",
+          "created_date": "2025-07-07T09:42:37.388859",
+          "file_hash": "b2e526fdb793cdc2a44d1d6abea78c6618d68689124f60ae08838b49a4146cc6",
+          "repository": "plc-600",
+          "relative_path": "plc/PLC600_RO.ACD",
+          "is_readable": true,
+          "error_message": null
+        }
+      ]
+    }
+  },
+  "acd_file_summary": {
+    "by_repository": {
+      "plc-100": {
+        "count": 1,
+        "total_size_mb": 0.0,
+        "largest_file": "PLC100_Mashing.ACD",
+        "issues": []
+      },
+      "plc-200": {
+        "count": 1,
+        "total_size_mb": 0.0,
+        "largest_file": "PLC200_Fermentation.ACD",
+        "issues": []
+      },
+      "plc-300": {
+        "count": 1,
+        "total_size_mb": 0.0,
+        "largest_file": "PLC300_Still.ACD",
+        "issues": []
+      },
+      "plc-400": {
+        "count": 1,
+        "total_size_mb": 0.0,
+        "largest_file": "PLC400_Utilities.ACD",
+        "issues": []
+      },
+      "plc-500": {
+        "count": 1,
+        "total_size_mb": 0.0,
+        "largest_file": "PLC500_Barreling.ACD",
+        "issues": []
+      },
+      "plc-600": {
+        "count": 1,
+        "total_size_mb": 0.0,
+        "largest_file": "PLC600_RO.ACD",
+        "issues": []
+      }
+    },
+    "by_size": [
+      {
+        "range": "< 1 MB",
+        "count": 6,
+        "percentage": 100.0
+      },
+      {
+        "range": "1-10 MB",
+        "count": 0,
+        "percentage": 0.0
+      },
+      {
+        "range": "10-50 MB",
+        "count": 0,
+        "percentage": 0.0
+      },
+      {
+        "range": "50-100 MB",
+        "count": 0,
+        "percentage": 0.0
+      },
+      {
+        "range": "> 100 MB",
+        "count": 0,
+        "percentage": 0.0
+      }
+    ],
+    "largest_files": [
+      {
+        "filename": "PLC100_Mashing.ACD",
+        "repository": "plc-100",
+        "size_mb": 0.0,
+        "relative_path": "plc/PLC100_Mashing.ACD"
+      },
+      {
+        "filename": "PLC200_Fermentation.ACD",
+        "repository": "plc-200",
+        "size_mb": 0.0,
+        "relative_path": "plc/PLC200_Fermentation.ACD"
+      },
+      {
+        "filename": "PLC300_Still.ACD",
+        "repository": "plc-300",
+        "size_mb": 0.0,
+        "relative_path": "plc/PLC300_Still.ACD"
+      },
+      {
+        "filename": "PLC400_Utilities.ACD",
+        "repository": "plc-400",
+        "size_mb": 0.0,
+        "relative_path": "plc/PLC400_Utilities.ACD"
+      },
+      {
+        "filename": "PLC500_Barreling.ACD",
+        "repository": "plc-500",
+        "size_mb": 0.0,
+        "relative_path": "plc/PLC500_Barreling.ACD"
+      },
+      {
+        "filename": "PLC600_RO.ACD",
+        "repository": "plc-600",
+        "size_mb": 0.0,
+        "relative_path": "plc/PLC600_RO.ACD"
+      }
+    ],
+    "potential_issues": []
+  },
+  "migration_recommendations": [
+    "Implement parallel processing for conversion efficiency",
+    "Set up comprehensive validation checkpoints",
+    "Create rollback procedures for failed conversions",
+    "Monitor conversion progress with detailed logging"
+  ]
+}

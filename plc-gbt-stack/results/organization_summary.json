@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-07-08T11:32:18.591827",
+  "files_processed": 39,
+  "files_moved": 39,
+  "categories": {
+    "repository-analysis": [
+      "step4_batch_repository_processing_report_20250707_114239.json",
+      "real_plc_files_test_report_20250707_112211.json",
+      "step1_repository_discovery_report_20250707_112817.json",
+      "step3_acd_processing_framework_report_20250707_112954.json",
+      "migration_urls.json",
+      "migration_manifest.json",
+      "repository_analysis_detailed.json",
+      "phase3_day4_test_report_20250701_232555.json",
+      "phase3_day4_test_report_20250701_232806.json",
+      "phase3_day4_test_report_20250701_232748.json"
+    ],
+    "phase37": [
+      "phase37_validation_report_20250707_115724.json",
+      "phase37_final_repository_validation_20250707_134031.json",
+      "phase37_validation_report_20250707_120623.json",
+      "phase37_demo_report_20250707_112434.json",
+      "phase37_discrepancy_analysis_20250707_120338.json",
+      "phase37_final_completion_report_20250707_115701.json"
+    ],
+    "miscellaneous": [
+      "acd_files_task_analysis_20250707_112705.json",
+      "task_status_update.json",
+      "dataset_statistics_20250703_161624.json",
+      "dataset_metadata_20250703_161624.json",
+      "metadata.json",
+      "pbr.json",
+      "version.json",
+      "setuptools.schema.json",
+      "distutils.schema.json",
+      "version.json",
+      "orchestrator_analysis.json",
+      "collections_list_2025-07-01_11-27-36.json"
+    ],
+    "git-operations": [
+      "remote_repos_task_analysis_20250707_113347.json",
+      "git_lfs_download_report_20250707_113058.json",
+      "deployment_config.json",
+      "github_security_config.json"
+    ],
+    "testing-results": [
+      "plc_gpt_model_testing_demo_20250703_170148.json"
+    ],
+    "phase38": [
+      "phase38_comprehensive_analysis_20250707_175016.json"
+    ],
+    "backups": [
+      "backup_history.json",
+      "backup_metadata.json",
+      "neo4j_backup_info.json",
+      "backup_metadata.json",
+      "pid_backup_20250703_173158.json"
+    ]
+  },
+  "errors": []
+}

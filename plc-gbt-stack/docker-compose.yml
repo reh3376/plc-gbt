@@ -1,0 +1,169 @@
+services:
+  # Neo4j Knowledge Graph Database
+  neo4j:
+    image: neo4j:5-enterprise
+    container_name: plc-neo4j
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_server_memory_heap_initial__size=2G
+      - NEO4J_server_memory_heap_max__size=4G
+      - NEO4J_server_memory_pagecache_size=2G
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/import
+      - ./seed:/seed:ro
+    networks:
+      - plc-network
+    healthcheck:
+      test: ["CMD", "neo4j", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: plc-qdrant
+    ports:
+      - "6333:6333"
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - plc-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # PostgreSQL for metadata
+  postgres:
+    image: postgres:15-alpine
+    container_name: plc-postgres
+    ports:
+      - "5432:5432"  # Expose PostgreSQL port for live connections
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - plc-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: plc-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "1gb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - plc-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ETL Worker
+  etl-worker:
+    build:
+      context: ./workers
+      dockerfile: etl_worker.Dockerfile
+    container_name: plc-etl-worker
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NEO4J_BOLT_URL=${NEO4J_BOLT_URL}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - QDRANT_HOST=${QDRANT_HOST}
+      - QDRANT_PORT=${QDRANT_PORT}
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - ETL_BATCH_SIZE=${ETL_BATCH_SIZE}
+      - ETL_WORKER_THREADS=${ETL_WORKER_THREADS}
+      - LOG_LEVEL=${ETL_LOG_LEVEL}
+    volumes:
+      - ./incoming:/app/incoming
+      - ./processed:/app/processed
+    networks:
+      - plc-network
+
+  # Gateway API
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: plc-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NEO4J_BOLT_URL=${NEO4J_BOLT_URL}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - QDRANT_HOST=${QDRANT_HOST}
+      - QDRANT_PORT=${QDRANT_PORT}
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - GATEWAY_HOST=${GATEWAY_HOST}
+      - GATEWAY_PORT=${GATEWAY_PORT}
+      - GATEWAY_BEARER_TOKEN=${GATEWAY_BEARER_TOKEN}
+      - GATEWAY_CORS_ORIGINS=${GATEWAY_CORS_ORIGINS},http://127.0.0.1:8080,http://localhost:8080,http://127.0.0.1:8081,http://localhost:8081
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_EXPIRATION_HOURS=${JWT_EXPIRATION_HOURS}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED}
+      - RATE_LIMIT_REQUESTS=${RATE_LIMIT_REQUESTS}
+      - RATE_LIMIT_WINDOW=${RATE_LIMIT_WINDOW}
+      - LOG_LEVEL=${LOG_LEVEL}
+    networks:
+      - plc-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  qdrant_data:
+  postgres_data:
+  redis_data:
+
+networks:
+  plc-network:
+    driver: bridge

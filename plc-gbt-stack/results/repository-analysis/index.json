@@ -1,0 +1,18 @@
+{
+  "category": "repository-analysis",
+  "description": "Repository discovery, analysis, and migration manifests",
+  "file_count": 10,
+  "files": [
+    "step4_batch_repository_processing_report_20250707_114239.json",
+    "real_plc_files_test_report_20250707_112211.json",
+    "step1_repository_discovery_report_20250707_112817.json",
+    "step3_acd_processing_framework_report_20250707_112954.json",
+    "migration_urls.json",
+    "migration_manifest.json",
+    "repository_analysis_detailed.json",
+    "phase3_day4_test_report_20250701_232555.json",
+    "phase3_day4_test_report_20250701_232806.json",
+    "phase3_day4_test_report_20250701_232748.json"
+  ],
+  "last_updated": "2025-07-08T11:32:18.755554"
+}

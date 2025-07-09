@@ -1,0 +1,459 @@
+{
+  "execution_timestamp": "2025-07-08T11:35:50.534919",
+  "repositories_tested": 6,
+  "tests_passed": 24,
+  "tests_failed": 6,
+  "repository_results": {
+    "plc-100": {
+      "repo_name": "plc-100",
+      "tests": {
+        "repository_structure": {
+          "test_name": "repository_structure",
+          "repo_name": "plc-100",
+          "success": true,
+          "checks": {
+            "plc-acd_exists": true,
+            "plc-l5x_exists": true,
+            "plc-acd-previous_exists": true,
+            "plc-l5x-previous_exists": true,
+            "plc-acd_readme": true,
+            "plc-l5x_readme": true,
+            "plc-acd-previous_readme": true,
+            "plc-l5x-previous_readme": true,
+            "workflow_plc-conversion.yml": true,
+            "workflow_plc-validation.yml": true,
+            "workflow_plc-branch-protection.yml": true
+          },
+          "errors": []
+        },
+        "git_operations": {
+          "test_name": "git_operations",
+          "repo_name": "plc-100",
+          "success": true,
+          "operations": {
+            "git_status": true,
+            "current_branch": "main",
+            "git_remote": true
+          },
+          "errors": []
+        },
+        "file_constraints": {
+          "test_name": "file_constraints",
+          "repo_name": "plc-100",
+          "success": true,
+          "file_counts": {
+            "plc_acd_files": 1,
+            "plc_l5x_files": 1
+          },
+          "errors": []
+        },
+        "workflow_syntax": {
+          "test_name": "workflow_syntax",
+          "repo_name": "plc-100",
+          "success": false,
+          "workflow_checks": {
+            "plc-conversion.yml": false,
+            "plc-validation.yml": false,
+            "plc-branch-protection.yml": false
+          },
+          "errors": [
+            "YAML parsing error in plc-conversion.yml: while parsing a block mapping\n  in \"/Users/reh3376/repos/plc-100/.github/workflows/plc-conversion.yml\", line 1, column 1\nexpected <block end>, but found '-'\n  in \"/Users/reh3376/repos/plc-100/.github/workflows/plc-conversion.yml\", line 121, column 1",
+            "Invalid workflow syntax: plc-validation.yml",
+            "Invalid workflow syntax: plc-branch-protection.yml"
+          ]
+        },
+        "simulate_commit": {
+          "test_name": "simulate_commit",
+          "repo_name": "plc-100",
+          "success": true,
+          "simulation_steps": {
+            "has_changes": true,
+            "add_simulation": true,
+            "diff_check": true
+          },
+          "errors": []
+        }
+      },
+      "overall_success": false,
+      "total_tests": 5,
+      "passed_tests": 4,
+      "failed_tests": 1
+    },
+    "plc-200": {
+      "repo_name": "plc-200",
+      "tests": {
+        "repository_structure": {
+          "test_name": "repository_structure",
+          "repo_name": "plc-200",
+          "success": true,
+          "checks": {
+            "plc-acd_exists": true,
+            "plc-l5x_exists": true,
+            "plc-acd-previous_exists": true,
+            "plc-l5x-previous_exists": true,
+            "plc-acd_readme": true,
+            "plc-l5x_readme": true,
+            "plc-acd-previous_readme": true,
+            "plc-l5x-previous_readme": true,
+            "workflow_plc-conversion.yml": true,
+            "workflow_plc-validation.yml": true,
+            "workflow_plc-branch-protection.yml": true
+          },
+          "errors": []
+        },
+        "git_operations": {
+          "test_name": "git_operations",
+          "repo_name": "plc-200",
+          "success": true,
+          "operations": {
+            "git_status": true,
+            "current_branch": "main",
+            "git_remote": true
+          },
+          "errors": []
+        },
+        "file_constraints": {
+          "test_name": "file_constraints",
+          "repo_name": "plc-200",
+          "success": true,
+          "file_counts": {
+            "plc_acd_files": 1,
+            "plc_l5x_files": 1
+          },
+          "errors": []
+        },
+        "workflow_syntax": {
+          "test_name": "workflow_syntax",
+          "repo_name": "plc-200",
+          "success": false,
+          "workflow_checks": {
+            "plc-conversion.yml": false,
+            "plc-validation.yml": false,
+            "plc-branch-protection.yml": false
+          },
+          "errors": [
+            "YAML parsing error in plc-conversion.yml: while parsing a block mapping\n  in \"/Users/reh3376/repos/plc-200/.github/workflows/plc-conversion.yml\", line 1, column 1\nexpected <block end>, but found '-'\n  in \"/Users/reh3376/repos/plc-200/.github/workflows/plc-conversion.yml\", line 121, column 1",
+            "Invalid workflow syntax: plc-validation.yml",
+            "Invalid workflow syntax: plc-branch-protection.yml"
+          ]
+        },
+        "simulate_commit": {
+          "test_name": "simulate_commit",
+          "repo_name": "plc-200",
+          "success": true,
+          "simulation_steps": {
+            "has_changes": true,
+            "add_simulation": true,
+            "diff_check": true
+          },
+          "errors": []
+        }
+      },
+      "overall_success": false,
+      "total_tests": 5,
+      "passed_tests": 4,
+      "failed_tests": 1
+    },
+    "plc-300": {
+      "repo_name": "plc-300",
+      "tests": {
+        "repository_structure": {
+          "test_name": "repository_structure",
+          "repo_name": "plc-300",
+          "success": true,
+          "checks": {
+            "plc-acd_exists": true,
+            "plc-l5x_exists": true,
+            "plc-acd-previous_exists": true,
+            "plc-l5x-previous_exists": true,
+            "plc-acd_readme": true,
+            "plc-l5x_readme": true,
+            "plc-acd-previous_readme": true,
+            "plc-l5x-previous_readme": true,
+            "workflow_plc-conversion.yml": true,
+            "workflow_plc-validation.yml": true,
+            "workflow_plc-branch-protection.yml": true
+          },
+          "errors": []
+        },
+        "git_operations": {
+          "test_name": "git_operations",
+          "repo_name": "plc-300",
+          "success": true,
+          "operations": {
+            "git_status": true,
+            "current_branch": "main",
+            "git_remote": true
+          },
+          "errors": []
+        },
+        "file_constraints": {
+          "test_name": "file_constraints",
+          "repo_name": "plc-300",
+          "success": true,
+          "file_counts": {
+            "plc_acd_files": 1,
+            "plc_l5x_files": 1
+          },
+          "errors": []
+        },
+        "workflow_syntax": {
+          "test_name": "workflow_syntax",
+          "repo_name": "plc-300",
+          "success": false,
+          "workflow_checks": {
+            "plc-conversion.yml": false,
+            "plc-validation.yml": false,
+            "plc-branch-protection.yml": false
+          },
+          "errors": [
+            "YAML parsing error in plc-conversion.yml: while parsing a block mapping\n  in \"/Users/reh3376/repos/plc-300/.github/workflows/plc-conversion.yml\", line 1, column 1\nexpected <block end>, but found '-'\n  in \"/Users/reh3376/repos/plc-300/.github/workflows/plc-conversion.yml\", line 121, column 1",
+            "Invalid workflow syntax: plc-validation.yml",
+            "Invalid workflow syntax: plc-branch-protection.yml"
+          ]
+        },
+        "simulate_commit": {
+          "test_name": "simulate_commit",
+          "repo_name": "plc-300",
+          "success": true,
+          "simulation_steps": {
+            "has_changes": true,
+            "add_simulation": true,
+            "diff_check": true
+          },
+          "errors": []
+        }
+      },
+      "overall_success": false,
+      "total_tests": 5,
+      "passed_tests": 4,
+      "failed_tests": 1
+    },
+    "plc-400": {
+      "repo_name": "plc-400",
+      "tests": {
+        "repository_structure": {
+          "test_name": "repository_structure",
+          "repo_name": "plc-400",
+          "success": true,
+          "checks": {
+            "plc-acd_exists": true,
+            "plc-l5x_exists": true,
+            "plc-acd-previous_exists": true,
+            "plc-l5x-previous_exists": true,
+            "plc-acd_readme": true,
+            "plc-l5x_readme": true,
+            "plc-acd-previous_readme": true,
+            "plc-l5x-previous_readme": true,
+            "workflow_plc-conversion.yml": true,
+            "workflow_plc-validation.yml": true,
+            "workflow_plc-branch-protection.yml": true
+          },
+          "errors": []
+        },
+        "git_operations": {
+          "test_name": "git_operations",
+          "repo_name": "plc-400",
+          "success": true,
+          "operations": {
+            "git_status": true,
+            "current_branch": "main",
+            "git_remote": true
+          },
+          "errors": []
+        },
+        "file_constraints": {
+          "test_name": "file_constraints",
+          "repo_name": "plc-400",
+          "success": true,
+          "file_counts": {
+            "plc_acd_files": 1,
+            "plc_l5x_files": 1
+          },
+          "errors": []
+        },
+        "workflow_syntax": {
+          "test_name": "workflow_syntax",
+          "repo_name": "plc-400",
+          "success": false,
+          "workflow_checks": {
+            "plc-conversion.yml": false,
+            "plc-validation.yml": false,
+            "plc-branch-protection.yml": false
+          },
+          "errors": [
+            "YAML parsing error in plc-conversion.yml: while parsing a block mapping\n  in \"/Users/reh3376/repos/plc-400/.github/workflows/plc-conversion.yml\", line 1, column 1\nexpected <block end>, but found '-'\n  in \"/Users/reh3376/repos/plc-400/.github/workflows/plc-conversion.yml\", line 121, column 1",
+            "Invalid workflow syntax: plc-validation.yml",
+            "Invalid workflow syntax: plc-branch-protection.yml"
+          ]
+        },
+        "simulate_commit": {
+          "test_name": "simulate_commit",
+          "repo_name": "plc-400",
+          "success": true,
+          "simulation_steps": {
+            "has_changes": true,
+            "add_simulation": true,
+            "diff_check": true
+          },
+          "errors": []
+        }
+      },
+      "overall_success": false,
+      "total_tests": 5,
+      "passed_tests": 4,
+      "failed_tests": 1
+    },
+    "plc-500": {
+      "repo_name": "plc-500",
+      "tests": {
+        "repository_structure": {
+          "test_name": "repository_structure",
+          "repo_name": "plc-500",
+          "success": true,
+          "checks": {
+            "plc-acd_exists": true,
+            "plc-l5x_exists": true,
+            "plc-acd-previous_exists": true,
+            "plc-l5x-previous_exists": true,
+            "plc-acd_readme": true,
+            "plc-l5x_readme": true,
+            "plc-acd-previous_readme": true,
+            "plc-l5x-previous_readme": true,
+            "workflow_plc-conversion.yml": true,
+            "workflow_plc-validation.yml": true,
+            "workflow_plc-branch-protection.yml": true
+          },
+          "errors": []
+        },
+        "git_operations": {
+          "test_name": "git_operations",
+          "repo_name": "plc-500",
+          "success": true,
+          "operations": {
+            "git_status": true,
+            "current_branch": "main",
+            "git_remote": true
+          },
+          "errors": []
+        },
+        "file_constraints": {
+          "test_name": "file_constraints",
+          "repo_name": "plc-500",
+          "success": true,
+          "file_counts": {
+            "plc_acd_files": 1,
+            "plc_l5x_files": 1
+          },
+          "errors": []
+        },
+        "workflow_syntax": {
+          "test_name": "workflow_syntax",
+          "repo_name": "plc-500",
+          "success": false,
+          "workflow_checks": {
+            "plc-conversion.yml": false,
+            "plc-validation.yml": false,
+            "plc-branch-protection.yml": false
+          },
+          "errors": [
+            "YAML parsing error in plc-conversion.yml: while parsing a block mapping\n  in \"/Users/reh3376/repos/plc-500/.github/workflows/plc-conversion.yml\", line 1, column 1\nexpected <block end>, but found '-'\n  in \"/Users/reh3376/repos/plc-500/.github/workflows/plc-conversion.yml\", line 121, column 1",
+            "Invalid workflow syntax: plc-validation.yml",
+            "Invalid workflow syntax: plc-branch-protection.yml"
+          ]
+        },
+        "simulate_commit": {
+          "test_name": "simulate_commit",
+          "repo_name": "plc-500",
+          "success": true,
+          "simulation_steps": {
+            "has_changes": true,
+            "add_simulation": true,
+            "diff_check": true
+          },
+          "errors": []
+        }
+      },
+      "overall_success": false,
+      "total_tests": 5,
+      "passed_tests": 4,
+      "failed_tests": 1
+    },
+    "plc-600": {
+      "repo_name": "plc-600",
+      "tests": {
+        "repository_structure": {
+          "test_name": "repository_structure",
+          "repo_name": "plc-600",
+          "success": true,
+          "checks": {
+            "plc-acd_exists": true,
+            "plc-l5x_exists": true,
+            "plc-acd-previous_exists": true,
+            "plc-l5x-previous_exists": true,
+            "plc-acd_readme": true,
+            "plc-l5x_readme": true,
+            "plc-acd-previous_readme": true,
+            "plc-l5x-previous_readme": true,
+            "workflow_plc-conversion.yml": true,
+            "workflow_plc-validation.yml": true,
+            "workflow_plc-branch-protection.yml": true
+          },
+          "errors": []
+        },
+        "git_operations": {
+          "test_name": "git_operations",
+          "repo_name": "plc-600",
+          "success": true,
+          "operations": {
+            "git_status": true,
+            "current_branch": "main",
+            "git_remote": true
+          },
+          "errors": []
+        },
+        "file_constraints": {
+          "test_name": "file_constraints",
+          "repo_name": "plc-600",
+          "success": true,
+          "file_counts": {
+            "plc_acd_files": 1,
+            "plc_l5x_files": 1
+          },
+          "errors": []
+        },
+        "workflow_syntax": {
+          "test_name": "workflow_syntax",
+          "repo_name": "plc-600",
+          "success": false,
+          "workflow_checks": {
+            "plc-conversion.yml": false,
+            "plc-validation.yml": false,
+            "plc-branch-protection.yml": false
+          },
+          "errors": [
+            "YAML parsing error in plc-conversion.yml: while parsing a block mapping\n  in \"/Users/reh3376/repos/plc-600/.github/workflows/plc-conversion.yml\", line 1, column 1\nexpected <block end>, but found '-'\n  in \"/Users/reh3376/repos/plc-600/.github/workflows/plc-conversion.yml\", line 121, column 1",
+            "Invalid workflow syntax: plc-validation.yml",
+            "Invalid workflow syntax: plc-branch-protection.yml"
+          ]
+        },
+        "simulate_commit": {
+          "test_name": "simulate_commit",
+          "repo_name": "plc-600",
+          "success": true,
+          "simulation_steps": {
+            "has_changes": true,
+            "add_simulation": true,
+            "diff_check": true
+          },
+          "errors": []
+        }
+      },
+      "overall_success": false,
+      "total_tests": 5,
+      "passed_tests": 4,
+      "failed_tests": 1
+    }
+  },
+  "errors": []
+}

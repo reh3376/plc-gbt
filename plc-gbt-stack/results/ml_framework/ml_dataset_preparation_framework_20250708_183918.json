@@ -1,0 +1,289 @@
+{
+  "session_id": "ml_prep_20250708_183918",
+  "analysis_results": {
+    "complexity": "COMPLEX",
+    "estimated_effort": {
+      "time": "3-8 hours",
+      "lines": "500-1500"
+    },
+    "requirements": [
+      "Dataset normalization strategies",
+      "Classification methodology selection",
+      "Model type recommendations",
+      "User option framework",
+      "Performance validation"
+    ],
+    "risks": [
+      "Data quality issues",
+      "Model selection complexity",
+      "Performance optimization",
+      "Overfitting prevention"
+    ],
+    "resources_needed": {
+      "knowledge_graph": true,
+      "tools": [
+        "pandas",
+        "scikit-learn",
+        "tensorflow",
+        "pytorch"
+      ],
+      "domain_expertise": "industrial_control_ml"
+    }
+  },
+  "dataset_characteristics": {
+    "dataset_type": "DatasetType.CONTROL_LOOP",
+    "sample_count": 1048575,
+    "feature_count": 15,
+    "temporal_length": 1048575,
+    "has_missing_values": true,
+    "has_outliers": true,
+    "class_balance": {
+      "stable": 0.3,
+      "unstable": 0.7
+    },
+    "data_distribution": "highly_skewed",
+    "correlation_matrix": "[[0.54200071 0.92359873 0.73964073 0.48394759 0.29769344 0.84126598\n  0.18061009 0.7138176  0.07231118 0.15029926 0.70704444 0.86769347\n  0.25537965 0.81641116 0.77008548]\n [0.13491247 0.19816451 0.87793571 0.62546361 0.63193309 0.07728671\n  0.31486171 0.42812848 0.973641   0.92534918 0.54558911 0.3167777\n  0.57403019 0.19143426 0.42517397]\n [0.20182482 0.82619136 0.58132203 0.26203299 0.52591901 0.2563187\n  0.05344791 0.64079168 0.23739792 0.2625561  0.47686677 0.16024336\n  0.62241627 0.53682432 0.1266842 ]\n [0.49632105 0.19270925 0.77823979 0.77521658 0.61512649 0.45291571\n  0.98479151 0.88019135 0.64545628 0.48345889 0.65584737 0.83347703\n  0.50500778 0.45660819 0.42459462]\n [0.14960243 0.14284287 0.38189271 0.67096179 0.56887609 0.85455964\n  0.2952018  0.35997033 0.55598285 0.67378851 0.30072684 0.28672747\n  0.9675128  0.6134401  0.9560974 ]\n [0.40167458 0.65787641 0.54490899 0.46831988 0.20609034 0.8370499\n  0.27938375 0.67178792 0.59982149 0.70928519 0.04983628 0.28320938\n  0.16647299 0.22082772 0.26450305]\n [0.81433953 0.71481881 0.82347485 0.06331671 0.26589427 0.52668756\n  0.18665689 0.51949016 0.81748615 0.5738549  0.85485982 0.2163758\n  0.73970681 0.4136256  0.53170274]\n [0.87601806 0.77531785 0.63380988 0.32556512 0.27238029 0.42493675\n  0.79658664 0.72167835 0.77626902 0.12248388 0.43628739 0.13428324\n  0.68321814 0.03431787 0.144045  ]\n [0.19649931 0.14956871 0.51501141 0.7754022  0.94897773 0.95173597\n  0.7892903  0.52763255 0.63329392 0.22241762 0.93850013 0.14221444\n  0.15483391 0.19427675 0.1356173 ]\n [0.08877627 0.94410201 0.55155418 0.34887346 0.29229832 0.63475433\n  0.60799454 0.69703841 0.60219089 0.24983221 0.98518028 0.65928658\n  0.36658393 0.74986387 0.59147083]\n [0.35767614 0.48065934 0.17946734 0.06011382 0.2436236  0.79739263\n  0.19322374 0.79269128 0.87267315 0.13357656 0.85585531 0.71235992\n  0.52010814 0.75712353 0.76939092]\n [0.71147664 0.54483479 0.77385325 0.64559992 0.62887094 0.06341003\n  0.26605911 0.23592953 0.00377472 0.86835656 0.36089548 0.74815203\n  0.33895977 0.82719119 0.93058256]\n [0.79675371 0.15600577 0.51932637 0.43507982 0.04009374 0.55454474\n  0.22399543 0.37795517 0.458279   0.03331735 0.99505654 0.73160035\n  0.39479376 0.90393868 0.88527843]\n [0.833747   0.22988869 0.34640862 0.64607933 0.40944208 0.3647645\n  0.58621858 0.76402729 0.53221349 0.79592607 0.18455786 0.69534365\n  0.04954342 0.25687001 0.10576059]\n [0.55698693 0.72122298 0.43495355 0.76602834 0.85879809 0.80083522\n  0.28422277 0.27253196 0.74909036 0.1146515  0.37450826 0.22854262\n  0.96064459 0.33027077 0.10705265]]",
+    "noise_level": 0.38,
+    "seasonality_detected": true
+  },
+  "normalization_strategy": {
+    "method": "NormalizationType.ROBUST",
+    "reasoning": "Robust scaling recommended due to outliers and high noise level",
+    "parameters": {
+      "with_centering": true,
+      "with_scaling": true
+    },
+    "feature_specific": true,
+    "preserves_relationships": true,
+    "handles_outliers": true
+  },
+  "model_recommendations": [
+    {
+      "model_type": "ModelType.LSTM",
+      "confidence": 0.92,
+      "justification": "LSTM captures long-term dependencies in extended time series",
+      "hyperparameters": {
+        "units": [
+          50,
+          50
+        ],
+        "dropout": 0.2,
+        "sequence_length": 20,
+        "learning_rate": 0.001
+      },
+      "preprocessing_steps": [
+        "sequence_windowing",
+        "normalization",
+        "stateful_design"
+      ],
+      "expected_performance": {
+        "accuracy": 0.87,
+        "training_time": "slow"
+      },
+      "complexity_score": 8.0,
+      "training_time_estimate": "45-90 minutes"
+    },
+    {
+      "model_type": "ModelType.RANDOM_FOREST",
+      "confidence": 0.9,
+      "justification": "Robust performance on mixed data types with feature importance",
+      "hyperparameters": {
+        "n_estimators": 100,
+        "max_depth": 10,
+        "min_samples_split": 5
+      },
+      "preprocessing_steps": [
+        "missing_value_imputation",
+        "categorical_encoding"
+      ],
+      "expected_performance": {
+        "accuracy": 0.82,
+        "training_time": "medium"
+      },
+      "complexity_score": 3.0,
+      "training_time_estimate": "5-15 minutes"
+    },
+    {
+      "model_type": "ModelType.CNN_1D",
+      "confidence": 0.88,
+      "justification": "1D CNN excellent for temporal pattern recognition in control data",
+      "hyperparameters": {
+        "filters": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 3,
+        "pool_size": 2,
+        "dropout": 0.2
+      },
+      "preprocessing_steps": [
+        "sequence_creation",
+        "normalization",
+        "padding"
+      ],
+      "expected_performance": {
+        "accuracy": 0.83,
+        "training_time": "medium"
+      },
+      "complexity_score": 5.0,
+      "training_time_estimate": "15-30 minutes"
+    },
+    {
+      "model_type": "ModelType.DEEP_NEURAL_NETWORK",
+      "confidence": 0.8,
+      "justification": "Large dataset with high dimensionality - DNN can capture complex patterns",
+      "hyperparameters": {
+        "hidden_layers": [
+          128,
+          64,
+          32
+        ],
+        "dropout": 0.3,
+        "learning_rate": 0.001,
+        "batch_size": 32
+      },
+      "preprocessing_steps": [
+        "normalization",
+        "feature_scaling",
+        "regularization"
+      ],
+      "expected_performance": {
+        "accuracy": 0.85,
+        "training_time": "slow"
+      },
+      "complexity_score": 7.0,
+      "training_time_estimate": "30-60 minutes"
+    }
+  ],
+  "user_framework": {
+    "dataset_summary": {
+      "type": "control_loop",
+      "size": "1,048,575 samples \u00d7 15 features",
+      "quality": "fair",
+      "complexity": "moderate"
+    },
+    "preprocessing_options": {
+      "recommended_normalization": {
+        "method": "robust",
+        "reasoning": "Robust scaling recommended due to outliers and high noise level"
+      },
+      "alternative_normalizations": [
+        {
+          "method": "min_max",
+          "use_case": "When features have different scales"
+        },
+        {
+          "method": "robust",
+          "use_case": "When data contains outliers"
+        },
+        {
+          "method": "quantile",
+          "use_case": "When data is non-normal"
+        },
+        {
+          "method": "none",
+          "use_case": "When data is already normalized"
+        }
+      ],
+      "feature_engineering": [
+        "Create lag features for temporal dependencies",
+        "Add rolling window statistics (mean, std, min, max)",
+        "Engineer derivative features for rate of change",
+        "Implement intelligent missing value imputation",
+        "Remove highly correlated features to prevent multicollinearity"
+      ]
+    },
+    "model_options": {
+      "beginner_friendly": [
+        "ModelRecommendation(model_type=<ModelType.RANDOM_FOREST: 'random_forest'>, confidence=0.9, justification='Robust performance on mixed data types with feature importance', hyperparameters={'n_estimators': 100, 'max_depth': 10, 'min_samples_split': 5}, preprocessing_steps=['missing_value_imputation', 'categorical_encoding'], expected_performance={'accuracy': 0.82, 'training_time': 'medium'}, complexity_score=3.0, training_time_estimate='5-15 minutes')"
+      ],
+      "intermediate": [
+        "ModelRecommendation(model_type=<ModelType.CNN_1D: 'cnn_1d'>, confidence=0.88, justification='1D CNN excellent for temporal pattern recognition in control data', hyperparameters={'filters': [32, 64, 128], 'kernel_size': 3, 'pool_size': 2, 'dropout': 0.2}, preprocessing_steps=['sequence_creation', 'normalization', 'padding'], expected_performance={'accuracy': 0.83, 'training_time': 'medium'}, complexity_score=5.0, training_time_estimate='15-30 minutes')"
+      ],
+      "advanced": [
+        "ModelRecommendation(model_type=<ModelType.LSTM: 'lstm'>, confidence=0.92, justification='LSTM captures long-term dependencies in extended time series', hyperparameters={'units': [50, 50], 'dropout': 0.2, 'sequence_length': 20, 'learning_rate': 0.001}, preprocessing_steps=['sequence_windowing', 'normalization', 'stateful_design'], expected_performance={'accuracy': 0.87, 'training_time': 'slow'}, complexity_score=8.0, training_time_estimate='45-90 minutes')",
+        "ModelRecommendation(model_type=<ModelType.DEEP_NEURAL_NETWORK: 'deep_neural_network'>, confidence=0.8, justification='Large dataset with high dimensionality - DNN can capture complex patterns', hyperparameters={'hidden_layers': [128, 64, 32], 'dropout': 0.3, 'learning_rate': 0.001, 'batch_size': 32}, preprocessing_steps=['normalization', 'feature_scaling', 'regularization'], expected_performance={'accuracy': 0.85, 'training_time': 'slow'}, complexity_score=7.0, training_time_estimate='30-60 minutes')"
+      ],
+      "quick_prototype": []
+    },
+    "configuration_wizard": {
+      "questions": [
+        {
+          "id": "performance_priority",
+          "question": "What's your primary goal?",
+          "options": [
+            {
+              "value": "accuracy",
+              "description": "Highest possible accuracy"
+            },
+            {
+              "value": "speed",
+              "description": "Fast training and inference"
+            },
+            {
+              "value": "interpretability",
+              "description": "Understandable model decisions"
+            },
+            {
+              "value": "robustness",
+              "description": "Stable performance on new data"
+            }
+          ]
+        },
+        {
+          "id": "resource_constraints",
+          "question": "What are your computational constraints?",
+          "options": [
+            {
+              "value": "limited",
+              "description": "Basic laptop/desktop"
+            },
+            {
+              "value": "moderate",
+              "description": "Workstation with GPU"
+            },
+            {
+              "value": "extensive",
+              "description": "Cloud/cluster computing"
+            }
+          ]
+        },
+        {
+          "id": "timeline",
+          "question": "What's your development timeline?",
+          "options": [
+            {
+              "value": "immediate",
+              "description": "Need results today"
+            },
+            {
+              "value": "week",
+              "description": "Have a week to develop"
+            },
+            {
+              "value": "month",
+              "description": "Can spend a month optimizing"
+            }
+          ]
+        }
+      ]
+    },
+    "validation_strategy": {
+      "cross_validation": {
+        "recommended_folds": 5,
+        "stratification": true
+      },
+      "test_split": {
+        "ratio": 0.2,
+        "temporal_split": false
+      },
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1_score"
+      ]
+    }
+  }
+}

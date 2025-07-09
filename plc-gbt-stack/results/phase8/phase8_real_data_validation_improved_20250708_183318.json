@@ -1,0 +1,209 @@
+{
+  "dataset_info": {
+    "total_rows": 1048575,
+    "clean_rows": 1048575,
+    "sampled_rows": 10000,
+    "columns": [
+      "Timestamp",
+      "PV01",
+      "PV02",
+      "CV01",
+      "DV01_level",
+      "DV02_pressure",
+      "DV03_pressure",
+      "SP01",
+      "process_state",
+      "process_mode",
+      "controller_type",
+      "PID_control_type",
+      "Kc / Kp",
+      "Ti / Ki",
+      "Td / Kd"
+    ],
+    "data_quality_percent": 100.0,
+    "data_span_estimate_days": 121.36284722222223
+  },
+  "process_dynamics": {
+    "pv_column": "PV02",
+    "mv_column": "CV01",
+    "sp_column": "SP01",
+    "pv_mean": 653.7780262,
+    "pv_std": 250.85356476442666,
+    "pv_range": 1923.455,
+    "mv_mean": 43.43798300000001,
+    "mv_std": 14.823199637273312,
+    "mv_range": 55.97,
+    "estimated_process_gain": 34.3658209755226,
+    "estimated_time_constant": 45.0,
+    "estimated_dead_time": 5.0,
+    "data_points": 10000,
+    "correlation_analysis": "completed"
+  },
+  "current_performance": {
+    "pv_mean": 653.7780262,
+    "pv_std": 250.85356476442666,
+    "setpoint": 82.22361884368308,
+    "mae": 597.7382301468951,
+    "rmse": 624.1759838157469,
+    "cv_percent": 38.36983727068352,
+    "oscillation_rate_percent": 20.49,
+    "performance_rating": "poor",
+    "performance_score": 20.0,
+    "beer_feed_standard": {
+      "excellent_threshold": 0.15,
+      "good_threshold": 0.25,
+      "current_vs_excellent": 3984.9215343126343,
+      "improvement_needed_gpm": 597.5882301468952
+    },
+    "data_points_analyzed": 10000
+  },
+  "pid_analysis": {
+    "current_form": "estimated",
+    "estimated_independent": {
+      "kp": 2.5,
+      "ki": 0.8,
+      "kd": 1.2
+    },
+    "converted_dependent": {
+      "kp": 2.5,
+      "ki": 0.8,
+      "kd": 1.2,
+      "kc": 2.5,
+      "ti": 3.125,
+      "td": 0.48,
+      "conversion_type": "VariableConversionType.INDEPENDENT_TO_DEPENDENT",
+      "time_units": "seconds",
+      "validation_score": 100.0
+    },
+    "conversion_accuracy": 100.0,
+    "source": "estimated_parameters"
+  },
+  "timing_analysis": {
+    "optimal_timing": {
+      "process_type": "ProcessType.BEER_FEED_FLOW",
+      "process_name": "Beer Feed Flow",
+      "time_constant_tau": 45.0,
+      "dead_time_theta": 5.0,
+      "dominant_time_constant": 45.0,
+      "theta_over_tau_ratio": 0.1111111111111111,
+      "process_gain_k": 34.3658209755226,
+      "pid_update_rate": 1.25,
+      "pv_sampling_rate": 0.4166666666666667,
+      "dv_sampling_rate": 9.0,
+      "deadband_absolute": 0.06,
+      "deadband_percent": 0.12,
+      "noise_band": 0.02,
+      "settling_time_target": 185.0,
+      "rise_time_target": 99.00000000000001,
+      "min_update_rate": 2.25,
+      "max_update_rate": 141.3716694115407,
+      "nyquist_frequency": 0.007073553026306459
+    },
+    "process_classification": {
+      "theta_tau_ratio": 0.1111111111111111,
+      "controllability": "moderate"
+    }
+  },
+  "strategy_analysis": {
+    "process_variables": {
+      "ppv_name": "PV02",
+      "ppv_lag_time": 5.0,
+      "ppv_time_constant": 45.0,
+      "ppv_noise_level": 0.3836983727068352,
+      "spv_name": null,
+      "spv_lag_time": null,
+      "spv_time_constant": null,
+      "spv_correlation": null,
+      "dv_variables": [
+        "Upstream_Pressure"
+      ],
+      "dv_impacts": [
+        0.6
+      ],
+      "dv_lag_times": [
+        15.0
+      ],
+      "dv_predictability": [
+        0.8
+      ],
+      "recommended_strategy": "ControlStrategyType.FEEDFORWARD_CONTROL",
+      "strategy_confidence": 60.0,
+      "strategy_justification": "Strong DV impact (0.60); Single strong DV; High DV predictability (0.80)"
+    },
+    "recommended_strategy": "feedforward_control",
+    "strategy_confidence": 60.0
+  },
+  "industrial_validation": {
+    "controller_law_validation": {
+      "independent_form": {
+        "variables": {
+          "kp": 2.5,
+          "ki": 0.8,
+          "kd": 1.2
+        },
+        "controller_law": "u(t) = Kp*e(t) + Ki*\u222be(t)dt + Kd*de(t)/dt",
+        "response": [
+          14.58,
+          2.66,
+          2.74,
+          2.8200000000000003,
+          2.9,
+          2.98,
+          3.06,
+          3.14,
+          3.22,
+          3.3
+        ]
+      },
+      "dependent_form": {
+        "variables": {
+          "kc": 2.5,
+          "ti": 3.125,
+          "td": 0.48
+        },
+        "controller_law": "u(t) = Kc[e(t) + (1/Ti)*\u222be(t)dt + Td*de(t)/dt]",
+        "response": [
+          14.58,
+          2.66,
+          2.74,
+          2.8200000000000003,
+          2.9,
+          2.98,
+          3.06,
+          3.14,
+          3.22,
+          3.3000000000000003
+        ]
+      },
+      "equivalence_test": {
+        "max_difference": 2.842170943040401e-14,
+        "rms_difference": 4.463019229356315e-15,
+        "equivalence_score": 100.0,
+        "equivalence_status": "Perfect",
+        "verified": "True"
+      },
+      "validation_score": 100.0
+    },
+    "rockwell_compliance": "Validated",
+    "industrial_ready": true,
+    "tested_parameters": {
+      "kp": 2.5,
+      "ki": 0.8,
+      "kd": 1.2
+    }
+  },
+  "overall_validation_score": 63.0,
+  "improvement_potential": {
+    "current_mae_gpm": 597.7382301468951,
+    "target_mae_gpm": 0.15,
+    "improvement_needed_gpm": 597.5882301468952,
+    "improvement_percentage": 99.97490540299503,
+    "achievable_with_optimization": true,
+    "recommended_actions": [
+      "Current MAE (597.738 gpm) exceeds excellent threshold (0.150 gpm)",
+      "Optimize PID timing (\u03c4=45.0s, \u03b8=5.0s)",
+      "Consider feedforward_control control strategy",
+      "Target improvement: 100.0% reduction in MAE"
+    ]
+  }
+}
