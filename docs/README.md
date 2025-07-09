@@ -23,13 +23,13 @@ PLC-Savvy GPT is an enterprise-grade AI assistant that understands PLC programmi
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/reh3376/plc-gpt_build.git
-   cd plc-gpt_build
+   git clone https://github.com/reh3376/plc-gbt.git
+   cd plc-gbt
    ```
 
 2. **Configure environment**
    ```bash
-   cd plc-gpt-stack
+   cd plc-gbt-stack
    cp .env.example .env
    # Edit .env with your credentials
    ```
@@ -58,7 +58,7 @@ PLC_GPT/
 │   ├── roadmap.md              # Project implementation roadmap
 │   └── plc_gpt_full_guide.md   # Detailed deployment guide
 ├── summaries/                   # Task completion summaries
-└── plc-gpt-stack/              # Docker stack configuration
+└── plc-gbt-stack/              # Docker stack configuration
     ├── docker-compose.yml      # Service orchestration
     ├── .env.example           # Environment template
     ├── seed/                  # Initial Neo4j backups
@@ -106,7 +106,7 @@ graph LR
 
 ## 📝 Development Workflow
 
-1. **Add documents**: Place PDFs/L5X files in `plc-gpt-stack/incoming/`
+1. **Add documents**: Place PDFs/L5X files in `plc-gbt-stack/incoming/`
 2. **Process documents**: ETL worker automatically processes new files
 3. **Query the system**: Use the Gateway API or ChatGPT interface
 4. **Monitor**: Check logs and metrics for system health

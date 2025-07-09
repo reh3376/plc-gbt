@@ -44,10 +44,10 @@ Successfully established the foundation for the PLC-Savvy GPT project, including
 
 ## Repository Structure
 ```
-PLC_GPT/
+plc-gbt/
 ├── docs/                    # All documentation
 ├── summaries/              # Progress summaries
-└── plc-gpt-stack/         # Docker services
+└── plc-gbt-stack/         # Docker services
     ├── gateway/           # API implementation
     ├── workers/           # ETL implementation
     └── seed/              # Database backups
@@ -79,7 +79,7 @@ PLC_GPT/
 3. Proper project structure from the start saves time later
 
 ## GitHub Repository
-https://github.com/reh3376/plc-gpt_build
+https://github.com/reh3376/plc-gbt
 
 ---
 *End of Summary* 

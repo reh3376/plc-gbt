@@ -23,7 +23,7 @@
 
 ```bash
 # Start Docker services (✅ READY)
-cd /Users/reh3376/repos/PLC_GPT/plc-gpt-stack
+cd /Users/reh3376/repos/plc-gbt/plc-gbt-stack
 docker-compose up -d neo4j qdrant
 
 # Activate Python environment

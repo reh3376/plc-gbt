@@ -167,7 +167,7 @@ To test the complete Day 2 implementation:
 
 ```bash
 # Initialize/update schema with new relationships
-cd plc-gpt-stack
+cd plc-gbt-stack
 python scripts/neo4j/init_neo4j_schema.py
 
 # Test PDF processing
@@ -180,7 +180,7 @@ python scripts/etl/embedding_generator.py
 python scripts/etl/etl_integration.py
 
 # Process incoming directory
-# Place PDFs and L5X files in plc-gpt-stack/incoming/
+# Place PDFs and L5X files in plc-gbt-stack/incoming/
 # Then run the ETL integration
 ```
 

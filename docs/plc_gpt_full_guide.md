@@ -50,12 +50,12 @@
 
 ### Tasks
 1. Install Docker & Docker Compose.
-2. Clone/unpack `plc-gpt-stack`.
+2. Clone/unpack `plc-gbt-stack`.
 3. Copy initial Neo4j backup into `/seed`.
 4. Populate `.env` with passwords & keys.
 
 ```bash
-cd plc-gpt-stack
+cd plc-gbt-stack
 cp .env.example .env
 docker compose pull          # or docker load -i images.tar
 docker compose up -d         # spins neo4j, qdrant, etl, gateway

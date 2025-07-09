@@ -15,7 +15,7 @@ Successfully upgraded the entire PLC-GPT codebase to Python 3.12+ and establishe
 - **Status**: ✅ Complete
 - **Python Version**: 3.12.10
 - **Virtual Environment**: Created using `uv venv --python 3.12`
-- **Location**: `/Users/reh3376/repos/PLC_GPT/plc-gpt-stack/.venv`
+- **Location**: `/Users/reh3376/repos/plc-gbt/plc-gbt-stack/.venv`
 - **Validation**: All dependencies successfully installed and tested
 
 ### 2. PLC Parsing Libraries Installation

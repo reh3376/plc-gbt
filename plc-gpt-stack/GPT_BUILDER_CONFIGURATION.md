@@ -142,7 +142,7 @@ You can upload reference documents to supplement the GPT's knowledge:
 
 ### **Privacy Policy** (Optional)
 ```
-https://github.com/reh3376/plc-gpt_build/blob/main/PRIVACY.md
+https://github.com/reh3376/plc-gbt/blob/main/PRIVACY.md
 ```
 
 ## 🔧 Step 5: Model Configuration

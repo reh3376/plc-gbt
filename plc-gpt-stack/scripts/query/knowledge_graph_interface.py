@@ -441,7 +441,7 @@ def get_knowledge_graph_summary() -> Dict[str, Any]:
         return {
             "knowledge_graph_available": False,
             "error": str(e),
-            "instructions": "Ensure Neo4j is running: cd plc-gpt-stack && docker-compose up -d"
+            "instructions": "Ensure Neo4j is running: cd plc-gbt-stack && docker-compose up -d"
         }
 
 
@@ -472,4 +472,4 @@ if __name__ == "__main__":
             
     except Exception as e:
         print(f"❌ Error: {e}")
-        print("💡 Ensure Neo4j is running: cd plc-gpt-stack && docker-compose up -d") 
+        print("💡 Ensure Neo4j is running: cd plc-gbt-stack && docker-compose up -d") 

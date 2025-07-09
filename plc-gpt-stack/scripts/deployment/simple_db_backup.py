@@ -29,7 +29,7 @@ class SimpleDatabaseBackup:
     
     def __init__(self):
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.backup_dir = Path("../../../plc-gpt-stack/backup") / f"session_{self.timestamp}"
+        self.backup_dir = Path("../../../plc-gbt-stack/backup") / f"session_{self.timestamp}"
         self.backup_dir.mkdir(parents=True, exist_ok=True)
         
         self.results = {}

@@ -46,7 +46,7 @@ class Phase38GitHubActionsCreator:
     
     def __init__(self):
         self.base_path = Path("/Users/reh3376/repos")
-        self.plc_gpt_path = Path("/Users/reh3376/repos/PLC_GPT")
+        self.plc_gbt_path = Path("/Users/reh3376/repos/plc-gbt")
         self.plc_repos = [f"plc-{i}00" for i in range(1, 7)]
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
@@ -1035,7 +1035,7 @@ EOF
         Save workflow creation results to file
         """
         output_file = f"phase38_step2_github_actions_results_{self.timestamp}.json"
-        output_path = self.plc_gpt_path / "plc-gpt-stack" / "scripts" / "ai" / output_file
+        output_path = self.plc_gbt_path / "plc-gbt-stack" / "scripts" / "ai" / output_file
         
         with open(output_path, 'w') as f:
             json.dump(results, f, indent=2)

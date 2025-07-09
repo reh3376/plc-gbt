@@ -80,7 +80,7 @@ class CodebaseModularizationFramework:
     Implements systematic approach from AI Task Orchestrator analysis
     """
     
-    def __init__(self, workspace_path: str = "/Users/reh3376/repos/PLC_GPT"):
+    def __init__(self, workspace_path: str = "/Users/reh3376/repos/plc-gbt"):
         self.workspace_path = Path(workspace_path)
         self.framework_id = f"modularization_framework_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.scripts_path = self.workspace_path / "plc-gpt-stack" / "scripts"

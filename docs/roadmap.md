@@ -2173,7 +2173,7 @@ Integrate WolframAlpha Pro's computational intelligence directly into the real-t
 - Task: Connected local repository to GitHub remote
 - Version: 0.1.0
 - Completed:
-  - ✅ Added remote origin: https://github.com/reh3376/plc-gpt_build.git
+  - ✅ Added remote origin: https://github.com/reh3376/plc-gbt.git
   - ✅ Pushed initial commit to main branch
   - ✅ Updated documentation with repository URL
 - Issues: None
@@ -2639,7 +2639,7 @@ Integrate WolframAlpha Pro's computational intelligence directly into the real-t
 - Qdrant Documentation: https://qdrant.tech/documentation/
 
 ### Project Repository
-- GitHub: https://github.com/reh3376/plc-gpt_build
+- GitHub: https://github.com/reh3376/plc-gbt
 
 ---
 

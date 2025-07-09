@@ -41,9 +41,9 @@ venv/
 ENV/
 
 # Docker volumes (local data)
-plc-gpt-stack/neo4j_data/
-plc-gpt-stack/qdrant_data/
-plc-gpt-stack/postgres_data/
+plc-gbt-stack/neo4j_data/
+plc-gbt-stack/qdrant_data/
+plc-gbt-stack/postgres_data/
 
 # Logs
 *.log
@@ -55,7 +55,7 @@ logs/
 *.dump
 
 # Processed documents
-plc-gpt-stack/processed/
+plc-gbt-stack/processed/
 
 # Temporary files
 *.tmp

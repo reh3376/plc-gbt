@@ -4,14 +4,14 @@
 
 **Access the web interface at:**
 ```
-http://127.0.0.1:8081/plc-gpt-stack/web_interface.html
+http://127.0.0.1:8081/plc-gbt-stack/web_interface.html
 ```
 
 ## ❌ **Do NOT Use This URL**
 
 **This will cause "Failed to Fetch" errors:**
 ```
-file:///Users/reh3376/repos/PLC_GPT/plc-gpt-stack/web_interface.html
+file:///Users/reh3376/repos/plc-gbt/plc-gbt-stack/web_interface.html
 ```
 
 ## 🔧 **Why This Matters**
@@ -24,7 +24,7 @@ file:///Users/reh3376/repos/PLC_GPT/plc-gpt-stack/web_interface.html
 
 1. **HTTP Server**: Already running on port 8081 (started automatically)
 2. **Gateway API**: Running in Docker on port 8000
-3. **Access URL**: http://127.0.0.1:8081/plc-gpt-stack/web_interface.html
+3. **Access URL**: http://127.0.0.1:8081/plc-gbt-stack/web_interface.html
 
 ## 🧪 **Testing the Interface**
 
@@ -47,7 +47,7 @@ Once opened, you can:
 
 If you still get "Failed to Fetch":
 
-1. **Check URL**: Ensure you're using `http://127.0.0.1:8081/plc-gpt-stack/web_interface.html`
+1. **Check URL**: Ensure you're using `http://127.0.0.1:8081/plc-gbt-stack/web_interface.html`
 2. **Check Services**: Verify Docker containers are running (`docker-compose ps`)
 3. **Check HTTP Server**: Verify server is running (`ps aux | grep http.server`)
 

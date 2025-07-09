@@ -25,8 +25,8 @@ from typing import Dict, List, Tuple, Any, Optional
 from dataclasses import dataclass, asdict
 import subprocess
 
-# Add the plc-gpt-stack to the path for imports
-sys.path.append('/Users/reh3376/repos/PLC_GPT/plc-gpt-stack')
+# Add the plc-gbt-stack to the path for imports
+sys.path.append('/Users/reh3376/repos/plc-gbt/plc-gbt-stack')
 
 @dataclass
 class RepositoryStatus:
@@ -57,7 +57,7 @@ class Phase38RepositoryMigrator:
     
     def __init__(self):
         self.base_path = Path("/Users/reh3376/repos")
-        self.plc_gpt_path = Path("/Users/reh3376/repos/PLC_GPT")
+        self.plc_gbt_path = Path("/Users/reh3376/repos/plc-gbt")
         self.plc_repos = [f"plc-{i}00" for i in range(1, 7)]
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
