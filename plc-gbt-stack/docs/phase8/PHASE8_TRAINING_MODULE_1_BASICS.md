@@ -760,9 +760,9 @@ Complete safety assessment for your loop:
 - ISA-5.1: Instrumentation Symbols and Identification
 
 ### Support
-- **Technical Support**: support@plc-gpt.com
-- **Training Questions**: training@plc-gpt.com  
-- **Documentation**: https://docs.plc-gpt.com/phase8
+- **Technical Support**: support@plc-gbt.com
+- **Training Questions**: training@plc-gbt.com  
+- **Documentation**: https://docs.plc-gbt.com/phase8
 
 ---
 

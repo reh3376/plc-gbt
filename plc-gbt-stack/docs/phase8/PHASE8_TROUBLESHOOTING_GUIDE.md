@@ -72,12 +72,12 @@ def quick_system_check():
 
 ```bash
 # Check system services
-systemctl status plc-gpt-phase8
+systemctl status plc-gbt-phase8
 systemctl status postgresql
 systemctl status redis
 
 # Check logs
-tail -f /var/log/plc-gpt/phase8.log
+tail -f /var/log/plc-gbt/phase8.log
 tail -f /var/log/postgresql/postgresql.log
 
 # Verify database connectivity
@@ -101,15 +101,15 @@ psql -h localhost -U plc_gpt_user -d phase8_db -c "SELECT version();"
 2. **Service Dependencies**:
    ```bash
    # Restart in correct order
-   sudo systemctl stop plc-gpt-phase8
+   sudo systemctl stop plc-gbt-phase8
    sudo systemctl restart postgresql
    sudo systemctl restart redis
-   sudo systemctl start plc-gpt-phase8
+   sudo systemctl start plc-gbt-phase8
    ```
 
 3. **License Renewal**:
    - Contact support for new license file
-   - Place license in `/etc/plc-gpt/license/`
+   - Place license in `/etc/plc-gbt/license/`
    - Restart services
 
 ### 2. Poor System Performance
@@ -523,7 +523,7 @@ def analyze_energy_efficiency(loop_id):
 systemctl status authentication-service
 
 # Review authentication logs
-grep "authentication" /var/log/plc-gpt/security.log
+grep "authentication" /var/log/plc-gbt/security.log
 
 # Test LDAP connectivity (if used)
 ldapsearch -x -H ldap://company.local -D "CN=service,DC=company,DC=local" -W
@@ -689,7 +689,7 @@ echo "Backing up system state..."
 echo "Restarting core services..."
 systemctl restart postgresql
 systemctl restart redis
-systemctl restart plc-gpt-phase8
+systemctl restart plc-gbt-phase8
 
 # 4. Verify critical functions
 echo "Verifying system recovery..."
@@ -806,16 +806,16 @@ def collect_support_info():
 
 #### 24/7 Emergency Support
 - **Phone**: +1-800-PLC-HELP
-- **Email**: emergency@plc-gpt.com
-- **Portal**: https://support.plc-gpt.com/emergency
+- **Email**: emergency@plc-gbt.com
+- **Portal**: https://support.plc-gbt.com/emergency
 
 #### Standard Support
-- **Email**: support@plc-gpt.com
-- **Portal**: https://support.plc-gpt.com
-- **Documentation**: https://docs.plc-gpt.com/phase8
+- **Email**: support@plc-gbt.com
+- **Portal**: https://support.plc-gbt.com
+- **Documentation**: https://docs.plc-gbt.com/phase8
 
 #### Training and Consulting
-- **Email**: training@plc-gpt.com
+- **Email**: training@plc-gbt.com
 - **Phone**: +1-800-PLC-TRAIN
 
 ---

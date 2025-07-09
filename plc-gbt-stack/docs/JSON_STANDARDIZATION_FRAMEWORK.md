@@ -581,7 +581,7 @@ def migrate_json_to_standard(file_path: Path, schema_type: str):
 
 ### Schema Files Location
 ```
-plc-gpt-stack/schemas/
+plc-gbt-stack/schemas/
 ├── master-framework.json          # Base schema for all JSON
 ├── phase8-pid-control.json        # Phase 8 PID control schema
 ├── validation-framework.json      # Validation results schema

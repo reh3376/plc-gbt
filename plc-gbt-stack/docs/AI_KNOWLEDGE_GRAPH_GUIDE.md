@@ -14,7 +14,7 @@ The PLC-GPT knowledge graph serves as **persistent memory** for AI agents and LL
 
 ## 🔌 Access Interface
 
-**Primary Interface**: `plc-gpt-stack/scripts/query/knowledge_graph_interface.py`
+**Primary Interface**: `plc-gbt-stack/scripts/query/knowledge_graph_interface.py`
 
 ```python
 from scripts.query.knowledge_graph_interface import PLCKnowledgeGraph, get_knowledge_graph_summary

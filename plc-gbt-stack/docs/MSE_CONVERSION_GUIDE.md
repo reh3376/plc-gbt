@@ -120,7 +120,7 @@ optimization_result = await monitor.optimize_pid_parameters_with_gradient_descen
 1. **Deploy MSE Calculator**
    ```bash
    # Install new MSE performance calculator
-   python3 plc-gpt-stack/scripts/ai/mse_performance_metric_orchestrator.py
+   python3 plc-gbt-stack/scripts/ai/mse_performance_metric_orchestrator.py
    ```
 
 2. **Update Performance Monitoring**
@@ -133,7 +133,7 @@ optimization_result = await monitor.optimize_pid_parameters_with_gradient_descen
 3. **Validate Implementation**
    ```bash
    # Run comprehensive validation
-   python3 plc-gpt-stack/scripts/ai/enhanced_mse_performance_monitor.py
+   python3 plc-gbt-stack/scripts/ai/enhanced_mse_performance_monitor.py
    ```
 
 ### Backward Compatibility

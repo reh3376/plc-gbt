@@ -34,7 +34,7 @@ Focus areas for completion:
 
 ### **New Files to Create**
 ```
-plc-gpt-stack/
+plc-gbt-stack/
 ├── auth/
 │   ├── __init__.py
 │   ├── jwt_manager.py          # JWT token creation/validation

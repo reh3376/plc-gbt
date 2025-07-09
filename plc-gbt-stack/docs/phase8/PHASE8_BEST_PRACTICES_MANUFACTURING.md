@@ -1400,9 +1400,9 @@ pasteurization_system = {
 ## 📞 Support and Resources
 
 ### Technical Support Contacts:
-- **Implementation Support**: implementation@plc-gpt.com
-- **Technical Questions**: tech-support@plc-gpt.com
-- **Training Services**: training@plc-gpt.com
+- **Implementation Support**: implementation@plc-gbt.com
+- **Technical Questions**: tech-support@plc-gbt.com
+- **Training Services**: training@plc-gbt.com
 - **Emergency Support**: 24/7 hotline available
 
 ### Additional Documentation:
@@ -1412,7 +1412,7 @@ pasteurization_system = {
 - [Troubleshooting Guide](PHASE8_TROUBLESHOOTING_GUIDE.md)
 
 ### Industry Forums and Communities:
-- **User Community Portal**: https://community.plc-gpt.com
+- **User Community Portal**: https://community.plc-gbt.com
 - **Technical Webinars**: Monthly best practices sessions
 - **Industry Conferences**: Annual user conference and training
 

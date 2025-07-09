@@ -1628,7 +1628,7 @@ X-RateLimit-Reset: 1641811200
 from plc_gpt_pid import PIDClient
 
 client = PIDClient(
-    base_url='https://api.plc-gpt.com',
+    base_url='https://api.plc-gbt.com',
     auth_method='jwt',
     token='your_jwt_token'
 )
@@ -1641,10 +1641,10 @@ performance = loop.get_performance_metrics()
 
 ### JavaScript SDK
 ```javascript
-import { PIDClient } from '@plc-gpt/pid-sdk';
+import { PIDClient } from '@plc-gbt/pid-sdk';
 
 const client = new PIDClient({
-  baseURL: 'https://api.plc-gpt.com',
+  baseURL: 'https://api.plc-gbt.com',
   authToken: 'your_jwt_token'
 });
 
@@ -1660,9 +1660,9 @@ const metrics = await Promise.all(
 ## Support & Resources
 
 ### Technical Support
-- **Email**: api-support@plc-gpt.com
-- **Documentation**: https://docs.plc-gpt.com/phase8
-- **GitHub Issues**: https://github.com/plc-gpt/pid-integration/issues
+- **Email**: api-support@plc-gbt.com
+- **Documentation**: https://docs.plc-gbt.com/phase8
+- **GitHub Issues**: https://github.com/plc-gbt/pid-integration/issues
 
 ### Additional Resources
 - [Phase 8 Integration Guide](PHASE8_INTEGRATION_GUIDE.md)
