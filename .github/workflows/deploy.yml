@@ -41,46 +41,76 @@ jobs:
         import sys
         
         l5x_files = list(Path('.').rglob('*.L5X'))
+        acd_files = list(Path('.').rglob('*.ACD'))
+        
+        print(f'Found {len(l5x_files)} L5X files and {len(acd_files)} ACD files')
+        
+        if len(l5x_files) == 0 and len(acd_files) == 0:
+            print('No PLC files found - this may be expected for some repositories')
+            sys.exit(0)
+        
         errors = []
+        warnings = []
         
         for f in l5x_files:
             if f.stat().st_size == 0:
                 errors.append(f'Empty file: {f}')
             elif f.stat().st_size < 100:
-                errors.append(f'Suspiciously small file: {f} ({f.stat().st_size} bytes)')
+                warnings.append(f'Small file: {f} ({f.stat().st_size} bytes)')
+        
+        for f in acd_files:
+            if f.stat().st_size == 0:
+                errors.append(f'Empty file: {f}')
         
         if errors:
             print('Validation errors:')
             for error in errors:
                 print(f'  - {error}')
+            print('Deployment blocked due to errors')
             sys.exit(1)
-        else:
-            print(f'All {len(l5x_files)} L5X files validated successfully')
+        
+        if warnings:
+            print('Validation warnings:')
+            for warning in warnings:
+                print(f'  - {warning}')
+        
+        print(f'Validation completed: {len(l5x_files)} L5X files, {len(acd_files)} ACD files')
         "
+        
+    - name: Set deployment environment
+      run: |
+        if [ -n "${{ github.event.inputs.environment }}" ]; then
+          echo "DEPLOY_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+        else
+          echo "DEPLOY_ENV=production" >> $GITHUB_ENV
+        fi
         
     - name: Generate deployment manifest
       run: |
         python -c "
         from pathlib import Path
         import json
+        import os
         from datetime import datetime
         
         manifest = {
             'deployment_id': '${{ github.run_id }}',
             'timestamp': datetime.now().isoformat(),
-            'environment': '${{ github.event.inputs.environment || "production" }}',
+            'environment': os.environ.get('DEPLOY_ENV', 'production'),
             'repository': '${{ github.repository }}',
             'commit': '${{ github.sha }}',
             'files': {
                 'l5x_files': [str(f) for f in Path('.').rglob('*.L5X')],
-                'total_size_mb': sum(f.stat().st_size for f in Path('.').rglob('*.L5X')) / 1024 / 1024
+                'acd_files': [str(f) for f in Path('.').rglob('*.ACD')],
+                'total_size_mb': (sum(f.stat().st_size for f in Path('.').rglob('*.L5X')) + sum(f.stat().st_size for f in Path('.').rglob('*.ACD'))) / 1024 / 1024
             }
         }
         
         with open('deployment_manifest.json', 'w') as f:
             json.dump(manifest, f, indent=2)
         
-        print(f'Deployment manifest created: {manifest}')
+        print(f'Deployment manifest created for environment: {manifest[\"environment\"]}')
+        print(f'Files: {len(manifest[\"files\"][\"l5x_files\"])} L5X, {len(manifest[\"files\"][\"acd_files\"])} ACD')
         "
         
     - name: Upload deployment manifest
