@@ -1,0 +1,738 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-gpt.com/schemas/phase8-pid-control.json",
+  "title": "Phase 8 PID Control Configuration Schema",
+  "description": "Standardized schema for Phase 8 PID tuning integration configurations",
+  "allOf": [
+    {
+      "$ref": "master-framework.json"
+    }
+  ],
+  "properties": {
+    "metadata": {
+      "properties": {
+        "schema_type": {
+          "const": "phase8_pid_control"
+        },
+        "process_information": {
+          "type": "object",
+          "properties": {
+            "process_type": {
+              "type": "string",
+              "enum": [
+                "temperature",
+                "pressure",
+                "flow",
+                "level",
+                "ph",
+                "concentration",
+                "motion"
+              ]
+            },
+            "industry_sector": {
+              "type": "string",
+              "enum": [
+                "chemical",
+                "pharmaceutical",
+                "food_beverage",
+                "metals",
+                "pulp_paper",
+                "oil_gas",
+                "distillation",
+                "general_manufacturing"
+              ]
+            },
+            "safety_level": {
+              "type": "string",
+              "enum": [
+                "SIL0",
+                "SIL1",
+                "SIL2",
+                "SIL3",
+                "C1D1"
+              ],
+              "description": "Safety Integrity Level or hazardous area classification"
+            },
+            "environmental_conditions": {
+              "type": "object",
+              "properties": {
+                "temperature_range": {
+                  "$ref": "#/definitions/engineering_units"
+                },
+                "humidity_range": {
+                  "type": "string"
+                },
+                "vibration_level": {
+                  "type": "string",
+                  "enum": [
+                    "low",
+                    "medium",
+                    "high"
+                  ]
+                },
+                "hazardous_area": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "variable_counts": {
+      "required": [
+        "total_variables",
+        "process_variables_count",
+        "disturbance_variables_count",
+        "control_variables_count"
+      ],
+      "properties": {
+        "process_variables_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Number of process variables (PV) configured"
+        },
+        "disturbance_variables_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Number of disturbance variables (DV) for feed-forward control"
+        },
+        "control_variables_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Number of control variables (CV) outputs"
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "control_configuration",
+        "variable_definitions",
+        "tuning_parameters"
+      ],
+      "properties": {
+        "control_configuration": {
+          "type": "object",
+          "required": [
+            "loop_id",
+            "algorithm_form",
+            "instruction_type"
+          ],
+          "properties": {
+            "loop_id": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]*[A-Z0-9]$",
+              "description": "Unique loop identifier"
+            },
+            "algorithm_form": {
+              "type": "string",
+              "enum": [
+                "dependent",
+                "independent",
+                "parallel",
+                "series"
+              ]
+            },
+            "instruction_type": {
+              "type": "string",
+              "enum": [
+                "PID",
+                "PIDE",
+                "PIDE_FF",
+                "PIDE_Cascade",
+                "PIDE_FF_Cas",
+                "PID_ENHANCED",
+                "MRAT",
+                "RMPS"
+              ]
+            },
+            "control_mode01": {
+              "type": "string",
+              "enum": [
+                "PID",
+                "PI",
+                "PD",
+                "P",
+                "AUTO",
+                "MANUAL",
+                "CASCADE"
+              ]
+            },
+            "control_mode02": {
+              "type": "string",
+              "enum": [
+                "Standard",
+                "Enhanced",
+                "Advanced"
+              ]
+            }
+          }
+        },
+        "variable_definitions": {
+          "type": "object",
+          "properties": {
+            "process_variables": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 10,
+              "items": {
+                "type": "object",
+                "required": [
+                  "variable_id",
+                  "tagdesc",
+                  "scaling"
+                ],
+                "properties": {
+                  "variable_id": {
+                    "type": "string",
+                    "pattern": "^pv\\d{2}$",
+                    "description": "Process variable identifier (pv01, pv02, etc.)"
+                  },
+                  "tagdesc": {
+                    "type": "object",
+                    "required": [
+                      "tagname",
+                      "data_type",
+                      "description"
+                    ],
+                    "properties": {
+                      "tagname": {
+                        "type": "string",
+                        "description": "PLC tag name"
+                      },
+                      "data_type": {
+                        "type": "string",
+                        "enum": [
+                          "REAL",
+                          "DINT",
+                          "INT",
+                          "BOOL"
+                        ]
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Human-readable description of the tag"
+                      }
+                    }
+                  },
+                  "scaling": {
+                    "type": "object",
+                    "required": [
+                      "raw_min",
+                      "raw_max",
+                      "eng_min",
+                      "eng_max",
+                      "units"
+                    ],
+                    "properties": {
+                      "raw_min": {
+                        "type": "integer",
+                        "description": "Raw ADC minimum value"
+                      },
+                      "raw_max": {
+                        "type": "integer",
+                        "description": "Raw ADC maximum value"
+                      },
+                      "eng_min": {
+                        "type": "number",
+                        "description": "Engineering minimum value"
+                      },
+                      "eng_max": {
+                        "type": "number",
+                        "description": "Engineering maximum value"
+                      },
+                      "units": {
+                        "type": "string"
+                      },
+                      "linearization": {
+                        "type": "string",
+                        "enum": [
+                          "linear",
+                          "square_root",
+                          "custom"
+                        ],
+                        "default": "linear"
+                      }
+                    }
+                  },
+                  "alarm_limits": {
+                    "type": "object",
+                    "properties": {
+                      "high_high": {
+                        "type": "number"
+                      },
+                      "high": {
+                        "type": "number"
+                      },
+                      "low": {
+                        "type": "number"
+                      },
+                      "low_low": {
+                        "type": "number"
+                      },
+                      "rate_of_change": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "disturbance_variables": {
+              "type": "array",
+              "maxItems": 10,
+              "items": {
+                "type": "object",
+                "required": [
+                  "variable_id",
+                  "tagdesc",
+                  "scaling"
+                ],
+                "properties": {
+                  "variable_id": {
+                    "type": "string",
+                    "pattern": "^dv\\d{2}$",
+                    "description": "Disturbance variable identifier (dv01, dv02, etc.)"
+                  },
+                  "tagdesc": {
+                    "type": "object",
+                    "required": [
+                      "tagname",
+                      "data_type",
+                      "description"
+                    ],
+                    "properties": {
+                      "tagname": {
+                        "type": "string"
+                      },
+                      "data_type": {
+                        "type": "string",
+                        "enum": [
+                          "REAL",
+                          "DINT",
+                          "INT",
+                          "BOOL"
+                        ]
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "scaling": {
+                    "type": "object",
+                    "required": [
+                      "raw_min",
+                      "raw_max",
+                      "eng_min",
+                      "eng_max",
+                      "units"
+                    ],
+                    "properties": {
+                      "raw_min": {
+                        "type": "integer"
+                      },
+                      "raw_max": {
+                        "type": "integer"
+                      },
+                      "eng_min": {
+                        "type": "number"
+                      },
+                      "eng_max": {
+                        "type": "number"
+                      },
+                      "units": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "feedforward_config": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "gain": {
+                        "type": "number"
+                      },
+                      "lead_time": {
+                        "type": "number"
+                      },
+                      "lag_time": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "control_variables": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 5,
+              "items": {
+                "type": "object",
+                "required": [
+                  "variable_id",
+                  "tagname",
+                  "limits"
+                ],
+                "properties": {
+                  "variable_id": {
+                    "type": "string",
+                    "pattern": "^cv\\d{2}$",
+                    "description": "Control variable identifier (cv01, cv02, etc.)"
+                  },
+                  "tagname": {
+                    "type": "object",
+                    "required": [
+                      "tagname",
+                      "data_type",
+                      "description"
+                    ],
+                    "properties": {
+                      "tagname": {
+                        "type": "string"
+                      },
+                      "data_type": {
+                        "type": "string",
+                        "enum": [
+                          "REAL",
+                          "DINT",
+                          "INT",
+                          "BOOL"
+                        ]
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "limits": {
+                    "type": "object",
+                    "required": [
+                      "min",
+                      "max",
+                      "units"
+                    ],
+                    "properties": {
+                      "min": {
+                        "type": "number"
+                      },
+                      "max": {
+                        "type": "number"
+                      },
+                      "units": {
+                        "type": "string"
+                      },
+                      "rate_limit": {
+                        "type": "number",
+                        "description": "Maximum rate of change per minute"
+                      }
+                    }
+                  },
+                  "actuator_characteristics": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "Control Valve",
+                          "valve",
+                          "damper",
+                          "vfd",
+                          "heater",
+                          "pump"
+                        ]
+                      },
+                      "action": {
+                        "type": "string",
+                        "enum": [
+                          "direct",
+                          "reverse"
+                        ]
+                      },
+                      "feedback": {
+                        "type": "boolean",
+                        "description": "Whether actuator provides position feedback"
+                      },
+                      "response_time": {
+                        "type": "number",
+                        "description": "Actuator response time in seconds"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tuning_parameters": {
+          "type": "object",
+          "properties": {
+            "current_parameters": {
+              "type": "object",
+              "required": [
+                "kc",
+                "ti",
+                "td"
+              ],
+              "properties": {
+                "loop_type": {
+                  "type": "string",
+                  "enum": [
+                    "Temperature",
+                    "Pressure",
+                    "Flow",
+                    "Level",
+                    "pH",
+                    "Concentration"
+                  ],
+                  "description": "Type of process loop"
+                },
+                "control_action": {
+                  "type": "string",
+                  "enum": [
+                    "direct",
+                    "reverse"
+                  ],
+                  "description": "Control action direction"
+                },
+                "loop_control": {
+                  "type": "string",
+                  "enum": [
+                    "feedforward",
+                    "feedback",
+                    "cascade",
+                    "ratio"
+                  ],
+                  "description": "Control strategy type"
+                },
+                "error_handling": {
+                  "type": "string",
+                  "enum": [
+                    "PVEProportional",
+                    "SPEProportional",
+                    "ErrorProportional"
+                  ],
+                  "description": "Error calculation method"
+                },
+                "DSmoothing": {
+                  "type": "boolean",
+                  "description": "Derivative smoothing enabled"
+                },
+                "DBcrossing": {
+                  "type": "string",
+                  "enum": [
+                    "ZCon",
+                    "ZCoff"
+                  ],
+                  "description": "Deadband crossing behavior"
+                },
+                "OP_mode": {
+                  "type": "string",
+                  "enum": [
+                    "Prog",
+                    "Oper"
+                  ],
+                  "description": "Output mode - Program or Operator"
+                },
+                "casrat_mode": {
+                  "type": ["string", "boolean"],
+                  "enum": [
+                    "Cascade",
+                    "Ratio",
+                    "False",
+                    false
+                  ],
+                  "description": "Cascade or Ratio mode setting"
+                },
+                "auto_mode": {
+                  "type": "boolean",
+                  "description": "Automatic mode enabled"
+                },
+                "manual_mode": {
+                  "type": "boolean",
+                  "description": "Manual mode enabled"
+                },
+                "override_mode": {
+                  "type": "boolean",
+                  "description": "Override mode enabled"
+                },
+                "dependIndepend": {
+                  "type": "string",
+                  "enum": [
+                    "Dependent",
+                    "Independent"
+                  ],
+                  "description": "PID algorithm form"
+                },
+                "Update": {
+                  "type": "number",
+                  "minimum": 1.0,
+                  "description": "Update time value"
+                },
+                "Update_units": {
+                  "type": "string",
+                  "enum": [
+                    "milliseconds",
+                    "seconds",
+                    "minutes"
+                  ],
+                  "description": "Update time units"
+                },
+                "ff": {
+                  "type": "boolean",
+                  "description": "Feed-forward enabled"
+                },
+                "cascade": {
+                  "type": "boolean",
+                  "description": "Cascade control enabled"
+                },
+                "ratio": {
+                  "type": "boolean",
+                  "description": "Ratio control enabled"
+                },
+                "timingmode": {
+                  "type": "string",
+                  "enum": [
+                    "Periodic",
+                    "Continuous",
+                    "OnDemand"
+                  ],
+                  "description": "Control loop timing mode"
+                },
+                "allowcasrat": {
+                  "type": "boolean",
+                  "description": "Allow Cascade or Ratio Mode"
+                },
+                "Loop_modes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "CVProg",
+                      "CVOper",
+                      "SPProg",
+                      "SPOper"
+                    ]
+                  },
+                  "description": "Available loop operation modes"
+                },
+                "CVroc": {
+                  "type": "boolean",
+                  "description": "Control Variable Rate of Change enabled"
+                },
+                "ROCopen": {
+                  "type": "boolean",
+                  "description": "Rate of Change opening enabled"
+                },
+                "ROCopen_limit": {
+                  "type": "number",
+                  "minimum": 0.0,
+                  "description": "Rate of Change opening limit"
+                },
+                "ROCclose": {
+                  "type": "boolean",
+                  "description": "Rate of Change closing enabled"
+                },
+                "ROCclose_limit": {
+                  "type": "number",
+                  "minimum": 0.0,
+                  "description": "Rate of Change closing limit"
+                },
+                "windupHin": {
+                  "type": "number",
+                  "description": "Windup high limit"
+                },
+                "windupLin": {
+                  "type": "number",
+                  "description": "Windup low limit"
+                },
+                "kc": {
+                  "type": "number",
+                  "description": "Proportional gain"
+                },
+                "ti": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Integral time (minutes)"
+                },
+                "td": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Derivative time (minutes)"
+                },
+                "bias": {
+                  "type": "number",
+                  "description": "Output bias"
+                },
+                "setpoint": {
+                  "type": "number",
+                  "description": "Current setpoint value"
+                },
+                "PPV": {
+                  "type": "string",
+                  "description": "Primary Process Variable tag name"
+                },
+                "SPV": {
+                  "type": "string",
+                  "description": "Secondary Process Variable tag name"
+                },
+                "MPV": {
+                  "type": "string",
+                  "description": "Multi Process Variable equation tag name"
+                }
+              }
+            },
+            "tuning_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "ziegler_nichols",
+                      "cohen_coon",
+                      "imc",
+                      "manual"
+                    ]
+                  },
+                  "parameters": {
+                    "type": "object",
+                    "properties": {
+                      "kc": {
+                        "type": "number"
+                      },
+                      "ti": {
+                        "type": "number"
+                      },
+                      "td": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "performance_before": {
+                    "$ref": "#/definitions/performance_threshold"
+                  },
+                  "performance_after": {
+                    "$ref": "#/definitions/performance_threshold"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
