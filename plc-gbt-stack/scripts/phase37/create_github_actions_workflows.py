@@ -97,7 +97,7 @@ except Exception as e:
         find . -name "*.L5X" -o -name "*.ACD" | wc -l | xargs echo "Total PLC files:" >> validation-report.md
         
     - name: Upload validation report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: validation-report
         path: validation-report.md
@@ -209,7 +209,7 @@ except Exception as e:
         echo "All integrity checks completed successfully ✅" >> conversion-report.md
         
     - name: Upload conversion report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: conversion-report
         path: conversion-report.md
@@ -302,7 +302,7 @@ jobs:
         echo "- Permission check: Completed ✅" >> security-report.md
         
     - name: Upload security report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-report
         path: security-report.md
@@ -423,7 +423,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Upload release artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: release-artifacts
         path: |

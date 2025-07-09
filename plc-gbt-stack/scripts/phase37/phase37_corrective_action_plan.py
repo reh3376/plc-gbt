@@ -386,7 +386,7 @@ PLCConverter = import_plc_converter()
         "
         
     - name: Upload conversion report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: conversion-report
         path: conversion_report.json
@@ -484,7 +484,7 @@ jobs:
         "
         
     - name: Upload deployment manifest
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: deployment-manifest
         path: deployment_manifest.json

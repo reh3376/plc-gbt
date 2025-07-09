@@ -363,7 +363,7 @@ EOF
         echo "report_file=$report_file" >> $GITHUB_OUTPUT
         
     - name: Upload conversion report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: conversion-report
         path: conversion_report_*.md
@@ -680,7 +680,7 @@ EOF
         echo "✅ Validation report created: $report_file"
         
     - name: Upload validation report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: validation-report
         path: validation_report_*.md
@@ -901,7 +901,7 @@ EOF
         echo "✅ Protection status report created: $report_file"
         
     - name: Upload protection report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: branch-protection-report
         path: branch_protection_report_*.md
