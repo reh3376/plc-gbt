@@ -1,0 +1,116 @@
+{
+  "audit_session_id": "audit_1752159964",
+  "audit_duration_seconds": 0.141067,
+  "databases_audited": 4,
+  "individual_results": {
+    "neo4j": {
+      "database_type": "DatabaseType.NEO4J",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 98.0,
+      "total_records": 261,
+      "expected_records": 100,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "basic_query_time_ms": 4.593,
+        "complex_query_time_ms": 1.176
+      },
+      "issues_found": [
+        "1 Documentation nodes missing path property"
+      ],
+      "recommendations": [
+        "Fix missing node properties to improve data integrity"
+      ],
+      "audit_timestamp": "2025-07-10 11:06:05.069387"
+    },
+    "postgresql": {
+      "database_type": "DatabaseType.POSTGRESQL",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 0,
+      "expected_records": 100,
+      "data_completeness_percentage": 0.0,
+      "performance_metrics": {
+        "python_files_query_time_ms": 0.716,
+        "python_files_record_count": 0,
+        "documentation_query_time_ms": 0.47,
+        "documentation_record_count": 0,
+        "configuration_files_query_time_ms": 0.569,
+        "configuration_files_record_count": 0,
+        "version_query_time_ms": 0.214,
+        "database_version": "PostgreSQL 15.13 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit"
+      },
+      "issues_found": [],
+      "recommendations": [
+        "Initialize database schema and run data ingestion"
+      ],
+      "audit_timestamp": "2025-07-10 11:06:05.073881"
+    },
+    "redis": {
+      "database_type": "DatabaseType.REDIS",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 168,
+      "expected_records": 50,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "info_query_time_ms": 0.5519999999999999,
+        "redis_version": "7.4.4",
+        "memory_usage_bytes": 1454336,
+        "connected_clients": 1,
+        "keys_query_time_ms": 0.432,
+        "total_keys": 168,
+        "set_operation_time_ms": 0.574,
+        "get_operation_time_ms": 0.22699999999999998,
+        "persistent_manager_healthy": true,
+        "persistent_connection_count": 1
+      },
+      "issues_found": [],
+      "recommendations": [],
+      "audit_timestamp": "2025-07-10 11:06:05.076388"
+    },
+    "qdrant": {
+      "database_type": "DatabaseType.QDRANT",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 80.0,
+      "total_records": 5,
+      "expected_records": 200,
+      "data_completeness_percentage": 2.5,
+      "performance_metrics": {
+        "info_query_time_ms": 1.975,
+        "collections_query_time_ms": 1.7329999999999999,
+        "collection_count": 4,
+        "documentation_query_time_ms": 2.63,
+        "documentation_vector_count": 0,
+        "python_code_query_time_ms": 1.5510000000000002,
+        "python_code_vector_count": 0,
+        "configurations_query_time_ms": 1.549,
+        "configurations_vector_count": 0,
+        "plc_embeddings_query_time_ms": 1.416,
+        "plc_embeddings_vector_count": 5
+      },
+      "issues_found": [
+        "Vector search test failed: Unexpected Response: 400 (Bad Request)\nRaw response content:\nb'{\"status\":{\"error\":\"Wrong input: Vector dimension error: expected dim: 3072, got 384\"},\"time\":0.000435042}'",
+        "Vector count lower than expected"
+      ],
+      "recommendations": [
+        "Validate embedding generation process"
+      ],
+      "audit_timestamp": "2025-07-10 11:06:05.090335"
+    }
+  },
+  "cross_validation": {
+    "data_consistency_score": 74.0,
+    "missing_cross_references": [],
+    "orphaned_records": [],
+    "synchronization_issues": [
+      "File count mismatch: Neo4j(261) vs PostgreSQL(0)"
+    ],
+    "recommendations": [
+      "Address cross-database synchronization issues",
+      "Re-run comprehensive data ingestion"
+    ]
+  },
+  "overall_health_score": 94.5,
+  "total_issues": 3,
+  "audit_timestamp": "2025-07-10T11:06:05.090514"
+}

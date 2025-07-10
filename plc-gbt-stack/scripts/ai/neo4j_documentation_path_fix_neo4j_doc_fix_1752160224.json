@@ -1,0 +1,59 @@
+{
+  "session_id": "neo4j_doc_fix_1752160224",
+  "start_time": "2025-07-10T11:10:24.671065",
+  "success": true,
+  "phases": {
+    "connection": {
+      "status": "success",
+      "message": "Neo4j connected"
+    },
+    "analysis": {
+      "total_documentation_nodes": 36,
+      "nodes_with_path": 35,
+      "nodes_missing_path": 1,
+      "missing_path_nodes": [
+        {
+          "title": "Python Packaging User Guide",
+          "doc_type": null,
+          "node_id": 66
+        }
+      ],
+      "sample_existing_paths": [
+        "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/PLC_MEMORY_MANAGEMENT_USER_GUIDE.md",
+        "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/PHASE8_DAY10_COMPLETION_SUMMARY.md",
+        "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/README_configurable_analyzer.md",
+        "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/MODULAR_TRANSFORMATION_SUMMARY.md",
+        "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/ENHANCED_INGESTION_COMPLETION_REPORT.md"
+      ],
+      "issues_found": [
+        "1 Documentation nodes missing path property"
+      ]
+    },
+    "path_generation": {
+      "path_assignments": {
+        "66": "docs/python_packaging_user_guide.md"
+      }
+    },
+    "path_fixes": {
+      "nodes_updated": 1,
+      "successful_updates": [
+        {
+          "node_id": 66,
+          "title": "Python Packaging User Guide",
+          "new_path": "docs/python_packaging_user_guide.md"
+        }
+      ],
+      "failed_updates": [],
+      "errors": []
+    },
+    "validation": {
+      "all_nodes_have_path": true,
+      "total_documentation_nodes": 36,
+      "nodes_with_path": 36,
+      "nodes_still_missing_path": 0,
+      "remaining_issues": []
+    }
+  },
+  "duration_seconds": 0.110917,
+  "end_time": "2025-07-10T11:10:24.781987"
+}

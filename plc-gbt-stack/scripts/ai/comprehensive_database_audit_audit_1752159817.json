@@ -1,0 +1,114 @@
+{
+  "audit_session_id": "audit_1752159817",
+  "audit_duration_seconds": 0.143015,
+  "databases_audited": 4,
+  "individual_results": {
+    "neo4j": {
+      "database_type": "DatabaseType.NEO4J",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 98.0,
+      "total_records": 261,
+      "expected_records": 100,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "basic_query_time_ms": 3.432,
+        "complex_query_time_ms": 1.0839999999999999
+      },
+      "issues_found": [
+        "1 Documentation nodes missing path property"
+      ],
+      "recommendations": [
+        "Fix missing node properties to improve data integrity"
+      ],
+      "audit_timestamp": "2025-07-10 11:03:37.631911"
+    },
+    "postgresql": {
+      "database_type": "DatabaseType.POSTGRESQL",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 0,
+      "expected_records": 100,
+      "data_completeness_percentage": 0.0,
+      "performance_metrics": {
+        "python_files_query_time_ms": 0.717,
+        "python_files_record_count": 0,
+        "documentation_query_time_ms": 0.5469999999999999,
+        "documentation_record_count": 0,
+        "configuration_files_query_time_ms": 0.514,
+        "configuration_files_record_count": 0,
+        "version_query_time_ms": 0.248,
+        "database_version": "PostgreSQL 15.13 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit"
+      },
+      "issues_found": [],
+      "recommendations": [
+        "Initialize database schema and run data ingestion"
+      ],
+      "audit_timestamp": "2025-07-10 11:03:37.636375"
+    },
+    "redis": {
+      "database_type": "DatabaseType.REDIS",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 168,
+      "expected_records": 50,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "info_query_time_ms": 0.603,
+        "redis_version": "7.4.4",
+        "memory_usage_bytes": 1454336,
+        "connected_clients": 1,
+        "keys_query_time_ms": 0.42000000000000004,
+        "total_keys": 168,
+        "set_operation_time_ms": 0.679,
+        "get_operation_time_ms": 0.194,
+        "persistent_manager_healthy": true,
+        "persistent_connection_count": 1
+      },
+      "issues_found": [],
+      "recommendations": [],
+      "audit_timestamp": "2025-07-10 11:03:37.638820"
+    },
+    "qdrant": {
+      "database_type": "DatabaseType.QDRANT",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 50.0,
+      "total_records": 5,
+      "expected_records": 200,
+      "data_completeness_percentage": 2.5,
+      "performance_metrics": {
+        "info_query_time_ms": 1.456,
+        "collections_query_time_ms": 2.009,
+        "collection_count": 1,
+        "plc_embeddings_query_time_ms": 2.837,
+        "plc_embeddings_vector_count": 5
+      },
+      "issues_found": [
+        "Missing collection: python_code",
+        "Missing collection: documentation",
+        "Missing collection: configurations",
+        "Vector search test failed: Unexpected Response: 400 (Bad Request)\nRaw response content:\nb'{\"status\":{\"error\":\"Wrong input: Vector dimension error: expected dim: 3072, got 384\"},\"time\":0.000386916}'",
+        "Vector count lower than expected"
+      ],
+      "recommendations": [
+        "Create missing vector collections for complete ingestion",
+        "Validate embedding generation process"
+      ],
+      "audit_timestamp": "2025-07-10 11:03:37.648201"
+    }
+  },
+  "cross_validation": {
+    "data_consistency_score": 68.0,
+    "missing_cross_references": [],
+    "orphaned_records": [],
+    "synchronization_issues": [
+      "File count mismatch: Neo4j(261) vs PostgreSQL(0)"
+    ],
+    "recommendations": [
+      "Address cross-database synchronization issues",
+      "Re-run comprehensive data ingestion"
+    ]
+  },
+  "overall_health_score": 87.0,
+  "total_issues": 6,
+  "audit_timestamp": "2025-07-10T11:03:37.648367"
+}

@@ -1,0 +1,34 @@
+{
+  "session_id": "emergency_qdrant_fix_1752161070",
+  "start_time": "2025-07-10T11:24:30.376986",
+  "embedding_model_analysis": {
+    "embedding_model_fixes": [],
+    "configuration_updates": [],
+    "success": true,
+    "errors": []
+  },
+  "collection_recreation": {
+    "collections_recreated": [],
+    "collection_info": [],
+    "success": false,
+    "errors": [
+      "'DatabaseManager' object has no attribute 'connect'"
+    ]
+  },
+  "validation": {
+    "collection_validation": [],
+    "embedding_test": {},
+    "success": false,
+    "errors": [
+      "'DatabaseManager' object has no attribute 'connect'"
+    ]
+  },
+  "success": false,
+  "summary": {
+    "collections_fixed": 0,
+    "embedding_files_analyzed": 0,
+    "total_errors": 2,
+    "fix_status": "FAILED"
+  },
+  "end_time": "2025-07-10T11:24:30.377323"
+}

@@ -1,0 +1,79 @@
+{
+  "session_id": "qdrant_fix_1752159944",
+  "start_time": "2025-07-10T11:05:44.766803",
+  "success": true,
+  "phases": {
+    "connection": {
+      "status": "success",
+      "message": "Qdrant connected"
+    },
+    "analysis": {
+      "existing_collections": {
+        "plc_embeddings": {
+          "vector_count": 5,
+          "current_dimensions": 3072,
+          "distance_metric": "Cosine"
+        }
+      },
+      "dimension_issues": [],
+      "missing_collections": [
+        "python_code",
+        "documentation",
+        "configurations"
+      ],
+      "vector_counts": {
+        "plc_embeddings": 5
+      },
+      "total_issues": 3
+    },
+    "dimension_fixes": {
+      "fixed_collections": []
+    },
+    "missing_collections": {
+      "creation_results": {
+        "python_code": true,
+        "documentation": true,
+        "configurations": true
+      }
+    },
+    "validation": {
+      "all_collections_exist": true,
+      "all_dimensions_correct": true,
+      "collection_details": {
+        "plc_embeddings": {
+          "exists": true,
+          "vector_count": 5,
+          "current_dimensions": 3072,
+          "expected_dimensions": 3072,
+          "dimensions_correct": true
+        },
+        "python_code": {
+          "exists": true,
+          "vector_count": 0,
+          "current_dimensions": 3072,
+          "expected_dimensions": 3072,
+          "dimensions_correct": true
+        },
+        "documentation": {
+          "exists": true,
+          "vector_count": 0,
+          "current_dimensions": 3072,
+          "expected_dimensions": 3072,
+          "dimensions_correct": true
+        },
+        "configurations": {
+          "exists": true,
+          "vector_count": 0,
+          "current_dimensions": 3072,
+          "expected_dimensions": 3072,
+          "dimensions_correct": true
+        }
+      },
+      "total_collections": 4,
+      "total_vectors": 5,
+      "issues_remaining": []
+    }
+  },
+  "duration_seconds": 0.204041,
+  "end_time": "2025-07-10T11:05:44.970850"
+}

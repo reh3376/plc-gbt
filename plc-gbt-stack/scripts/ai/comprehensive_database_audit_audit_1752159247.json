@@ -1,0 +1,107 @@
+{
+  "audit_session_id": "audit_1752159247",
+  "audit_duration_seconds": 0.263857,
+  "databases_audited": 4,
+  "individual_results": {
+    "neo4j": {
+      "database_type": "DatabaseType.NEO4J",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 98.0,
+      "total_records": 261,
+      "expected_records": 100,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "basic_query_time_ms": 6.194,
+        "complex_query_time_ms": 17.112
+      },
+      "issues_found": [
+        "1 Documentation nodes missing path property"
+      ],
+      "recommendations": [
+        "Fix missing node properties to improve data integrity"
+      ],
+      "audit_timestamp": "2025-07-10 10:54:07.875637"
+    },
+    "postgresql": {
+      "database_type": "DatabaseType.POSTGRESQL",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 70.0,
+      "total_records": 0,
+      "expected_records": 100,
+      "data_completeness_percentage": 0.0,
+      "performance_metrics": {
+        "version_query_time_ms": 0.6539999999999999,
+        "database_version": "PostgreSQL 15.13 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit"
+      },
+      "issues_found": [
+        "Missing table: python_files",
+        "Missing table: documentation",
+        "Missing table: configuration_files"
+      ],
+      "recommendations": [
+        "Create missing database schema tables",
+        "Initialize database schema and run data ingestion",
+        "Run database schema initialization script"
+      ],
+      "audit_timestamp": "2025-07-10 10:54:07.884944"
+    },
+    "redis": {
+      "database_type": "DatabaseType.REDIS",
+      "connection_status": "ERROR",
+      "data_integrity_score": 0.0,
+      "total_records": 0,
+      "expected_records": 0,
+      "data_completeness_percentage": 0.0,
+      "performance_metrics": {},
+      "issues_found": [
+        "Audit failed: 'PersistentRedisManager' object has no attribute 'connection_count'"
+      ],
+      "recommendations": [
+        "Investigate Redis connection and configuration"
+      ],
+      "audit_timestamp": "2025-07-10 10:54:07.887145"
+    },
+    "qdrant": {
+      "database_type": "DatabaseType.QDRANT",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 50.0,
+      "total_records": 5,
+      "expected_records": 200,
+      "data_completeness_percentage": 2.5,
+      "performance_metrics": {
+        "info_query_time_ms": 1.335,
+        "collections_query_time_ms": 1.8190000000000002,
+        "collection_count": 1,
+        "plc_embeddings_query_time_ms": 2.839,
+        "plc_embeddings_vector_count": 5
+      },
+      "issues_found": [
+        "Missing collection: python_code",
+        "Missing collection: documentation",
+        "Missing collection: configurations",
+        "Vector search test failed: Unexpected Response: 400 (Bad Request)\nRaw response content:\nb'{\"status\":{\"error\":\"Wrong input: Vector dimension error: expected dim: 3072, got 384\"},\"time\":0.00126525}'",
+        "Vector count lower than expected"
+      ],
+      "recommendations": [
+        "Create missing vector collections for complete ingestion",
+        "Validate embedding generation process"
+      ],
+      "audit_timestamp": "2025-07-10 10:54:07.898354"
+    }
+  },
+  "cross_validation": {
+    "data_consistency_score": 60.0,
+    "missing_cross_references": [],
+    "orphaned_records": [],
+    "synchronization_issues": [
+      "File count mismatch: Neo4j(261) vs PostgreSQL(0)"
+    ],
+    "recommendations": [
+      "Address cross-database synchronization issues",
+      "Re-run comprehensive data ingestion"
+    ]
+  },
+  "overall_health_score": 54.5,
+  "total_issues": 10,
+  "audit_timestamp": "2025-07-10T10:54:07.898493"
+}

@@ -1,0 +1,103 @@
+{
+  "audit_session_id": "audit_1752161220",
+  "audit_duration_seconds": 0.195183,
+  "databases_audited": 4,
+  "individual_results": {
+    "neo4j": {
+      "database_type": "DatabaseType.NEO4J",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 885,
+      "expected_records": 100,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "basic_query_time_ms": 1.3190000000000002,
+        "complex_query_time_ms": 1.1
+      },
+      "issues_found": [],
+      "recommendations": [],
+      "audit_timestamp": "2025-07-10 11:27:00.392647"
+    },
+    "postgresql": {
+      "database_type": "DatabaseType.POSTGRESQL",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 297,
+      "expected_records": 100,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "documentation_query_time_ms": 0.6930000000000001,
+        "documentation_record_count": 44,
+        "python_files_query_time_ms": 0.5419999999999999,
+        "python_files_record_count": 171,
+        "configuration_files_query_time_ms": 0.535,
+        "configuration_files_record_count": 82,
+        "version_query_time_ms": 0.592,
+        "database_version": "PostgreSQL 15.13 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit"
+      },
+      "issues_found": [],
+      "recommendations": [],
+      "audit_timestamp": "2025-07-10 11:27:00.445153"
+    },
+    "redis": {
+      "database_type": "DatabaseType.REDIS",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 168,
+      "expected_records": 50,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "info_query_time_ms": 0.571,
+        "redis_version": "7.4.4",
+        "memory_usage_bytes": 1454336,
+        "connected_clients": 1,
+        "keys_query_time_ms": 0.40700000000000003,
+        "total_keys": 168,
+        "set_operation_time_ms": 0.356,
+        "get_operation_time_ms": 0.392,
+        "persistent_manager_healthy": true,
+        "persistent_connection_count": 1
+      },
+      "issues_found": [],
+      "recommendations": [],
+      "audit_timestamp": "2025-07-10 11:27:00.448195"
+    },
+    "qdrant": {
+      "database_type": "DatabaseType.QDRANT",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 4097,
+      "expected_records": 200,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "info_query_time_ms": 1.549,
+        "collections_query_time_ms": 1.6789999999999998,
+        "collection_count": 4,
+        "documentation_query_time_ms": 1.857,
+        "documentation_vector_count": 973,
+        "python_code_query_time_ms": 1.478,
+        "python_code_vector_count": 1199,
+        "configurations_query_time_ms": 1.431,
+        "configurations_vector_count": 1920,
+        "plc_embeddings_query_time_ms": 1.198,
+        "plc_embeddings_vector_count": 5,
+        "search_query_time_ms": 5.0520000000000005
+      },
+      "issues_found": [],
+      "recommendations": [],
+      "audit_timestamp": "2025-07-10 11:27:00.462563"
+    }
+  },
+  "cross_validation": {
+    "data_consistency_score": 80.0,
+    "missing_cross_references": [],
+    "orphaned_records": [],
+    "synchronization_issues": [
+      "File count mismatch: Neo4j(885) vs PostgreSQL(297)"
+    ],
+    "recommendations": []
+  },
+  "overall_health_score": 100.0,
+  "total_issues": 0,
+  "audit_timestamp": "2025-07-10T11:27:00.462715"
+}

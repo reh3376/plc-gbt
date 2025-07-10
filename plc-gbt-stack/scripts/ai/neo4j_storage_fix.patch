@@ -1,0 +1,33 @@
+
+# Storage Fix for DateTime Serialization Issues
+# Apply this patch to file_processors.py
+
+def fix_database_routing_metadata(database_routing):
+    """Fix metadata in database routing to ensure JSON serialization compatibility"""
+    import json
+    from datetime import datetime
+    
+    for tier, data in database_routing.items():
+        if 'data' in data and 'metadata' in data['data']:
+            # Fix metadata for long-term storage (PostgreSQL)
+            metadata = data['data']['metadata']
+            fixed_metadata = {}
+            
+            for key, value in metadata.items():
+                if isinstance(value, datetime):
+                    fixed_metadata[key] = value.isoformat()
+                elif hasattr(value, '__dict__'):
+                    try:
+                        fixed_metadata[key] = asdict(value) if hasattr(value, '__dataclass_fields__') else str(value)
+                    except:
+                        fixed_metadata[key] = str(value)
+                else:
+                    fixed_metadata[key] = value
+            
+            data['data']['metadata'] = fixed_metadata
+    
+    return database_routing
+
+# Apply this fix in each processor's process() method after creating database_routing
+# Example for PythonFileProcessor:
+# database_routing = fix_database_routing_metadata(database_routing)

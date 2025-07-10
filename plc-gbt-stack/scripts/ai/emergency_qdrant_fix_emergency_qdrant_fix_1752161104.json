@@ -1,0 +1,50 @@
+{
+  "session_id": "emergency_qdrant_fix_1752161104",
+  "start_time": "2025-07-10T11:25:04.370594",
+  "embedding_model_analysis": {
+    "embedding_model_fixes": [],
+    "configuration_updates": [],
+    "success": true,
+    "errors": []
+  },
+  "collection_recreation": {
+    "collections_recreated": [],
+    "collection_info": [],
+    "success": false,
+    "errors": [
+      "Failed to create collection: python_code",
+      "Failed to create collection: documentation",
+      "Failed to create collection: configurations"
+    ]
+  },
+  "validation": {
+    "collection_validation": [
+      {
+        "name": "python_code",
+        "exists": false,
+        "status": "missing"
+      },
+      {
+        "name": "documentation",
+        "exists": false,
+        "status": "missing"
+      },
+      {
+        "name": "configurations",
+        "exists": false,
+        "status": "missing"
+      }
+    ],
+    "embedding_test": {},
+    "success": false,
+    "errors": []
+  },
+  "success": false,
+  "summary": {
+    "collections_fixed": 0,
+    "embedding_files_analyzed": 0,
+    "total_errors": 3,
+    "fix_status": "FAILED"
+  },
+  "end_time": "2025-07-10T11:25:04.490094"
+}

@@ -1,0 +1,72 @@
+{
+  "session_id": "emergency_qdrant_fix_1752161179",
+  "start_time": "2025-07-10T11:26:19.128664",
+  "embedding_model_analysis": {
+    "embedding_model_fixes": [],
+    "configuration_updates": [],
+    "success": true,
+    "errors": []
+  },
+  "collection_recreation": {
+    "collections_recreated": [
+      "python_code",
+      "documentation",
+      "configurations"
+    ],
+    "collection_info": [
+      {
+        "name": "python_code",
+        "dimensions": 384,
+        "distance": "Cosine",
+        "status": "created"
+      },
+      {
+        "name": "documentation",
+        "dimensions": 384,
+        "distance": "Cosine",
+        "status": "created"
+      },
+      {
+        "name": "configurations",
+        "dimensions": 384,
+        "distance": "Cosine",
+        "status": "created"
+      }
+    ],
+    "success": true,
+    "errors": []
+  },
+  "validation": {
+    "collection_validation": [
+      {
+        "name": "python_code",
+        "exists": true,
+        "dimensions": 384,
+        "status": "valid"
+      },
+      {
+        "name": "documentation",
+        "exists": true,
+        "dimensions": 384,
+        "status": "valid"
+      },
+      {
+        "name": "configurations",
+        "exists": true,
+        "dimensions": 384,
+        "status": "valid"
+      }
+    ],
+    "embedding_test": {},
+    "success": true,
+    "errors": []
+  },
+  "success": true,
+  "summary": {
+    "collections_fixed": 3,
+    "embedding_files_analyzed": 0,
+    "total_errors": 0,
+    "fix_status": "SUCCESS"
+  },
+  "end_time": "2025-07-10T11:26:19.408326"
+}

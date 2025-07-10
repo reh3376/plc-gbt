@@ -1,0 +1,180 @@
+{
+  "session_id": "validator_1752155112",
+  "timestamp": "2025-07-10 09:45:14.945864",
+  "total_tests": 8,
+  "passed_tests": 6,
+  "failed_tests": 2,
+  "skipped_tests": 0,
+  "warning_tests": 0,
+  "total_execution_time_ms": 2891.2456035614014,
+  "test_results": [
+    {
+      "test_name": "Database Connectivity",
+      "result": "ValidationResult.FAIL",
+      "execution_time_ms": 112.03312873840332,
+      "details": "Database connectivity failed: 'DatabaseManager' object has no attribute 'health_check'",
+      "metrics": {},
+      "error_message": null
+    },
+    {
+      "test_name": "Memory Coordinator Initialization",
+      "result": "ValidationResult.PASS",
+      "execution_time_ms": 0.10275840759277344,
+      "details": "Memory coordinator initialized successfully: memory_coord_1752155112",
+      "metrics": {
+        "session_id": "memory_coord_1752155112",
+        "uptime_seconds": 6.4e-05,
+        "memory_tier_utilization": {
+          "short_term_redis": "Available",
+          "medium_term_neo4j": "Available",
+          "long_term_postgresql": "Available",
+          "pattern_qdrant": "Available"
+        }
+      },
+      "error_message": null
+    },
+    {
+      "test_name": "Codebase Analysis",
+      "result": "ValidationResult.FAIL",
+      "execution_time_ms": 5.316019058227539,
+      "details": "Codebase analysis failed: 'file_types'",
+      "metrics": {},
+      "error_message": null
+    },
+    {
+      "test_name": "Intelligent Ingestion",
+      "result": "ValidationResult.PASS",
+      "execution_time_ms": 119.85492706298828,
+      "details": "Intelligent ingestion successful: 83.3% success rate",
+      "metrics": {
+        "methodology": "AI Task Orchestrator Intelligent Ingestion",
+        "total_files_analyzed": 6,
+        "successfully_processed": 5,
+        "failed_files": 1,
+        "success_rate": 83.33333333333334,
+        "files_per_second": 41.76412249921337,
+        "total_batches_created": 3,
+        "complexity_analysis": {
+          "complexity_distribution": {
+            "simple": 4,
+            "moderate": 1,
+            "complex": 1,
+            "extensive": 0
+          },
+          "strategy_distribution": {
+            "sequential": 0,
+            "small_batch": 1,
+            "medium_batch": 1,
+            "large_batch": 4
+          },
+          "total_batches": 3,
+          "average_batch_size": 2.0
+        },
+        "bandwidth_management": {
+          "peak_load": "0.0%",
+          "rate_limited_operations": 6,
+          "avg_operation_interval_ms": 23.275232315063477
+        }
+      },
+      "error_message": null
+    },
+    {
+      "test_name": "Legacy Ingestion",
+      "result": "ValidationResult.PASS",
+      "execution_time_ms": 16.51787757873535,
+      "details": "Legacy ingestion successful: 83.3% success rate",
+      "metrics": {
+        "methodology": "Legacy Sequential Processing",
+        "total_files_analyzed": 6,
+        "successfully_processed": 5,
+        "failed_files": [
+          "/var/folders/l8/wfy_83z17vd_84vvrph7mj9r0000gn/T/plc_validation_84ldmsww/large_file.txt"
+        ],
+        "success_rate": 83.33333333333334,
+        "files_per_second": 303.8558057318381,
+        "ingestion_time_ms": 16.45517349243164
+      },
+      "error_message": null
+    },
+    {
+      "test_name": "CLI Functionality",
+      "result": "ValidationResult.PASS",
+      "execution_time_ms": 2637.0978355407715,
+      "details": "CLI functionality: 3/3 tests passed",
+      "metrics": {
+        "help_command": true,
+        "version_command": true,
+        "dry_run_command": true,
+        "success_rate": 1.0
+      },
+      "error_message": null
+    },
+    {
+      "test_name": "Error Handling",
+      "result": "ValidationResult.PASS",
+      "execution_time_ms": 0.3001689910888672,
+      "details": "Error handling: 3/3 scenarios handled",
+      "metrics": {
+        "error_scenarios_tested": 3,
+        "errors_handled_gracefully": 3,
+        "error_handling_rate": 1.0
+      },
+      "error_message": null
+    },
+    {
+      "test_name": "Performance Metrics",
+      "result": "ValidationResult.PASS",
+      "execution_time_ms": 0.02288818359375,
+      "details": "Performance metrics: All 5 metrics available",
+      "metrics": {
+        "required_metrics": [
+          "session_id",
+          "uptime_seconds",
+          "total_operations",
+          "cache_hit_rate",
+          "memory_tier_utilization"
+        ],
+        "present_metrics": 5,
+        "performance_summary": {
+          "session_id": "memory_coord_1752155112",
+          "uptime_seconds": 2.779501,
+          "total_operations": 5,
+          "queries_executed": 0,
+          "files_ingested": 5,
+          "data_migrations": 0,
+          "cache_hit_rate": 0,
+          "average_query_time_ms": 0,
+          "memory_tier_utilization": {
+            "short_term_redis": "Available",
+            "medium_term_neo4j": "Available",
+            "long_term_postgresql": "Available",
+            "pattern_qdrant": "Available"
+          }
+        }
+      },
+      "error_message": null
+    }
+  ],
+  "system_info": {
+    "python_version": "3.9.6 (default, Apr 30 2025, 02:07:17) \n[Clang 17.0.0 (clang-1700.0.13.5)]",
+    "platform": "darwin",
+    "test_data_directory": "/var/folders/l8/wfy_83z17vd_84vvrph7mj9r0000gn/T/plc_validation_84ldmsww",
+    "validation_timestamp": "2025-07-10T09:45:14.945857"
+  },
+  "performance_summary": {
+    "session_id": "memory_coord_1752155112",
+    "uptime_seconds": 2.779541,
+    "total_operations": 5,
+    "queries_executed": 0,
+    "files_ingested": 5,
+    "data_migrations": 0,
+    "cache_hit_rate": 0,
+    "average_query_time_ms": 0,
+    "memory_tier_utilization": {
+      "short_term_redis": "Available",
+      "medium_term_neo4j": "Available",
+      "long_term_postgresql": "Available",
+      "pattern_qdrant": "Available"
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "audit_session_id": "audit_1752160856",
+  "audit_duration_seconds": 0.277436,
+  "databases_audited": 4,
+  "individual_results": {
+    "neo4j": {
+      "database_type": "DatabaseType.NEO4J",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 670,
+      "expected_records": 100,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "basic_query_time_ms": 3.4090000000000003,
+        "complex_query_time_ms": 11.762
+      },
+      "issues_found": [],
+      "recommendations": [],
+      "audit_timestamp": "2025-07-10 11:20:56.593837"
+    },
+    "postgresql": {
+      "database_type": "DatabaseType.POSTGRESQL",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 143,
+      "expected_records": 100,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "documentation_query_time_ms": 0.825,
+        "documentation_record_count": 21,
+        "python_files_query_time_ms": 0.614,
+        "python_files_record_count": 85,
+        "configuration_files_query_time_ms": 0.683,
+        "configuration_files_record_count": 37,
+        "version_query_time_ms": 0.532,
+        "database_version": "PostgreSQL 15.13 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit"
+      },
+      "issues_found": [],
+      "recommendations": [],
+      "audit_timestamp": "2025-07-10 11:20:56.647560"
+    },
+    "redis": {
+      "database_type": "DatabaseType.REDIS",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 100.0,
+      "total_records": 168,
+      "expected_records": 50,
+      "data_completeness_percentage": 100.0,
+      "performance_metrics": {
+        "info_query_time_ms": 0.6719999999999999,
+        "redis_version": "7.4.4",
+        "memory_usage_bytes": 1438976,
+        "connected_clients": 1,
+        "keys_query_time_ms": 0.41,
+        "total_keys": 168,
+        "set_operation_time_ms": 0.5720000000000001,
+        "get_operation_time_ms": 0.393,
+        "persistent_manager_healthy": true,
+        "persistent_connection_count": 1
+      },
+      "issues_found": [],
+      "recommendations": [],
+      "audit_timestamp": "2025-07-10 11:20:56.650804"
+    },
+    "qdrant": {
+      "database_type": "DatabaseType.QDRANT",
+      "connection_status": "CONNECTED",
+      "data_integrity_score": 80.0,
+      "total_records": 5,
+      "expected_records": 200,
+      "data_completeness_percentage": 2.5,
+      "performance_metrics": {
+        "info_query_time_ms": 1.5479999999999998,
+        "collections_query_time_ms": 1.583,
+        "collection_count": 4,
+        "documentation_query_time_ms": 1.829,
+        "documentation_vector_count": 0,
+        "python_code_query_time_ms": 1.075,
+        "python_code_vector_count": 0,
+        "configurations_query_time_ms": 1.159,
+        "configurations_vector_count": 0,
+        "plc_embeddings_query_time_ms": 1.1869999999999998,
+        "plc_embeddings_vector_count": 5
+      },
+      "issues_found": [
+        "Vector search test failed: Unexpected Response: 400 (Bad Request)\nRaw response content:\nb'{\"status\":{\"error\":\"Wrong input: Vector dimension error: expected dim: 3072, got 384\"},\"time\":0.0004205}'",
+        "Vector count lower than expected"
+      ],
+      "recommendations": [
+        "Validate embedding generation process"
+      ],
+      "audit_timestamp": "2025-07-10 11:20:56.661641"
+    }
+  },
+  "cross_validation": {
+    "data_consistency_score": 76.0,
+    "missing_cross_references": [],
+    "orphaned_records": [],
+    "synchronization_issues": [
+      "File count mismatch: Neo4j(670) vs PostgreSQL(143)"
+    ],
+    "recommendations": [
+      "Address cross-database synchronization issues"
+    ]
+  },
+  "overall_health_score": 95.0,
+  "total_issues": 2,
+  "audit_timestamp": "2025-07-10T11:20:56.661801"
+}
