@@ -689,6 +689,158 @@ class Neo4jOrphanNodeResolver:
             validation_results["validation_success"] = False
             return validation_results
     
+    async def create_intelligent_relationships(self, orphaned_nodes: List[Dict], 
+                                            batch_size: int = 50, 
+                                            strategy: str = "intelligent") -> Dict[str, Any]:
+        """
+        Create relationships for orphaned nodes using the specified strategy.
+        
+        Args:
+            orphaned_nodes: List of orphaned node data
+            batch_size: Number of nodes to process at a time
+            strategy: Relationship creation strategy (intelligent, conservative, aggressive)
+        
+        Returns:
+            Dict with results including relationships created and orphans resolved
+        """
+        print(f"\n🔗 Creating Relationships with {strategy} Strategy")
+        print("-" * 50)
+        
+        results = {
+            "relationships_created": 0,
+            "orphans_resolved": 0,
+            "remaining_orphans": 0,
+            "batches_processed": 0,
+            "errors": []
+        }
+        
+        try:
+            # Process orphans in batches
+            total_orphans = len(orphaned_nodes)
+            batches = [orphaned_nodes[i:i + batch_size] for i in range(0, total_orphans, batch_size)]
+            
+            for batch_num, batch in enumerate(batches, 1):
+                print(f"\n📦 Processing batch {batch_num}/{len(batches)} ({len(batch)} nodes)")
+                
+                # Analyze existing data model for context
+                model_data = await self.analyze_existing_data_model()
+                
+                # Design strategy for this batch
+                batch_data = {
+                    "orphaned_nodes": batch,
+                    "orphan_distribution": {}
+                }
+                
+                # Calculate distribution for this batch
+                for node in batch:
+                    label = node.get("primary_label", "Unknown")
+                    batch_data["orphan_distribution"][label] = batch_data["orphan_distribution"].get(label, 0) + 1
+                
+                strategy_data = await self.design_relationship_strategy(batch_data, model_data)
+                
+                # Apply strategy based on selected approach
+                if strategy == "conservative":
+                    # Only create high-confidence relationships
+                    relationship_results = await self._create_conservative_relationships(batch, strategy_data)
+                elif strategy == "aggressive":
+                    # Create all possible relationships
+                    relationship_results = await self._create_aggressive_relationships(batch, strategy_data)
+                else:
+                    # Default intelligent strategy
+                    relationship_results = await self.generate_missing_relationships(batch_data, strategy_data)
+                
+                # Update results
+                results["relationships_created"] += relationship_results.get("total_created", 0)
+                results["batches_processed"] += 1
+                
+                # Log progress
+                print(f"   ✅ Created {relationship_results.get('total_created', 0)} relationships")
+            
+            # Count remaining orphans
+            with self.neo4j_driver.session() as session:
+                orphan_count_query = """
+                MATCH (n)
+                WHERE NOT (n)--()
+                RETURN count(n) as count
+                """
+                count_result = session.run(orphan_count_query)
+                results["remaining_orphans"] = count_result.single()["count"]
+            
+            # Calculate orphans resolved
+            results["orphans_resolved"] = total_orphans - results["remaining_orphans"]
+            
+            print(f"\n✅ Relationship Creation Complete!")
+            print(f"   Total relationships created: {results['relationships_created']}")
+            print(f"   Orphans resolved: {results['orphans_resolved']}")
+            print(f"   Remaining orphans: {results['remaining_orphans']}")
+            
+        except Exception as e:
+            logger.error(f"Error creating relationships: {e}")
+            results["errors"].append(str(e))
+        
+        return results
+    
+    async def _create_conservative_relationships(self, orphans: List[Dict], strategy: Dict[str, Any]) -> Dict[str, Any]:
+        """Create only high-confidence relationships"""
+        results = {"total_created": 0}
+        
+        with self.neo4j_driver.session() as session:
+            # Only create relationships for exact matches
+            for orphan in orphans:
+                node_id = orphan["node_id"]
+                label = orphan.get("primary_label", "")
+                
+                if label == "PythonFile" and orphan.get("file_path"):
+                    # Only link if exact repo match
+                    query = """
+                    MATCH (pf) WHERE id(pf) = $node_id
+                    MATCH (repo:GitHubRepo)
+                    WHERE pf.file_path STARTS WITH repo.name + '/'
+                    CREATE (pf)-[:IN_REPO]->(repo)
+                    RETURN count(*) as created
+                    """
+                    result = session.run(query, node_id=node_id)
+                    results["total_created"] += result.single()["created"]
+        
+        return results
+    
+    async def _create_aggressive_relationships(self, orphans: List[Dict], strategy: Dict[str, Any]) -> Dict[str, Any]:
+        """Create all possible relationships"""
+        results = {"total_created": 0}
+        
+        with self.neo4j_driver.session() as session:
+            # Create relationships more liberally
+            for orphan in orphans:
+                node_id = orphan["node_id"]
+                label = orphan.get("primary_label", "")
+                
+                if label == "PythonFile":
+                    # Link to any repo
+                    query = """
+                    MATCH (pf) WHERE id(pf) = $node_id
+                    MATCH (repo:GitHubRepo)
+                    CREATE (pf)-[:POSSIBLY_IN_REPO]->(repo)
+                    RETURN count(*) as created
+                    LIMIT 1
+                    """
+                    result = session.run(query, node_id=node_id)
+                    results["total_created"] += result.single()["created"]
+                
+                elif label == "Documentation":
+                    # Link to any file or repo
+                    query = """
+                    MATCH (doc) WHERE id(doc) = $node_id
+                    MATCH (target)
+                    WHERE target:PythonFile OR target:GitHubRepo
+                    CREATE (doc)-[:POSSIBLY_DOCUMENTS]->(target)
+                    RETURN count(*) as created
+                    LIMIT 2
+                    """
+                    result = session.run(query, node_id=node_id)
+                    results["total_created"] += result.single()["created"]
+        
+        return results
+    
     async def run_complete_orphan_resolution(self) -> Dict[str, Any]:
         """
         Execute complete orphan node resolution workflow

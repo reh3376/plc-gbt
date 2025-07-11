@@ -765,5 +765,303 @@ def version():
     click.echo("  • PostgreSQL (long-term memory)")
     click.echo("  • Qdrant (pattern matching)")
 
+@cli.group()
+def neo4j():
+    """
+    🔗 Neo4j graph database management commands
+    
+    Provides tools for managing Neo4j graph database including orphan node
+    detection, relationship creation, and graph health monitoring.
+    """
+    pass
+
+@neo4j.command()
+@click.option('--verbose', '-v', is_flag=True, help='Show detailed orphan information')
+@click.option('--limit', '-l', default=50, help='Maximum orphans to display')
+def orphans(verbose, limit):
+    """
+    🔍 Check for orphaned nodes in Neo4j
+    
+    Identifies nodes without any relationships and displays their count,
+    distribution by label, and details if verbose mode is enabled.
+    
+    Examples:
+      plc-memory neo4j orphans
+      plc-memory neo4j orphans --verbose --limit 20
+    """
+    async def _orphans():
+        try:
+            db_mgr, coord = await init_system()
+            neo4j_driver = db_mgr.connections.get(DatabaseType.NEO4J)
+            
+            if not neo4j_driver:
+                click.echo("❌ Neo4j connection not available", err=True)
+                return 1
+            
+            click.echo("🔍 Checking for orphaned nodes in Neo4j...")
+            
+            with neo4j_driver.session() as session:
+                # Count total orphans
+                count_query = """
+                MATCH (n)
+                WHERE NOT (n)--()
+                RETURN count(n) as orphan_count
+                """
+                count_result = session.run(count_query)
+                orphan_count = count_result.single()["orphan_count"]
+                
+                click.echo(f"\n📊 Total orphaned nodes: {orphan_count}")
+                
+                # Check threshold
+                threshold = 10  # From monitoring configuration
+                if orphan_count > threshold:
+                    click.echo(f"⚠️  WARNING: Orphan count ({orphan_count}) exceeds threshold ({threshold})")
+                elif orphan_count == 0:
+                    click.echo("✅ No orphaned nodes found - graph is fully connected!")
+                    return
+                else:
+                    click.echo(f"✅ Orphan count is within acceptable threshold (<= {threshold})")
+                
+                # Get distribution by label
+                distribution_query = """
+                MATCH (n)
+                WHERE NOT (n)--()
+                WITH labels(n) as node_labels
+                UNWIND node_labels as label
+                RETURN label, count(*) as count
+                ORDER BY count DESC
+                """
+                
+                dist_result = session.run(distribution_query)
+                
+                click.echo("\n📋 Orphan distribution by label:")
+                for record in dist_result:
+                    label = record["label"]
+                    count = record["count"]
+                    click.echo(f"   {label}: {count} orphans")
+                
+                if verbose:
+                    # Get detailed orphan information
+                    detail_query = f"""
+                    MATCH (n)
+                    WHERE NOT (n)--()
+                    RETURN id(n) as node_id, labels(n) as labels, 
+                           properties(n) as properties
+                    LIMIT {limit}
+                    """
+                    
+                    detail_result = session.run(detail_query)
+                    orphans = list(detail_result)
+                    
+                    if orphans:
+                        click.echo(f"\n📄 Detailed orphan information (showing {len(orphans)} of {orphan_count}):")
+                        for i, orphan in enumerate(orphans, 1):
+                            node_id = orphan["node_id"]
+                            labels = orphan["labels"]
+                            props = orphan["properties"]
+                            
+                            click.echo(f"\n   {i}. Node ID: {node_id}")
+                            click.echo(f"      Labels: {', '.join(labels)}")
+                            if props:
+                                click.echo(f"      Properties:")
+                                for key, value in props.items():
+                                    click.echo(f"        - {key}: {value}")
+                
+        except Exception as e:
+            click.echo(f"❌ Error checking orphans: {str(e)}", err=True)
+            return 1
+        finally:
+            await cleanup_system()
+    
+    asyncio.run(_orphans())
+
+@neo4j.command()
+@click.option('--dry-run', is_flag=True, help='Show what would be done without making changes')
+@click.option('--batch-size', '-b', default=50, help='Number of orphans to process at a time')
+@click.option('--strategy', '-s', 
+              type=click.Choice(['intelligent', 'conservative', 'aggressive']),
+              default='intelligent',
+              help='Relationship creation strategy')
+@click.confirmation_option(prompt='Are you sure you want to create relationships for orphaned nodes?')
+def resolve(dry_run, batch_size, strategy):
+    """
+    🔗 Create relationships for orphaned nodes
+    
+    Intelligently creates relationships for orphaned nodes based on their
+    properties, labels, and context. Uses AI Task Orchestrator methodology
+    to ensure proper graph connectivity.
+    
+    Strategies:
+    - intelligent: Creates relationships based on property analysis
+    - conservative: Only creates relationships with high confidence
+    - aggressive: Creates all possible relationships
+    
+    Examples:
+      plc-memory neo4j resolve --dry-run
+      plc-memory neo4j resolve --strategy conservative
+      plc-memory neo4j resolve --batch-size 100
+    """
+    async def _resolve():
+        try:
+            db_mgr, coord = await init_system()
+            neo4j_driver = db_mgr.connections.get(DatabaseType.NEO4J)
+            
+            if not neo4j_driver:
+                click.echo("❌ Neo4j connection not available", err=True)
+                return 1
+            
+            click.echo(f"🔗 Resolving orphaned nodes with {strategy} strategy...")
+            
+            if dry_run:
+                click.echo("🔍 DRY RUN - No changes will be made")
+            
+            # Import the orphan resolver
+            from neo4j_orphan_node_resolver import Neo4jOrphanNodeResolver
+            
+            resolver = Neo4jOrphanNodeResolver()
+            resolver.neo4j_driver = neo4j_driver
+            
+            # Get orphan analysis
+            analysis = await resolver.confirm_orphan_nodes()
+            total_orphans = len(analysis['orphaned_nodes'])
+            
+            if total_orphans == 0:
+                click.echo("✅ No orphaned nodes to resolve!")
+                return
+            
+            click.echo(f"📊 Found {total_orphans} orphaned nodes")
+            click.echo(f"📦 Processing in batches of {batch_size}")
+            
+            if not dry_run:
+                # Create relationships
+                click.echo("\n🔧 Creating relationships...")
+                
+                results = await resolver.create_intelligent_relationships(
+                    analysis['orphaned_nodes'],
+                    batch_size=batch_size,
+                    strategy=strategy
+                )
+                
+                click.echo(f"\n✅ Resolution complete!")
+                click.echo(f"   Created relationships: {results.get('relationships_created', 0)}")
+                click.echo(f"   Orphans resolved: {results.get('orphans_resolved', 0)}")
+                click.echo(f"   Remaining orphans: {results.get('remaining_orphans', 0)}")
+                
+                # Check if we're now under threshold
+                if results.get('remaining_orphans', 0) <= 10:
+                    click.echo("\n🎉 Orphan count is now within acceptable threshold!")
+                
+            else:
+                # Dry run - show what would be done
+                click.echo("\n📋 Would create relationships for:")
+                for label, count in analysis['orphan_distribution'].items():
+                    click.echo(f"   {label}: {count} nodes")
+                    
+        except Exception as e:
+            click.echo(f"❌ Error resolving orphans: {str(e)}", err=True)
+            return 1
+        finally:
+            await cleanup_system()
+    
+    asyncio.run(_resolve())
+
+@neo4j.command()
+@click.option('--detailed', '-d', is_flag=True, help='Show detailed health information')
+def health(detailed):
+    """
+    🏥 Check Neo4j graph health
+    
+    Performs comprehensive health checks including connectivity, 
+    constraint status, orphan count, and performance metrics.
+    """
+    async def _health():
+        try:
+            db_mgr, coord = await init_system()
+            neo4j_driver = db_mgr.connections.get(DatabaseType.NEO4J)
+            
+            if not neo4j_driver:
+                click.echo("❌ Neo4j connection not available", err=True)
+                return 1
+            
+            click.echo("🏥 Neo4j Graph Health Check")
+            click.echo("=" * 40)
+            
+            with neo4j_driver.session() as session:
+                # Basic stats
+                stats_query = """
+                MATCH (n)
+                WITH count(n) as total_nodes
+                MATCH ()-[r]-()
+                WITH total_nodes, count(r) as total_relationships
+                MATCH (orphan)
+                WHERE NOT (orphan)--()
+                RETURN total_nodes, total_relationships, 
+                       count(orphan) as orphan_count
+                """
+                
+                result = session.run(stats_query).single()
+                
+                total_nodes = result["total_nodes"]
+                total_relationships = result["total_relationships"]
+                orphan_count = result["orphan_count"]
+                connectivity = ((total_nodes - orphan_count) / total_nodes * 100) if total_nodes > 0 else 0
+                
+                click.echo(f"📊 Graph Statistics:")
+                click.echo(f"   Total nodes: {total_nodes:,}")
+                click.echo(f"   Total relationships: {total_relationships:,}")
+                click.echo(f"   Orphaned nodes: {orphan_count:,}")
+                click.echo(f"   Connectivity: {connectivity:.1f}%")
+                
+                # Health status
+                click.echo(f"\n🎯 Health Status:")
+                
+                if orphan_count == 0:
+                    click.echo("   ✅ No orphaned nodes - Excellent!")
+                elif orphan_count <= 10:
+                    click.echo(f"   ✅ Orphan count within threshold ({orphan_count} <= 10)")
+                else:
+                    click.echo(f"   ⚠️  Orphan count exceeds threshold ({orphan_count} > 10)")
+                
+                if connectivity >= 99:
+                    click.echo("   ✅ Connectivity excellent (>99%)")
+                elif connectivity >= 95:
+                    click.echo("   ✅ Connectivity good (>95%)")
+                else:
+                    click.echo(f"   ⚠️  Connectivity needs improvement ({connectivity:.1f}%)")
+                
+                if detailed:
+                    # Check constraints
+                    constraints_query = "SHOW CONSTRAINTS"
+                    constraints_result = session.run(constraints_query)
+                    constraints = list(constraints_result)
+                    
+                    click.echo(f"\n🔐 Active Constraints: {len(constraints)}")
+                    
+                    # Node type distribution
+                    type_query = """
+                    MATCH (n)
+                    WITH labels(n) as node_labels
+                    UNWIND node_labels as label
+                    RETURN label, count(*) as count
+                    ORDER BY count DESC
+                    LIMIT 10
+                    """
+                    
+                    type_result = session.run(type_query)
+                    
+                    click.echo("\n📋 Top 10 Node Types:")
+                    for record in type_result:
+                        label = record["label"]
+                        count = record["count"]
+                        click.echo(f"   {label}: {count:,} nodes")
+                
+        except Exception as e:
+            click.echo(f"❌ Error checking health: {str(e)}", err=True)
+            return 1
+        finally:
+            await cleanup_system()
+    
+    asyncio.run(_health())
+
 if __name__ == '__main__':
     cli() 

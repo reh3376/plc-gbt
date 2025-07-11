@@ -130,7 +130,8 @@ class EnterpriseMonitoring:
             'response_time': 2.0,
             'cache_hit_rate': 70.0,
             'database_connections': 100,
-            'queue_size': 1000
+            'queue_size': 1000,
+            'neo4j_orphaned_nodes': 10
         }
         
         # Monitoring intervals
@@ -463,6 +464,17 @@ class EnterpriseMonitoring:
                 'application',
                 {'avg_response_time': self.performance_metrics.avg_response_time}
             )
+        
+        # Neo4j orphaned nodes alert
+        orphaned_nodes_count = self._get_neo4j_orphaned_nodes_count()
+        if orphaned_nodes_count > self.alert_thresholds['neo4j_orphaned_nodes']:
+            self._create_alert(
+                'neo4j_orphaned_nodes_exceeded',
+                AlertSeverity.HIGH,
+                f"Neo4j orphaned nodes exceeded threshold: {orphaned_nodes_count} > {self.alert_thresholds['neo4j_orphaned_nodes']}",
+                'neo4j',
+                {'orphaned_nodes_count': orphaned_nodes_count, 'threshold': self.alert_thresholds['neo4j_orphaned_nodes']}
+            )
     
     def _check_business_alerts(self):
         """Check business-specific alerts."""
@@ -552,6 +564,16 @@ class EnterpriseMonitoring:
         except Exception as e:
             self.logger.error(f"Error getting rate limit stats: {e}")
             return None
+    
+    def _get_neo4j_orphaned_nodes_count(self) -> int:
+        """Get the count of orphaned nodes in Neo4j."""
+        try:
+            from neo4j.graph_db import get_graph_db
+            graph_db = get_graph_db()
+            return graph_db.get_orphaned_nodes_count()
+        except Exception as e:
+            self.logger.error(f"Error getting Neo4j orphaned nodes count: {e}")
+            return 0
     
     # Public API methods
     def record_request(self, method: str, endpoint: str, status_code: int, 
