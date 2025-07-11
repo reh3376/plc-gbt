@@ -1,0 +1,30 @@
+[
+  {
+    "model_id": "ft:gpt-3.5-turbo-0125:whiskey-house:plc-expert:Bs1vLs9Z",
+    "base_model": "gpt-3.5-turbo-0125",
+    "date": "2025-01-17T06:23:00",
+    "training_examples": "Unknown",
+    "validation_score": null,
+    "version": "v0.9",
+    "notes": "Initial fine-tuning attempt - wrong base model"
+  },
+  {
+    "model_id": "ft:gpt-4o:industrial-control:20250117",
+    "base_model": "gpt-4o",
+    "date": "2025-01-17T00:00:00",
+    "training_examples": 8000,
+    "validation_score": 91,
+    "version": "v1.0",
+    "notes": "INVALID - GPT-4o does not support fine-tuning"
+  },
+  {
+    "model_id": "ftjob-FyqfDD3U8fRnNCUxmgojm4Yw",
+    "base_model": "gpt-4o-mini-2024-07-18",
+    "date": "2025-01-17T13:00:00",
+    "training_examples": 120,
+    "validation_score": null,
+    "version": "v2.0",
+    "notes": "Corrected fine-tuning with GPT-4o-mini using Phase 10 temperature control data",
+    "status": "training"
+  }
+] 

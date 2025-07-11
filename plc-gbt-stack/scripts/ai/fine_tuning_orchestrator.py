@@ -47,18 +47,18 @@ class FineTuningOrchestrator:
         
         # Training configuration
         self.training_config = {
-            "model": "gpt-3.5-turbo-0125",  # Base model for fine-tuning
+            "model": os.getenv("OPENAI_FINETUNE_BASE_MODEL", "gpt-4o-mini-2024-07-18"),  # Use GPT-4o-mini as default (supports fine-tuning)
             "n_epochs": 3,           # Number of training epochs
             "batch_size": 1,         # Batch size for training
             "learning_rate_multiplier": 0.1,  # Learning rate multiplier
             "prompt_loss_weight": 0.01,       # Weight for prompt loss
-            "suffix": "plc-expert"   # Model suffix
+            "suffix": "industrial-control"    # Model suffix for consistency
         }
         
-        # Cost tracking
+        # Cost tracking (Updated for GPT-4o-mini)
         self.cost_estimates = {
-            "training_cost_per_1k_tokens": 0.0080,  # GPT-4o mini training cost
-            "usage_cost_per_1k_tokens": 0.0015,     # GPT-4o mini usage cost
+            "training_cost_per_1k_tokens": 0.0030,  # GPT-4o-mini training cost
+            "usage_cost_per_1k_tokens": 0.0001,     # GPT-4o-mini usage cost
             "estimated_tokens_per_example": 200      # Average tokens per training example
         }
         
