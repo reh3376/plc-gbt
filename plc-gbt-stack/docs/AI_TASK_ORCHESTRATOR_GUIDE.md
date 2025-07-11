@@ -555,8 +555,8 @@ roadmap_update = {
         "Sub-100ms response times achieved"
     ],
     "deliverables": {
-        "orchestrator": "[Production Orchestrator](../scripts/ai/phase12_production_orchestrator.py)",
-        "validation": "[Enhanced Validation Framework](../scripts/ai/phase12_enhanced_validation.py)",
+        "orchestrator": "[Production Orchestrator](scripts/ai/phases/phase12/phase12_production_orchestrator.py)",
+        "validation": "[Enhanced Validation Framework](scripts/ai/phases/phase12/phase12_enhanced_validation.py)",
         "summary": "[Phase 12 Completion Summary](../docs/phase12_final_completion_summary.md)"
     }
 }

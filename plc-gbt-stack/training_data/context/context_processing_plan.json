@@ -1,0 +1,73 @@
+{
+  "session_id": "ai_task_orchestrator_1752212415",
+  "methodology": "AI Task Orchestrator Guide",
+  "task_complexity": "EXTENSIVE",
+  "documents": [
+    {
+      "name": "Enhanced PID.docx",
+      "category": "\ud83c\udfaf PID Control Theory",
+      "size_mb": 0.7211618423461914,
+      "strategy": "\ud83d\udd27 Document Parser + Q&A Generation",
+      "priority": "HIGH"
+    },
+    {
+      "name": "basic_loop_tuning_methods.docx",
+      "category": "\ud83d\udcda General Control",
+      "size_mb": 1.679884910583496,
+      "strategy": "\ud83d\udd27 Document Parser + Q&A Generation",
+      "priority": "MEDIUM"
+    },
+    {
+      "name": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "\ud83c\udfaf PID Control Theory",
+      "size_mb": 0.057631492614746094,
+      "strategy": "\ud83d\udd27 Document Parser + Q&A Generation",
+      "priority": "HIGH"
+    },
+    {
+      "name": "Quick Start Guide.docx",
+      "category": "\ud83d\udcda General Control",
+      "size_mb": 0.2159881591796875,
+      "strategy": "\ud83d\udd27 Document Parser + Q&A Generation",
+      "priority": "MEDIUM"
+    },
+    {
+      "name": "WHK Unified Control Philosophy to achieve advanced dynamic process control.docx",
+      "category": "\ud83d\udccb Control Philosophy",
+      "size_mb": 0.06755256652832031,
+      "strategy": "\ud83d\udd27 Document Parser + Q&A Generation",
+      "priority": "MEDIUM"
+    },
+    {
+      "name": "Studio5000_PhaseManager_Framework_Final.docx",
+      "category": "\ud83d\udee0\ufe0f Implementation",
+      "size_mb": 0.06628227233886719,
+      "strategy": "\ud83d\udd27 Document Parser + Q&A Generation",
+      "priority": "MEDIUM"
+    },
+    {
+      "name": "Model Based Tuning.docx",
+      "category": "\ud83d\udcda General Control",
+      "size_mb": 0.0327911376953125,
+      "strategy": "\ud83d\udd27 Document Parser + Q&A Generation",
+      "priority": "MEDIUM"
+    },
+    {
+      "name": "WHK Digital Strategy - 2023 V1r4.docx",
+      "category": "\ud83d\udccb Control Philosophy",
+      "size_mb": 0.047125816345214844,
+      "strategy": "\ud83d\udd27 Document Parser + Q&A Generation",
+      "priority": "MEDIUM"
+    },
+    {
+      "name": "WHK PID Granary V3_2.pdf",
+      "category": "\ud83c\udfaf PID Control Theory",
+      "size_mb": 0.4661731719970703,
+      "strategy": "\ud83d\udd27 Document Parser + Q&A Generation",
+      "priority": "HIGH"
+    }
+  ],
+  "total_documents": 9,
+  "total_size_mb": 3.3545913696289062,
+  "processing_timestamp": "2025-07-11T01:40:15.807604"
+}

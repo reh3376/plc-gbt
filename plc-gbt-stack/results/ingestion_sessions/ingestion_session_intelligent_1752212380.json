@@ -1,0 +1,44 @@
+{
+  "session_id": "ingestion_orch_1752212380",
+  "root_path": "/Users/reh3376/repos/plc-gbt/docs/context",
+  "analysis_depth": "comprehensive",
+  "methodology": "AI Task Orchestrator Intelligent Ingestion",
+  "total_files_analyzed": 1,
+  "total_batches_created": 1,
+  "successfully_processed": 1,
+  "failed_files": 0,
+  "processing_time_ms": 36.43393516540527,
+  "files_per_second": 27.446939109380622,
+  "bandwidth_management": {
+    "peak_load": "0.0%",
+    "rate_limited_operations": 1,
+    "avg_operation_interval_ms": 0.0
+  },
+  "complexity_analysis": {
+    "complexity_distribution": {
+      "simple": 0,
+      "moderate": 1,
+      "complex": 0,
+      "extensive": 0
+    },
+    "strategy_distribution": {
+      "sequential": 0,
+      "small_batch": 0,
+      "medium_batch": 1,
+      "large_batch": 0
+    },
+    "total_batches": 1,
+    "average_batch_size": 1.0
+  },
+  "performance_metrics": {
+    "total_files": 1,
+    "completed_files": 1,
+    "failed_files": 0,
+    "skipped_files": 0,
+    "total_batches": 1,
+    "completed_batches": 1,
+    "total_processing_time_ms": 36.43393516540527,
+    "average_file_time_ms": 36.43393516540527
+  },
+  "checkpoints_created": 0
+}

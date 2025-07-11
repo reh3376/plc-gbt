@@ -1,0 +1,27 @@
+{
+  "dataset_info": {
+    "error": "Process identification failed: could not convert string to float: '#VALUE!'"
+  },
+  "process_dynamics": {
+    "error": "Process identification failed: could not convert string to float: '#VALUE!'"
+  },
+  "current_performance": {
+    "error": "Process identification failed: could not convert string to float: '#VALUE!'"
+  },
+  "pid_analysis": {
+    "error": "Process identification failed: could not convert string to float: '#VALUE!'"
+  },
+  "timing_analysis": {
+    "error": "Process identification failed: could not convert string to float: '#VALUE!'"
+  },
+  "strategy_analysis": {
+    "error": "Process identification failed: could not convert string to float: '#VALUE!'"
+  },
+  "industrial_validation": {
+    "error": "Process identification failed: could not convert string to float: '#VALUE!'"
+  },
+  "overall_validation_score": 0.0,
+  "improvement_potential": {
+    "error": "Process identification failed: could not convert string to float: '#VALUE!'"
+  }
+}

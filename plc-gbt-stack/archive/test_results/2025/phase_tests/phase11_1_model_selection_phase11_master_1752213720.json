@@ -1,0 +1,101 @@
+{
+  "selected_model": "gpt-4o",
+  "model_evaluation": {
+    "gpt-4o": {
+      "specifications": {
+        "strengths": [
+          "Mathematical reasoning",
+          "Technical documentation"
+        ],
+        "context_window": 128000,
+        "reasoning_capability": "excellent",
+        "fine_tuning_support": true
+      },
+      "test_response": {
+        "response_quality": "good",
+        "response_time": 1.2,
+        "technical_accuracy": "high",
+        "available": true
+      },
+      "evaluation_score": 1.0,
+      "recommended_for": [
+        "Primary model candidate",
+        "Large context applications",
+        "Mathematical reasoning tasks",
+        "Specialized domain fine-tuning"
+      ]
+    },
+    "gpt-4o-mini": {
+      "specifications": {
+        "strengths": [
+          "Efficiency",
+          "Cost-effective",
+          "Fast inference"
+        ],
+        "context_window": 128000,
+        "reasoning_capability": "good",
+        "fine_tuning_support": true
+      },
+      "test_response": {
+        "response_quality": "good",
+        "response_time": 1.2,
+        "technical_accuracy": "high",
+        "available": true
+      },
+      "evaluation_score": 0.8999999999999999,
+      "recommended_for": [
+        "Primary model candidate",
+        "Large context applications",
+        "Specialized domain fine-tuning"
+      ]
+    },
+    "gpt-3.5-turbo": {
+      "specifications": {
+        "strengths": [
+          "Proven fine-tuning",
+          "Good performance"
+        ],
+        "context_window": 16385,
+        "reasoning_capability": "good",
+        "fine_tuning_support": true
+      },
+      "test_response": {
+        "response_quality": "good",
+        "response_time": 1.2,
+        "technical_accuracy": "high",
+        "available": true
+      },
+      "evaluation_score": 0.6384023437499999,
+      "recommended_for": [
+        "Specialized domain fine-tuning"
+      ]
+    }
+  },
+  "model_configuration": {
+    "base_model": "gpt-4o",
+    "training_dataset_path": "plc-gbt-stack/results/phase10/phase10_specialized_training_data_phase10_training_1752210513.jsonl",
+    "validation_dataset_path": "validation_data.jsonl",
+    "test_dataset_path": "test_data.jsonl",
+    "hyperparameters": {
+      "n_epochs": 3,
+      "batch_size": 1,
+      "learning_rate_multiplier": 0.1,
+      "prompt_loss_weight": 0.1,
+      "compute_classification_metrics": true
+    },
+    "specialized_domains": [
+      "PID Controller Tuning",
+      "Process Control Theory",
+      "Mathematical Modeling",
+      "Stability Analysis",
+      "Optimization Theory",
+      "Safety Systems",
+      "Real-time Control",
+      "Industrial Automation"
+    ],
+    "mathematical_validation_enabled": true,
+    "real_time_inference_optimized": true
+  },
+  "selection_rationale": "Selected gpt-4o based on highest evaluation score",
+  "phase_completion": "100%"
+}

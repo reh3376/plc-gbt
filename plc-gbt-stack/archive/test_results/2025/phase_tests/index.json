@@ -1,0 +1,14 @@
+{
+  "category": "phase37",
+  "description": "Phase 3.7 repository migration and ACD file processing results",
+  "file_count": 6,
+  "files": [
+    "phase37_validation_report_20250707_115724.json",
+    "phase37_final_repository_validation_20250707_134031.json",
+    "phase37_validation_report_20250707_120623.json",
+    "phase37_demo_report_20250707_112434.json",
+    "phase37_discrepancy_analysis_20250707_120338.json",
+    "phase37_final_completion_report_20250707_115701.json"
+  ],
+  "last_updated": "2025-07-08T11:32:18.755701"
+}

@@ -1,0 +1,103 @@
+{
+  "timestamp": "2025-07-01T13:52:19.742651",
+  "tests": [
+    {
+      "test_name": "L5X Document Parsing",
+      "status": "PASS",
+      "duration_ms": 0.28,
+      "details": {
+        "file_type": "L5X",
+        "routines_found": 2,
+        "aois_found": 1,
+        "udts_found": 1,
+        "tags_found": 4,
+        "devices_found": 1
+      }
+    },
+    {
+      "test_name": "PDF Text Processing",
+      "status": "WARN",
+      "duration_ms": 0.04,
+      "details": {
+        "sections_found": 5,
+        "qa_pairs_found": 3,
+        "document_type": "Safety Manual",
+        "expected_qa_pairs": 3
+      }
+    },
+    {
+      "test_name": "ETL Transformation",
+      "status": "PASS",
+      "duration_ms": 4217.14,
+      "details": {
+        "nodes_created": 10,
+        "relationships_created": 7,
+        "vectors_created": 5,
+        "errors": 0
+      }
+    },
+    {
+      "test_name": "Database Connections",
+      "status": "PASS",
+      "duration_ms": 35.27,
+      "details": {
+        "neo4j": true,
+        "qdrant": true
+      }
+    },
+    {
+      "test_name": "ETL Loading",
+      "status": "PASS",
+      "duration_ms": 128.29,
+      "details": {
+        "nodes_loaded": 7,
+        "relationships_loaded": 2,
+        "vectors_loaded": 5,
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "test_name": "Database Statistics",
+      "status": "PASS",
+      "duration_ms": 0,
+      "details": {
+        "neo4j_total_nodes": 21,
+        "neo4j_total_relationships": 25,
+        "qdrant_vectors": 5
+      }
+    },
+    {
+      "test_name": "E2E Pipeline Integration",
+      "status": "PASS",
+      "duration_ms": 4995.24,
+      "details": {
+        "parse_success": true,
+        "transform_nodes": 10,
+        "transform_relationships": 7,
+        "transform_vectors": 5,
+        "load_nodes": 7,
+        "load_relationships": 2,
+        "load_vectors": 5,
+        "total_errors": 0
+      }
+    },
+    {
+      "test_name": "Data Quality Validation",
+      "status": "PASS",
+      "duration_ms": 3.12,
+      "details": {
+        "uuid_consistency": true,
+        "text_chunking": true,
+        "chunk_count": 10,
+        "sample_uuid": "b5dfa399..."
+      }
+    }
+  ],
+  "summary": {
+    "total_tests": 8,
+    "passed": 7,
+    "failed": 0,
+    "warnings": 1
+  }
+}

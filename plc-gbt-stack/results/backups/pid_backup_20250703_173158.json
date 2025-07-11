@@ -1,9 +1,0 @@
-{
-  "project_path": "/test/project.ACD",
-  "timestamp": "20250703_173158",
-  "parameters": {
-    "PGain": 1.0,
-    "IGain": 0.5,
-    "DGain": 0.1
-  }
-}

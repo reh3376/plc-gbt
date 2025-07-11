@@ -183,7 +183,7 @@ class Phase8ComprehensiveTestSuite:
         try:
             # Import and test PID domain models
             sys.path.insert(0, str(project_root / "scripts/ai"))
-            from phase8_day1_implementation import PIDDomainModelManager, PIDLoop, ProcessType
+            from scripts.ai.phases.phase8.phase8_day1_implementation import PIDDomainModelManager, PIDLoop, ProcessType
             
             manager = PIDDomainModelManager()
             sample_loop = manager.create_sample_pid_loop()
@@ -347,7 +347,7 @@ class Phase8ComprehensiveTestSuite:
         test_start = datetime.now()
         try:
             # Import and test multi-PV analysis
-            from phase8_day2_implementation import PVAnalysis, LoopStrategy, TuningRule
+            from scripts.ai.phases.phase8.phase8_day2_implementation import PVAnalysis, LoopStrategy, TuningRule
             
             # Create sample PV analysis
             pv_analysis = PVAnalysis(
@@ -472,7 +472,7 @@ class Phase8ComprehensiveTestSuite:
         try:
             # Import and test Rockwell parameter mapping
             sys.path.insert(0, str(project_root / "scripts/ai"))
-            from phase8_day3_orchestrator import ParameterMappingSystem, RockwellParameter
+            from scripts.ai.phases.phase8.phase8_day3_orchestrator import ParameterMappingSystem, RockwellParameter
             
             mapper = ParameterMappingSystem()
             
@@ -538,8 +538,8 @@ class Phase8ComprehensiveTestSuite:
         test_start = datetime.now()
         try:
             # Test that Phase 8 Day 1 models work with Day 2 analysis
-            from phase8_day1_implementation import PIDDomainModelManager
-            from phase8_day2_implementation import PVAnalysis
+            from scripts.ai.phases.phase8.phase8_day1_implementation import PIDDomainModelManager
+            from scripts.ai.phases.phase8.phase8_day2_implementation import PVAnalysis
             
             manager = PIDDomainModelManager()
             sample_loop = manager.create_sample_pid_loop()

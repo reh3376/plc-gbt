@@ -1,0 +1,44 @@
+{
+  "session_id": "ingestion_orch_1752162499",
+  "root_path": "/Users/reh3376/repos/plc-200",
+  "analysis_depth": "structural",
+  "methodology": "AI Task Orchestrator Intelligent Ingestion",
+  "total_files_analyzed": 14,
+  "total_batches_created": 2,
+  "successfully_processed": 8,
+  "failed_files": 6,
+  "processing_time_ms": 288.7768745422363,
+  "files_per_second": 27.703049327206166,
+  "bandwidth_management": {
+    "peak_load": "0.0%",
+    "rate_limited_operations": 14,
+    "avg_operation_interval_ms": 13.018718132605919
+  },
+  "complexity_analysis": {
+    "complexity_distribution": {
+      "simple": 13,
+      "moderate": 0,
+      "complex": 0,
+      "extensive": 1
+    },
+    "strategy_distribution": {
+      "sequential": 1,
+      "small_batch": 0,
+      "medium_batch": 0,
+      "large_batch": 13
+    },
+    "total_batches": 2,
+    "average_batch_size": 7.0
+  },
+  "performance_metrics": {
+    "total_files": 14,
+    "completed_files": 8,
+    "failed_files": 6,
+    "skipped_files": 0,
+    "total_batches": 2,
+    "completed_batches": 2,
+    "total_processing_time_ms": 288.7768745422363,
+    "average_file_time_ms": 36.09710931777954
+  },
+  "checkpoints_created": 0
+}

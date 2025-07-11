@@ -1,0 +1,15 @@
+{
+  "generation_date": "2025-07-11T01:58:02.775018",
+  "session_id": "phase10_training_1752211813",
+  "total_qa_pairs": 120,
+  "categories": {
+    "temperature_control": 120,
+    "pid_tuning": 0,
+    "disturbance_rejection": 0,
+    "process_dynamics": 0,
+    "performance_analysis": 0,
+    "mathematical_validation": 0
+  },
+  "training_file": "results/phase10/phase10_specialized_training_data_phase10_training_1752211813.jsonl",
+  "dataset_source": "/Users/reh3376/repos/plc-gbt/docs/context/dataset_still_steam_till_03_02.csv"
+}

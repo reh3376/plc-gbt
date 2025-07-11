@@ -25,7 +25,7 @@ from enum import Enum
 from pathlib import Path
 import uuid
 from abc import ABC, abstractmethod
-from wolfram_alpha_context_enhancer import WolframAlphaProEnhancer
+from scripts.ai.wolfram.wolfram_alpha_context_enhancer import WolframAlphaProEnhancer
 from advanced_normalization_functions import WolframNormalizationLibrary, ExperienceLevel
 
 class NormalizationMethod(Enum):

@@ -1,0 +1,1450 @@
+{
+  "methodology": "AI Task Orchestrator Guide",
+  "session_id": "context_training_1752212564",
+  "generation_date": "2025-07-11T01:42:44.708498",
+  "source_documents": [
+    {
+      "name": "Enhanced PID.docx",
+      "content_length": 20302,
+      "qa_pairs_generated": 31,
+      "processing_time": "2025-07-11T01:42:44.319921"
+    },
+    {
+      "name": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "content_length": 46249,
+      "qa_pairs_generated": 24,
+      "processing_time": "2025-07-11T01:42:44.347126"
+    },
+    {
+      "name": "WHK PID Granary V3_2.pdf",
+      "content_length": 1292,
+      "qa_pairs_generated": 1,
+      "processing_time": "2025-07-11T01:42:44.628483"
+    },
+    {
+      "name": "basic_loop_tuning_methods.docx",
+      "content_length": 66393,
+      "qa_pairs_generated": 30,
+      "processing_time": "2025-07-11T01:42:44.699277"
+    },
+    {
+      "name": "Quick Start Guide.docx",
+      "content_length": 4396,
+      "qa_pairs_generated": 23,
+      "processing_time": "2025-07-11T01:42:44.708434"
+    }
+  ],
+  "total_qa_pairs": 109,
+  "categories": {
+    "PID Control Theory": 45,
+    "Control Tuning": 28,
+    "General Control": 23,
+    "Advanced Control": 13
+  },
+  "openai_format": [
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: The\u00a0Enhanced PID (PIDE) instruction provides enhanced capabilities over the stan...?"
+        },
+        {
+          "role": "assistant",
+          "content": "The\u00a0Enhanced PID (PIDE) instruction provides enhanced capabilities over the standard PID instruction"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: The instruction uses the velocity form of the PID algorithm...?"
+        },
+        {
+          "role": "assistant",
+          "content": "The instruction uses the velocity form of the PID algorithm"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, what tuning approach is described: The gain terms are applied to the change in the value of error or PV, not the va...?"
+        },
+        {
+          "role": "assistant",
+          "content": "The gain terms are applied to the change in the value of error or PV, not the value of error or PV"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: The PID algorithm regulates the CV output in order to maintain the PV at the SP ...?"
+        },
+        {
+          "role": "assistant",
+          "content": "The PID algorithm regulates the CV output in order to maintain the PV at the SP when the instruction executes in Cascade/Ratio or Auto modes"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: When ControlAction is set, the calculated value of EPercent and PVPIDPercent is ...?"
+        },
+        {
+          "role": "assistant",
+          "content": "When ControlAction is set, the calculated value of EPercent and PVPIDPercent is negated before being used by the control algorithm"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: The following table describes how the instruction calculates the PID terms...?"
+        },
+        {
+          "role": "assistant",
+          "content": "The following table describes how the instruction calculates the PID terms"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: The PID control algorithm computes the value for CV by summing Delta PTerm, Delt...?"
+        },
+        {
+          "role": "assistant",
+          "content": "The PID control algorithm computes the value for CV by summing Delta PTerm, Delta Term, Delta"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: The PIDE instruction uses a velocity form PID algorithm similar to that used in ...?"
+        },
+        {
+          "role": "assistant",
+          "content": "The PIDE instruction uses a velocity form PID algorithm similar to that used in most DCS systems"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, what tuning approach is described: Bumpless adaptive gain changes \u2013 You can change gains on the fly without initial...?"
+        },
+        {
+          "role": "assistant",
+          "content": "Bumpless adaptive gain changes \u2013 You can change gains on the fly without initializing the algorithm"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, what tuning approach is described: In this form of the algorithm, each term of the algorithm (proportional, integra...?"
+        },
+        {
+          "role": "assistant",
+          "content": "In this form of the algorithm, each term of the algorithm (proportional, integral, and derivative) has a separate gain"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, what tuning approach is described: Changing one gain only affects that term and not any of the others, where:...?"
+        },
+        {
+          "role": "assistant",
+          "content": "Changing one gain only affects that term and not any of the others, where:"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, what tuning approach is described: This form of the algorithm changes the proportional gain into a controller gain...?"
+        },
+        {
+          "role": "assistant",
+          "content": "This form of the algorithm changes the proportional gain into a controller gain"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, what tuning approach is described: By changing the controller gain, you change the action of all three terms (propo...?"
+        },
+        {
+          "role": "assistant",
+          "content": "By changing the controller gain, you change the action of all three terms (proportional, integral, and derivative) at the same time, where:"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: The PIDE equations above are representative of the algorithms used by the PIDE i...?"
+        },
+        {
+          "role": "assistant",
+          "content": "The PIDE equations above are representative of the algorithms used by the PIDE instruction"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, what tuning approach is described: You can substitute the change in error values for the change in PV (in percent o...?"
+        },
+        {
+          "role": "assistant",
+          "content": "You can substitute the change in error values for the change in PV (in percent of span) for the proportional and derivative terms by manipulating the parameters PVEProportional and PVEDerivative"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: By default, the PIDE instruction uses the change in error for the proportional t...?"
+        },
+        {
+          "role": "assistant",
+          "content": "By default, the PIDE instruction uses the change in error for the proportional term and the change in PV for the derivative term"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "What control concept does Enhanced PID.docx explain: This eliminates large derivative spikes on changes in setpoint...?"
+        },
+        {
+          "role": "assistant",
+          "content": "This eliminates large derivative spikes on changes in setpoint"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, how does PID control work in this context: You can convert the gains used between the different PIDE algorithm forms using ...?"
+        },
+        {
+          "role": "assistant",
+          "content": "You can convert the gains used between the different PIDE algorithm forms using these equations:"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, what tuning approach is described: Each algorithm provides identical control with the appropriate gains...?"
+        },
+        {
+          "role": "assistant",
+          "content": "Each algorithm provides identical control with the appropriate gains"
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "According to Enhanced PID.docx, what tuning approach is described: Some people prefer the independent gains style because they can manipulate indiv...?"
+        },
+        {
+          "role": "assistant",
+          "content": "Some people prefer the independent gains style because they can manipulate individual gains without affecting the other terms"
+        }
+      ]
+    }
+  ],
+  "full_qa_pairs": [
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The\u00a0Enhanced PID (PIDE) instruction provides enhanced capabilities over the stan...?",
+      "answer": "The\u00a0Enhanced PID (PIDE) instruction provides enhanced capabilities over the standard PID instruction",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The instruction uses the velocity form of the PID algorithm...?",
+      "answer": "The instruction uses the velocity form of the PID algorithm",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, what tuning approach is described: The gain terms are applied to the change in the value of error or PV, not the va...?",
+      "answer": "The gain terms are applied to the change in the value of error or PV, not the value of error or PV",
+      "source": "Enhanced PID.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "gain"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The PID algorithm regulates the CV output in order to maintain the PV at the SP ...?",
+      "answer": "The PID algorithm regulates the CV output in order to maintain the PV at the SP when the instruction executes in Cascade/Ratio or Auto modes",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "cascade"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: When ControlAction is set, the calculated value of EPercent and PVPIDPercent is ...?",
+      "answer": "When ControlAction is set, the calculated value of EPercent and PVPIDPercent is negated before being used by the control algorithm",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The following table describes how the instruction calculates the PID terms...?",
+      "answer": "The following table describes how the instruction calculates the PID terms",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The PID control algorithm computes the value for CV by summing Delta PTerm, Delt...?",
+      "answer": "The PID control algorithm computes the value for CV by summing Delta PTerm, Delta Term, Delta",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The PIDE instruction uses a velocity form PID algorithm similar to that used in ...?",
+      "answer": "The PIDE instruction uses a velocity form PID algorithm similar to that used in most DCS systems",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, what tuning approach is described: Bumpless adaptive gain changes \u2013 You can change gains on the fly without initial...?",
+      "answer": "Bumpless adaptive gain changes \u2013 You can change gains on the fly without initializing the algorithm",
+      "source": "Enhanced PID.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "gain"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, what tuning approach is described: In this form of the algorithm, each term of the algorithm (proportional, integra...?",
+      "answer": "In this form of the algorithm, each term of the algorithm (proportional, integral, and derivative) has a separate gain",
+      "source": "Enhanced PID.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "proportional",
+        "integral",
+        "derivative",
+        "gain"
+      ],
+      "confidence": 0.8999999999999999
+    },
+    {
+      "question": "According to Enhanced PID.docx, what tuning approach is described: Changing one gain only affects that term and not any of the others, where:...?",
+      "answer": "Changing one gain only affects that term and not any of the others, where:",
+      "source": "Enhanced PID.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "gain"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, what tuning approach is described: This form of the algorithm changes the proportional gain into a controller gain...?",
+      "answer": "This form of the algorithm changes the proportional gain into a controller gain",
+      "source": "Enhanced PID.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "proportional",
+        "controller",
+        "gain"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "According to Enhanced PID.docx, what tuning approach is described: By changing the controller gain, you change the action of all three terms (propo...?",
+      "answer": "By changing the controller gain, you change the action of all three terms (proportional, integral, and derivative) at the same time, where:",
+      "source": "Enhanced PID.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "proportional",
+        "integral",
+        "derivative",
+        "controller",
+        "gain"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The PIDE equations above are representative of the algorithms used by the PIDE i...?",
+      "answer": "The PIDE equations above are representative of the algorithms used by the PIDE instruction",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, what tuning approach is described: You can substitute the change in error values for the change in PV (in percent o...?",
+      "answer": "You can substitute the change in error values for the change in PV (in percent of span) for the proportional and derivative terms by manipulating the parameters PVEProportional and PVEDerivative",
+      "source": "Enhanced PID.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "proportional",
+        "derivative"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: By default, the PIDE instruction uses the change in error for the proportional t...?",
+      "answer": "By default, the PIDE instruction uses the change in error for the proportional term and the change in PV for the derivative term",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "proportional",
+        "derivative"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "What control concept does Enhanced PID.docx explain: This eliminates large derivative spikes on changes in setpoint...?",
+      "answer": "This eliminates large derivative spikes on changes in setpoint",
+      "source": "Enhanced PID.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "derivative",
+        "setpoint"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: You can convert the gains used between the different PIDE algorithm forms using ...?",
+      "answer": "You can convert the gains used between the different PIDE algorithm forms using these equations:",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "gain"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to Enhanced PID.docx, what tuning approach is described: Each algorithm provides identical control with the appropriate gains...?",
+      "answer": "Each algorithm provides identical control with the appropriate gains",
+      "source": "Enhanced PID.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "gain"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, what tuning approach is described: Some people prefer the independent gains style because they can manipulate indiv...?",
+      "answer": "Some people prefer the independent gains style because they can manipulate individual gains without affecting the other terms",
+      "source": "Enhanced PID.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "gain"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: Others prefer the dependent gains style because they can, at least to a certain ...?",
+      "answer": "Others prefer the dependent gains style because they can, at least to a certain extent, change just the controller gain and cause an overall change in the aggressiveness of the PID loop without changing each gain separately",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "controller",
+        "gain"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: Monitoring the PIDE Instruction: There is an operator faceplate available for th...?",
+      "answer": "Monitoring the PIDE Instruction: There is an operator faceplate available for the PIDE instruction",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The\u00a0Logix Designer\u00a0application PIDE autotuner provides an open-loop autotuner bu...?",
+      "answer": "The\u00a0Logix Designer\u00a0application PIDE autotuner provides an open-loop autotuner built into the PIDE instruction",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The PIDE block has an Autotune Tag (type PIDE_AUTOTUNE) that you specify for tho...?",
+      "answer": "The PIDE block has an Autotune Tag (type PIDE_AUTOTUNE) that you specify for those PIDE blocks that you want to autotune",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The PIDE autotuner is installed with the application, but you need an activation...?",
+      "answer": "The PIDE autotuner is installed with the application, but you need an activation key to enable it",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: Use the Autotune tab to specify and configure the autotune tag for a PIDE block...?",
+      "answer": "Use the Autotune tab to specify and configure the autotune tag for a PIDE block",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: When using cascaded PID loops, the primary PID loop can be initialized when the ...?",
+      "answer": "When using cascaded PID loops, the primary PID loop can be initialized when the secondary loop is initialized or when the secondary loop leaves the Cascade/Ratio mode",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "cascade"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The easiest way to implement a PIDE instruction is to create a function block ro...?",
+      "answer": "The easiest way to implement a PIDE instruction is to create a function block routine in a program in a periodic task",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: The default timing mode for the PIDE instruction is periodic...?",
+      "answer": "The default timing mode for the PIDE instruction is periodic",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: When the PIDE instruction is used in a periodic task and in periodic timing mode...?",
+      "answer": "When the PIDE instruction is used in a periodic task and in periodic timing mode, it automatically uses the periodic task's update rate as its delta t update time",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Enhanced PID.docx, how does PID control work in this context: All you need to do is wire the process variable analog input into the PV paramet...?",
+      "answer": "All you need to do is wire the process variable analog input into the PV parameter on the PIDE instruction and wire the CVEU out of the PIDE instruction into the controlled variable analog output",
+      "source": "Enhanced PID.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "process variable"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: Cascaded Feedforward PID Control for Still01 Low Wine Condensers...?",
+      "answer": "Cascaded Feedforward PID Control for Still01 Low Wine Condensers",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "feedforward",
+        "cascade"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "What does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain about advanced control in this context: System Architecture Overview (Cascaded + Feedforward Control)...?",
+      "answer": "System Architecture Overview (Cascaded + Feedforward Control)",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "feedforward",
+        "cascade"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: The control strategy combines a cascade loop (two nested FBD - PIDE controllers)...?",
+      "answer": "The control strategy combines a cascade loop (two nested FBD - PIDE controllers) with a feedforward element for disturbance anticipation",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "controller",
+        "feedforward",
+        "cascade",
+        "disturbance"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: Cascade Loop Structure: The system uses two PIDE controllers in cascade: an oute...?",
+      "answer": "Cascade Loop Structure: The system uses two PIDE controllers in cascade: an outer (primary) loop and an inner (secondary) loop\u200b [ literature",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "controller",
+        "cascade"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "What control concept does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain: The outer loop monitors the vent temperature (TIT-4031) and adjusts the setpoint...?",
+      "answer": "The outer loop monitors the vent temperature (TIT-4031) and adjusts the setpoint of the inner loop",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "setpoint"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain: This architecture leverages the faster response of the product temperature compa...?",
+      "answer": "This architecture leverages the faster response of the product temperature compared to the vent temperature (TIT-4033 has a shorter dead time, than TIT-4031 \u2013 MUST be confirmed with testing and data collection described below in Section 5",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "response"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain about advanced control in this context: 1) to correct disturbances before the vent temperature deviates significantly\u200b \u2013...?",
+      "answer": "1) to correct disturbances before the vent temperature deviates significantly\u200b \u2013 Forum discussion about cascaded loop tuning",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "tuning",
+        "cascade",
+        "disturbance"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "What control concept does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain: Outer Loop (Primary): PV = Vent temperature (TIT-4031); SP = 153\u202f\u00b0F (desired ven...?",
+      "answer": "Outer Loop (Primary): PV = Vent temperature (TIT-4031); SP = 153\u202f\u00b0F (desired vent temp); CV = setpoint for inner loop (desired product condenser temp)",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "setpoint"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain about advanced control in this context: Inner Loop (Secondary): PV = Product condenser temperature (TIT-4033); SP = rece...?",
+      "answer": "Inner Loop (Secondary): PV = Product condenser temperature (TIT-4033); SP = received from outer loop (cascade SP); CV = Cooling water valve command to FCV-4032",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "cascade"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain about advanced control in this context: The outer loop\u2019s output drives the inner loop\u2019s setpoint, forming the cascaded (...?",
+      "answer": "The outer loop\u2019s output drives the inner loop\u2019s setpoint, forming the cascaded (master-slave) relationship",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "setpoint",
+        "cascade"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "What control concept does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain: The inner loop reacts quickly to achieve the product temperature setpoint, which...?",
+      "answer": "The inner loop reacts quickly to achieve the product temperature setpoint, which in turn keeps the vent temperature in range",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "setpoint"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain about advanced control in this context: Feedforward Integration: In addition to feedback control, a feedforward path use...?",
+      "answer": "Feedforward Integration: In addition to feedback control, a feedforward path uses still vapor pressure (PIT-4012), Cooling water Temp (TIT-52001), and Cooling Water pressure (PIT-52006) as measured disturbance variables (DV)",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "feedback",
+        "feedforward",
+        "disturbance"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "What does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain about advanced control in this context: We implement a graduated feedforward bias formula to assist with increasing or d...?",
+      "answer": "We implement a graduated feedforward bias formula to assist with increasing or decreasing CV output based on DV values",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "feedforward"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: This feedforward action \u201canticipates\u201d pressure-driven load changes and adjusts t...?",
+      "answer": "This feedforward action \u201canticipates\u201d pressure-driven load changes and adjusts the cooling valve output before vent temperature can drift\u200b\u200b, here is a quick review of feedforward control in PID/PIDE control loops, if needed",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "control loop",
+        "feedforward"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: The feedforward signal thus nudges the valve open proportionally to pressure inc...?",
+      "answer": "The feedforward signal thus nudges the valve open proportionally to pressure increases, reducing the corrective work the PID loops must do",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "proportional",
+        "feedforward"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "What does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain about advanced control in this context: These supporting variables can be used to refine the control logic (see Section ...?",
+      "answer": "These supporting variables can be used to refine the control logic (see Section 5) but are not part of the primary cascade control",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "cascade"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: Outer PID (Vent Temp Control): Monitors vent temp; computes desired product temp...?",
+      "answer": "Outer PID (Vent Temp Control): Monitors vent temp; computes desired product temp SP",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: Inner PID (Product Temp Control): Receives SP from outer; modulates valve to con...?",
+      "answer": "Inner PID (Product Temp Control): Receives SP from outer; modulates valve to control product temp",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain about advanced control in this context: Feedforward Bias: Adds directly to valve command based on vapor pressure (and tr...?",
+      "answer": "Feedforward Bias: Adds directly to valve command based on vapor pressure (and trimmed by tower water conditions)",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "feedforward"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain: Process Dynamics: Cooling water -> LWC (affects TIT-4033) -> LWVC (affects TIT-4...?",
+      "answer": "Process Dynamics: Cooling water -> LWC (affects TIT-4033) -> LWVC (affects TIT-4031); disturbances from vapor pressure and cooling water conditions enter at various points",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "disturbance"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: PIDE Loop Configuration (Cascade and Feedforward Implementation)...?",
+      "answer": "PIDE Loop Configuration (Cascade and Feedforward Implementation)",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "feedforward",
+        "cascade"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: In Studio 5000 (v35+), the cascaded PID control is implemented using two PIDE fu...?",
+      "answer": "In Studio 5000 (v35+), the cascaded PID control is implemented using two PIDE function blocks configured as a cascade pair, with added feedforward",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "feedforward",
+        "cascade"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "According to Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx, how does PID control work in this context: Enable Cascade mode on this PIDE by setting its AllowCasRat parameter = TRUE\u200b...?",
+      "answer": "Enable Cascade mode on this PIDE by setting its AllowCasRat parameter = TRUE\u200b",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "cascade"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "What does Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx explain about advanced control in this context: The inner loop will use SPCascade as its active setpoint whenever Cascade mode i...?",
+      "answer": "The inner loop will use SPCascade as its active setpoint whenever Cascade mode is active\u200b",
+      "source": "Cascaded Feedforward PIDE Control for Still01 Low Wine Condensers.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "setpoint",
+        "cascade"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to WHK PID Granary V3_2.pdf, how does PID control work in this context: Cedar Rapids, Ia 52404C R C  -  Maintaining the past and Building the Future...?",
+      "answer": "Cedar Rapids, Ia 52404C R C  -  Maintaining the past and Building the Future",
+      "source": "WHK PID Granary V3_2.pdf",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, how does PID control work in this context: Currently, more than half of the controllers used in industry are PID controller...?",
+      "answer": "Currently, more than half of the controllers used in industry are PID controllers",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "controller"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "What control concept does basic_loop_tuning_methods.docx explain: In the past, many of these controllers were analog; however, many of today's con...?",
+      "answer": "In the past, many of these controllers were analog; however, many of today's controllers use digital signals and computers",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "controller"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: When a mathematical model of a system is available, the parameters of the contro...?",
+      "answer": "When a mathematical model of a system is available, the parameters of the controller can be explicitly determined",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "controller"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: Controller tuning is the process of determining the controller parameters which ...?",
+      "answer": "Controller tuning is the process of determining the controller parameters which produce the desired output",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "controller",
+        "tuning"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: Controller tuning allows for optimization of a process and minimizes the error b...?",
+      "answer": "Controller tuning allows for optimization of a process and minimizes the error between the variable of the process and its set point",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "controller",
+        "tuning"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: Types of controller tuning methods include the trial and error method, and proce...?",
+      "answer": "Types of controller tuning methods include the trial and error method, and process reaction curve methods",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "controller",
+        "tuning"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: The most common classical controller tuning methods are the Ziegler-Nichols and ...?",
+      "answer": "The most common classical controller tuning methods are the Ziegler-Nichols and Cohen-Coon methods",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "controller",
+        "tuning"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "What control concept does basic_loop_tuning_methods.docx explain: A closed-loop control system is a system which uses feedback control...?",
+      "answer": "A closed-loop control system is a system which uses feedback control",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "feedback"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, how does PID control work in this context: The equation below shows the PID algorithm as discussed in the previous PID Cont...?",
+      "answer": "The equation below shows the PID algorithm as discussed in the previous PID Control section",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: \u03c4i\u00a0is the parameter that scales the integral controller...?",
+      "answer": "\u03c4i\u00a0is the parameter that scales the integral controller",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "integral",
+        "controller"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: \u03c4d\u00a0is the parameter that scales the derivative controller...?",
+      "answer": "\u03c4d\u00a0is the parameter that scales the derivative controller",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "derivative",
+        "controller"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: The experimentally obtained controller\u00a0gain\u00a0which gives stable and consistent os...?",
+      "answer": "The experimentally obtained controller\u00a0gain\u00a0which gives stable and consistent oscillations for closed loop systems, or the\u00a0ultimate gain, is defined as\u00a0Ku",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "controller",
+        "gain"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: Kc\u00a0is the controller gain which has been corrected by the Ziegler-Nichols or Coh...?",
+      "answer": "Kc\u00a0is the controller gain which has been corrected by the Ziegler-Nichols or Cohen-Coon methods, and can be input into the above equation",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "controller",
+        "gain"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: If the gain is too low, the output signal will be damped and attain equilibrium ...?",
+      "answer": "If the gain is too low, the output signal will be damped and attain equilibrium eventually after the disturbance occurs as shown below",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "disturbance",
+        "gain"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: On the other hand, if the gain is too high, the oscillations become unstable and...?",
+      "answer": "On the other hand, if the gain is too high, the oscillations become unstable and grow larger and larger with time as shown below",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "gain"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: The trial and error tuning method is based on guess-and-check...?",
+      "answer": "The trial and error tuning method is based on guess-and-check",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "tuning"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does basic_loop_tuning_methods.docx explain: In this method, the proportional action is the main control, while the integral ...?",
+      "answer": "In this method, the proportional action is the main control, while the integral and derivative actions refine it",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "proportional",
+        "integral",
+        "derivative"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: The controller gain,\u00a0Kc, is adjusted with the integral and derivative actions he...?",
+      "answer": "The controller gain,\u00a0Kc, is adjusted with the integral and derivative actions held at a minimum, until a desired output is obtained",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "integral",
+        "derivative",
+        "controller",
+        "gain"
+      ],
+      "confidence": 0.8999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: P or PI control can be used with low controller gain...?",
+      "answer": "P or PI control can be used with low controller gain",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "controller",
+        "gain"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, how does PID control work in this context: Derivative control is not considered due to the rapid fluctuations in flow dynam...?",
+      "answer": "Derivative control is not considered due to the rapid fluctuations in flow dynamics with lots of noise",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "derivative"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, how does PID control work in this context: Derivative control is not considered due to the rapid fluctuations in flow dynam...?",
+      "answer": "Derivative control is not considered due to the rapid fluctuations in flow dynamics with lots of noise",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "derivative"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: Tuning here has a large range of possible values of\u00a0Kc\u00a0and\u00a0Ti\u00a0for use in PI cont...?",
+      "answer": "Tuning here has a large range of possible values of\u00a0Kc\u00a0and\u00a0Ti\u00a0for use in PI control, depending on if the pressure measurement is in liquid or gas phase",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "tuning"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, how does PID control work in this context: Due to the relatively slow response of temperature sensors to dynamic temperatur...?",
+      "answer": "Due to the relatively slow response of temperature sensors to dynamic temperature changes, PID controllers are used",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "controller",
+        "response"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "question": "What control concept does basic_loop_tuning_methods.docx explain: A disturbance is introduced into the system and data can then be obtained from t...?",
+      "answer": "A disturbance is introduced into the system and data can then be obtained from this curve",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "disturbance"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does basic_loop_tuning_methods.docx explain: First the system is allowed to reach steady state, and then a disturbance,\u00a0Xo, i...?",
+      "answer": "First the system is allowed to reach steady state, and then a disturbance,\u00a0Xo, is introduced to it",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "disturbance"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does basic_loop_tuning_methods.docx explain: The percentage of disturbance to the system can be introduced by a change in eit...?",
+      "answer": "The percentage of disturbance to the system can be introduced by a change in either the set point or process variable",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "process variable",
+        "disturbance"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "What control concept does basic_loop_tuning_methods.docx explain: For example, if you have a thermometer in which you can only turn it up or down ...?",
+      "answer": "For example, if you have a thermometer in which you can only turn it up or down by 10 degrees, then raising the temperature by 1 degree would be a 10% disturbance to the system",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "disturbance"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does basic_loop_tuning_methods.docx explain: These types of curves are obtained in open loop systems when there is no control...?",
+      "answer": "These types of curves are obtained in open loop systems when there is no control of the system, allowing the disturbance to be recorded",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "disturbance"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to basic_loop_tuning_methods.docx, what tuning approach is described: The process reaction curve method usually produces a response to a step function...?",
+      "answer": "The process reaction curve method usually produces a response to a step function change for which several parameters may be measured which include: transportation lag or dead time, \u03c4dead, the time for the response to change, \u03c4, and the ultimate value that the response reaches at steady-state,\u00a0Mu",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "response"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does basic_loop_tuning_methods.docx explain: \u03c4dead\u00a0= transportation lag or dead time: the time taken from the moment the dist...?",
+      "answer": "\u03c4dead\u00a0= transportation lag or dead time: the time taken from the moment the disturbance was introduced to the first sign of change in the output signal",
+      "source": "basic_loop_tuning_methods.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "disturbance"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What does Quick Start Guide.docx explain about advanced control in this context: Quick Start Guide \u2013 cascaded ff control loop instantiation...?",
+      "answer": "Quick Start Guide \u2013 cascaded ff control loop instantiation",
+      "source": "Quick Start Guide.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "control loop",
+        "cascade"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to Quick Start Guide.docx, how does PID control work in this context: PIDE: Proportional-Integral-Derivative Enhanced controller...?",
+      "answer": "PIDE: Proportional-Integral-Derivative Enhanced controller",
+      "source": "Quick Start Guide.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid",
+        "proportional",
+        "integral",
+        "derivative",
+        "controller"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "question": "What control concept does Quick Start Guide.docx explain: Bias: Preemptive adjustment to controller output based on anticipated process di...?",
+      "answer": "Bias: Preemptive adjustment to controller output based on anticipated process disturbances",
+      "source": "Quick Start Guide.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "controller",
+        "disturbance"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "What control concept does Quick Start Guide.docx explain: Objective: Work thru a specific example \u2013 Still01 LWC / LWVC Control Loop...?",
+      "answer": "Objective: Work thru a specific example \u2013 Still01 LWC / LWVC Control Loop",
+      "source": "Quick Start Guide.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "control loop"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Quick Start Guide.docx, how does PID control work in this context: Primary PIDE (Outer Loop I Secondary PV (SPV)): Monitors TIT-4031; sets SP for i...?",
+      "answer": "Primary PIDE (Outer Loop I Secondary PV (SPV)): Monitors TIT-4031; sets SP for inner loop",
+      "source": "Quick Start Guide.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Quick Start Guide.docx, how does PID control work in this context: Secondary PIDE (Inner Loop): Controls TIT-4033 by adjusting FCV-4032...?",
+      "answer": "Secondary PIDE (Inner Loop): Controls TIT-4033 by adjusting FCV-4032",
+      "source": "Quick Start Guide.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What does Quick Start Guide.docx explain about advanced control in this context: Feedforward Input: Adjusts valve CV based on PIT-4012 (vapor pressure), TIT-5200...?",
+      "answer": "Feedforward Input: Adjusts valve CV based on PIT-4012 (vapor pressure), TIT-52001 (cooling temp), PIT-52006 (cooling pressure)",
+      "source": "Quick Start Guide.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "feedforward"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Quick Start Guide.docx, how does PID control work in this context: Important: Utilize Studio 5000 PIDE block built-in anti-windup features to preve...?",
+      "answer": "Important: Utilize Studio 5000 PIDE block built-in anti-windup features to prevent CV saturation",
+      "source": "Quick Start Guide.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Quick Start Guide.docx, how does PID control work in this context: Implementation in Studio 5000: PIDE Configuration (Function Block preferred)...?",
+      "answer": "Implementation in Studio 5000: PIDE Configuration (Function Block preferred)",
+      "source": "Quick Start Guide.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Quick Start Guide.docx, how does PID control work in this context: NOTE: Task Scheduling & Timing: Place each PIDE instruction in separate periodic...?",
+      "answer": "NOTE: Task Scheduling & Timing: Place each PIDE instruction in separate periodic tasks to allow independent adjustments",
+      "source": "Quick Start Guide.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does Quick Start Guide.docx explain: Collect and use baseline response data (worksheet provided) to refine these inte...?",
+      "answer": "Collect and use baseline response data (worksheet provided) to refine these intervals",
+      "source": "Quick Start Guide.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "response"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does Quick Start Guide.docx explain: Data Collection: **Baseline data MUST be collected before moving to the Advanced...?",
+      "answer": "Data Collection: **Baseline data MUST be collected before moving to the Advanced Control Loop",
+      "source": "Quick Start Guide.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "control loop"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Quick Start Guide.docx, how does PID control work in this context: Using existing PID populate the necessary data points (outlined in: Supporting D...?",
+      "answer": "Using existing PID populate the necessary data points (outlined in: Supporting Documents in Section 10)",
+      "source": "Quick Start Guide.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Quick Start Guide.docx, what tuning approach is described: New Control Loop Initialization & Tuning:  Using the data obtained from baseline...?",
+      "answer": "New Control Loop Initialization & Tuning:  Using the data obtained from baseline data collection workbook, we can instantiate the new control mechanisms and set them up for testing",
+      "source": "Quick Start Guide.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "tuning",
+        "control loop"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "What control concept does Quick Start Guide.docx explain: Inner Loop: Manual valve step \u2192 record TIT-4033 response...?",
+      "answer": "Inner Loop: Manual valve step \u2192 record TIT-4033 response",
+      "source": "Quick Start Guide.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "response"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does Quick Start Guide.docx explain: Outer Loop: Manual inner SP step \u2192 record TIT-4031 response...?",
+      "answer": "Outer Loop: Manual inner SP step \u2192 record TIT-4031 response",
+      "source": "Quick Start Guide.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "response"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What does Quick Start Guide.docx explain about advanced control in this context: Feedforward: Increase vapor pressure \u2192 log temperature response...?",
+      "answer": "Feedforward: Increase vapor pressure \u2192 log temperature response",
+      "source": "Quick Start Guide.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "feedforward",
+        "response"
+      ],
+      "confidence": 0.7999999999999999
+    },
+    {
+      "question": "According to Quick Start Guide.docx, what tuning approach is described: Structured Model-Based Tuning (IMC & Lambda Methods):...?",
+      "answer": "Structured Model-Based Tuning (IMC & Lambda Methods):",
+      "source": "Quick Start Guide.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "tuning"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Quick Start Guide.docx, what tuning approach is described: Refine these values using IMC or Lambda tuning methods as detailed in the \"Model...?",
+      "answer": "Refine these values using IMC or Lambda tuning methods as detailed in the \"Model-Based Tuning\" supporting document",
+      "source": "Quick Start Guide.docx",
+      "category": "Control Tuning",
+      "relevant_terms": [
+        "tuning"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does Quick Start Guide.docx explain: IMC/Lambda methods ensure stable, robust, predictable disturbance handling...?",
+      "answer": "IMC/Lambda methods ensure stable, robust, predictable disturbance handling",
+      "source": "Quick Start Guide.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "disturbance"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "According to Quick Start Guide.docx, how does PID control work in this context: Enable inner PIDE (CAS \u2192 Auto); confirm stable product temp...?",
+      "answer": "Enable inner PIDE (CAS \u2192 Auto); confirm stable product temp",
+      "source": "Quick Start Guide.docx",
+      "category": "PID Control Theory",
+      "relevant_terms": [
+        "pid"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What control concept does Quick Start Guide.docx explain: Confirm bias logic correct via disturbance injection tests...?",
+      "answer": "Confirm bias logic correct via disturbance injection tests",
+      "source": "Quick Start Guide.docx",
+      "category": "General Control",
+      "relevant_terms": [
+        "disturbance"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "question": "What does Quick Start Guide.docx explain about advanced control in this context: Seasonally adjusts to feedforward constants (TIT-52001, PIT-52006)...?",
+      "answer": "Seasonally adjusts to feedforward constants (TIT-52001, PIT-52006)",
+      "source": "Quick Start Guide.docx",
+      "category": "Advanced Control",
+      "relevant_terms": [
+        "feedforward"
+      ],
+      "confidence": 0.75
+    }
+  ]
+}

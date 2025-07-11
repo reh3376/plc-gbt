@@ -252,9 +252,9 @@ if __name__ == "__main__":
 ## 🔗 Related Documentation
 
 - [AI Task Orchestrator Guide](AI_TASK_ORCHESTRATOR_GUIDE.md)
-- [Phase 10: Specialized Training Data](../scripts/ai/phase10_master_orchestrator.py)
-- [Phase 11: Model Fine-tuning](../scripts/ai/phase11_master_orchestrator.py)
-- [Phase 12: Production Deployment](../scripts/ai/phase12_production_deployment_orchestrator.py)
+- [Phase 10: Specialized Training Data](scripts/ai/phases/phase10/phase10_master_orchestrator.py)
+- [Phase 11: Model Fine-tuning](scripts/ai/phases/phase11/phase11_master_orchestrator.py)
+- [Phase 12: Production Deployment](scripts/ai/phases/phase12/phase12_production_deployment_orchestrator.py)
 
 ## 📞 Support
 

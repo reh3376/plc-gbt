@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "analysis_date": "2025-07-11T01:04:42.566378",
+    "session_id": "phase10_analysis_1752210219",
+    "dataset_path": "/Users/reh3376/repos/plc-gbt/docs/context/dataset_still_steam_till_03_02.csv",
+    "analyzer_version": "1.0.0"
+  },
+  "analysis_results": {
+    "structure_analysis": {
+      "basic_info": {
+        "total_records": 1043037,
+        "total_variables": 9,
+        "memory_usage_mb": 79.57740783691406,
+        "time_range": {
+          "start": "2025-01-01T15:18:48.184800",
+          "end": "2025-03-02T23:59:58.595800",
+          "duration_days": 60
+        }
+      },
+      "variable_analysis": {
+        "PV01": {
+          "definition": {
+            "type": "Process Variable",
+            "description": "Primary temperature measurement",
+            "unit": "\u00b0F"
+          },
+          "statistics": {
+            "mean": 211.90554429037508,
+            "std": 9.178731443898133,
+            "min": 94.83,
+            "max": 219.13,
+            "range": 124.3,
+            "median": 213.11,
+            "q25": 212.49,
+            "q75": 213.79
+          },
+          "distribution": {
+            "skewness": -7.855250714272786,
+            "kurtosis": 66.3332790124302,
+            "normality_test": 
