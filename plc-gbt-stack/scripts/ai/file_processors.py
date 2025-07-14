@@ -360,6 +360,293 @@ class JSONFileProcessor:
             database_routing=database_routing
         )
 
+class SQLFileProcessor:
+    """
+    🗄️ SQL File Processor
+    
+    Processes SQL files including database dumps, schema definitions,
+    and SQL scripts for database management and analysis.
+    """
+    
+    def __init__(self, db_manager: DatabaseManager):
+        self.db_manager = db_manager
+        self.embedding_generator = EmbeddingGenerator()
+        
+    def _parse_sql_statements(self, content: str) -> List[Dict[str, Any]]:
+        """Parse SQL content into individual statements"""
+        statements = []
+        
+        # Split by semicolons but handle quoted strings
+        current_statement = ""
+        in_quote = False
+        quote_char = None
+        
+        for char in content:
+            if char in ["'", '"'] and not in_quote:
+                in_quote = True
+                quote_char = char
+            elif char == quote_char and in_quote:
+                in_quote = False
+                quote_char = None
+            elif char == ';' and not in_quote:
+                if current_statement.strip():
+                    statements.append(current_statement.strip())
+                current_statement = ""
+                continue
+            
+            current_statement += char
+        
+        # Add final statement if exists
+        if current_statement.strip():
+            statements.append(current_statement.strip())
+        
+        # Analyze each statement
+        parsed_statements = []
+        for i, stmt in enumerate(statements):
+            if not stmt or stmt.startswith('--'):
+                continue
+                
+            stmt_upper = stmt.upper().strip()
+            
+            # Determine statement type
+            if stmt_upper.startswith('CREATE'):
+                stmt_type = 'CREATE'
+                if 'TABLE' in stmt_upper:
+                    object_type = 'TABLE'
+                elif 'SCHEMA' in stmt_upper:
+                    object_type = 'SCHEMA'
+                elif 'INDEX' in stmt_upper:
+                    object_type = 'INDEX'
+                else:
+                    object_type = 'UNKNOWN'
+            elif stmt_upper.startswith('INSERT'):
+                stmt_type = 'INSERT'
+                object_type = 'DATA'
+            elif stmt_upper.startswith('UPDATE'):
+                stmt_type = 'UPDATE'
+                object_type = 'DATA'
+            elif stmt_upper.startswith('DELETE'):
+                stmt_type = 'DELETE'
+                object_type = 'DATA'
+            elif stmt_upper.startswith('ALTER'):
+                stmt_type = 'ALTER'
+                object_type = 'SCHEMA'
+            elif stmt_upper.startswith('DROP'):
+                stmt_type = 'DROP'
+                object_type = 'SCHEMA'
+            elif stmt_upper.startswith('SET'):
+                stmt_type = 'SET'
+                object_type = 'CONFIG'
+            elif stmt_upper.startswith('SELECT'):
+                stmt_type = 'SELECT'
+                object_type = 'QUERY'
+            else:
+                stmt_type = 'OTHER'
+                object_type = 'UNKNOWN'
+            
+            parsed_statements.append({
+                'statement_id': i,
+                'type': stmt_type,
+                'object_type': object_type,
+                'content': stmt,
+                'length': len(stmt)
+            })
+        
+        return parsed_statements
+    
+    def _detect_database_type(self, content: str) -> str:
+        """Detect database type from SQL content"""
+        content_upper = content.upper()
+        
+        if 'POSTGRESQL' in content_upper or 'PG_DUMP' in content_upper:
+            return 'postgresql'
+        elif 'MYSQL' in content_upper or 'MARIADB' in content_upper:
+            return 'mysql'
+        elif 'SQLITE' in content_upper:
+            return 'sqlite'
+        elif 'ORACLE' in content_upper:
+            return 'oracle'
+        elif 'SQL SERVER' in content_upper or 'MSSQL' in content_upper:
+            return 'sqlserver'
+        else:
+            return 'unknown'
+    
+    def _extract_schema_objects(self, statements: List[Dict[str, Any]]) -> Dict[str, List[str]]:
+        """Extract database objects from SQL statements"""
+        objects = {
+            'schemas': [],
+            'tables': [],
+            'indexes': [],
+            'functions': [],
+            'views': []
+        }
+        
+        for stmt in statements:
+            content = stmt['content'].upper()
+            
+            if stmt['type'] == 'CREATE':
+                if 'CREATE SCHEMA' in content:
+                    # Extract schema name
+                    match = re.search(r'CREATE SCHEMA\s+([^\s;]+)', content)
+                    if match:
+                        objects['schemas'].append(match.group(1))
+                
+                elif 'CREATE TABLE' in content:
+                    # Extract table name
+                    match = re.search(r'CREATE TABLE\s+([^\s(;]+)', content)
+                    if match:
+                        objects['tables'].append(match.group(1))
+                
+                elif 'CREATE INDEX' in content:
+                    # Extract index name
+                    match = re.search(r'CREATE.*INDEX\s+([^\s(;]+)', content)
+                    if match:
+                        objects['indexes'].append(match.group(1))
+                
+                elif 'CREATE FUNCTION' in content:
+                    # Extract function name
+                    match = re.search(r'CREATE.*FUNCTION\s+([^\s(;]+)', content)
+                    if match:
+                        objects['functions'].append(match.group(1))
+                
+                elif 'CREATE VIEW' in content:
+                    # Extract view name
+                    match = re.search(r'CREATE VIEW\s+([^\s(;]+)', content)
+                    if match:
+                        objects['views'].append(match.group(1))
+        
+        return objects
+    
+    def process(self, analysis_result: AnalysisResult) -> ProcessedContent:
+        """Process SQL file content"""
+        try:
+            # Read file content
+            file_path = Path(analysis_result.file_metadata.path)
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+            
+            # Parse SQL statements
+            statements = self._parse_sql_statements(content)
+            
+            # Detect database type
+            db_type = self._detect_database_type(content)
+            
+            # Extract schema objects
+            schema_objects = self._extract_schema_objects(statements)
+            
+            # Create content chunks (group statements by type)
+            chunks = []
+            
+            # Group statements by type for better chunking
+            statement_groups = {}
+            for stmt in statements:
+                stmt_type = stmt['type']
+                if stmt_type not in statement_groups:
+                    statement_groups[stmt_type] = []
+                statement_groups[stmt_type].append(stmt)
+            
+            # Create chunks for each statement type
+            for stmt_type, group_statements in statement_groups.items():
+                if not group_statements:
+                    continue
+                    
+                chunk = {
+                    'type': 'sql_statement_group',
+                    'statement_type': stmt_type,
+                    'statement_count': len(group_statements),
+                    'statements': group_statements[:5],  # Limit to first 5 for chunk size
+                    'total_length': sum(stmt['length'] for stmt in group_statements)
+                }
+                chunks.append(chunk)
+            
+            # Add overall file summary chunk
+            summary_chunk = {
+                'type': 'sql_file_summary',
+                'database_type': db_type,
+                'total_statements': len(statements),
+                'statement_types': list(statement_groups.keys()),
+                'schema_objects': schema_objects,
+                'file_size': len(content)
+            }
+            chunks.append(summary_chunk)
+            
+            # Generate embeddings
+            embeddings = []
+            for chunk in chunks:
+                # Create embedding text based on chunk type
+                if chunk['type'] == 'sql_statement_group':
+                    embedding_text = f"SQL {chunk['statement_type']} statements: {chunk['statement_count']} statements"
+                    if chunk['statements']:
+                        embedding_text += f" Example: {chunk['statements'][0]['content'][:200]}"
+                else:
+                    embedding_text = f"SQL file summary: {db_type} database with {len(statements)} statements"
+                    if schema_objects['tables']:
+                        embedding_text += f" Tables: {', '.join(schema_objects['tables'][:5])}"
+                
+                embeddings.append(self.embedding_generator.generate_embedding(embedding_text))
+            
+            # Create processed content
+            processed_data = {
+                "file_path": str(file_path),
+                "file_name": file_path.name,
+                "file_type": "sql",
+                "content": content,
+                "metadata": {
+                    "database_type": db_type,
+                    "statement_count": len(statements),
+                    "statement_types": list(statement_groups.keys()),
+                    "schema_objects": schema_objects,
+                    "file_size_bytes": len(content),
+                    "line_count": len(content.split('\n')),
+                    "processed_at": datetime.now().isoformat()
+                }
+            }
+            
+            # Database routing
+            database_routing = {
+                MemoryTier.LONG_TERM: {
+                    "table": "configuration_files",
+                    "data": processed_data
+                },
+                MemoryTier.MEDIUM_TERM: {
+                    "nodes": [{
+                        "type": "SQLFile",
+                        "properties": {
+                            "path": str(file_path),
+                            "name": file_path.name,
+                            "database_type": db_type,
+                            "statement_count": len(statements),
+                            "table_count": len(schema_objects['tables']),
+                            "schema_count": len(schema_objects['schemas']),
+                            "file_type": "sql"
+                        }
+                    }]
+                },
+                MemoryTier.PATTERN_MATCHING: {
+                    'collection': 'configurations',
+                    'points': [
+                        {
+                            'id': str(uuid.uuid5(uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8'), f"{file_path}_{i}")),
+                            'vector': embedding,
+                            'payload': chunk
+                        }
+                        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
+                    ]
+                }
+            }
+            
+            return ProcessedContent(
+                file_id=hashlib.md5(str(file_path).encode()).hexdigest(),
+                content_chunks=chunks,
+                embeddings=embeddings,
+                metadata=fix_metadata_serialization(asdict(analysis_result.file_metadata)),
+                database_routing=database_routing
+            )
+            
+        except Exception as e:
+            logger.error(f"Error processing SQL file {analysis_result.file_metadata.path}: {str(e)}")
+            return None
+
 class FileProcessorOrchestrator:
     """
     🎯 File Processing Orchestrator
@@ -374,6 +661,11 @@ class FileProcessorOrchestrator:
             FileType.PYTHON: PythonFileProcessor(db_manager),
             FileType.MARKDOWN: MarkdownFileProcessor(db_manager),
             FileType.JSON: JSONFileProcessor(db_manager),
+            FileType.TEXT: TextFileProcessor(db_manager),
+            FileType.SHELL: ShellFileProcessor(db_manager),
+            FileType.DOCKERFILE: DockerfileProcessor(db_manager),
+            FileType.SQL: SQLFileProcessor(db_manager),
+            FileType.UNKNOWN: GenericFileProcessor(db_manager),
         }
         
         # Add YAML processor if available
@@ -453,6 +745,439 @@ class FileProcessorOrchestrator:
                 results[f"{tier.value}_error"] = str(e)
         
         return results
+
+
+class TextFileProcessor:
+    """
+    📄 Text File Processor
+    
+    Processes plain text files (.txt, .log, etc.) for documentation storage
+    """
+    
+    def __init__(self, db_manager: DatabaseManager):
+        self.db_manager = db_manager
+        self.embedding_generator = EmbeddingGenerator()
+        
+    def process(self, analysis_result: AnalysisResult) -> ProcessedContent:
+        """Process text file content"""
+        try:
+            # Read file content
+            file_path = Path(analysis_result.file_metadata.path)
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+            
+            # Extract basic metadata
+            lines = content.split('\n')
+            word_count = len(content.split())
+            
+            # Create content chunks
+            chunks = [{
+                'type': 'text_document',
+                'content': content,
+                'word_count': word_count,
+                'line_count': len(lines),
+                'is_log_file': file_path.suffix.lower() == '.log'
+            }]
+            
+            # Generate embeddings
+            embeddings = [self.embedding_generator.generate_embedding(content)]
+            
+            # Create processed content
+            processed_data = {
+                "file_path": str(file_path),
+                "file_name": file_path.name,
+                "file_type": "text",
+                "content": content,
+                "metadata": {
+                    "line_count": len(lines),
+                    "word_count": word_count,
+                    "character_count": len(content),
+                    "is_log_file": file_path.suffix.lower() == '.log',
+                    "processed_at": datetime.now().isoformat()
+                }
+            }
+            
+            # Database routing
+            database_routing = {
+                MemoryTier.LONG_TERM: {
+                    "table": "documentation",
+                    "data": processed_data
+                },
+                MemoryTier.MEDIUM_TERM: {
+                    "nodes": [{
+                        "type": "TextFile",
+                        "properties": {
+                            "path": str(file_path),
+                            "name": file_path.name,
+                            "word_count": word_count,
+                            "line_count": len(lines),
+                            "file_type": "text"
+                        }
+                    }]
+                },
+                MemoryTier.PATTERN_MATCHING: {
+                    'collection': 'documentation',
+                    'points': [
+                        {
+                            'id': str(uuid.uuid5(uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8'), f"{file_path}_{i}")),
+                            'vector': embedding,
+                            'payload': chunk
+                        }
+                        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
+                    ]
+                }
+            }
+            
+            return ProcessedContent(
+                file_id=hashlib.md5(str(file_path).encode()).hexdigest(),
+                content_chunks=chunks,
+                embeddings=embeddings,
+                metadata=fix_metadata_serialization(asdict(analysis_result.file_metadata)),
+                database_routing=database_routing
+            )
+            
+        except Exception as e:
+            logger.error(f"Error processing text file {analysis_result.file_metadata.path}: {str(e)}")
+            return None
+
+
+class ShellFileProcessor:
+    """
+    🐚 Shell Script Processor
+    
+    Processes shell scripts (.sh, .bash, .zsh) for configuration and automation
+    """
+    
+    def __init__(self, db_manager: DatabaseManager):
+        self.db_manager = db_manager
+        self.embedding_generator = EmbeddingGenerator()
+        
+    def process(self, analysis_result: AnalysisResult) -> ProcessedContent:
+        """Process shell script content"""
+        try:
+            # Read file content
+            file_path = Path(analysis_result.file_metadata.path)
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+            
+            # Extract shell script metadata
+            lines = content.split('\n')
+            shebang = lines[0] if lines and lines[0].startswith('#!') else None
+            
+            # Count different types of shell constructs
+            function_count = len(re.findall(r'function\s+\w+|^\w+\s*\(\)', content, re.MULTILINE))
+            variable_count = len(re.findall(r'^\s*\w+\s*=', content, re.MULTILINE))
+            command_count = len([line for line in lines if line.strip() and not line.strip().startswith('#')])
+            
+            # Create content chunks
+            chunks = [{
+                'type': 'shell_script',
+                'content': content,
+                'shebang': shebang,
+                'function_count': function_count,
+                'variable_count': variable_count,
+                'command_count': command_count,
+                'shell_type': self._detect_shell_type(content, file_path)
+            }]
+            
+            # Generate embeddings
+            embeddings = [self.embedding_generator.generate_embedding(content)]
+            
+            # Create processed content
+            processed_data = {
+                "file_path": str(file_path),
+                "file_name": file_path.name,
+                "file_type": "shell_script",
+                "content": content,
+                "metadata": {
+                    "shebang": shebang,
+                    "line_count": len(lines),
+                    "function_count": function_count,
+                    "variable_count": variable_count,
+                    "command_count": command_count,
+                    "shell_type": self._detect_shell_type(content, file_path),
+                    "processed_at": datetime.now().isoformat()
+                }
+            }
+            
+            # Database routing
+            database_routing = {
+                MemoryTier.LONG_TERM: {
+                    "table": "configuration_files",
+                    "data": processed_data
+                },
+                MemoryTier.MEDIUM_TERM: {
+                    "nodes": [{
+                        "type": "ShellScript",
+                        "properties": {
+                            "path": str(file_path),
+                            "name": file_path.name,
+                            "shell_type": self._detect_shell_type(content, file_path),
+                            "function_count": function_count,
+                            "variable_count": variable_count,
+                            "file_type": "shell_script"
+                        }
+                    }]
+                },
+                MemoryTier.PATTERN_MATCHING: {
+                    'collection': 'configurations',
+                    'points': [
+                        {
+                            'id': str(uuid.uuid5(uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8'), f"{file_path}_{i}")),
+                            'vector': embedding,
+                            'payload': chunk
+                        }
+                        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
+                    ]
+                }
+            }
+            
+            return ProcessedContent(
+                file_id=hashlib.md5(str(file_path).encode()).hexdigest(),
+                content_chunks=chunks,
+                embeddings=embeddings,
+                metadata=fix_metadata_serialization(asdict(analysis_result.file_metadata)),
+                database_routing=database_routing
+            )
+            
+        except Exception as e:
+            logger.error(f"Error processing shell script {analysis_result.file_metadata.path}: {str(e)}")
+            return None
+    
+    def _detect_shell_type(self, content: str, file_path: Path) -> str:
+        """Detect shell type from shebang or file extension"""
+        first_line = content.split('\n')[0] if content else ""
+        
+        if 'bash' in first_line:
+            return 'bash'
+        elif 'zsh' in first_line:
+            return 'zsh'
+        elif 'sh' in first_line:
+            return 'sh'
+        elif file_path.suffix == '.bash':
+            return 'bash'
+        elif file_path.suffix == '.zsh':
+            return 'zsh'
+        else:
+            return 'shell'
+
+
+class GenericFileProcessor:
+    """
+    🔧 Generic File Processor
+    
+    Handles unknown file types with basic content extraction
+    """
+    
+    def __init__(self, db_manager: DatabaseManager):
+        self.db_manager = db_manager
+        self.embedding_generator = EmbeddingGenerator()
+        
+    def process(self, analysis_result: AnalysisResult) -> ProcessedContent:
+        """Process unknown file type with basic extraction"""
+        try:
+            file_path = Path(analysis_result.file_metadata.path)
+            
+            # Try to read as text first
+            try:
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                is_text = True
+            except:
+                # If text reading fails, read as binary and get basic info
+                with open(file_path, 'rb') as f:
+                    binary_content = f.read()
+                content = f"Binary file: {len(binary_content)} bytes"
+                is_text = False
+            
+            # Extract basic metadata
+            file_size = file_path.stat().st_size
+            file_ext = file_path.suffix.lower()
+            
+            # Create content chunks
+            chunks = [{
+                'type': 'unknown_file',
+                'content': content if is_text else f"Binary file ({file_size} bytes)",
+                'file_extension': file_ext,
+                'file_size_bytes': file_size,
+                'is_text_file': is_text
+            }]
+            
+            # Generate embeddings (only for text files)
+            if is_text and content.strip():
+                embeddings = [self.embedding_generator.generate_embedding(content)]
+            else:
+                embeddings = []
+            
+            # Create processed content
+            processed_data = {
+                "file_path": str(file_path),
+                "file_name": file_path.name,
+                "file_type": "unknown",
+                "content": content if is_text else f"Binary file ({file_size} bytes)",
+                "metadata": {
+                    "file_extension": file_ext,
+                    "file_size_bytes": file_size,
+                    "is_text_file": is_text,
+                    "mime_type": analysis_result.file_metadata.mime_type,
+                    "processed_at": datetime.now().isoformat()
+                }
+            }
+            
+            # Database routing - store as configuration for unknown types
+            database_routing = {
+                MemoryTier.LONG_TERM: {
+                    "table": "configuration_files",
+                    "data": processed_data
+                },
+                MemoryTier.MEDIUM_TERM: {
+                    "nodes": [{
+                        "type": "UnknownFile",
+                        "properties": {
+                            "path": str(file_path),
+                            "name": file_path.name,
+                            "file_extension": file_ext,
+                            "file_size_bytes": file_size,
+                            "is_text_file": is_text,
+                            "file_type": "unknown"
+                        }
+                    }]
+                }
+            }
+            
+            # Only add vector storage if we have embeddings
+            if embeddings:
+                database_routing[MemoryTier.PATTERN_MATCHING] = {
+                    'collection': 'configurations',
+                    'points': [
+                        {
+                            'id': str(uuid.uuid5(uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8'), f"{file_path}_{i}")),
+                            'vector': embedding,
+                            'payload': chunk
+                        }
+                        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
+                    ]
+                }
+            
+            return ProcessedContent(
+                file_id=hashlib.md5(str(file_path).encode()).hexdigest(),
+                content_chunks=chunks,
+                embeddings=embeddings,
+                metadata=fix_metadata_serialization(asdict(analysis_result.file_metadata)),
+                database_routing=database_routing
+            )
+            
+        except Exception as e:
+            logger.error(f"Error processing unknown file {analysis_result.file_metadata.path}: {str(e)}")
+            return None
+
+class DockerfileProcessor:
+    """
+    🐳 Dockerfile Processor
+    
+    Processes Dockerfiles for container configuration management
+    """
+    
+    def __init__(self, db_manager: DatabaseManager):
+        self.db_manager = db_manager
+        self.embedding_generator = EmbeddingGenerator()
+        
+    def process(self, analysis_result: AnalysisResult) -> ProcessedContent:
+        """Process Dockerfile content"""
+        try:
+            # Read file content
+            file_path = Path(analysis_result.file_metadata.path)
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+            
+            # Extract Dockerfile metadata
+            lines = content.split('\n')
+            
+            # Parse Dockerfile instructions
+            instructions = []
+            base_image = None
+            
+            for line in lines:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    parts = line.split(' ', 1)
+                    if len(parts) >= 2:
+                        instruction = parts[0].upper()
+                        value = parts[1] if len(parts) > 1 else ""
+                        instructions.append({'instruction': instruction, 'value': value})
+                        
+                        if instruction == 'FROM' and not base_image:
+                            base_image = value
+            
+            # Create content chunks
+            chunks = [{
+                'type': 'dockerfile',
+                'content': content,
+                'base_image': base_image,
+                'instructions': instructions,
+                'instruction_count': len(instructions)
+            }]
+            
+            # Generate embeddings
+            embeddings = [self.embedding_generator.generate_embedding(content)]
+            
+            # Create processed content
+            processed_data = {
+                "file_path": str(file_path),
+                "file_name": file_path.name,
+                "file_type": "dockerfile",
+                "content": content,
+                "metadata": {
+                    "base_image": base_image,
+                    "instruction_count": len(instructions),
+                    "instructions": instructions,
+                    "line_count": len(lines),
+                    "processed_at": datetime.now().isoformat()
+                }
+            }
+            
+            # Database routing
+            database_routing = {
+                MemoryTier.LONG_TERM: {
+                    "table": "configuration_files",
+                    "data": processed_data
+                },
+                MemoryTier.MEDIUM_TERM: {
+                    "nodes": [{
+                        "type": "Dockerfile",
+                        "properties": {
+                            "path": str(file_path),
+                            "name": file_path.name,
+                            "base_image": base_image or "unknown",
+                            "instruction_count": len(instructions),
+                            "file_type": "dockerfile"
+                        }
+                    }]
+                },
+                MemoryTier.PATTERN_MATCHING: {
+                    'collection': 'configurations',
+                    'points': [
+                        {
+                            'id': str(uuid.uuid5(uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8'), f"{file_path}_{i}")),
+                            'vector': embedding,
+                            'payload': chunk
+                        }
+                        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
+                    ]
+                }
+            }
+            
+            return ProcessedContent(
+                file_id=hashlib.md5(str(file_path).encode()).hexdigest(),
+                content_chunks=chunks,
+                embeddings=embeddings,
+                metadata=fix_metadata_serialization(asdict(analysis_result.file_metadata)),
+                database_routing=database_routing
+            )
+            
+        except Exception as e:
+            logger.error(f"Error processing Dockerfile {analysis_result.file_metadata.path}: {str(e)}")
+            return None
 
 async def main():
     """
