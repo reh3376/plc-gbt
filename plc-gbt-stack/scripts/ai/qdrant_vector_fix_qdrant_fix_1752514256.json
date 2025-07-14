@@ -1,0 +1,73 @@
+{
+  "session_id": "qdrant_fix_1752514256",
+  "start_time": "2025-07-14T13:30:56.532192",
+  "success": true,
+  "phases": {
+    "connection": {
+      "status": "success",
+      "message": "Qdrant connected"
+    },
+    "analysis": {
+      "existing_collections": {},
+      "dimension_issues": [],
+      "missing_collections": [
+        "plc_embeddings",
+        "python_code",
+        "documentation",
+        "configurations"
+      ],
+      "vector_counts": {},
+      "total_issues": 4
+    },
+    "dimension_fixes": {
+      "fixed_collections": []
+    },
+    "missing_collections": {
+      "creation_results": {
+        "plc_embeddings": true,
+        "python_code": true,
+        "documentation": true,
+        "configurations": true
+      }
+    },
+    "validation": {
+      "all_collections_exist": true,
+      "all_dimensions_correct": true,
+      "collection_details": {
+        "plc_embeddings": {
+          "exists": true,
+          "vector_count": 0,
+          "current_dimensions": 3072,
+          "expected_dimensions": 3072,
+          "dimensions_correct": true
+        },
+        "python_code": {
+          "exists": true,
+          "vector_count": 0,
+          "current_dimensions": 3072,
+          "expected_dimensions": 3072,
+          "dimensions_correct": true
+        },
+        "documentation": {
+          "exists": true,
+          "vector_count": 0,
+          "current_dimensions": 3072,
+          "expected_dimensions": 3072,
+          "dimensions_correct": true
+        },
+        "configurations": {
+          "exists": true,
+          "vector_count": 0,
+          "current_dimensions": 3072,
+          "expected_dimensions": 3072,
+          "dimensions_correct": true
+        }
+      },
+      "total_collections": 4,
+      "total_vectors": 0,
+      "issues_remaining": []
+    }
+  },
+  "duration_seconds": 0.310156,
+  "end_time": "2025-07-14T13:30:56.842353"
+}

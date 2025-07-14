@@ -1,0 +1,164 @@
+{
+  "validation_id": "simple_validation_1752256087",
+  "timestamp": "2025-07-11T13:48:07.194246",
+  "overall_score": 0.7044202898550724,
+  "validation_time_seconds": 2.3427069187164307,
+  "code_reduction": {
+    "individual_migrations": [
+      {
+        "name": "PLC Memory CLI",
+        "original_file": "plc_memory_cli.py",
+        "modular_file": "plc_memory_cli_modular.py",
+        "original_lines": 794,
+        "modular_lines": 254,
+        "line_reduction_percent": 68.01007556675063,
+        "lines_eliminated": 540,
+        "file_exists": {
+          "original": true,
+          "modular": true
+        }
+      },
+      {
+        "name": "OpenAI Fine-Tuning CLI",
+        "original_file": "openai_fine_tuning_cli.py",
+        "modular_file": "openai_fine_tuning_cli_modular.py",
+        "original_lines": 814,
+        "modular_lines": 328,
+        "line_reduction_percent": 59.7051597051597,
+        "lines_eliminated": 486,
+        "file_exists": {
+          "original": true,
+          "modular": true
+        }
+      },
+      {
+        "name": "LLM-WolframAlpha Middleware",
+        "original_file": "phases/phase13/phase13_4_llm_wolfram_middleware.py",
+        "modular_file": "phases/phase13/phase13_4_llm_wolfram_middleware_modular.py",
+        "original_lines": 692,
+        "modular_lines": 604,
+        "line_reduction_percent": 12.716763005780345,
+        "lines_eliminated": 88,
+        "file_exists": {
+          "original": true,
+          "modular": true
+        }
+      }
+    ],
+    "overall_line_reduction_percent": 48.434782608695656,
+    "total_lines_eliminated": 1114,
+    "total_original_lines": 2300,
+    "summary": "Overall reduction: 48.4% (1114 lines eliminated)"
+  },
+  "module_imports": {
+    "module_test_results": {
+      "modules.core": {
+        "status": "SUCCESS",
+        "available_components": [
+          "BaseOrchestrator",
+          "ConfigurationManager",
+          "DatabaseManager"
+        ],
+        "total_components": 3,
+        "score": 1.0
+      },
+      "modules.integration": {
+        "status": "SUCCESS",
+        "available_components": [
+          "ServiceManager",
+          "ServiceType",
+          "ServiceStatus"
+        ],
+        "total_components": 3,
+        "score": 1.0
+      },
+      "modules.data": {
+        "status": "SUCCESS",
+        "available_components": [
+          "DataLoader",
+          "DataValidator",
+          "DataPreprocessor"
+        ],
+        "total_components": 3,
+        "score": 1.0
+      },
+      "modules.metrics": {
+        "status": "SUCCESS",
+        "available_components": [
+          "MetricCalculator",
+          "PerformanceClassifier"
+        ],
+        "total_components": 2,
+        "score": 1.0
+      },
+      "modules.analysis": {
+        "status": "SUCCESS",
+        "available_components": [
+          "PerformanceAnalyzer",
+          "ReportGenerator"
+        ],
+        "total_components": 2,
+        "score": 1.0
+      }
+    },
+    "successful_imports": 5,
+    "total_modules": 5,
+    "overall_import_score": 1.0,
+    "summary": "Module imports: 5/5 successful (100.0%)"
+  },
+  "functionality_testing": {
+    "functionality_tests": {
+      "configuration_management": {
+        "status": "FAILED",
+        "error": "'ConfigurationManager' object has no attribute 'set_config'",
+        "score": 0.0
+      },
+      "service_management": {
+        "status": "PASSED",
+        "operations_tested": [
+          "service_manager_creation"
+        ],
+        "score": 1.0
+      },
+      "metrics_calculation": {
+        "status": "FAILED",
+        "error": "'MetricCalculator' object has no attribute 'calculate_mse'",
+        "score": 0.0
+      }
+    },
+    "overall_functionality_score": 0.3333333333333333,
+    "passed_tests": 1,
+    "total_tests": 3,
+    "summary": "Functionality tests: 33.3% success rate"
+  },
+  "migration_assessment": {
+    "migration_artifacts": {
+      "modular_cli_files": {
+        "found": 2,
+        "total": 2,
+        "score": 1.0,
+        "artifacts": [
+          "plc_memory_cli_modular.py",
+          "openai_fine_tuning_cli_modular.py"
+        ]
+      },
+      "integration_module": {
+        "exists": true,
+        "score": 1.0,
+        "path": "modules/integration.py"
+      },
+      "migration_demo": {
+        "exists": true,
+        "score": 1.0,
+        "path": "PHASE14_MODULAR_MIGRATION_DEMO.md"
+      },
+      "validation_script": {
+        "exists": true,
+        "score": 1.0,
+        "path": "phase14_modular_validation.py"
+      }
+    },
+    "completeness_score": 1.0,
+    "summary": "Migration completeness: 100.0%"
+  }
+}

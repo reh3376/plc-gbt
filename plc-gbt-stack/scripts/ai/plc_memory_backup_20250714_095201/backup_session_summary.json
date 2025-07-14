@@ -1,0 +1,22 @@
+{
+  "session_id": "memory_backup_20250714_095201",
+  "timestamp": "2025-07-14T09:52:01.560456",
+  "backup_directory": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_095201",
+  "total_databases": 1,
+  "successful_backups": 1,
+  "failed_backups": 0,
+  "success_rate_percent": 100.0,
+  "total_duration_seconds": 0.10131692886352539,
+  "total_size_mb": 0.00046825408935546875,
+  "compression_enabled": false,
+  "validation_enabled": false,
+  "backup_results": [
+    {
+      "database": "postgresql",
+      "success": true,
+      "backup_file": "plc_memory_backup_20250714_095201/postgresql_backup_20250714_095201.sql",
+      "duration_seconds": 0.10125279426574707,
+      "file_size_mb": 0.00046825408935546875
+    }
+  ]
+}

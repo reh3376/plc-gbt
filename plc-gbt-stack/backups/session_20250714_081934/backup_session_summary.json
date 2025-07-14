@@ -1,0 +1,21 @@
+{
+  "session_id": "20250714_081934",
+  "backup_timestamp": "2025-07-14T08:19:37.860299",
+  "backup_directory": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/../../../plc-gpt-stack/backup/session_20250714_081934",
+  "results": {
+    "redis": {
+      "status": "success",
+      "file": "../../../plc-gpt-stack/backup/session_20250714_081934/redis_dump_20250714_081934.rdb",
+      "size_mb": 0.0,
+      "keys": 0,
+      "duration": 3.1
+    }
+  },
+  "summary": {
+    "total_databases": 1,
+    "successful": 1,
+    "failed": 0,
+    "total_size_mb": 0.0,
+    "total_duration": 3.1
+  }
+}

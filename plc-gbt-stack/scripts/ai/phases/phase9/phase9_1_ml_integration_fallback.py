@@ -38,6 +38,10 @@ try:
 except ImportError:
     MPC_AVAILABLE = False
     logging.warning("MPC framework not available - using standalone ML implementation")
+    # Define fallback types for type hints
+    MPCConfiguration = Any
+    ModelPredictiveController = Any
+    MPCState = Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

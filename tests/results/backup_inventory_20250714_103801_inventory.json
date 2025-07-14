@@ -1,0 +1,18 @@
+{
+  "inventory_metadata": {
+    "session_id": "backup_inventory_20250714_103801",
+    "timestamp": "2025-07-14T10:38:01.815368",
+    "total_backup_directories": 11,
+    "total_backup_files": 14,
+    "total_size_mb": 0.03
+  },
+  "database_distribution": {
+    "postgresql": 2,
+    "qdrant": 2,
+    "neo4j": 2,
+    "redis": 3
+  },
+  "organization_plan": {
+    "target_directories": {
+      "plc_backups/plc_backup_neo4j": [
+        

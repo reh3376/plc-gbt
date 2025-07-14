@@ -1,0 +1,19 @@
+{
+  "session_id": "backup_20250714_100604",
+  "timestamp": "2025-07-14T10:06:04.735622",
+  "backup_directory": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_100604",
+  "total_databases": 1,
+  "successful_backups": 1,
+  "success_rate_percent": 100.0,
+  "total_duration_seconds": 0.0460360050201416,
+  "total_size_mb": 7.82012939453125e-05,
+  "databases": [
+    {
+      "database": "qdrant",
+      "success": true,
+      "file_size_mb": 7.82012939453125e-05,
+      "duration_seconds": 0.0460360050201416,
+      "error": null
+    }
+  ]
+}

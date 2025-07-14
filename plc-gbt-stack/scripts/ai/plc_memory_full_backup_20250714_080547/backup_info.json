@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-07-14T08:05:48.980966",
+  "databases": [
+    "neo4j",
+    "postgresql",
+    "qdrant",
+    "redis"
+  ],
+  "backup_directory": "plc_memory_full_backup_20250714_080547",
+  "compressed": false
+}

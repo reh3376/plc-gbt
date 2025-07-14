@@ -1,0 +1,120 @@
+{
+  "session_id": "cli_targeted_1752491744",
+  "timestamp": "2025-07-14T07:15:44.776143",
+  "test_results": {
+    "plc_memory_cli": {
+      "status": "PASSED",
+      "passed_tests": 2,
+      "total_tests": 3,
+      "success_rate": 66.66666666666666,
+      "tests": [
+        {
+          "command": "--help",
+          "exit_code": 0,
+          "stdout_length": 960,
+          "stderr_length": 0,
+          "success": true,
+          "execution_time": "< 30s",
+          "output_indicators": {
+            "has_help": true,
+            "has_error": false,
+            "has_success": false
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "stdout_length": 315,
+          "stderr_length": 2543,
+          "success": true,
+          "execution_time": "< 30s",
+          "output_indicators": {
+            "has_help": false,
+            "has_error": false,
+            "has_success": true
+          }
+        },
+        {
+          "command": "list-collections",
+          "exit_code": 2,
+          "stdout_length": 0,
+          "stderr_length": 138,
+          "success": false,
+          "execution_time": "< 30s"
+        }
+      ]
+    },
+    "openai_fine_tuning_cli": {
+      "status": "PASSED",
+      "passed_tests": 1,
+      "total_tests": 3,
+      "success_rate": 33.33333333333333,
+      "tests": [
+        {
+          "command": "--help",
+          "exit_code": 0,
+          "stdout_length": 511,
+          "stderr_length": 0,
+          "success": true,
+          "execution_time": "< 30s",
+          "output_indicators": {
+            "has_help": true,
+            "has_error": false,
+            "has_success": false
+          }
+        },
+        {
+          "command": "list-models",
+          "exit_code": 2,
+          "stdout_length": 0,
+          "stderr_length": 149,
+          "success": false,
+          "execution_time": "< 30s"
+        },
+        {
+          "command": "status",
+          "exit_code": 1,
+          "stdout_length": 112,
+          "stderr_length": 0,
+          "success": false,
+          "execution_time": "< 30s",
+          "output_indicators": {
+            "has_help": false,
+            "has_error": true,
+            "has_success": false
+          }
+        }
+      ]
+    },
+    "plc_optimize_cli": {
+      "status": "FAILED",
+      "passed_tests": 0,
+      "total_tests": 2,
+      "success_rate": 0.0,
+      "tests": [
+        {
+          "command": "--help",
+          "exit_code": 1,
+          "stdout_length": 0,
+          "stderr_length": 211,
+          "success": false,
+          "execution_time": "< 30s"
+        },
+        {
+          "command": "--version",
+          "exit_code": 1,
+          "stdout_length": 0,
+          "stderr_length": 211,
+          "success": false,
+          "execution_time": "< 30s"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_tests": 8,
+    "passed": 3,
+    "failed": 5,
+    "skipped": 0
+  }
+}

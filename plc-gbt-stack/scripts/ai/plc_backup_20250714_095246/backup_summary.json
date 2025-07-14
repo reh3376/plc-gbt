@@ -1,0 +1,19 @@
+{
+  "session_id": "backup_20250714_095246",
+  "timestamp": "2025-07-14T09:52:48.518488",
+  "backup_directory": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_095246",
+  "total_databases": 1,
+  "successful_backups": 1,
+  "success_rate_percent": 100.0,
+  "total_duration_seconds": 2.0787761211395264,
+  "total_size_mb": 0.009241104125976562,
+  "databases": [
+    {
+      "database": "neo4j",
+      "success": true,
+      "file_size_mb": 0.009241104125976562,
+      "duration_seconds": 2.0787761211395264,
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "session_id": "backup_session_1752501943",
+  "timestamp": "2025-07-14T10:05:50.298131",
+  "total_databases": 4,
+  "successful_backups": 4,
+  "failed_backups": 0,
+  "success_rate_percent": 100.0,
+  "total_duration_seconds": 6.49359,
+  "total_size_mb": 0.01619720458984375,
+  "backup_directory": "plc_enterprise_backups/backup_session_1752501943",
+  "databases": [
+    {
+      "database_name": "redis",
+      "backup_id": "redis_backup_session_1752501943",
+      "start_time": "2025-07-14T10:05:43.804019",
+      "end_time": "2025-07-14T10:05:46.953921",
+      "duration_seconds": 3.149902,
+      "file_size_bytes": 88,
+      "file_size_mb": 8.392333984375e-05,
+      "records_backed_up": 0,
+      "backup_method": "redis_bgsave",
+      "compression_ratio": 1.0,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "database_name": "neo4j",
+      "backup_id": "neo4j_backup_session_1752501943",
+      "start_time": "2025-07-14T10:05:46.954113",
+      "end_time": "2025-07-14T10:05:50.081587",
+      "duration_seconds": 3.127474,
+      "file_size_bytes": 16323,
+      "file_size_mb": 0.015566825866699219,
+      "records_backed_up": 0,
+      "backup_method": "neo4j_admin",
+      "compression_ratio": 1.0,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "database_name": "postgresql",
+      "backup_id": "postgresql_backup_session_1752501943",
+      "start_time": "2025-07-14T10:05:50.081698",
+      "end_time": "2025-07-14T10:05:50.235628",
+      "duration_seconds": 0.15393,
+      "file_size_bytes": 491,
+      "file_size_mb": 0.00046825408935546875,
+      "records_backed_up": 0,
+      "backup_method": "pg_dump",
+      "compression_ratio": 1.0,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "database_name": "qdrant",
+      "backup_id": "qdrant_backup_session_1752501943",
+      "start_time": "2025-07-14T10:05:50.235772",
+      "end_time": "2025-07-14T10:05:50.298056",
+      "duration_seconds": 0.062284,
+      "file_size_bytes": 82,
+      "file_size_mb": 7.82012939453125e-05,
+      "records_backed_up": 0,
+      "backup_method": "qdrant_snapshot",
+      "compression_ratio": 1.0,
+      "success": true,
+      "error_message": null
+    }
+  ]
+}

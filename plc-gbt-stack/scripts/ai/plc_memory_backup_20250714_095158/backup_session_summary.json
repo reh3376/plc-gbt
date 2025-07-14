@@ -1,0 +1,22 @@
+{
+  "session_id": "memory_backup_20250714_095158",
+  "timestamp": "2025-07-14T09:51:58.610027",
+  "backup_directory": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_095158",
+  "total_databases": 1,
+  "successful_backups": 1,
+  "failed_backups": 0,
+  "success_rate_percent": 100.0,
+  "total_duration_seconds": 2.005204916000366,
+  "total_size_mb": 0.008187294006347656,
+  "compression_enabled": false,
+  "validation_enabled": false,
+  "backup_results": [
+    {
+      "database": "neo4j",
+      "success": true,
+      "backup_directory": "plc_memory_backup_20250714_095158/neo4j_backup_20250714_095158",
+      "duration_seconds": 2.005147933959961,
+      "file_size_mb": 0.008187294006347656
+    }
+  ]
+}

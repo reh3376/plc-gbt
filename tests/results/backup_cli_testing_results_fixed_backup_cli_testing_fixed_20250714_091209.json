@@ -1,0 +1,287 @@
+{
+  "session_info": {
+    "session_id": "backup_cli_testing_fixed_20250714_091209",
+    "start_time": "2025-07-14T09:12:09.679771",
+    "end_time": "2025-07-14T09:12:26.353670",
+    "total_duration_seconds": 16.673899,
+    "framework_version": "1.1.0",
+    "fixes_applied": [
+      "path_resolution_correction",
+      "subprocess_import_verified"
+    ]
+  },
+  "test_summary": {
+    "total_cli_implementations": 6,
+    "available_clis": 6,
+    "total_tests_executed": 22,
+    "successful_tests": 19,
+    "failed_tests": 3,
+    "success_rate_percent": 86.36363636363636
+  },
+  "cli_results": {
+    "plc_backup_cli_final": {
+      "total_tests": 4,
+      "successful_tests": 4,
+      "failed_tests": 0,
+      "success_rate_percent": 100.0,
+      "avg_duration_seconds": 0.593646228313446
+    },
+    "plc_memory_cli": {
+      "total_tests": 2,
+      "successful_tests": 2,
+      "failed_tests": 0,
+      "success_rate_percent": 100.0,
+      "avg_duration_seconds": 2.3593649864196777
+    },
+    "backup_cli_complete": {
+      "total_tests": 4,
+      "successful_tests": 3,
+      "failed_tests": 1,
+      "success_rate_percent": 75.0,
+      "avg_duration_seconds": 0.6093300580978394
+    },
+    "plc_backup_cli": {
+      "total_tests": 4,
+      "successful_tests": 4,
+      "failed_tests": 0,
+      "success_rate_percent": 100.0,
+      "avg_duration_seconds": 0.854950487613678
+    },
+    "enhanced_backup_cli": {
+      "total_tests": 4,
+      "successful_tests": 2,
+      "failed_tests": 2,
+      "success_rate_percent": 50.0,
+      "avg_duration_seconds": 0.04650944471359253
+    },
+    "enterprise_backup_cli": {
+      "total_tests": 4,
+      "successful_tests": 4,
+      "failed_tests": 0,
+      "success_rate_percent": 100.0,
+      "avg_duration_seconds": 0.8836652636528015
+    }
+  },
+  "detailed_results": [
+    {
+      "test_name": "help_command",
+      "cli_name": "plc_backup_cli_final",
+      "command": "python3 plc_backup_cli_final.py --help",
+      "success": true,
+      "duration_seconds": 0.04947400093078613,
+      "output": "Usage: plc_backup_cli_final.py [OPTIONS] COMMAND [ARGS]...\n\n  \ud83d\ude80 PLC Backup CLI - Enterprise Database Management\n\nOptions:\n  --version  Show the version and exit.\n  --help     Show this message and exit.\n\nCommands:\n  backup  \ud83d\udcbe Database backup operations\n  list    \ud83d\udccb List backup sessions\n  status  \ud83d\udcca Show system status\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "status_command",
+      "cli_name": "plc_backup_cli_final",
+      "command": "python3 plc_backup_cli_final.py status",
+      "success": true,
+      "duration_seconds": 0.11561799049377441,
+      "output": "\ud83d\udcca Backup System Status\n=========================\n  \u2705 plc-redis: RUNNING\n  \u2705 plc-neo4j: RUNNING\n  \u2705 plc-postgres: RUNNING\n  \u2705 plc-qdrant: RUNNING\n\n\ud83d\udcca 4/4 databases running\n\ud83d\udcbe Backup sessions: 11\n\n\ud83c\udfaf Ready for backup operations!\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "backup_redis",
+      "cli_name": "plc_backup_cli_final",
+      "command": "python3 plc_backup_cli_final.py backup redis",
+      "success": true,
+      "duration_seconds": 2.146484851837158,
+      "output": "\ud83d\udd34 Backing up Redis...\n  \u2705 Success: 0.00 MB\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "list_command",
+      "cli_name": "plc_backup_cli_final",
+      "command": "python3 plc_backup_cli_final.py list",
+      "success": true,
+      "duration_seconds": 0.06300806999206543,
+      "output": "\ud83d\udccb Available Backup Sessions\nSession              Date                 DBs  Success  Size    \n-----------------------------------------------------------------\n20250714_091209      2025-07-14 09:12:11  1    100%     0.0MB   \n20250714_085716      2025-07-14 08:57:21  4    100%     0.0MB   \n20250714_085708      2025-07-14 08:57:08  1    100%     0.0MB   \n20250714_085700      2025-07-14 08:57:01  1    100%     0.0MB   \n20250714_085649      2025-07-14 08:56:51  1    100%     0.0MB   \n20250714_085640      2025-07-14 08:56:42  1    100%     0.0MB   \n20250714_082356      2025-07-14 08:23:58  1    100%     0.0MB   \n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "help_command",
+      "cli_name": "plc_memory_cli",
+      "command": "python3 plc_memory_cli.py --help",
+      "success": true,
+      "duration_seconds": 1.6621708869934082,
+      "output": "Usage: plc_memory_cli.py [OPTIONS] COMMAND [ARGS]...\n\n  \ud83e\udd16 PLC Memory Management CLI\n\n  Comprehensive multi-database memory management for AI systems. Manages\n  Redis, Neo4j, PostgreSQL, and Qdrant databases intelligently.\n\nOptions:\n  --version  Show the version and exit.\n  --help     Show this message and exit.\n\nCommands:\n  backup    \ud83d\udcbe Create backup of memory databases with comprehensive...\n  clean     \ud83e\uddf9 Clean up unused data and optimize storage Removes unused...\n  health    \ud83c\udfe5 Run comprehensive health checks Performs detailed health...\n  ingest    \ud83d\udd04 Ingest codebase into memory system Uses AI Task...\n  neo4j     \ud83d\udd17 Neo4j graph database management commands Provides tools for...\n  optimize  \ud83d\udd27 Optimize memory tiers and performance Analyzes access...\n  query     \ud83d\udd0d Query memory system with intelligent routing Searches...\n  status    \ud83d\udcca Show system status and performance metrics Displays current...\n  version   \ud83d\udccb Show version and system information\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "backup_redis",
+      "cli_name": "plc_memory_cli",
+      "command": "python3 plc_memory_cli.py backup -d redis",
+      "success": true,
+      "duration_seconds": 3.0565590858459473,
+      "output": "\ud83d\ude80 Starting PLC Memory Database Backup Operation\n============================================================\n\ud83d\udcc1 Backup Directory: /Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_091214\n\ud83c\udd94 Session ID: memory_backup_20250714_091214\n\ud83d\udddc\ufe0f  Compression: Disabled\n\u2705 Validation: Disabled\n\ud83c\udfaf Target Databases: redis\n\n\ud83d\udd04 Backing up REDIS...\n  \u2705 Redis backup completed: 0.00 MB\n\n============================================================\n\ud83d\udcca BACKUP SESSION COMPLETE\n============================================================\n\ud83c\udfaf Session ID: memory_backup_20250714_091214\n\ud83d\udcc1 Location: /Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_091214\n\u23f1\ufe0f  Duration: 2.10 seconds\n\ud83d\udcbe Total Size: 0.00 MB\n\u2705 Success Rate: 100.0% (1/1)\n\n\ud83d\udccb Database Results:\n  REDIS: \u2705 SUCCESS - 0.00 MB in 2.10s\n\n\ud83c\udf89 Backup session completed!\n\ud83d\udcc4 Session summary: plc_memory_backup_20250714_091214/backup_session_summary.json\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "help_command",
+      "cli_name": "backup_cli_complete",
+      "command": "python3 backup_cli_complete.py --help",
+      "success": true,
+      "duration_seconds": 0.05534219741821289,
+      "output": "Usage: backup_cli_complete.py [OPTIONS] COMMAND [ARGS]...\n\n  \ud83d\ude80 Complete Backup CLI - Enterprise Database Management\n\n  Comprehensive backup management for PLC-GBT Industrial Automation AI\n  Ecosystem.\n\nOptions:\n  --version  Show the version and exit.\n  --help     Show this message and exit.\n\nCommands:\n  backup    \ud83d\udcbe Database backup operations\n  cleanup   \ud83e\uddf9 Cleanup old backups\n  list      \ud83d\udccb List backup sessions\n  status    \ud83d\udcca Show backup system status\n  validate  \ud83d\udd0d Validate backup session\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "status_command",
+      "cli_name": "backup_cli_complete",
+      "command": "python3 backup_cli_complete.py status",
+      "success": false,
+      "duration_seconds": 0.13625025749206543,
+      "output": "\ud83d\udcca Backup System Status\n==============================\n  \u2705 plc-redis: RUNNING\n  \u2705 plc-neo4j: RUNNING\n  \u2705 plc-postgres: RUNNING\n  \u2705 plc-qdrant: RUNNING\n\n\ud83d\udcca 4/4 databases running\n",
+      "error_message": "Traceback (most recent call last):\n  File \"/Users/reh3376/repos/plc-gbt/backup_cli_complete.py\", line 697, in <module>\n    cli() \n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1161, in __call__\n    return self.main(*args, **kwargs)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1082, in main\n    rv = self.invoke(ctx)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1697, in invoke\n    return _process_result(sub_ctx.command.invoke(sub_ctx))\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1443, in invoke\n    return ctx.invoke(self.callback, **ctx.params)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 788, in invoke\n    return __callback(*args, **kwargs)\n  File \"/Users/reh3376/repos/plc-gbt/backup_cli_complete.py\", line 679, in status\n    backup_dirs = list(Path(\".\").glob(\"plc_backup_*\")) + list(Path(\".\").glob(\"backup_session_*\"))\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1161, in __call__\n    return self.main(*args, **kwargs)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1081, in main\n    with self.make_context(prog_name, args, **extra) as ctx:\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 949, in make_context\n    self.parse_args(ctx, args)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1414, in parse_args\n    opts, args, param_order = parser.parse_args(args=args)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/parser.py\", line 339, in parse_args\n    self._process_args_for_options(state)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/parser.py\", line 360, in _process_args_for_options\n    arglen = len(arg)\nTypeError: object of type 'PosixPath' has no len()\n",
+      "exit_code": 1
+    },
+    {
+      "test_name": "backup_redis",
+      "cli_name": "backup_cli_complete",
+      "command": "python3 backup_cli_complete.py backup redis",
+      "success": true,
+      "duration_seconds": 2.1988637447357178,
+      "output": "\ud83d\udd34 Backing up Redis...\n  \ud83d\udcca Keys: 0\n  \u2705 Success: 0.00 MB\n\n\u2705 Redis backup completed: 0.00 MB\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "list_command",
+      "cli_name": "backup_cli_complete",
+      "command": "python3 backup_cli_complete.py list",
+      "success": true,
+      "duration_seconds": 0.04686403274536133,
+      "output": "\ud83d\udccb Available Backup Sessions\nSession                   Date                 DBs  Success  Size    \n----------------------------------------------------------------------\nckup_20250714_091217      2025-07-14 09:12:19  1    100%     0.0MB   \nckup_20250714_090036      2025-07-14 09:00:38  1    100%     0.0MB   \n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "help_command",
+      "cli_name": "plc_backup_cli",
+      "command": "python3 plc_backup_cli.py --help",
+      "success": true,
+      "duration_seconds": 0.05015206336975098,
+      "output": "Usage: plc_backup_cli.py [OPTIONS] COMMAND [ARGS]...\n\n  \ud83d\ude80 PLC Backup CLI - Enterprise Database Backup Management\n\n  Comprehensive backup management for PLC-GBT Industrial Automation AI\n  Ecosystem.\n\n  Supports: Neo4j, PostgreSQL, Redis, Qdrant databases with full metrics and\n  monitoring.\n\nOptions:\n  --version  Show the version and exit.\n  --help     Show this message and exit.\n\nCommands:\n  backup    \ud83d\udcbe Database backup operations with comprehensive metrics\n  cleanup   \ud83e\uddf9 Clean up old backups based on retention policy\n  list      \ud83d\udccb List all available backups with metadata\n  status    \ud83d\udcca Show backup system status and health\n  validate  \ud83d\udd0d Validate backup integrity and completeness\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "status_command",
+      "cli_name": "plc_backup_cli",
+      "command": "python3 plc_backup_cli.py status",
+      "success": true,
+      "duration_seconds": 0.12136602401733398,
+      "output": "\ud83d\udcca PLC Backup System Status\n==================================================\n\ud83d\uddc4\ufe0f  Database Container Status:\n  \u2705 plc-neo4j: RUNNING\n  \u2705 plc-postgres: RUNNING\n  \u2705 plc-redis: RUNNING\n  \u2705 plc-qdrant: RUNNING\n\n\ud83d\udcc1 Backup Directories:\n  \u2705 plc_enterprise_backups: 3 sessions, 0.00 MB\n  \u2705 plc_backups: 4 sessions, 0.00 MB\n\n\ud83c\udfaf System Ready for Backup Operations!\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "backup_redis",
+      "cli_name": "plc_backup_cli",
+      "command": "python3 plc_backup_cli.py backup redis",
+      "success": true,
+      "duration_seconds": 3.1950230598449707,
+      "output": "\ud83d\udd34 Starting Redis-only backup...\n\u2705 Redis backup completed: 0.00 MB in 3.15s\n\ud83d\udcc1 Backup location: plc_backups/backup_session_1752498739\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "list_command",
+      "cli_name": "plc_backup_cli",
+      "command": "python3 plc_backup_cli.py list",
+      "success": true,
+      "duration_seconds": 0.05326080322265625,
+      "output": "\ud83d\udccb Listing available backups...\n\u274c No backup sessions found\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "help_command",
+      "cli_name": "enhanced_backup_cli",
+      "command": "python3 enhanced_backup_cli.py --help",
+      "success": true,
+      "duration_seconds": 0.04833173751831055,
+      "output": "Usage: enhanced_backup_cli.py [OPTIONS] COMMAND [ARGS]...\n\n  \ud83d\ude80 Enhanced Backup CLI - Production Database Backup Management\n\n  Comprehensive backup management for PLC-GBT Industrial Automation AI\n  Ecosystem.\n\nOptions:\n  --version  Show the version and exit.\n  --help     Show this message and exit.\n\nCommands:\n  backup  \ud83d\udcbe Database backup operations with comprehensive metrics\n  list    \ud83d\udccb List all available backup sessions\n  status  \ud83d\udcca Show backup system status\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "status_command",
+      "cli_name": "enhanced_backup_cli",
+      "command": "python3 enhanced_backup_cli.py status",
+      "success": false,
+      "duration_seconds": 0.04569697380065918,
+      "output": "\ud83d\udcca Enhanced Backup System Status\n==================================================\n",
+      "error_message": "Traceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1313, in mkdir\n    self._accessor.mkdir(self, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '../../../plc-gpt-stack/backup/session_20250714_091222'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1313, in mkdir\n    self._accessor.mkdir(self, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '../../../plc-gpt-stack/backup'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/reh3376/repos/plc-gbt/enhanced_backup_cli.py\", line 726, in <module>\n    cli() \n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1161, in __call__\n    return self.main(*args, **kwargs)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1082, in main\n    rv = self.invoke(ctx)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1697, in invoke\n    return _process_result(sub_ctx.command.invoke(sub_ctx))\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1443, in invoke\n    return ctx.invoke(self.callback, **ctx.params)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 788, in invoke\n    return __callback(*args, **kwargs)\n  File \"/Users/reh3376/repos/plc-gbt/enhanced_backup_cli.py\", line 714, in status\n    backup_system = EnhancedDatabaseBackup()\n  File \"/Users/reh3376/repos/plc-gbt/enhanced_backup_cli.py\", line 78, in __init__\n    self.backup_dir.mkdir(parents=True, exist_ok=True)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1317, in mkdir\n    self.parent.mkdir(parents=True, exist_ok=True)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1317, in mkdir\n    self.parent.mkdir(parents=True, exist_ok=True)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1313, in mkdir\n    self._accessor.mkdir(self, mode)\nPermissionError: [Errno 13] Permission denied: '../../../plc-gpt-stack'\n",
+      "exit_code": 1
+    },
+    {
+      "test_name": "backup_redis",
+      "cli_name": "enhanced_backup_cli",
+      "command": "python3 enhanced_backup_cli.py backup redis",
+      "success": false,
+      "duration_seconds": 0.048699140548706055,
+      "output": "\ud83d\udd34 Starting Redis-Only Backup\n",
+      "error_message": "Traceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1313, in mkdir\n    self._accessor.mkdir(self, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '../../../plc-gpt-stack/backup/session_20250714_091222'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1313, in mkdir\n    self._accessor.mkdir(self, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '../../../plc-gpt-stack/backup'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/reh3376/repos/plc-gbt/enhanced_backup_cli.py\", line 726, in <module>\n    cli() \n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1161, in __call__\n    return self.main(*args, **kwargs)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1082, in main\n    rv = self.invoke(ctx)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1697, in invoke\n    return _process_result(sub_ctx.command.invoke(sub_ctx))\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1697, in invoke\n    return _process_result(sub_ctx.command.invoke(sub_ctx))\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 1443, in invoke\n    return ctx.invoke(self.callback, **ctx.params)\n  File \"/Users/reh3376/Library/Python/3.9/lib/python/site-packages/click/core.py\", line 788, in invoke\n    return __callback(*args, **kwargs)\n  File \"/Users/reh3376/repos/plc-gbt/enhanced_backup_cli.py\", line 597, in redis\n    backup_system = EnhancedDatabaseBackup(output)\n  File \"/Users/reh3376/repos/plc-gbt/enhanced_backup_cli.py\", line 78, in __init__\n    self.backup_dir.mkdir(parents=True, exist_ok=True)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1317, in mkdir\n    self.parent.mkdir(parents=True, exist_ok=True)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1317, in mkdir\n    self.parent.mkdir(parents=True, exist_ok=True)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1313, in mkdir\n    self._accessor.mkdir(self, mode)\nPermissionError: [Errno 13] Permission denied: '../../../plc-gpt-stack'\n",
+      "exit_code": 1
+    },
+    {
+      "test_name": "list_command",
+      "cli_name": "enhanced_backup_cli",
+      "command": "python3 enhanced_backup_cli.py list",
+      "success": true,
+      "duration_seconds": 0.043309926986694336,
+      "output": "\ud83d\udccb Listing Available Backup Sessions...\n\u274c No backup sessions found\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "help_command",
+      "cli_name": "enterprise_backup_cli",
+      "command": "python3 enterprise_backup_cli.py --help",
+      "success": true,
+      "duration_seconds": 0.04875016212463379,
+      "output": "Usage: enterprise_backup_cli.py [OPTIONS] COMMAND [ARGS]...\n\n  \ud83d\ude80 Enterprise Backup CLI - Production Database Backup Management\n\n  Comprehensive backup management for PLC-GBT Industrial Automation AI\n  Ecosystem.\n\n  Features: \u2705 Multi-database support (Neo4j, PostgreSQL, Redis, Qdrant) \u2705\n  Comprehensive metrics and progress tracking   \u2705 Enterprise-grade validation\n  and integrity checks \u2705 Automated cleanup and retention policies \u2705 Production\n  logging and error handling\n\nOptions:\n  --version  Show the version and exit.\n  --help     Show this message and exit.\n\nCommands:\n  backup  \ud83d\udcbe Database backup operations with enterprise metrics\n  list    \ud83d\udccb List all available backups with enterprise metadata\n  status  \ud83d\udcca Show enterprise backup system status and health\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "status_command",
+      "cli_name": "enterprise_backup_cli",
+      "command": "python3 enterprise_backup_cli.py status",
+      "success": true,
+      "duration_seconds": 0.13241982460021973,
+      "output": "\ud83d\udcca Enterprise Backup System Status\n==================================================\n\ud83d\uddc4\ufe0f  Database Container Status:\n  \u2705 Neo4j Knowledge Graph: RUNNING\n  \u2705 PostgreSQL Metadata: RUNNING\n  \u2705 Redis Cache: RUNNING\n  \u2705 Qdrant Vector Database: RUNNING\n\n\ud83d\udcca Summary: 4/4 databases running\n\n\ud83d\udcc1 Backup Directories:\n  \u2705 plc_enterprise_backups: 4 sessions, 0.00 MB\n  \u2705 plc_backups: 4 sessions, 0.00 MB\n\n\ud83d\udcca Total backup sessions: 8\n\ud83d\udcbe Total backup size: 0.00 MB\n\n\ud83c\udfaf System Status: Ready for Backup Operations\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "backup_redis",
+      "cli_name": "enterprise_backup_cli",
+      "command": "python3 enterprise_backup_cli.py backup redis",
+      "success": true,
+      "duration_seconds": 3.303283214569092,
+      "output": "\ud83d\udd34 Starting Redis Enterprise Backup...\n\ud83d\udd34 Starting Redis backup: redis_backup_session_20250714_091223\n  \ud83d\udcca Redis memory usage: 1.10 MB\n  \ud83d\udd11 Total keys: 0\n  \ud83d\udcbe Executing Redis BGSAVE...\n  \u23f3 Waiting for BGSAVE completion...\n  \u2705 Last save timestamp: 1752498743\n  \u2705 Redis backup completed successfully\n     \ud83d\udcc1 File: redis_backup_session_20250714_091223.rdb\n     \ud83d\udcbe Size: 0.00 MB\n     \u23f1\ufe0f  Duration: 3.26 seconds\n     \ud83d\udd11 Keys backed up: 0\n     \ud83d\udd12 Checksum: 400c345a6efbda79...\n\n\u2705 Redis backup completed successfully!\n\ud83d\udcc1 Backup location: plc_enterprise_backups/backup_session_20250714_091223\n",
+      "error_message": null,
+      "exit_code": 0
+    },
+    {
+      "test_name": "list_command",
+      "cli_name": "enterprise_backup_cli",
+      "command": "python3 enterprise_backup_cli.py list",
+      "success": true,
+      "duration_seconds": 0.05020785331726074,
+      "output": "\ud83d\udccb Listing Enterprise Backup Sessions...\n\u274c No backup sessions found\n",
+      "error_message": null,
+      "exit_code": 0
+    }
+  ]
+}

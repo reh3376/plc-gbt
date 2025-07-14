@@ -1,0 +1,19 @@
+{
+  "session_id": "backup_20250714_091209",
+  "timestamp": "2025-07-14T09:12:11.986725",
+  "backup_directory": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_091209",
+  "total_databases": 1,
+  "successful_backups": 1,
+  "success_rate_percent": 100.0,
+  "total_duration_seconds": 2.1041879653930664,
+  "total_size_mb": 8.392333984375e-05,
+  "databases": [
+    {
+      "database": "redis",
+      "success": true,
+      "file_size_mb": 8.392333984375e-05,
+      "duration_seconds": 2.1041879653930664,
+      "error": null
+    }
+  ]
+}

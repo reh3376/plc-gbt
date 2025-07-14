@@ -1,0 +1,145 @@
+{
+  "session_info": {
+    "session_id": "critical_cli_testing_20250714_095154",
+    "start_time": "2025-07-14T09:51:54.791013",
+    "end_time": "2025-07-14T09:52:03.639431",
+    "total_duration_seconds": 8.848418,
+    "framework_version": "1.0.0",
+    "test_focus": "critical_gap_resolution"
+  },
+  "test_summary": {
+    "total_critical_tests": 10,
+    "successful_tests": 8,
+    "failed_tests": 2,
+    "overall_success_rate_percent": 80.0
+  },
+  "priority_breakdown": {
+    "critical_commands": {
+      "total": 2,
+      "passed": 2,
+      "success_rate": 100.0
+    },
+    "high_priority": {
+      "total": 5,
+      "passed": 3,
+      "success_rate": 60.0
+    },
+    "medium_priority": {
+      "total": 3,
+      "passed": 3,
+      "success_rate": 100.0
+    }
+  },
+  "detailed_results": [
+    {
+      "test_name": "critical_plc_memory_cli_status",
+      "cli_name": "plc_memory_cli",
+      "command": "python3 plc_memory_cli.py status",
+      "success": true,
+      "duration_seconds": 1.8131372928619385,
+      "output": "\ud83d\udcca PLC Memory System Status\n========================================\n\ud83d\ude80 Session: memory_coord_1752501116\n\u23f1\ufe0f  Uptime: 0.2s\n\ud83d\udd22 Total operations: 0\n\ud83d\udcdd Queries executed: 0\n\ud83d\udcc1 Files ingested: 0\n\ud83d\udcbe Cache hit rate: 0.0%\n\u26a1 Avg query time: 0.0ms\n\n\ud83c\udfe5 Database Health:\n  \u2705 neo4j: connected\n  \u2705 qdrant: connected\n  \u2705 redis: connected\n",
+      "error_message": null,
+      "exit_code": 0,
+      "priority_level": "CRITICAL"
+    },
+    {
+      "test_name": "critical_plc_memory_cli_status",
+      "cli_name": "plc_memory_cli",
+      "command": "python3 plc_memory_cli.py health",
+      "success": true,
+      "duration_seconds": 1.0626649856567383,
+      "output": "\ud83c\udfe5 Running comprehensive health checks...\n\u2705 neo4j: Healthy\n\u2705 qdrant: Healthy\n\u2705 redis: Healthy\n\n\ud83d\udcca Performance Health:\n\u274c Cache performance: Needs improvement\n\u2705 Query performance: Excellent\n\n\ud83c\udfaf Overall system health: \u2705 HEALTHY\n",
+      "error_message": null,
+      "exit_code": 0,
+      "priority_level": "CRITICAL"
+    },
+    {
+      "test_name": "critical_backup_cli_complete_status",
+      "cli_name": "backup_cli_complete",
+      "command": "python3 backup_cli_complete.py validate --help",
+      "success": true,
+      "duration_seconds": 0.05017399787902832,
+      "output": "Usage: backup_cli_complete.py validate [OPTIONS] SESSION_ID\n\n  \ud83d\udd0d Validate backup session\n\nOptions:\n  --help  Show this message and exit.\n",
+      "error_message": null,
+      "exit_code": 0,
+      "priority_level": "HIGH"
+    },
+    {
+      "test_name": "database_backup_plc_memory_cli",
+      "cli_name": "plc_memory_cli",
+      "command": "python3 plc_memory_cli.py backup -d neo4j",
+      "success": true,
+      "duration_seconds": 2.985379934310913,
+      "output": "\ud83d\ude80 Starting PLC Memory Database Backup Operation\n============================================================\n\ud83d\udcc1 Backup Directory: /Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_095158\n\ud83c\udd94 Session ID: memory_backup_20250714_095158\n\ud83d\udddc\ufe0f  Compression: Disabled\n\u2705 Validation: Disabled\n\ud83c\udfaf Target Databases: neo4j\n\n\ud83d\udd04 Backing up NEO4J...\n  \u2705 Neo4j backup completed: 0.01 MB\n\n============================================================\n\ud83d\udcca BACKUP SESSION COMPLETE\n============================================================\n\ud83c\udfaf Session ID: memory_backup_20250714_095158\n\ud83d\udcc1 Location: /Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_095158\n\u23f1\ufe0f  Duration: 2.01 seconds\n\ud83d\udcbe Total Size: 0.01 MB\n\u2705 Success Rate: 100.0% (1/1)\n\n\ud83d\udccb Database Results:\n  NEO4J: \u2705 SUCCESS - 0.01 MB in 2.01s\n\n\ud83c\udf89 Backup session completed!\n\ud83d\udcc4 Session summary: plc_memory_backup_20250714_095158/backup_session_summary.json\n",
+      "error_message": null,
+      "exit_code": 0,
+      "priority_level": "HIGH"
+    },
+    {
+      "test_name": "database_backup_plc_memory_cli",
+      "cli_name": "plc_memory_cli",
+      "command": "python3 plc_memory_cli.py backup -d postgresql",
+      "success": true,
+      "duration_seconds": 1.0393028259277344,
+      "output": "\ud83d\ude80 Starting PLC Memory Database Backup Operation\n============================================================\n\ud83d\udcc1 Backup Directory: /Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_095201\n\ud83c\udd94 Session ID: memory_backup_20250714_095201\n\ud83d\udddc\ufe0f  Compression: Disabled\n\u2705 Validation: Disabled\n\ud83c\udfaf Target Databases: postgresql\n\n\ud83d\udd04 Backing up POSTGRESQL...\n  \u2705 PostgreSQL backup completed: 0.00 MB\n\n============================================================\n\ud83d\udcca BACKUP SESSION COMPLETE\n============================================================\n\ud83c\udfaf Session ID: memory_backup_20250714_095201\n\ud83d\udcc1 Location: /Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_095201\n\u23f1\ufe0f  Duration: 0.10 seconds\n\ud83d\udcbe Total Size: 0.00 MB\n\u2705 Success Rate: 100.0% (1/1)\n\n\ud83d\udccb Database Results:\n  POSTGRESQL: \u2705 SUCCESS - 0.00 MB in 0.10s\n\n\ud83c\udf89 Backup session completed!\n\ud83d\udcc4 Session summary: plc_memory_backup_20250714_095201/backup_session_summary.json\n",
+      "error_message": null,
+      "exit_code": 0,
+      "priority_level": "HIGH"
+    },
+    {
+      "test_name": "database_backup_plc_backup_cli_final",
+      "cli_name": "plc_backup_cli_final",
+      "command": "python3 plc_backup_cli_final.py backup neo4j",
+      "success": false,
+      "duration_seconds": 0.023782730102539062,
+      "output": "",
+      "error_message": "/Library/Developer/CommandLineTools/usr/bin/python3: can't open file '/Users/reh3376/repos/plc-gbt/plc_backup_cli_final.py': [Errno 2] No such file or directory\n",
+      "exit_code": 2,
+      "priority_level": "HIGH"
+    },
+    {
+      "test_name": "database_backup_plc_backup_cli_final",
+      "cli_name": "plc_backup_cli_final",
+      "command": "python3 plc_backup_cli_final.py backup all",
+      "success": false,
+      "duration_seconds": 0.02305889129638672,
+      "output": "",
+      "error_message": "/Library/Developer/CommandLineTools/usr/bin/python3: can't open file '/Users/reh3376/repos/plc-gbt/plc_backup_cli_final.py': [Errno 2] No such file or directory\n",
+      "exit_code": 2,
+      "priority_level": "HIGH"
+    },
+    {
+      "test_name": "advanced_plc_memory_cli",
+      "cli_name": "plc_memory_cli",
+      "command": "python3 plc_memory_cli.py version",
+      "success": true,
+      "duration_seconds": 0.8715620040893555,
+      "output": "\ud83e\udd16 PLC Memory Management System\nVersion: 1.0.0\nAI Task Orchestrator Implementation\nMulti-Database Memory Coordination\n\nSupported databases:\n  \u2022 Redis (short-term memory)\n  \u2022 Neo4j (medium-term memory)\n  \u2022 PostgreSQL (long-term memory)\n  \u2022 Qdrant (pattern matching)\n",
+      "error_message": null,
+      "exit_code": 0,
+      "priority_level": "MEDIUM"
+    },
+    {
+      "test_name": "advanced_plc_memory_cli",
+      "cli_name": "plc_memory_cli",
+      "command": "python3 plc_memory_cli.py neo4j --help",
+      "success": true,
+      "duration_seconds": 0.9312000274658203,
+      "output": "Usage: plc_memory_cli.py neo4j [OPTIONS] COMMAND [ARGS]...\n\n  \ud83d\udd17 Neo4j graph database management commands\n\n  Provides tools for managing Neo4j graph database including orphan node\n  detection, relationship creation, and graph health monitoring.\n\nOptions:\n  --help  Show this message and exit.\n\nCommands:\n  health   \ud83c\udfe5 Check Neo4j graph health Performs comprehensive health...\n  orphans  \ud83d\udd0d Check for orphaned nodes in Neo4j Identifies nodes without...\n  resolve  \ud83d\udd17 Create relationships for orphaned nodes Intelligently...\n",
+      "error_message": null,
+      "exit_code": 0,
+      "priority_level": "MEDIUM"
+    },
+    {
+      "test_name": "advanced_plc_backup_cli",
+      "cli_name": "plc_backup_cli",
+      "command": "python3 plc_backup_cli.py cleanup --help",
+      "success": true,
+      "duration_seconds": 0.047010183334350586,
+      "output": "Usage: plc_backup_cli.py cleanup [OPTIONS]\n\n  \ud83e\uddf9 Clean up old backups based on retention policy\n\nOptions:\n  --older-than TEXT      Remove backups older than specified time (e.g., 30d,\n                         7d, 2w)\n  --keep-latest INTEGER  Always keep this many latest backups\n  --dry-run              Show what would be deleted without actually deleting\n  --help                 Show this message and exit.\n",
+      "error_message": null,
+      "exit_code": 0,
+      "priority_level": "MEDIUM"
+    }
+  ]
+}

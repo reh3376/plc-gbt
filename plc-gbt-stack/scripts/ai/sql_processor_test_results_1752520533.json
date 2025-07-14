@@ -1,0 +1,491 @@
+{
+  "session_id": "sql_processor_test_1752520533",
+  "start_time": "2025-07-14T15:15:33.643383",
+  "test_results": [
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_enhanced_backups/session_20250714_102600/postgresql_backup_20250714_102600.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0018076896667480469
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_backup_postgresql/plc_backup_20250714_100543/postgresql_20250714_100543.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.00034308433532714844
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_backup_neo4j/plc_backup_20250714_100534/postgresql_20250714_100534.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003399848937988281
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/backup_session_1752501953/postgresql_backup_session_1752501953.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003190040588378906
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_enterprise_backups/backup_session_1752501943/postgresql_backup_session_1752501943.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.00031495094299316406
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_enterprise_backups/backup_session_20250714_100604/postgresql_backup_session_20250714_100604.sql",
+      "success": true,
+      "file_size": 571,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003390312194824219
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_enterprise_backups/backup_session_20250714_100554/postgresql_backup_session_20250714_100554.sql",
+      "success": true,
+      "file_size": 571,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003409385681152344
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/archive/backups/postgres/postgres_backup_2025-07-01_11-27-01.sql",
+      "success": true,
+      "file_size": 0,
+      "chunks_count": 1,
+      "embeddings_count": 1,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.00019478797912597656
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/archive/backups/postgres/plc_metadata_backup_2025-07-01_11-27-27.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003409385681152344
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/archive/backups/sessions/postgresql_dump_20250708_161238.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.00033783912658691406
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/supabase_postgres_backup_20250714_080639.sql",
+      "success": true,
+      "file_size": 197489,
+      "chunks_count": 6,
+      "embeddings_count": 6,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.016742944717407227
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_100604/postgresql_20250714_100604.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003819465637207031
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/full_system_test_backup/postgresql_20250714_085018.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003390312194824219
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_085716/postgresql_20250714_085716.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003409385681152344
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_095201/postgresql_backup_20250714_095201.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.00035190582275390625
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_085700/postgresql_20250714_085700.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003409385681152344
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_095257/postgresql_20250714_095257.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003387928009033203
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_100521/postgresql_backup_20250714_100521.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003440380096435547
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_100529/postgresql_backup_20250714_100529.sql",
+      "success": true,
+      "file_size": 491,
+      "chunks_count": 3,
+      "embeddings_count": 3,
+      "database_routing": [
+        "LONG_TERM",
+        "MEDIUM_TERM",
+        "PATTERN_MATCHING"
+      ],
+      "validation": {
+        "has_chunks": true,
+        "has_embeddings": true,
+        "has_metadata": true,
+        "has_database_routing": true,
+        "chunk_types": [
+          "sql_statement_group",
+          "sql_statement_group",
+          "sql_file_summary"
+        ],
+        "database_routing_complete": true
+      },
+      "duration": 0.0003478527069091797
+    }
+  ],
+  "summary": {
+    "total_files": 19,
+    "successful_tests": 19,
+    "failed_tests": 0,
+    "success_rate": 100.0,
+    "total_duration": 0.02420663833618164,
+    "average_duration": 0.001274033596641139,
+    "end_time": "2025-07-14T15:15:33.684484"
+  }
+}

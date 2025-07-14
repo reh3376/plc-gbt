@@ -1,0 +1,75 @@
+{
+  "validation_summary": {
+    "overall_score": 60.555555555555564,
+    "production_ready": true,
+    "validation_timestamp": "2025-07-14T09:02:28.564502",
+    "framework_version": "1.0.0"
+  },
+  "tier_results": {
+    "Syntax Validation": {
+      "score": 66.66666666666666,
+      "status": "WARNING",
+      "issues": [
+        "plc_backup_cli_final: Help command failed - /Library/Developer/CommandLineTools/usr/bin/python3: can't open file '/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc-gbt-stack/scripts/ai/plc_backup_cli_final.py': [Errno 2] No such file or directory\n",
+        "plc_memory_cli: Help command failed - /Library/Developer/CommandLineTools/usr/bin/python3: can't open file '/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc-gbt-stack/scripts/ai/plc_memory_cli.py': [Errno 2] No such file or directory\n"
+      ],
+      "recommendations": [
+        "Address syntax issues in failing CLIs"
+      ]
+    },
+    "Requirements Validation": {
+      "score": 59.166666666666664,
+      "status": "WARNING",
+      "issues": [
+        "Low System status checking coverage: 40.0%"
+      ],
+      "recommendations": [
+        "Focus on production-ready CLIs: plc_backup_cli, enterprise_backup_cli"
+      ]
+    },
+    "Hallucination Detection": {
+      "score": 33.33333333333333,
+      "status": "CRITICAL",
+      "issues": [
+        "backup_cli_complete: Backup output lacks real implementation indicators",
+        "plc_backup_cli: Backup output lacks real implementation indicators"
+      ],
+      "recommendations": []
+    },
+    "Best Practices Validation": {
+      "score": 20.833333333333332,
+      "status": "CRITICAL",
+      "issues": [
+        "Insufficient CLIs following best practices"
+      ],
+      "recommendations": []
+    },
+    "Performance Validation": {
+      "score": 100,
+      "status": "GOOD",
+      "issues": [],
+      "recommendations": [
+        "Backup performance: 2.89s avg, Help: 0.05s avg"
+      ]
+    },
+    "Production Validation": {
+      "score": 83.33333333333334,
+      "status": "PRODUCTION_READY",
+      "issues": [],
+      "recommendations": [
+        "System ready for production deployment"
+      ]
+    }
+  },
+  "recommendations": [
+    "Address syntax issues in failing CLIs",
+    "Focus on production-ready CLIs: plc_backup_cli, enterprise_backup_cli",
+    "Backup performance: 2.89s avg, Help: 0.05s avg",
+    "System ready for production deployment"
+  ],
+  "critical_issues": [
+    "backup_cli_complete: Backup output lacks real implementation indicators",
+    "plc_backup_cli: Backup output lacks real implementation indicators",
+    "Insufficient CLIs following best practices"
+  ]
+}

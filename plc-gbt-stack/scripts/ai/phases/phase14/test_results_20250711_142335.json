@@ -1,0 +1,196 @@
+{
+  "analysis_result": {
+    "directory_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14",
+    "total_files": 2,
+    "total_lines": 1371,
+    "total_functions": 56,
+    "total_classes": 5,
+    "average_complexity": 8.875,
+    "modular_compliance_score": 0.6850390501486119,
+    "file_analyses": [
+      {
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "size_bytes": 43911,
+        "line_count": 1120,
+        "function_count": 50,
+        "class_count": 5,
+        "import_count": 21,
+        "complexity_score": 10.0,
+        "maintainability_index": 37.6,
+        "modularity_score": 0.8348412698412698,
+        "optimization_opportunities": [
+          "File too large (1120 lines) - consider splitting",
+          "Deep nesting detected - consider early returns or extraction",
+          "Many functions - consider grouping into classes or modules"
+        ],
+        "refactoring_suggestions": [
+          "Split large file into focused modules"
+        ],
+        "dependencies": [
+          "datetime",
+          "typing",
+          "pathlib",
+          "hashlib",
+          "os",
+          "re",
+          "ast",
+          "importlib.util",
+          "collections",
+          "json",
+          "core",
+          "sys",
+          "dataclasses"
+        ],
+        "exports": [
+          "FileAnalysisResult",
+          "DirectoryAnalysis",
+          "RefactoringPlan",
+          "CodebaseAnalyzer",
+          "PythonASTAnalyzer",
+          "execute",
+          "analyze_file_structure",
+          "analyze_directory",
+          "identify_refactoring_opportunities",
+          "reset",
+          "analyze",
+          "visit_FunctionDef",
+          "visit_ClassDef",
+          "visit_Import",
+          "visit_ImportFrom",
+          "visit_If",
+          "visit_For",
+          "visit_While",
+          "visit_Try",
+          "visit_ExceptHandler",
+          "dfs"
+        ],
+        "technical_debt_score": 3.89,
+        "test_coverage_estimate": 0.5599999999999999
+      },
+      {
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/test_codebase_analyzer.py",
+        "size_bytes": 9417,
+        "line_count": 251,
+        "function_count": 6,
+        "class_count": 0,
+        "import_count": 7,
+        "complexity_score": 7.75,
+        "maintainability_index": 61.25,
+        "modularity_score": 0.835236830455954,
+        "optimization_opportunities": [],
+        "refactoring_suggestions": [],
+        "dependencies": [
+          "datetime",
+          "pathlib",
+          "codebase_analyzer",
+          "json",
+          "sys"
+        ],
+        "exports": [
+          "test_basic_functionality",
+          "test_file_analysis",
+          "test_directory_analysis",
+          "test_refactoring_plans",
+          "test_full_execution",
+          "main"
+        ],
+        "technical_debt_score": 3.88,
+        "test_coverage_estimate": 0.1
+      }
+    ],
+    "dependency_graph": {
+      "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/test_codebase_analyzer.py": [
+        "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py"
+      ]
+    },
+    "circular_dependencies": [],
+    "optimization_priorities": [
+      {
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "priority_score": 9.5,
+        "opportunities": [
+          "File too large (1120 lines) - consider splitting",
+          "Deep nesting detected - consider early returns or extraction",
+          "Many functions - consider grouping into classes or modules"
+        ],
+        "impact": {
+          "maintainability": "high",
+          "performance": "medium",
+          "readability": "high"
+        }
+      }
+    ],
+    "architecture_recommendations": [
+      "Split 1 large files into focused modules",
+      "Refactor 1 high-complexity files"
+    ]
+  },
+  "optimization_plan": {
+    "summary": {
+      "total_files": 2,
+      "files_needing_optimization": 1,
+      "circular_dependencies": 0,
+      "estimated_effort": "Low (2-5 days)"
+    },
+    "priorities": [
+      {
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "priority_score": 9.5,
+        "opportunities": [
+          "File too large (1120 lines) - consider splitting",
+          "Deep nesting detected - consider early returns or extraction",
+          "Many functions - consider grouping into classes or modules"
+        ],
+        "impact": {
+          "maintainability": "high",
+          "performance": "medium",
+          "readability": "high"
+        }
+      }
+    ],
+    "quick_wins": [],
+    "major_refactoring": [
+      {
+        "file": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "action": "Major refactoring",
+        "effort": "1-2 days"
+      }
+    ],
+    "architecture_improvements": [
+      "Split 1 large files into focused modules",
+      "Refactor 1 high-complexity files"
+    ]
+  },
+  "performance_summary": {
+    "analysis_metrics": {
+      "files_analyzed": 2,
+      "functions_analyzed": 0,
+      "classes_analyzed": 0,
+      "optimization_opportunities": 0,
+      "refactoring_suggestions": 0
+    },
+    "codebase_health": {
+      "average_complexity": 8.875,
+      "modular_compliance": 0.6850390501486119,
+      "total_technical_debt": 7.77,
+      "estimated_test_coverage": 0.32999999999999996
+    },
+    "recommendations_summary": {
+      "high_priority_files": 1,
+      "medium_priority_files": 0,
+      "low_priority_files": 0
+    }
+  },
+  "metrics": {
+    "files_analyzed": 2,
+    "functions_analyzed": 0,
+    "classes_analyzed": 0,
+    "optimization_opportunities": 0,
+    "refactoring_suggestions": 0
+  },
+  "session_info": {
+    "session_id": "test_full_execution_20250711_142335",
+    "analysis_date": "2025-07-11T14:23:35.157072",
+    "total_execution_time": 0
+  }
+}

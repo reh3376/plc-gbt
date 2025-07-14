@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-07-14T10:05:43.755824",
+  "collections": {
+    "result": {
+      "collections": []
+    },
+    "status": "ok",
+    "time": 2.667e-06
+  },
+  "collection_count": 0,
+  "status": "minimal_backup"
+}

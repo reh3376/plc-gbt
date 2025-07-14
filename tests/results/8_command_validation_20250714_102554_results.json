@@ -1,0 +1,160 @@
+{
+  "validation_metadata": {
+    "session_id": "8_command_validation_20250714_102554",
+    "timestamp": "2025-07-14T10:25:54.941735",
+    "total_commands_tested": 8,
+    "total_duration_seconds": 43.56972336769104
+  },
+  "validation_results_summary": {
+    "commands_fixed": 4,
+    "commands_improved": 1,
+    "commands_working": 5,
+    "commands_still_failing": 3,
+    "overall_success_rate_percent": 62.5
+  },
+  "status_breakdown": {
+    "FIXED": 4,
+    "IMPROVED": 1,
+    "STILL_FAILING": 3
+  },
+  "cli_implementation_breakdown": {
+    "backup_cli_complete": {
+      "total": 1,
+      "fixed": 1,
+      "improved": 0,
+      "failing": 0
+    },
+    "plc_memory_cli": {
+      "total": 3,
+      "fixed": 1,
+      "improved": 1,
+      "failing": 1
+    },
+    "enhanced_backup_cli": {
+      "total": 3,
+      "fixed": 1,
+      "improved": 0,
+      "failing": 2
+    },
+    "enterprise_backup_cli": {
+      "total": 1,
+      "fixed": 1,
+      "improved": 0,
+      "failing": 0
+    }
+  },
+  "detailed_results": [
+    {
+      "command_id": "backup_complete_status",
+      "cli_implementation": "backup_cli_complete",
+      "command_string": "python3 backup_cli_complete.py status",
+      "working_directory": "/Users/reh3376/repos/plc-gbt",
+      "success": true,
+      "duration_seconds": 0.1355750560760498,
+      "output": "\ud83d\udcca Backup System Status\n==============================\n  \u2705 plc-redis: RUNNING\n  \u2705 plc-neo4j: RUNNING\n  \u2705 plc-postgres: RUNNING\n  \u2705 plc-qdrant: RUNNING\n\n\ud83d\udcca 4/4 databases running\n\ud83d\udcbe Backup sessions: 11\n\ud83d\udcca Total backup size: 0.0 MB\n\n\ud83c\udfaf Ready for backup operations!\n",
+      "error_message": "",
+      "exit_code": 0,
+      "validation_status": "FIXED",
+      "notes": "Command works successfully"
+    },
+    {
+      "command_id": "plc_memory_neo4j_health",
+      "cli_implementation": "plc_memory_cli",
+      "command_string": "python3 plc_memory_cli.py neo4j health",
+      "working_directory": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai",
+      "success": true,
+      "duration_seconds": 1.672914981842041,
+      "output": "\ud83c\udfe5 Neo4j Graph Health Check\n========================================\n\u274c Error checking health: No data returned from Neo4j query\n",
+      "error_message": "2025-07-14 10:25:56,562 - database_manager - INFO - Database configurations loaded successfully\n2025-07-14 10:25:56,562 - database_manager - INFO - DatabaseManager initialized with session: db_manager_1752503156\n2025-07-14 10:25:56,562 - database_manager - INFO - \u2705 Persistent Redis manager enabled for enhanced caching performance\n2025-07-14 10:25:56,562 - memory_coordinator - INFO - MemoryCoordinator initialized: memory_coord_1752503156\n2025-07-14 10:25:56,562 - database_manager - INFO - \ud83d\udd17 Initializing all database connections...\n2025-07-14 10:25:56,569 - database_manager - INFO - \u2705 Neo4j connected at bolt://localhost:7687\n2025-07-14 10:25:56,569 - database_manager - INFO - \u2705 neo4j initialization: success\n2025-07-14 10:25:56,597 - database_manager - INFO - \u2705 PostgreSQL connected at localhost:5432\n2025-07-14 10:25:56,597 - database_manager - INFO - \u2705 postgresql initialization: success\n2025-07-14 10:25:56,652 - httpx - INFO - HTTP Request: GET http://localhost:6333 \"HTTP/1.1 200 OK\"\n2025-07-14 10:25:56,654 - httpx - INFO - HTTP Request: GET http://localhost:6333/ \"HTTP/1.1 200 OK\"\n2025-07-14 10:25:56,654 - database_manager - INFO - \u2705 Qdrant connected at localhost:6333\n2025-07-14 10:25:56,654 - database_manager - INFO - \u2705 qdrant initialization: success\n2025-07-14 10:25:56,654 - persistent_redis_manager - INFO - PersistentRedisManager initialized with session: redis_manager_1752503156\n2025-07-14 10:25:56,658 - persistent_redis_manager - INFO - Health monitoring started\n2025-07-14 10:25:56,658 - persistent_redis_manager - INFO - \u2705 Persistent Redis connection established: localhost:6379\n2025-07-14 10:25:56,658 - database_manager - INFO - \u2705 Persistent Redis connection established at localhost:6379\n2025-07-14 10:25:56,658 - database_manager - INFO - \u2705 redis initialization: success\n2025-07-14 10:25:56,658 - database_manager - INFO - \ud83c\udfaf Database initialization complete: 4/4 databases connected\n2025-07-14 10:25:56,661 - database_manager - INFO - \ud83d\udd12 Closing all database connections...\n2025-07-14 10:25:56,661 - database_manager - INFO - \u2705 neo4j connection closed\n2025-07-14 10:25:56,661 - database_manager - INFO - \u2705 qdrant connection closed\n2025-07-14 10:25:56,661 - database_manager - INFO - \u2705 redis persistent connection maintained\n2025-07-14 10:25:56,661 - database_manager - INFO - \u2705 PostgreSQL connection pool closed\n2025-07-14 10:25:56,662 - database_manager - INFO - \ud83c\udfaf All database connections closed successfully\n",
+      "exit_code": 0,
+      "validation_status": "IMPROVED",
+      "notes": "Command runs but reports internal errors"
+    },
+    {
+      "command_id": "enhanced_backup_status",
+      "cli_implementation": "enhanced_backup_cli",
+      "command_string": "python3 enhanced_backup_cli.py status",
+      "working_directory": "/Users/reh3376/repos/plc-gbt",
+      "success": true,
+      "duration_seconds": 0.1256110668182373,
+      "output": "\ud83d\udcca Enhanced Backup System Status\n==================================================\n\ud83d\ude80 Enhanced Database Backup Session\n\ud83d\udcc1 Session ID: backup_session_20250714_102556\n\ud83d\udcc2 Backup Directory: /Users/reh3376/repos/plc-gbt/plc_enhanced_backups/session_20250714_102556\n\n\ud83d\udd0d Checking container status...\n  \ud83d\udd04 Checking plc-neo4j status\n     Command: docker ps --format {{.Names}} --filter name=plc-neo4j\n     Duration: 0.02s\n     Exit code: 0\n     \u2705 Success\n  \u2705 plc-neo4j: Running\n  \ud83d\udd04 Checking plc-postgres status\n     Command: docker ps --format {{.Names}} --filter name=plc-postgres\n     Duration: 0.02s\n     Exit code: 0\n     \u2705 Success\n  \u2705 plc-postgres: Running\n  \ud83d\udd04 Checking plc-qdrant status\n     Command: docker ps --format {{.Names}} --filter name=plc-qdrant\n     Duration: 0.02s\n     Exit code: 0\n     \u2705 Success\n  \u2705 plc-qdrant: Running\n  \ud83d\udd04 Checking plc-redis status\n     Command: docker ps --format {{.Names}} --filter name=plc-redis\n     Duration: 0.02s\n     Exit code: 0\n     \u2705 Success\n  \u2705 plc-redis: Running\n\n\ud83d\udcca Container Summary: 4/4 databases running\n\n\ud83d\udcca Summary: 4/4 databases ready for backup\n\ud83c\udfaf System ready for backup operations!\n",
+      "error_message": "",
+      "exit_code": 0,
+      "validation_status": "FIXED",
+      "notes": "Command works successfully"
+    },
+    {
+      "command_id": "enhanced_backup_backup_redis",
+      "cli_implementation": "enhanced_backup_cli",
+      "command_string": "python3 enhanced_backup_cli.py backup redis",
+      "working_directory": "/Users/reh3376/repos/plc-gbt",
+      "success": false,
+      "duration_seconds": 3.237922191619873,
+      "output": "\ud83d\udd34 Starting Redis-Only Backup\n\ud83d\ude80 Enhanced Database Backup Session\n\ud83d\udcc1 Session ID: backup_session_20250714_102556\n\ud83d\udcc2 Backup Directory: /Users/reh3376/repos/plc-gbt/plc_enhanced_backups/session_20250714_102556\n\n\n\u26a1 Backing up Redis Cache...\n  \ud83d\udd04 Getting Redis memory info\n     Command: docker exec plc-redis redis-cli INFO memory\n     Duration: 0.05s\n     Exit code: 0\n     \u2705 Success\n  \ud83d\udd04 Getting Redis key count\n     Command: docker exec plc-redis redis-cli DBSIZE\n     Duration: 0.05s\n     Exit code: 0\n     \u2705 Success\n  \ud83d\udcca Total keys: 0\n  \ud83d\udd04 Executing Redis BGSAVE\n     Command: docker exec plc-redis redis-cli BGSAVE\n     Duration: 0.05s\n     Exit code: 0\n     \u2705 Success\n  \u23f3 Waiting for BGSAVE completion...\n  \ud83d\udd04 Copying Redis dump file\n     Command: docker cp plc-redis:/data/dump.rdb plc_enhanced_backups/session_20250714_102556/redis_dump_20250714_102556.rdb\n     Duration: 0.03s\n     Exit code: 0\n     \u2705 Success\n  \u2705 Redis backup completed\n     \ud83d\udcc1 File: redis_dump_20250714_102556.rdb\n     \ud83d\udcbe Size: 0.00 MB\n     \ud83d\udd12 Checksum: 5f20edbedabe8ef3...\n",
+      "error_message": "Usage: enhanced_backup_cli.py [OPTIONS]\nTry 'enhanced_backup_cli.py --help' for help.\n\nError: Got unexpected extra argument (redis_bgsave)\n",
+      "exit_code": 2,
+      "validation_status": "STILL_FAILING",
+      "notes": "Command failed with exit code 2"
+    },
+    {
+      "command_id": "enhanced_backup_backup_all",
+      "cli_implementation": "enhanced_backup_cli",
+      "command_string": "python3 enhanced_backup_cli.py backup all",
+      "working_directory": "/Users/reh3376/repos/plc-gbt",
+      "success": false,
+      "duration_seconds": 6.947351932525635,
+      "output": "\ud83d\ude80 Starting Comprehensive Database Backup - All Systems\n============================================================\n\ud83d\ude80 Enhanced Database Backup Session\n\ud83d\udcc1 Session ID: backup_session_20250714_102600\n\ud83d\udcc2 Backup Directory: /Users/reh3376/repos/plc-gbt/plc_enhanced_backups/session_20250714_102600\n\n\ud83d\udd0d Checking container status...\n  \ud83d\udd04 Checking plc-neo4j status\n     Command: docker ps --format {{.Names}} --filter name=plc-neo4j\n     Duration: 0.02s\n     Exit code: 0\n     \u2705 Success\n  \u2705 plc-neo4j: Running\n  \ud83d\udd04 Checking plc-postgres status\n     Command: docker ps --format {{.Names}} --filter name=plc-postgres\n     Duration: 0.05s\n     Exit code: 0\n     \u2705 Success\n  \u2705 plc-postgres: Running\n  \ud83d\udd04 Checking plc-qdrant status\n     Command: docker ps --format {{.Names}} --filter name=plc-qdrant\n     Duration: 0.03s\n     Exit code: 0\n     \u2705 Success\n  \u2705 plc-qdrant: Running\n  \ud83d\udd04 Checking plc-redis status\n     Command: docker ps --format {{.Names}} --filter name=plc-redis\n     Duration: 0.02s\n     Exit code: 0\n     \u2705 Success\n  \u2705 plc-redis: Running\n\n\ud83d\udcca Container Summary: 4/4 databases running\n\n\u26a1 Backing up Redis Cache...\n  \ud83d\udd04 Getting Redis memory info\n     Command: docker exec plc-redis redis-cli INFO memory\n     Duration: 0.06s\n     Exit code: 0\n     \u2705 Success\n  \ud83d\udd04 Getting Redis key count\n     Command: docker exec plc-redis redis-cli DBSIZE\n     Duration: 0.05s\n     Exit code: 0\n     \u2705 Success\n  \ud83d\udcca Total keys: 0\n  \ud83d\udd04 Executing Redis BGSAVE\n     Command: docker exec plc-redis redis-cli BGSAVE\n     Duration: 0.05s\n     Exit code: 0\n     \u2705 Success\n  \u23f3 Waiting for BGSAVE completion...\n  \ud83d\udd04 Copying Redis dump file\n     Command: docker cp plc-redis:/data/dump.rdb plc_enhanced_backups/session_20250714_102600/redis_dump_20250714_102600.rdb\n     Duration: 0.02s\n     Exit code: 0\n     \u2705 Success\n  \u2705 Redis backup completed\n     \ud83d\udcc1 File: redis_dump_20250714_102600.rdb\n     \ud83d\udcbe Size: 0.00 MB\n     \ud83d\udd12 Checksum: ecc27019b17a3e46...\n\n\ud83e\udde0 Backing up Neo4j Knowledge Graph...\n  \ud83d\udd04 Getting Neo4j node count\n     Command: docker exec plc-neo4j cypher-shell -u neo4j -p your-secure-neo4j-password MATCH (n) RETURN count(n) as total_nodes\n     Duration: 1.12s\n     Exit code: 0\n     \u2705 Success\n  \ud83d\udcca Total nodes: 0\n  \ud83d\udd04 Creating backup directory\n     Command: docker exec plc-neo4j mkdir -p /var/lib/neo4j/dumps\n     Duration: 0.06s\n     Exit code: 0\n     \u2705 Success\n  \ud83d\udd04 Creating Neo4j backup\n     Command: docker exec plc-neo4j neo4j-admin database backup --to-path=/var/lib/neo4j/dumps/ neo4j\n     Duration: 2.01s\n     Exit code: 0\n     \u2705 Success\n  \ud83d\udd04 Copying Neo4j backup files\n     Command: docker cp plc-neo4j:/var/lib/neo4j/dumps/ plc_enhanced_backups/session_20250714_102600/neo4j_backup_20250714_102600\n     Duration: 0.02s\n     Exit code: 0\n     \u2705 Success\n  \u274c Neo4j backup failed: object of type 'PosixPath' has no len()\n\n\ud83d\udc18 Backing up PostgreSQL Database...\n  \ud83d\udd04 Getting PostgreSQL table count\n     Command: docker exec plc-postgres psql -U plc_user -d plc_metadata -c SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public';\n     Duration: 0.06s\n     Exit code: 0\n     \u2705 Success\n  \ud83d\udcca Tables: 0\n  \ud83d\udd04 Creating PostgreSQL dump\n     \u2705 Success\n  \u2705 PostgreSQL backup completed\n     \ud83d\udcc1 File: postgresql_backup_20250714_102600.sql\n     \ud83d\udcbe Size: 0.00 MB\n     \ud83d\udd12 Checksum: 1e1bee4bafca5076...\n\n\ud83d\udd0d Backing up Qdrant Vector Database...\n  \ud83d\udcca Collections: 0\n  \u2705 Qdrant backup completed\n     \ud83d\udcc1 File: qdrant_backup_20250714_102600.json\n     \ud83d\udcbe Size: 0.00 MB\n     \ud83d\udd12 Checksum: 91279a57d136d326...\n",
+      "error_message": "Usage: enhanced_backup_cli.py [OPTIONS]\nTry 'enhanced_backup_cli.py --help' for help.\n\nError: Got unexpected extra arguments (redis_bgsave pg_dump qdrant_api_export neo4j_admin)\n",
+      "exit_code": 2,
+      "validation_status": "STILL_FAILING",
+      "notes": "Command failed with exit code 2"
+    },
+    {
+      "command_id": "enterprise_backup_backup_qdrant",
+      "cli_implementation": "enterprise_backup_cli",
+      "command_string": "python3 enterprise_backup_cli.py backup qdrant",
+      "working_directory": "/Users/reh3376/repos/plc-gbt",
+      "success": true,
+      "duration_seconds": 0.12017393112182617,
+      "output": "\ud83d\udd0d Starting Qdrant Enterprise Backup...\n\ud83d\udd0d Starting Qdrant backup: qdrant_backup_session_20250714_102607\n  \ud83d\udcca Collecting Qdrant collections via API...\n  \ud83d\udcca Collections found: 0\n  \u2705 Qdrant backup completed successfully\n     \ud83d\udcc1 File: qdrant_backup_session_20250714_102607.json\n     \ud83d\udcbe Size: 0.00 MB\n     \u23f1\ufe0f  Duration: 0.07 seconds\n     \ud83d\udcca Collections: 0\n     \ud83d\udd12 Checksum: 6a87c4a601e48bc0...\n\n\u2705 Qdrant backup completed successfully!\n\ud83d\udcc1 Backup location: plc_enterprise_backups/backup_session_20250714_102607\n",
+      "error_message": "2025-07-14 10:26:07,105 - __main__ - INFO - \ud83d\ude80 Enterprise Backup Manager initialized\n2025-07-14 10:26:07,105 - __main__ - INFO - \ud83d\udcc1 Session directory: plc_enterprise_backups/backup_session_20250714_102607\n",
+      "exit_code": 0,
+      "validation_status": "FIXED",
+      "notes": "Command works successfully"
+    },
+    {
+      "command_id": "plc_memory_clean",
+      "cli_implementation": "plc_memory_cli",
+      "command_string": "python3 plc_memory_cli.py clean",
+      "working_directory": "plc-gbt-stack/scripts/ai",
+      "success": false,
+      "duration_seconds": 30.009043216705322,
+      "output": "",
+      "error_message": "Command timed out after 30 seconds",
+      "exit_code": -1,
+      "validation_status": "STILL_FAILING",
+      "notes": "Command timeout indicates serious issues"
+    },
+    {
+      "command_id": "plc_memory_neo4j_orphans",
+      "cli_implementation": "plc_memory_cli",
+      "command_string": "python3 plc_memory_cli.py neo4j orphans",
+      "working_directory": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai",
+      "success": true,
+      "duration_seconds": 1.3211309909820557,
+      "output": "\ud83d\udd0d Checking for orphaned nodes in Neo4j...\n\n\ud83d\udcca Total orphaned nodes: 0\n\u2705 No orphaned nodes found - graph is fully connected!\n",
+      "error_message": "2025-07-14 10:26:38,334 - database_manager - INFO - Database configurations loaded successfully\n2025-07-14 10:26:38,334 - database_manager - INFO - DatabaseManager initialized with session: db_manager_1752503198\n2025-07-14 10:26:38,334 - database_manager - INFO - \u2705 Persistent Redis manager enabled for enhanced caching performance\n2025-07-14 10:26:38,334 - memory_coordinator - INFO - MemoryCoordinator initialized: memory_coord_1752503198\n2025-07-14 10:26:38,334 - database_manager - INFO - \ud83d\udd17 Initializing all database connections...\n2025-07-14 10:26:38,346 - database_manager - INFO - \u2705 Neo4j connected at bolt://localhost:7687\n2025-07-14 10:26:38,346 - database_manager - INFO - \u2705 neo4j initialization: success\n2025-07-14 10:26:38,366 - database_manager - INFO - \u2705 PostgreSQL connected at localhost:5432\n2025-07-14 10:26:38,366 - database_manager - INFO - \u2705 postgresql initialization: success\n2025-07-14 10:26:38,416 - httpx - INFO - HTTP Request: GET http://localhost:6333 \"HTTP/1.1 200 OK\"\n2025-07-14 10:26:38,418 - httpx - INFO - HTTP Request: GET http://localhost:6333/ \"HTTP/1.1 200 OK\"\n2025-07-14 10:26:38,419 - database_manager - INFO - \u2705 Qdrant connected at localhost:6333\n2025-07-14 10:26:38,419 - database_manager - INFO - \u2705 qdrant initialization: success\n2025-07-14 10:26:38,419 - persistent_redis_manager - INFO - PersistentRedisManager initialized with session: redis_manager_1752503198\n2025-07-14 10:26:38,423 - persistent_redis_manager - INFO - Health monitoring started\n2025-07-14 10:26:38,423 - persistent_redis_manager - INFO - \u2705 Persistent Redis connection established: localhost:6379\n2025-07-14 10:26:38,423 - database_manager - INFO - \u2705 Persistent Redis connection established at localhost:6379\n2025-07-14 10:26:38,423 - database_manager - INFO - \u2705 redis initialization: success\n2025-07-14 10:26:38,423 - database_manager - INFO - \ud83c\udfaf Database initialization complete: 4/4 databases connected\n2025-07-14 10:26:38,430 - database_manager - INFO - \ud83d\udd12 Closing all database connections...\n2025-07-14 10:26:38,430 - database_manager - INFO - \u2705 neo4j connection closed\n2025-07-14 10:26:38,430 - database_manager - INFO - \u2705 qdrant connection closed\n2025-07-14 10:26:38,430 - database_manager - INFO - \u2705 redis persistent connection maintained\n2025-07-14 10:26:38,430 - database_manager - INFO - \u2705 PostgreSQL connection pool closed\n2025-07-14 10:26:38,430 - database_manager - INFO - \ud83c\udfaf All database connections closed successfully\n",
+      "exit_code": 0,
+      "validation_status": "FIXED",
+      "notes": "Command works successfully"
+    }
+  ],
+  "recommendations": [
+    "\u2705 Major success: Multiple commands successfully fixed and operational",
+    "\u26a1 Partial success: Some commands work but need minor refinements",
+    "\ud83d\udd27 Additional work needed: Several commands still require fixes",
+    "\ud83d\udee0\ufe0f Fix needed: enhanced_backup_backup_redis - Command failed with exit code 2",
+    "\ud83d\udee0\ufe0f Fix needed: enhanced_backup_backup_all - Command failed with exit code 2",
+    "\ud83d\udee0\ufe0f Fix needed: plc_memory_clean - Command timeout indicates serious issues"
+  ]
+}

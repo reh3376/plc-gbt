@@ -1,0 +1,53 @@
+{
+  "session_id": "backup_20250714_100534",
+  "timestamp": "2025-07-14T10:05:40.243802",
+  "backup_directory": "/Users/reh3376/repos/plc-gbt/plc_backup_20250714_100534",
+  "total_databases": 4,
+  "successful_backups": 4,
+  "failed_backups": 0,
+  "success_rate_percent": 100.0,
+  "total_duration_seconds": 5.748948812484741,
+  "total_size_mb": 0.014216423034667969,
+  "databases": [
+    {
+      "database": "redis",
+      "container": "plc-redis",
+      "success": true,
+      "file_path": "plc_backup_20250714_100534/redis_20250714_100534.rdb",
+      "file_size_mb": 8.392333984375e-05,
+      "duration_seconds": 2.145578145980835,
+      "error": null,
+      "records": 0
+    },
+    {
+      "database": "neo4j",
+      "container": "plc-neo4j",
+      "success": true,
+      "file_path": "plc_backup_20250714_100534/neo4j_20250714_100534",
+      "file_size_mb": 0.013459205627441406,
+      "duration_seconds": 3.3855550289154053,
+      "error": null,
+      "records": 0
+    },
+    {
+      "database": "postgresql",
+      "container": "plc-postgres",
+      "success": true,
+      "file_path": "plc_backup_20250714_100534/postgresql_20250714_100534.sql",
+      "file_size_mb": 0.00046825408935546875,
+      "duration_seconds": 0.15871000289916992,
+      "error": null,
+      "records": 0
+    },
+    {
+      "database": "qdrant",
+      "container": "plc-qdrant",
+      "success": true,
+      "file_path": "plc_backup_20250714_100534/qdrant_20250714_100534.json",
+      "file_size_mb": 0.00020503997802734375,
+      "duration_seconds": 0.059105634689331055,
+      "error": null,
+      "records": 0
+    }
+  ]
+}

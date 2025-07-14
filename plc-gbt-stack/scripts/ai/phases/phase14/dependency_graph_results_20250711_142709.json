@@ -1,0 +1,416 @@
+{
+  "graph_analysis": {
+    "total_modules": 2,
+    "total_dependencies": 0,
+    "graph_depth": 1,
+    "clustering_coefficient": 0.0,
+    "import_nodes": [
+      {
+        "module_name": "ast",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "import ast",
+        "line_number": 21,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "os",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "import os",
+        "line_number": 22,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "sys",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "import sys",
+        "line_number": 23,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "pathlib.Path",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from pathlib import Path",
+        "line_number": 24,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Dict",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Dict",
+        "line_number": 25,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.List",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import List",
+        "line_number": 25,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Any",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Any",
+        "line_number": 25,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Optional",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Optional",
+        "line_number": 25,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Tuple",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Tuple",
+        "line_number": 25,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Set",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Set",
+        "line_number": 25,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "dataclasses.dataclass",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from dataclasses import dataclass",
+        "line_number": 26,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "dataclasses.asdict",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from dataclasses import asdict",
+        "line_number": 26,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "datetime.datetime",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from datetime import datetime",
+        "line_number": 27,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "re",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "import re",
+        "line_number": 28,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "json",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "import json",
+        "line_number": 29,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "hashlib",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "import hashlib",
+        "line_number": 30,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "importlib.util",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "import importlib.util",
+        "line_number": 31,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "collections.defaultdict",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from collections import defaultdict",
+        "line_number": 32,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "collections.Counter",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from collections import Counter",
+        "line_number": 32,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "core.BaseOrchestrator",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from core import BaseOrchestrator",
+        "line_number": 36,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "core.TaskAnalysis",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/codebase_analyzer.py",
+        "import_type": "absolute",
+        "import_statement": "from core import TaskAnalysis",
+        "line_number": 36,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "ast",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "import ast",
+        "line_number": 21,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "os",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "import os",
+        "line_number": 22,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "sys",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "import sys",
+        "line_number": 23,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "re",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "import re",
+        "line_number": 24,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "pathlib.Path",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from pathlib import Path",
+        "line_number": 25,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Dict",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Dict",
+        "line_number": 26,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.List",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import List",
+        "line_number": 26,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Any",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Any",
+        "line_number": 26,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Optional",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Optional",
+        "line_number": 26,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Tuple",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Tuple",
+        "line_number": 26,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Set",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Set",
+        "line_number": 26,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "typing.Union",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from typing import Union",
+        "line_number": 26,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "dataclasses.dataclass",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from dataclasses import dataclass",
+        "line_number": 27,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "dataclasses.asdict",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from dataclasses import asdict",
+        "line_number": 27,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "datetime.datetime",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from datetime import datetime",
+        "line_number": 28,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "json",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "import json",
+        "line_number": 29,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "collections.defaultdict",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from collections import defaultdict",
+        "line_number": 30,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "collections.deque",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from collections import deque",
+        "line_number": 30,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "importlib.util",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "import importlib.util",
+        "line_number": 31,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "core.BaseOrchestrator",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from core import BaseOrchestrator",
+        "line_number": 35,
+        "is_conditional": false,
+        "is_dynamic": false
+      },
+      {
+        "module_name": "core.TaskAnalysis",
+        "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/phases/phase14/dependency_graph_builder.py",
+        "import_type": "absolute",
+        "import_statement": "from core import TaskAnalysis",
+        "line_number": 35,
+        "is_conditional": false,
+        "is_dynamic": false
+      }
+    ],
+    "dependency_edges": [],
+    "circular_dependencies": [],
+    "modular_opportunities": [],
+    "architectural_insights": {
+      "clustering_coefficient": 0.0,
+      "average_dependencies": 0.0,
+      "highly_coupled_modules": [],
+      "dependency_distribution": {
+        "no_dependencies": 2,
+        "low_dependencies": 0,
+        "medium_dependencies": 0,
+        "high_dependencies": 0
+      }
+    },
+    "optimization_recommendations": [
+      "Improve module organization to increase cohesion"
+    ]
+  },
+  "metrics": {
+    "files_processed": 2,
+    "imports_analyzed": 42,
+    "circular_deps_found": 0,
+    "extraction_opportunities": 0
+  },
+  "session_info": {
+    "session_id": "test_full_execution_20250711_142709",
+    "analysis_date": "2025-07-11T14:27:09.106870",
+    "total_execution_time": 0
+  }
+}

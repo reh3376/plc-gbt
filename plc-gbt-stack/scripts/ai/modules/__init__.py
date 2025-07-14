@@ -43,6 +43,17 @@ from .analysis import (
     PerformanceAnalyzer
 )
 
+from .integration import (
+    ServiceManager,
+    WolframAlphaProClient,
+    OpenAIClient,
+    GitHubAPIClient,
+    ServiceType,
+    ServiceStatus,
+    create_service_manager_with_defaults,
+    ServiceContext
+)
+
 __all__ = [
     # Core
     'BaseOrchestrator',
@@ -64,5 +75,15 @@ __all__ = [
     # Analysis
     'StatisticalAnalyzer',
     'ReportGenerator',
-    'PerformanceAnalyzer'
+    'PerformanceAnalyzer',
+    
+    # Integration
+    'ServiceManager',
+    'WolframAlphaProClient',
+    'OpenAIClient',
+    'GitHubAPIClient',
+    'ServiceType',
+    'ServiceStatus',
+    'create_service_manager_with_defaults',
+    'ServiceContext'
 ] 

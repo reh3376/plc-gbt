@@ -1,0 +1,332 @@
+{
+  "analysis_metadata": {
+    "timestamp": "2025-07-14T10:16:49.410856",
+    "total_failing_commands": 8,
+    "total_estimated_fix_time_minutes": 330,
+    "total_estimated_fix_time_hours": 5.5
+  },
+  "issue_type_breakdown": {
+    "IMPLEMENTATION_BUG": {
+      "count": 3,
+      "commands": [
+        "enhanced_backup_status",
+        "enhanced_backup_backup_all",
+        "enhanced_backup_backup_redis"
+      ],
+      "total_fix_time": 195
+    },
+    "LOGIC_ERROR": {
+      "count": 2,
+      "commands": [
+        "plc_memory_neo4j_health",
+        "plc_memory_neo4j_orphans"
+      ],
+      "total_fix_time": 60
+    },
+    "MISSING_IMPLEMENTATION": {
+      "count": 1,
+      "commands": [
+        "plc_memory_clean"
+      ],
+      "total_fix_time": 30
+    },
+    "DATABASE_CONNECTION": {
+      "count": 1,
+      "commands": [
+        "enterprise_backup_backup_qdrant"
+      ],
+      "total_fix_time": 20
+    },
+    "RUNTIME_ERROR": {
+      "count": 1,
+      "commands": [
+        "backup_complete_status"
+      ],
+      "total_fix_time": 25
+    }
+  },
+  "priority_breakdown": {
+    "HIGH": {
+      "count": 2,
+      "commands": [
+        "enterprise_backup_backup_qdrant",
+        "backup_complete_status"
+      ],
+      "total_fix_time": 45
+    },
+    "MEDIUM": {
+      "count": 6,
+      "commands": [
+        "enhanced_backup_status",
+        "enhanced_backup_backup_all",
+        "enhanced_backup_backup_redis",
+        "plc_memory_neo4j_health",
+        "plc_memory_clean",
+        "plc_memory_neo4j_orphans"
+      ],
+      "total_fix_time": 285
+    }
+  },
+  "complexity_breakdown": {
+    "SIMPLE": {
+      "count": 3,
+      "total_time_minutes": 60,
+      "commands": [
+        "plc_memory_neo4j_health",
+        "enterprise_backup_backup_qdrant",
+        "backup_complete_status"
+      ]
+    },
+    "MODERATE": {
+      "count": 4,
+      "total_time_minutes": 180,
+      "commands": [
+        "enhanced_backup_status",
+        "enhanced_backup_backup_redis",
+        "plc_memory_clean",
+        "plc_memory_neo4j_orphans"
+      ]
+    },
+    "COMPLEX": {
+      "count": 1,
+      "total_time_minutes": 90,
+      "commands": [
+        "enhanced_backup_backup_all"
+      ]
+    }
+  },
+  "implementation_breakdown": {
+    "enhanced_backup_cli": {
+      "failure_count": 3,
+      "total_fix_time": 195,
+      "issues": [
+        "enhanced_backup_status",
+        "enhanced_backup_backup_all",
+        "enhanced_backup_backup_redis"
+      ]
+    },
+    "plc_memory_cli": {
+      "failure_count": 3,
+      "total_fix_time": 90,
+      "issues": [
+        "plc_memory_neo4j_health",
+        "plc_memory_clean",
+        "plc_memory_neo4j_orphans"
+      ]
+    },
+    "enterprise_backup_cli": {
+      "failure_count": 1,
+      "total_fix_time": 20,
+      "issues": [
+        "enterprise_backup_backup_qdrant"
+      ]
+    },
+    "backup_cli_complete": {
+      "failure_count": 1,
+      "total_fix_time": 25,
+      "issues": [
+        "backup_complete_status"
+      ]
+    }
+  },
+  "detailed_issues": [
+    {
+      "command_id": "enhanced_backup_status",
+      "cli_implementation": "enhanced_backup_cli",
+      "command_string": "python3 enhanced_backup_cli.py status",
+      "category": "monitoring",
+      "priority": "MEDIUM",
+      "issue_type": "IMPLEMENTATION_BUG",
+      "root_cause": "Missing status command implementation or import errors",
+      "error_description": "Command execution fails due to missing implementation",
+      "fix_complexity": "MODERATE",
+      "estimated_fix_time_minutes": 45,
+      "dependencies": [],
+      "fix_strategy": "Implement missing status functionality or fix import issues"
+    },
+    {
+      "command_id": "enhanced_backup_backup_all",
+      "cli_implementation": "enhanced_backup_cli",
+      "command_string": "python3 enhanced_backup_cli.py backup all",
+      "category": "backup",
+      "priority": "MEDIUM",
+      "issue_type": "IMPLEMENTATION_BUG",
+      "root_cause": "Backup functionality not properly implemented",
+      "error_description": "All backup operations fail in enhanced CLI",
+      "fix_complexity": "COMPLEX",
+      "estimated_fix_time_minutes": 90,
+      "dependencies": [],
+      "fix_strategy": "Complete backup functionality implementation"
+    },
+    {
+      "command_id": "enhanced_backup_backup_redis",
+      "cli_implementation": "enhanced_backup_cli",
+      "command_string": "python3 enhanced_backup_cli.py backup redis",
+      "category": "backup",
+      "priority": "MEDIUM",
+      "issue_type": "IMPLEMENTATION_BUG",
+      "root_cause": "Redis backup functionality missing or broken",
+      "error_description": "Redis-specific backup fails in enhanced CLI",
+      "fix_complexity": "MODERATE",
+      "estimated_fix_time_minutes": 60,
+      "dependencies": [
+        "enhanced_backup_backup_all"
+      ],
+      "fix_strategy": "Fix Redis backup implementation after fixing general backup"
+    },
+    {
+      "command_id": "plc_memory_neo4j_health",
+      "cli_implementation": "plc_memory_cli",
+      "command_string": "python3 plc_memory_cli.py neo4j health",
+      "category": "monitoring",
+      "priority": "MEDIUM",
+      "issue_type": "LOGIC_ERROR",
+      "root_cause": "NoneType object error in health check logic",
+      "error_description": "'NoneType' object is not subscriptable error",
+      "fix_complexity": "SIMPLE",
+      "estimated_fix_time_minutes": 15,
+      "dependencies": [],
+      "fix_strategy": "Fix null pointer handling in Neo4j health check"
+    },
+    {
+      "command_id": "plc_memory_clean",
+      "cli_implementation": "plc_memory_cli",
+      "command_string": "python3 plc_memory_cli.py clean",
+      "category": "maintenance",
+      "priority": "MEDIUM",
+      "issue_type": "MISSING_IMPLEMENTATION",
+      "root_cause": "Clean functionality not fully implemented",
+      "error_description": "Clean command missing implementation or has runtime errors",
+      "fix_complexity": "MODERATE",
+      "estimated_fix_time_minutes": 30,
+      "dependencies": [],
+      "fix_strategy": "Implement or fix clean functionality"
+    },
+    {
+      "command_id": "plc_memory_neo4j_orphans",
+      "cli_implementation": "plc_memory_cli",
+      "command_string": "python3 plc_memory_cli.py neo4j orphans",
+      "category": "maintenance",
+      "priority": "MEDIUM",
+      "issue_type": "LOGIC_ERROR",
+      "root_cause": "Orphan node detection logic issues",
+      "error_description": "Orphan detection functionality fails or returns errors",
+      "fix_complexity": "MODERATE",
+      "estimated_fix_time_minutes": 45,
+      "dependencies": [],
+      "fix_strategy": "Fix orphan node detection and reporting logic"
+    },
+    {
+      "command_id": "enterprise_backup_backup_qdrant",
+      "cli_implementation": "enterprise_backup_cli",
+      "command_string": "python3 enterprise_backup_cli.py backup qdrant",
+      "category": "backup",
+      "priority": "HIGH",
+      "issue_type": "DATABASE_CONNECTION",
+      "root_cause": "Qdrant database connection or API issues",
+      "error_description": "Qdrant backup fails in enterprise CLI",
+      "fix_complexity": "SIMPLE",
+      "estimated_fix_time_minutes": 20,
+      "dependencies": [],
+      "fix_strategy": "Fix Qdrant connection configuration in enterprise CLI"
+    },
+    {
+      "command_id": "backup_complete_status",
+      "cli_implementation": "backup_cli_complete",
+      "command_string": "python3 backup_cli_complete.py status",
+      "category": "monitoring",
+      "priority": "HIGH",
+      "issue_type": "RUNTIME_ERROR",
+      "root_cause": "Status command runtime error or missing dependencies",
+      "error_description": "Status functionality fails with runtime error",
+      "fix_complexity": "SIMPLE",
+      "estimated_fix_time_minutes": 25,
+      "dependencies": [],
+      "fix_strategy": "Fix status command runtime issues and dependencies"
+    }
+  ],
+  "fix_sequence_recommendation": [
+    {
+      "sequence_order": 1,
+      "command_id": "enterprise_backup_backup_qdrant",
+      "cli_implementation": "enterprise_backup_cli",
+      "estimated_fix_time": 20,
+      "fix_complexity": "SIMPLE",
+      "priority": "HIGH",
+      "dependencies": [],
+      "fix_strategy": "Fix Qdrant connection configuration in enterprise CLI"
+    },
+    {
+      "sequence_order": 2,
+      "command_id": "backup_complete_status",
+      "cli_implementation": "backup_cli_complete",
+      "estimated_fix_time": 25,
+      "fix_complexity": "SIMPLE",
+      "priority": "HIGH",
+      "dependencies": [],
+      "fix_strategy": "Fix status command runtime issues and dependencies"
+    },
+    {
+      "sequence_order": 3,
+      "command_id": "plc_memory_neo4j_health",
+      "cli_implementation": "plc_memory_cli",
+      "estimated_fix_time": 15,
+      "fix_complexity": "SIMPLE",
+      "priority": "MEDIUM",
+      "dependencies": [],
+      "fix_strategy": "Fix null pointer handling in Neo4j health check"
+    },
+    {
+      "sequence_order": 4,
+      "command_id": "enhanced_backup_status",
+      "cli_implementation": "enhanced_backup_cli",
+      "estimated_fix_time": 45,
+      "fix_complexity": "MODERATE",
+      "priority": "MEDIUM",
+      "dependencies": [],
+      "fix_strategy": "Implement missing status functionality or fix import issues"
+    },
+    {
+      "sequence_order": 5,
+      "command_id": "plc_memory_clean",
+      "cli_implementation": "plc_memory_cli",
+      "estimated_fix_time": 30,
+      "fix_complexity": "MODERATE",
+      "priority": "MEDIUM",
+      "dependencies": [],
+      "fix_strategy": "Implement or fix clean functionality"
+    },
+    {
+      "sequence_order": 6,
+      "command_id": "plc_memory_neo4j_orphans",
+      "cli_implementation": "plc_memory_cli",
+      "estimated_fix_time": 45,
+      "fix_complexity": "MODERATE",
+      "priority": "MEDIUM",
+      "dependencies": [],
+      "fix_strategy": "Fix orphan node detection and reporting logic"
+    },
+    {
+      "sequence_order": 7,
+      "command_id": "enhanced_backup_backup_all",
+      "cli_implementation": "enhanced_backup_cli",
+      "estimated_fix_time": 90,
+      "fix_complexity": "COMPLEX",
+      "priority": "MEDIUM",
+      "dependencies": [],
+      "fix_strategy": "Complete backup functionality implementation"
+    },
+    {
+      "sequence_order": 8,
+      "command_id": "enhanced_backup_backup_redis",
+      "cli_implementation": "enhanced_backup_cli",
+      "estimated_fix_time": 60,
+      "fix_complexity": "MODERATE",
+      "priority": "MEDIUM",
+      "dependencies": [
+        "enhanced_backup_backup_all"
+      ],
+      "fix_strategy": "Fix Redis backup implementation after fixing general backup"
+    }
+  ]
+}

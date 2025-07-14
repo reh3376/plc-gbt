@@ -1,0 +1,12 @@
+{
+  "status": "success",
+  "collections": {
+    "result": {
+      "collections": []
+    },
+    "status": "ok",
+    "time": 3.708e-06
+  },
+  "timestamp": "2025-07-14T10:06:00.858459",
+  "api_available": true
+}

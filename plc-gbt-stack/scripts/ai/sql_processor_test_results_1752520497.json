@@ -1,0 +1,129 @@
+{
+  "session_id": "sql_processor_test_1752520497",
+  "start_time": "2025-07-14T15:14:57.823186",
+  "test_results": [
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_enhanced_backups/session_20250714_102600/postgresql_backup_20250714_102600.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 2.86102294921875e-06
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_backup_postgresql/plc_backup_20250714_100543/postgresql_20250714_100543.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 0.0
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_backup_neo4j/plc_backup_20250714_100534/postgresql_20250714_100534.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 0.0
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/backup_session_1752501953/postgresql_backup_session_1752501953.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 1.1920928955078125e-06
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_enterprise_backups/backup_session_1752501943/postgresql_backup_session_1752501943.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 0.0
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_enterprise_backups/backup_session_20250714_100604/postgresql_backup_session_20250714_100604.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 1.1920928955078125e-06
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc_backups/plc_enterprise_backups/backup_session_20250714_100554/postgresql_backup_session_20250714_100554.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 9.5367431640625e-07
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/archive/backups/postgres/postgres_backup_2025-07-01_11-27-01.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 9.5367431640625e-07
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/archive/backups/postgres/plc_metadata_backup_2025-07-01_11-27-27.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 9.5367431640625e-07
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/archive/backups/sessions/postgresql_dump_20250708_161238.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 1.9073486328125e-06
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/supabase_postgres_backup_20250714_080639.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 0.0
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_100604/postgresql_20250714_100604.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 0.0
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/full_system_test_backup/postgresql_20250714_085018.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 9.5367431640625e-07
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_085716/postgresql_20250714_085716.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 0.0
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_095201/postgresql_backup_20250714_095201.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 0.0
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_085700/postgresql_20250714_085700.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 1.1920928955078125e-06
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_backup_20250714_095257/postgresql_20250714_095257.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 1.1920928955078125e-06
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_100521/postgresql_backup_20250714_100521.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 0.0
+    },
+    {
+      "file_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_100529/postgresql_backup_20250714_100529.sql",
+      "success": false,
+      "error": "'CodebaseAnalyzer' object has no attribute 'analyze_file'",
+      "duration": 0.0
+    }
+  ],
+  "summary": {
+    "total_files": 19,
+    "successful_tests": 0,
+    "failed_tests": 19,
+    "success_rate": 0.0,
+    "total_duration": 1.33514404296875e-05,
+    "average_duration": 7.027073910361842e-07,
+    "end_time": "2025-07-14T15:14:57.841216"
+  }
+}

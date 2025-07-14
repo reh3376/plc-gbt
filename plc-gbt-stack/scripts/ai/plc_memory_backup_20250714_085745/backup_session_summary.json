@@ -1,0 +1,22 @@
+{
+  "session_id": "memory_backup_20250714_085745",
+  "timestamp": "2025-07-14T08:57:45.624289",
+  "backup_directory": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/scripts/ai/plc_memory_backup_20250714_085745",
+  "total_databases": 1,
+  "successful_backups": 0,
+  "failed_backups": 1,
+  "success_rate_percent": 0.0,
+  "total_duration_seconds": 7.605552673339844e-05,
+  "total_size_mb": 0,
+  "compression_enabled": false,
+  "validation_enabled": false,
+  "backup_results": [
+    {
+      "database": "redis",
+      "success": false,
+      "error": "name 'subprocess' is not defined",
+      "duration_seconds": 8.106231689453125e-06,
+      "file_size_mb": 0
+    }
+  ]
+}

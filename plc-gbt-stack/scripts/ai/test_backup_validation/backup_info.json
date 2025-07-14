@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-07-14T08:10:35.478299",
+  "databases": [
+    "neo4j",
+    "postgresql",
+    "qdrant",
+    "redis"
+  ],
+  "backup_directory": "test_backup_validation",
+  "compressed": true
+}
