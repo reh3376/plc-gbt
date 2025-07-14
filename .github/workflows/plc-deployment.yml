@@ -1,6 +1,6 @@
 name: PLC Repository Deployment
 
-on:
+"on":
   release:
     types: [published]
   workflow_dispatch:
@@ -8,7 +8,6 @@ on:
 jobs:
   deploy-to-production:
     runs-on: ubuntu-latest
-    environment: production
     
     steps:
     - uses: actions/checkout@v4
@@ -38,4 +37,6 @@ jobs:
       uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: always()
