@@ -1,0 +1,70 @@
+{
+  "session_info": {
+    "session_id": "still01_bf_pid_analysis_1752528702",
+    "dataset_path": "/Users/reh3376/repos/plc-gbt/docs/data/still01-bf-pid.csv",
+    "analysis_timestamp": "2025-07-14T17:31:43.334874",
+    "data_points": 2099,
+    "time_span_minutes": 174.91666666666666
+  },
+  "pid_configuration": {
+    "kp": 0.625,
+    "ki": 0.0235,
+    "kd": 0.0012,
+    "update_rate_ms": 750,
+    "control_action": "SP - PV",
+    "equation_form": "Independent"
+  },
+  "performance_metrics": {
+    "control_loop_type": "Flow Control (Volume Flow)",
+    "pid_configuration": {
+      "kp": 0.625,
+      "ki": 0.0235,
+      "kd": 0.0012,
+      "update_rate_ms": 750,
+      "control_action": "SP - PV",
+      "equation_form": "Independent"
+    },
+    "process_variables": {
+      "sp_range": {
+        "min": 70.55,
+        "max": 70.55,
+        "mean": 70.55
+      },
+      "pv_range": {
+        "min": 80.256355,
+        "max": 86.71563,
+        "mean": 83.02589504882792
+      },
+      "cv_range": {
+        "min": 41.782786,
+        "max": 51.412504,
+        "mean": 47.25367540638399
+      },
+      "error_stats": {
+        "mean": -12.475895048827923,
+        "std": 0.7662827252997492,
+        "rms": 12.499405845257678,
+        "max_abs": 16.165630000000007
+      }
+    },
+    "performance_indicators": {
+      "iae": 130934.51853744904,
+      "ise": 1639687.862354427,
+      "itae": 137225603.0292737,
+      "tracking_accuracy": 82.3162366423417,
+      "control_effort": 3.4419280338088702,
+      "steady_state_error": -12.447571867258004
+    }
+  },
+  "control_loop_behavior": {
+    "stability_analysis": {
+      "oscillation_detected": {
+        "oscillation_rate_percent": 0.0,
+        "is_oscillating": false,
+        "zero_crossings": 0
+      },
+      "control_effort_variability": 3.4419280338088702,
+      "error_variance": 0.5871892150928109,
+      "settling_behavior": {
+        "settling_time_minutes": 0.3333333333333333,
+        "is_settled": 

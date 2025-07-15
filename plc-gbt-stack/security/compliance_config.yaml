@@ -1,0 +1,190 @@
+# Phase 17.1: Advanced Security & Compliance Framework Configuration
+# PLC-GPT Industrial Control Security Enhancement
+
+# STRIDE Threat Analysis Configuration
+stride_analysis:
+  enabled: true
+  components:
+    - plc_controller
+    - hmi_interface
+    - database_layer
+    - api_gateway
+    - authentication_service
+    - vault_secrets
+    - network_communications
+  severity_thresholds:
+    critical: 20
+    high: 12
+    medium: 6
+    low: 0
+  risk_calculation:
+    method: "likelihood_x_impact"
+    likelihood_scale: 5
+    impact_scale: 5
+
+# IEC 62443-3-3 Compliance Configuration
+iec62443_compliance:
+  target_security_level: 3
+  assessment_frequency: "quarterly"
+  compliance_threshold: 85.0
+  requirements_scope:
+    - iac_1_human_user_identification
+    - iac_2_software_process_identification
+    - uc_1_authorization_enforcement
+    - si_1_communication_integrity
+    - si_2_malicious_code_protection
+    - si_3_security_functionality_verification
+    - si_4_software_and_information_integrity
+    - dc_1_data_confidentiality
+    - dc_3_use_of_cryptography
+    - rdf_1_network_segmentation
+    - rdf_2_zone_boundary_protection
+    - tre_1_audit_log_accessibility
+    - tre_2_audit_logging
+    - tre_4_system_monitoring
+    - ra_1_denial_of_service_protection
+    - ra_2_managed_resource_allocation
+
+# SBOM (Software Bill of Materials) Configuration
+sbom_generation:
+  enabled: true
+  format: "cyclonedx"
+  include_dev_dependencies: false
+  output_formats:
+    - json
+    - xml
+    - spdx
+  scan_paths:
+    - "."
+    - "plc-gbt-stack"
+    - "scripts"
+    - "src"
+  exclude_patterns:
+    - "*.pyc"
+    - "__pycache__"
+    - ".git"
+    - "node_modules"
+    - ".env"
+
+# Vulnerability Scanning Configuration
+vulnerability_scanning:
+  enabled: true
+  scan_frequency: "daily"
+  severity_threshold: "medium"
+  databases:
+    - "nvd"
+    - "osv"
+    - "github_advisories"
+  scan_types:
+    - "dependency_scan"
+    - "container_scan"
+    - "code_scan"
+  notification_channels:
+    - "security_team"
+    - "development_team"
+
+# Security Monitoring Configuration
+security_monitoring:
+  enabled: true
+  monitoring_components:
+    - "authentication_events"
+    - "authorization_failures"
+    - "system_access_attempts"
+    - "configuration_changes"
+    - "network_anomalies"
+  alert_thresholds:
+    failed_login_attempts: 5
+    privilege_escalation_attempts: 1
+    suspicious_network_activity: 3
+  retention_period: "90_days"
+
+# Compliance Reporting Configuration
+compliance_reporting:
+  enabled: true
+  report_frequency: "monthly"
+  output_formats:
+    - "json"
+    - "pdf"
+    - "excel"
+  distribution_list:
+    - "security_officer"
+    - "compliance_team"
+    - "management"
+  include_sections:
+    - "executive_summary"
+    - "threat_analysis"
+    - "compliance_assessment"
+    - "vulnerability_report"
+    - "recommendations"
+
+# Integration Configuration
+integrations:
+  vault_integration:
+    enabled: true
+    vault_url: "https://vault.plc-gbt.local:8200"
+    auth_method: "token"
+    secret_path: "secret/plc-gbt"
+  
+  siem_integration:
+    enabled: false
+    siem_type: "splunk"
+    endpoint: "https://siem.plc-gbt.local:8088"
+    index: "plc_security"
+  
+  ticketing_integration:
+    enabled: false
+    system: "jira"
+    endpoint: "https://jira.plc-gbt.local"
+    project_key: "PLCSEC"
+
+# Notification Configuration
+notifications:
+  email:
+    enabled: true
+    smtp_server: "smtp.plc-gbt.local"
+    smtp_port: 587
+    use_tls: true
+    sender: "security@plc-gbt.local"
+    recipients:
+      - "security-team@plc-gbt.local"
+      - "devops@plc-gbt.local"
+  
+  slack:
+    enabled: false
+    webhook_url: "https://hooks.slack.com/services/..."
+    channel: "#security-alerts"
+  
+  teams:
+    enabled: false
+    webhook_url: "https://outlook.office.com/webhook/..."
+
+# Audit Configuration
+audit:
+  enabled: true
+  audit_level: "detailed"
+  log_retention: "1_year"
+  log_encryption: true
+  log_integrity_check: true
+  audit_events:
+    - "threat_identification"
+    - "compliance_assessment"
+    - "vulnerability_detection"
+    - "security_configuration_changes"
+    - "report_generation"
+    - "user_access_events"
+
+# Performance Configuration
+performance:
+  max_concurrent_scans: 5
+  scan_timeout: 300
+  report_generation_timeout: 600
+  cache_enabled: true
+  cache_ttl: 3600
+
+# Development Configuration
+development:
+  debug_mode: false
+  test_mode: false
+  mock_external_services: false
+  log_level: "INFO"
+  profiling_enabled: false 

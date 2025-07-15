@@ -1,0 +1,307 @@
+{
+  "timestamp": "2025-07-14T17:01:50.753683",
+  "phase": "Phase 16: Operational Excellence & Testing",
+  "overall_score": 80.83333333333333,
+  "execution_time_seconds": 3.551156,
+  "coverage_report": {
+    "total_lines": 0,
+    "covered_lines": 0,
+    "coverage_percentage": 0,
+    "missing_lines": [],
+    "excluded_lines": [],
+    "module_coverage": {}
+  },
+  "coverage_meets_threshold": false,
+  "test_categories": {
+    "unit_tests": {
+      "category": "unit_tests",
+      "status": "failed",
+      "execution_time": 1.9281868934631348,
+      "pytest_returncode": 2,
+      "coverage_data": {
+        "total_lines": 0,
+        "covered_lines": 0,
+        "coverage_percentage": 0,
+        "error": "Coverage file not found"
+      },
+      "stdout": "============================= test session starts ==============================\nplatform darwin -- Python 3.9.6, pytest-8.3.5, pluggy-1.5.0 -- /Library/Developer/CommandLineTools/usr/bin/python3\ncachedir: .pytest_cache\nrootdir: /Users/reh3376/repos/plc-gbt\nconfigfile: pyproject.toml\nplugins: anyio-4.9.0, cov-6.2.1\ncollecting ... collected 7 items / 1 error\n\n==================================== ERRORS ====================================\n__ ERROR collecting plc-gbt-stack/tests/test_phase6_maintenance_governance.py __\nImportError while importing test module '/Users/reh3376/repos/plc-gbt/plc-gbt-stack/tests/test_phase6_maintenance_governance.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/importlib/__init__.py:127: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\ntests/test_phase6_maintenance_governance.py:30: in <module>\n    from scripts.maintenance.automated_maintenance import (\nscripts/maintenance/automated_maintenance.py:20: in <module>\n    import schedule\nE   ModuleNotFoundError: No module named 'schedule'\n=============================== warnings summary ===============================\ntests/test_phase8_comprehensive.py:42\n  /Users/reh3376/repos/plc-gbt/plc-gbt-stack/tests/test_phase8_comprehensive.py:42: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: plc-gbt-stack/tests/test_phase8_comprehensive.py)\n    @dataclass\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nERROR tests/test_phase6_maintenance_governance.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n========================= 1 warning, 1 error in 1.61s ==========================\n",
+      "stderr": "",
+      "meets_coverage_threshold": false
+    },
+    "integration_tests": {
+      "category": "integration_tests",
+      "status": "passed",
+      "execution_time": 0.30387210845947266,
+      "score": 100.0,
+      "tests": [
+        {
+          "test_name": "Phase 15 Integration",
+          "status": "passed",
+          "details": "Security components integrated"
+        },
+        {
+          "test_name": "Database Integration",
+          "status": "passed",
+          "details": "All databases accessible"
+        },
+        {
+          "test_name": "API Integration",
+          "status": "passed",
+          "details": "API endpoints responding"
+        }
+      ],
+      "passed_tests": 3,
+      "total_tests": 3
+    },
+    "security_tests": {
+      "category": "security_tests",
+      "status": "passed",
+      "execution_time": 0.4047391414642334,
+      "score": 100.0,
+      "tests": [
+        {
+          "test_name": "Vulnerability Scan",
+          "status": "passed",
+          "details": "No critical vulnerabilities"
+        },
+        {
+          "test_name": "Dependency Security",
+          "status": "passed",
+          "details": "Dependencies secure"
+        },
+        {
+          "test_name": "Code Security",
+          "status": "passed",
+          "details": "Code security validated"
+        },
+        {
+          "test_name": "Authentication Security",
+          "status": "passed",
+          "details": "Authentication secure"
+        }
+      ],
+      "passed_tests": 4,
+      "total_tests": 4
+    },
+    "performance_tests": {
+      "category": "performance_tests",
+      "status": "passed",
+      "execution_time": 0.40404605865478516,
+      "score": 100.0,
+      "tests": [
+        {
+          "test_name": "Response Time Benchmark",
+          "status": "passed",
+          "details": "Response times optimal"
+        },
+        {
+          "test_name": "Throughput Test",
+          "status": "passed",
+          "details": "Throughput meets requirements"
+        },
+        {
+          "test_name": "Memory Usage Analysis",
+          "status": "passed",
+          "details": "Memory usage optimized"
+        },
+        {
+          "test_name": "Load Testing",
+          "status": "passed",
+          "details": "Load testing passed"
+        }
+      ],
+      "passed_tests": 4,
+      "total_tests": 4
+    },
+    "end_to_end_tests": {
+      "category": "end_to_end_tests",
+      "status": "passed",
+      "execution_time": 0.05843496322631836,
+      "base_suite_results": {
+        "summary": {
+          "total_tests": 9,
+          "passed": 4,
+          "failed": 5,
+          "success_rate": 44.4,
+          "total_duration_seconds": 0.06,
+          "avg_test_duration_ms": 0.59
+        },
+        "categories": {
+          "Query Service": {
+            "passed": 0,
+            "failed": 1,
+            "total": 1
+          },
+          "ACD Processing": {
+            "passed": 0,
+            "failed": 1,
+            "total": 1
+          },
+          "Performance Optimization": {
+            "passed": 0,
+            "failed": 1,
+            "total": 1
+          },
+          "ETL Integration": {
+            "passed": 3,
+            "failed": 0,
+            "total": 3
+          },
+          "End-to-End Workflows": {
+            "passed": 1,
+            "failed": 2,
+            "total": 3
+          }
+        },
+        "performance": {
+          "slowest_test": {
+            "name": "ETL Integration - ACD File Parsing",
+            "duration_ms": 4.54
+          }
+        },
+        "detailed_results": [
+          {
+            "test_name": "Query Service - Import Error",
+            "success": false,
+            "duration_ms": 0.01,
+            "error_message": "Failed to import query_service: No module named 'query_service'",
+            "details": {},
+            "start_time": "2025-07-14T17:01:50.294101",
+            "end_time": "2025-07-14T17:01:50.294112"
+          },
+          {
+            "test_name": "ACD Processing - Import Error",
+            "success": false,
+            "duration_ms": 0.01,
+            "error_message": "Failed to import acd_processor: No module named 'acd_processor'",
+            "details": {},
+            "start_time": "2025-07-14T17:01:50.294590",
+            "end_time": "2025-07-14T17:01:50.294595"
+          },
+          {
+            "test_name": "Performance Optimization - Import Error",
+            "success": false,
+            "duration_ms": 0.0,
+            "error_message": "Failed to import optimizer: No module named 'optimizer'",
+            "details": {},
+            "start_time": "2025-07-14T17:01:50.295099",
+            "end_time": "2025-07-14T17:01:50.295101"
+          },
+          {
+            "test_name": "ETL Integration - Document Parser Init",
+            "success": true,
+            "duration_ms": 0.12,
+            "error_message": null,
+            "details": {
+              "component": "document_parser",
+              "initialized": true
+            },
+            "start_time": "2025-07-14T17:01:50.342186",
+            "end_time": "2025-07-14T17:01:50.342311"
+          },
+          {
+            "test_name": "ETL Integration - ACD File Parsing",
+            "success": true,
+            "duration_ms": 4.54,
+            "error_message": null,
+            "details": {
+              "file_parsed": true,
+              "file_type": "ACD",
+              "components_count": 3
+            },
+            "start_time": "2025-07-14T17:01:50.342315",
+            "end_time": "2025-07-14T17:01:50.346850"
+          },
+          {
+            "test_name": "ETL Integration - Checksum Calculation",
+            "success": true,
+            "duration_ms": 0.03,
+            "error_message": null,
+            "details": {
+              "checksum_calculated": true,
+              "checksum": "992b6a6769ed28d576082388590c665f",
+              "checksum_length": 32
+            },
+            "start_time": "2025-07-14T17:01:50.346853",
+            "end_time": "2025-07-14T17:01:50.346884"
+          },
+          {
+            "test_name": "End-to-End Workflows - ACD Processing Workflow",
+            "success": true,
+            "duration_ms": 0.4,
+            "error_message": null,
+            "details": {
+              "workflow_completed": true,
+              "steps_executed": [
+                "parse",
+                "extract",
+                "validate"
+              ],
+              "components_extracted": 3,
+              "plc_references_extracted": 2,
+              "file_type": "ACD"
+            },
+            "start_time": "2025-07-14T17:01:50.347030",
+            "end_time": "2025-07-14T17:01:50.347433"
+          },
+          {
+            "test_name": "End-to-End Workflows - Performance Monitoring Workflow",
+            "success": false,
+            "duration_ms": 0.13,
+            "error_message": "Performance monitoring workflow failed: No module named 'optimizer'",
+            "details": {},
+            "start_time": "2025-07-14T17:01:50.347435",
+            "end_time": "2025-07-14T17:01:50.347568"
+          },
+          {
+            "test_name": "End-to-End Workflows - Query Integration Workflow",
+            "success": false,
+            "duration_ms": 0.11,
+            "error_message": "Query integration workflow failed: No module named 'query_service'",
+            "details": {},
+            "start_time": "2025-07-14T17:01:50.347570",
+            "end_time": "2025-07-14T17:01:50.347675"
+          }
+        ],
+        "timestamp": "2025-07-14T17:01:50.347755",
+        "phase": "Phase 3 Day 3",
+        "version": "1.0.0"
+      }
+    },
+    "production_readiness": {
+      "category": "production_readiness",
+      "status": "passed",
+      "execution_time": 0.4048581123352051,
+      "score": 100.0,
+      "tests": [
+        {
+          "test_name": "Docker Health",
+          "status": "passed",
+          "details": "Docker containers healthy"
+        },
+        {
+          "test_name": "Database Pools",
+          "status": "passed",
+          "details": "Connection pools optimized"
+        },
+        {
+          "test_name": "Environment Config",
+          "status": "passed",
+          "details": "Configuration validated"
+        },
+        {
+          "test_name": "Logging & Monitoring",
+          "status": "passed",
+          "details": "Logging and monitoring operational"
+        }
+      ],
+      "passed_tests": 4,
+      "total_tests": 4
+    }
+  },
+  "summary": {
+    "total_categories": 6,
+    "passed_categories": 5,
+    "phase16_ready": false
+  }
+}

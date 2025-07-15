@@ -1,0 +1,113 @@
+[run]
+# Phase 16 Coverage Configuration
+# Source directories to analyze
+source = .
+
+# Files to include in coverage
+include = 
+    scripts/*
+    workers/*
+    monitoring/*
+    security/*
+    auth/*
+    cache/*
+    config/*
+    middleware/*
+    gateway/*
+    ai/*
+    api/*
+
+# Files to exclude from coverage
+omit =
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */venv/*
+    */.venv/*
+    */node_modules/*
+    */htmlcov/*
+    */coverage/*
+    */.git/*
+    */build/*
+    */dist/*
+    */.pytest_cache/*
+    */archive/*
+    */backups/*
+    */logs/*
+    */results/*
+    */schemas/*
+    */seed/*
+    */tools/*
+    */training_data/*
+    */embedding_cache/*
+    */plc_backups/*
+    */plc-format-converter/*
+    setup.py
+    conftest.py
+
+# Coverage thresholds
+fail_under = 95
+
+# Precision for coverage reporting
+precision = 2
+
+# Show missing lines in terminal report
+show_missing = true
+
+# Skip covered files in terminal report
+skip_covered = false
+
+# Sort coverage report
+sort = Cover
+
+[report]
+# Exclude lines from coverage reporting
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+    # Type checking imports
+    if TYPE_CHECKING:
+    # Defensive assertions
+    assert False
+    # Debug code
+    if DEBUG:
+
+# Ignore empty files
+ignore_empty = true
+
+# Partial branches to ignore
+partial_branches =
+    pragma: no branch
+    pragma: no cover
+
+[html]
+# HTML report directory
+directory = htmlcov
+
+# HTML report title
+title = Phase 16 Comprehensive Testing Coverage Report
+
+# Show contexts in HTML report
+show_contexts = true
+
+[xml]
+# XML report file
+output = coverage.xml
+
+[json]
+# JSON report file
+output = coverage.json
+
+# Pretty print JSON
+pretty_print = true
+
+# Show contexts in JSON report
+show_contexts = true 

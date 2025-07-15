@@ -1,0 +1,728 @@
+{
+  "report_metadata": {
+    "generated_at": "2025-07-14T21:13:31.546046",
+    "session_id": "e53b46cd-a61d-4010-a1fd-4686ba757426",
+    "report_version": "1.0.0",
+    "framework_version": "17.1.0"
+  },
+  "stride_analysis": {
+    "total_components_analyzed": 3,
+    "total_threats_identified": 14,
+    "threat_summary": {
+      "severity_distribution": {
+        "HIGH": 6,
+        "MEDIUM": 8
+      },
+      "category_distribution": {
+        "spoofing": 4,
+        "tampering": 4,
+        "repudiation": 1,
+        "information_disclosure": 3,
+        "denial_of_service": 1,
+        "elevation_of_privilege": 1
+      },
+      "average_risk_score": 10.357142857142858
+    },
+    "threats": [
+      {
+        "id": "plc_controller_spoofing_1",
+        "category": "STRIDECategory.SPOOFING",
+        "component": "plc_controller",
+        "description": "Unauthorized device impersonating PLC controller",
+        "severity": 3,
+        "likelihood": 3,
+        "impact": 5,
+        "risk_score": 15,
+        "mitigation_strategy": "Implement device certificates and mutual TLS authentication",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545497",
+        "updated_at": "2025-07-14 21:13:31.545498",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "plc_controller_spoofing_2",
+        "category": "STRIDECategory.SPOOFING",
+        "component": "plc_controller",
+        "description": "Man-in-the-middle attack on PLC communications",
+        "severity": 2,
+        "likelihood": 2,
+        "impact": 4,
+        "risk_score": 8,
+        "mitigation_strategy": "Use encrypted communication protocols and certificate pinning",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545504",
+        "updated_at": "2025-07-14 21:13:31.545505",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "plc_controller_tampering_1",
+        "category": "STRIDECategory.TAMPERING",
+        "component": "plc_controller",
+        "description": "Unauthorized modification of PLC program logic",
+        "severity": 2,
+        "likelihood": 2,
+        "impact": 5,
+        "risk_score": 10,
+        "mitigation_strategy": "Implement code signing and integrity verification",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545513",
+        "updated_at": "2025-07-14 21:13:31.545513",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "plc_controller_tampering_2",
+        "category": "STRIDECategory.TAMPERING",
+        "component": "plc_controller",
+        "description": "Manipulation of sensor data or control outputs",
+        "severity": 3,
+        "likelihood": 3,
+        "impact": 4,
+        "risk_score": 12,
+        "mitigation_strategy": "Use data integrity checks and anomaly detection",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545517",
+        "updated_at": "2025-07-14 21:13:31.545517",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "plc_controller_repudiation_1",
+        "category": "STRIDECategory.REPUDIATION",
+        "component": "plc_controller",
+        "description": "Denial of PLC program changes or control actions",
+        "severity": 2,
+        "likelihood": 2,
+        "impact": 3,
+        "risk_score": 6,
+        "mitigation_strategy": "Implement comprehensive audit logging and digital signatures",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545525",
+        "updated_at": "2025-07-14 21:13:31.545525",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "plc_controller_information_disclosure_1",
+        "category": "STRIDECategory.INFORMATION_DISCLOSURE",
+        "component": "plc_controller",
+        "description": "Unauthorized access to process data or control logic",
+        "severity": 3,
+        "likelihood": 3,
+        "impact": 4,
+        "risk_score": 12,
+        "mitigation_strategy": "Implement data encryption and access controls",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545533",
+        "updated_at": "2025-07-14 21:13:31.545533",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "plc_controller_denial_of_service_1",
+        "category": "STRIDECategory.DENIAL_OF_SERVICE",
+        "component": "plc_controller",
+        "description": "Network flooding causing PLC communication failure",
+        "severity": 3,
+        "likelihood": 3,
+        "impact": 5,
+        "risk_score": 15,
+        "mitigation_strategy": "Implement rate limiting and network segmentation",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545539",
+        "updated_at": "2025-07-14 21:13:31.545540",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "plc_controller_elevation_of_privilege_1",
+        "category": "STRIDECategory.ELEVATION_OF_PRIVILEGE",
+        "component": "plc_controller",
+        "description": "Privilege escalation to gain administrative control",
+        "severity": 2,
+        "likelihood": 2,
+        "impact": 5,
+        "risk_score": 10,
+        "mitigation_strategy": "Implement least privilege principle and role-based access",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545546",
+        "updated_at": "2025-07-14 21:13:31.545546",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "hmi_interface_spoofing_1",
+        "category": "STRIDECategory.SPOOFING",
+        "component": "hmi_interface",
+        "description": "Fake HMI interface to capture operator credentials",
+        "severity": 2,
+        "likelihood": 2,
+        "impact": 4,
+        "risk_score": 8,
+        "mitigation_strategy": "Implement strong authentication and session management",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545569",
+        "updated_at": "2025-07-14 21:13:31.545569",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "hmi_interface_tampering_1",
+        "category": "STRIDECategory.TAMPERING",
+        "component": "hmi_interface",
+        "description": "Unauthorized modification of HMI displays or controls",
+        "severity": 3,
+        "likelihood": 3,
+        "impact": 4,
+        "risk_score": 12,
+        "mitigation_strategy": "Implement input validation and integrity checks",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545577",
+        "updated_at": "2025-07-14 21:13:31.545577",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "hmi_interface_information_disclosure_1",
+        "category": "STRIDECategory.INFORMATION_DISCLOSURE",
+        "component": "hmi_interface",
+        "description": "Unauthorized access to process visualization data",
+        "severity": 2,
+        "likelihood": 3,
+        "impact": 3,
+        "risk_score": 9,
+        "mitigation_strategy": "Implement view-based access controls and data masking",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545587",
+        "updated_at": "2025-07-14 21:13:31.545588",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "database_layer_spoofing_1",
+        "category": "STRIDECategory.SPOOFING",
+        "component": "database_layer",
+        "description": "Database connection spoofing or credential theft",
+        "severity": 2,
+        "likelihood": 2,
+        "impact": 4,
+        "risk_score": 8,
+        "mitigation_strategy": "Use connection pooling with encrypted credentials",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545611",
+        "updated_at": "2025-07-14 21:13:31.545611",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "database_layer_tampering_1",
+        "category": "STRIDECategory.TAMPERING",
+        "component": "database_layer",
+        "description": "Unauthorized modification of historical data",
+        "severity": 2,
+        "likelihood": 2,
+        "impact": 4,
+        "risk_score": 8,
+        "mitigation_strategy": "Implement database triggers and audit trails",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545618",
+        "updated_at": "2025-07-14 21:13:31.545618",
+        "evidence": [],
+        "references": []
+      },
+      {
+        "id": "database_layer_information_disclosure_1",
+        "category": "STRIDECategory.INFORMATION_DISCLOSURE",
+        "component": "database_layer",
+        "description": "SQL injection exposing sensitive process data",
+        "severity": 3,
+        "likelihood": 3,
+        "impact": 4,
+        "risk_score": 12,
+        "mitigation_strategy": "Use parameterized queries and input validation",
+        "status": "ThreatStatus.IDENTIFIED",
+        "owner": "security_team",
+        "created_at": "2025-07-14 21:13:31.545629",
+        "updated_at": "2025-07-14 21:13:31.545629",
+        "evidence": [],
+        "references": []
+      }
+    ]
+  },
+  "iec62443_compliance": {
+    "total_requirements_assessed": 25,
+    "compliance_summary": {
+      "average_compliance_percentage": 33.408,
+      "compliant_requirements": 1,
+      "non_compliant_requirements": 24,
+      "total_gaps": 26
+    },
+    "requirements": [
+      {
+        "requirement": "IEC62443Requirement.IAC_1",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 76.5,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "automated_testing",
+        "evidence": [
+          "JWT authentication",
+          "User session management",
+          "MFA support"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545790",
+        "next_review": "2025-10-12 21:13:31.545791"
+      },
+      {
+        "requirement": "IEC62443Requirement.IAC_2",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 72.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "configuration_audit",
+        "evidence": [
+          "Service account management",
+          "API key rotation"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545802",
+        "next_review": "2025-10-12 21:13:31.545802"
+      },
+      {
+        "requirement": "IEC62443Requirement.UC_1",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 81.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "access_control_testing",
+        "evidence": [
+          "Role-based access control",
+          "Approval workflows"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545812",
+        "next_review": "2025-10-12 21:13:31.545812"
+      },
+      {
+        "requirement": "IEC62443Requirement.UC_2",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545821",
+        "next_review": "2025-10-12 21:13:31.545822"
+      },
+      {
+        "requirement": "IEC62443Requirement.UC_3",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545829",
+        "next_review": "2025-10-12 21:13:31.545829"
+      },
+      {
+        "requirement": "IEC62443Requirement.SI_1",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 85.5,
+        "gap_analysis": [
+          "PKI implementation required for SL3+"
+        ],
+        "remediation_plan": "Implement comprehensive PKI infrastructure with certificate lifecycle management",
+        "validation_method": "network_scanning",
+        "evidence": [
+          "TLS 1.3 encryption",
+          "Certificate validation"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545837",
+        "next_review": "2025-10-12 21:13:31.545838"
+      },
+      {
+        "requirement": "IEC62443Requirement.SI_2",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 67.5,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "malware_scanning",
+        "evidence": [
+          "Input validation",
+          "Sandboxing"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545848",
+        "next_review": "2025-10-12 21:13:31.545848"
+      },
+      {
+        "requirement": "IEC62443Requirement.SI_3",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545855",
+        "next_review": "2025-10-12 21:13:31.545855"
+      },
+      {
+        "requirement": "IEC62443Requirement.SI_4",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545863",
+        "next_review": "2025-10-12 21:13:31.545863"
+      },
+      {
+        "requirement": "IEC62443Requirement.DC_1",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 79.2,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "encryption_audit",
+        "evidence": [
+          "AES-256 encryption",
+          "Key rotation"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545870",
+        "next_review": "2025-10-12 21:13:31.545870"
+      },
+      {
+        "requirement": "IEC62443Requirement.DC_2",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545877",
+        "next_review": "2025-10-12 21:13:31.545877"
+      },
+      {
+        "requirement": "IEC62443Requirement.DC_3",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 82.8,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "cryptographic_review",
+        "evidence": [
+          "PKI implementation",
+          "Certificate management"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545884",
+        "next_review": "2025-10-12 21:13:31.545885"
+      },
+      {
+        "requirement": "IEC62443Requirement.DC_4",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545891",
+        "next_review": "2025-10-12 21:13:31.545891"
+      },
+      {
+        "requirement": "IEC62443Requirement.RDF_1",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 63.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "network_topology_review",
+        "evidence": [
+          "Docker network isolation",
+          "Firewall rules"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545898",
+        "next_review": "2025-10-12 21:13:31.545898"
+      },
+      {
+        "requirement": "IEC62443Requirement.RDF_2",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545905",
+        "next_review": "2025-10-12 21:13:31.545905"
+      },
+      {
+        "requirement": "IEC62443Requirement.RDF_3",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545912",
+        "next_review": "2025-10-12 21:13:31.545912"
+      },
+      {
+        "requirement": "IEC62443Requirement.TRE_1",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 76.5,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "log_analysis",
+        "evidence": [
+          "Comprehensive logging",
+          "Log aggregation"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545919",
+        "next_review": "2025-10-12 21:13:31.545919"
+      },
+      {
+        "requirement": "IEC62443Requirement.TRE_2",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 79.2,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)",
+          "Real-time monitoring required for SL3+"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%); Address gap: Real-time monitoring required for SL3+",
+        "validation_method": "audit_log_review",
+        "evidence": [
+          "Audit trail",
+          "Change tracking"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545927",
+        "next_review": "2025-10-12 21:13:31.545927"
+      },
+      {
+        "requirement": "IEC62443Requirement.TRE_3",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545934",
+        "next_review": "2025-10-12 21:13:31.545934"
+      },
+      {
+        "requirement": "IEC62443Requirement.TRE_4",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545941",
+        "next_review": "2025-10-12 21:13:31.545941"
+      },
+      {
+        "requirement": "IEC62443Requirement.RA_1",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 72.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "stress_testing",
+        "evidence": [
+          "Rate limiting",
+          "Resource monitoring"
+        ],
+        "last_assessment": "2025-07-14 21:13:31.545948",
+        "next_review": "2025-10-12 21:13:31.545948"
+      },
+      {
+        "requirement": "IEC62443Requirement.RA_2",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545954",
+        "next_review": "2025-10-12 21:13:31.545954"
+      },
+      {
+        "requirement": "IEC62443Requirement.RA_3",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545961",
+        "next_review": "2025-10-12 21:13:31.545962"
+      },
+      {
+        "requirement": "IEC62443Requirement.RA_4",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545968",
+        "next_review": "2025-10-12 21:13:31.545968"
+      },
+      {
+        "requirement": "IEC62443Requirement.RA_5",
+        "security_level": 3,
+        "component": "plc_gbt_system",
+        "implementation_status": "partial",
+        "compliance_percentage": 0.0,
+        "gap_analysis": [
+          "Implementation level below compliance threshold (85%)"
+        ],
+        "remediation_plan": "Address gap: Implementation level below compliance threshold (85%)",
+        "validation_method": "manual_review",
+        "evidence": [],
+        "last_assessment": "2025-07-14 21:13:31.545975",
+        "next_review": "2025-10-12 21:13:31.545975"
+      }
+    ]
+  },
+  "sbom_analysis": {
+    "total_components": 0,
+    "sbom_reports": [
+      {
+        "document_name": "PLC-GPT-SBOM",
+        "document_namespace": "https://plc-gbt.com/sbom/e53b46cd-a61d-4010-a1fd-4686ba757426",
+        "creation_info": {
+          "created": "2025-07-14T21:13:31.545988",
+          "creators": [
+            "AI Task Orchestrator"
+          ],
+          "license_list_version": "3.21"
+        },
+        "components": [],
+        "relationships": [],
+        "generated_at": "2025-07-14 21:13:31.546038",
+        "format_version": "2.3"
+      }
+    ]
+  },
+  "vulnerability_assessment": {
+    "total_vulnerabilities": 0,
+    "vulnerability_summary": {
+      "no_vulnerabilities": true
+    },
+    "vulnerabilities": []
+  },
+  "recommendations": [
+    {
+      "priority": "MEDIUM",
+      "category": "Compliance",
+      "title": "Improve IEC 62443-3-3 Compliance",
+      "description": "Address 24 non-compliant requirements",
+      "action_items": [
+        "Address gap: Implementation level below compliance threshold (85%)",
+        "Address gap: Implementation level below compliance threshold (85%)",
+        "Address gap: Implementation level below compliance threshold (85%)"
+      ]
+    }
+  ]
+}

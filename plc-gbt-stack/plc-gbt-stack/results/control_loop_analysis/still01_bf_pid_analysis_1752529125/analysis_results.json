@@ -1,0 +1,88 @@
+{
+  "session_info": {
+    "session_id": "still01_bf_pid_analysis_1752529125",
+    "dataset_path": "/Users/reh3376/repos/plc-gbt/docs/data/still01-bf-pid.csv",
+    "analysis_timestamp": "2025-07-14T17:38:46.082998",
+    "data_points": 2099,
+    "time_span_minutes": 174.91666666666666
+  },
+  "pid_configuration": {
+    "kp": 0.625,
+    "ki": 0.0235,
+    "kd": 0.0012,
+    "update_rate_ms": 750,
+    "control_action": "SP - PV",
+    "equation_form": "Independent"
+  },
+  "performance_metrics": {
+    "control_loop_type": "Flow Control (Volume Flow)",
+    "pid_configuration": {
+      "kp": 0.625,
+      "ki": 0.0235,
+      "kd": 0.0012,
+      "update_rate_ms": 750,
+      "control_action": "SP - PV",
+      "equation_form": "Independent"
+    },
+    "process_variables": {
+      "sp_range": {
+        "min": 83.0,
+        "max": 83.0,
+        "mean": 83.0
+      },
+      "pv_range": {
+        "min": 80.256355,
+        "max": 86.71563,
+        "mean": 83.02589504882792
+      },
+      "cv_range": {
+        "min": 41.782786,
+        "max": 51.412504,
+        "mean": 47.25367540638399
+      },
+      "error_stats": {
+        "mean": -0.025895048827917964,
+        "std": 0.7662827252997493,
+        "rms": 0.766720137107805,
+        "max_abs": 3.7156300000000044
+      }
+    },
+    "performance_indicators": {
+      "iae": 6279.421293191001,
+      "ise": 6169.588271946184,
+      "itae": 6111060.397577871,
+      "tracking_accuracy": 99.27912645801604,
+      "control_effort": 3.4419280338088702,
+      "steady_state_error": 0.002428132742000031
+    }
+  },
+  "control_loop_behavior": {
+    "stability_analysis": {
+      "oscillation_detected": {
+        "oscillation_rate_percent": 39.87613149118628,
+        "is_oscillating": true,
+        "zero_crossings": 837
+      },
+      "control_effort_variability": 3.4419280338088702,
+      "error_variance": 0.587189215092811,
+      "settling_behavior": {
+        "settling_time_minutes": 0.3333333333333333,
+        "is_settled": true,
+        "settling_threshold": 0.03831413626498747
+      }
+    },
+    "performance_characteristics": {
+      "response_time": 0.6666666666666666,
+      "overshoot": 4.476662650602415,
+      "steady_state_accuracy": 0.4749073628166668
+    },
+    "disturbance_rejection": {
+      "disturbance_correlation": {
+        "correlation": -0.021567427019269735,
+        "analysis": "Weak correlation"
+      },
+      "recovery_time": 0.16284403669724767
+    }
+  },
+  "recommendations": []
+}

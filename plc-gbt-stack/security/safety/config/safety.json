@@ -1,0 +1,97 @@
+{
+  "safety_system": {
+    "name": "PLC-GPT Industrial Safety Interlocks",
+    "version": "1.0.0",
+    "compliance_standards": ["IEC 61508", "IEC 61511", "ISA-95"],
+    "safety_integrity_level": "SIL-2"
+  },
+  "approval_policies": {
+    "routine": {
+      "required_approvers": 1,
+      "approval_timeout": 1800,
+      "safety_score_threshold": 70,
+      "approver_roles": ["control_engineer", "automation_engineer"]
+    },
+    "maintenance": {
+      "required_approvers": 2,
+      "approval_timeout": 3600,
+      "safety_score_threshold": 80,
+      "approver_roles": ["control_engineer", "safety_engineer"]
+    },
+    "safety_configuration": {
+      "required_approvers": 3,
+      "approval_timeout": 7200,
+      "safety_score_threshold": 95,
+      "approver_roles": ["control_engineer", "safety_engineer", "plant_manager"]
+    },
+    "critical": {
+      "required_approvers": 3,
+      "approval_timeout": 7200,
+      "safety_score_threshold": 95,
+      "approver_roles": ["control_engineer", "safety_engineer", "plant_manager"],
+      "require_guardlogix_signature": true
+    }
+  },
+  "safety_rules": {
+    "emergency_stop": {
+      "rule_id": "SAFETY_001",
+      "description": "Emergency stop functionality validation",
+      "severity": "critical",
+      "required_keywords": ["emergency", "stop", "e_stop"],
+      "weight": 25
+    },
+    "safety_interlocks": {
+      "rule_id": "SAFETY_002",
+      "description": "Safety interlock validation",
+      "severity": "high",
+      "required_keywords": ["interlock", "safety", "permit", "enable"],
+      "weight": 20
+    },
+    "fail_safe": {
+      "rule_id": "SAFETY_003",
+      "description": "Fail-safe behavior validation",
+      "severity": "critical",
+      "required_keywords": ["fail", "safe", "default", "fallback"],
+      "weight": 25
+    },
+    "redundancy": {
+      "rule_id": "SAFETY_004",
+      "description": "System redundancy validation",
+      "severity": "high",
+      "required_keywords": ["redundant", "backup", "secondary", "alternate"],
+      "weight": 15
+    },
+    "watchdog": {
+      "rule_id": "SAFETY_005",
+      "description": "Watchdog timer validation",
+      "severity": "medium",
+      "required_keywords": ["watchdog", "timer", "timeout", "monitor"],
+      "weight": 15
+    }
+  },
+  "guardlogix": {
+    "enabled": true,
+    "certificate_path": "/app/certs/guardlogix",
+    "signature_validity": 86400,
+    "required_safety_level": "SIL-2"
+  },
+  "notifications": {
+    "email": {
+      "enabled": false,
+      "smtp_server": "smtp.company.com",
+      "smtp_port": 587,
+      "sender": "plc-safety@company.com"
+    },
+    "slack": {
+      "enabled": false,
+      "webhook_url": "",
+      "channel": "#plc-safety"
+    }
+  },
+  "audit": {
+    "enabled": true,
+    "log_path": "/app/logs/safety_audit.log",
+    "retention_days": 365,
+    "log_level": "INFO"
+  }
+} 

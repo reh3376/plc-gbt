@@ -1,0 +1,105 @@
+{
+  "session_info": {
+    "session_id": "still01_bf_pid_analysis_1752528726",
+    "dataset_path": "/Users/reh3376/repos/plc-gbt/docs/data/still01-bf-pid.csv",
+    "analysis_timestamp": "2025-07-14T17:32:07.766499",
+    "data_points": 2099,
+    "time_span_minutes": 174.91666666666666
+  },
+  "pid_configuration": {
+    "kp": 0.625,
+    "ki": 0.0235,
+    "kd": 0.0012,
+    "update_rate_ms": 750,
+    "control_action": "SP - PV",
+    "equation_form": "Independent"
+  },
+  "performance_metrics": {
+    "control_loop_type": "Flow Control (Volume Flow)",
+    "pid_configuration": {
+      "kp": 0.625,
+      "ki": 0.0235,
+      "kd": 0.0012,
+      "update_rate_ms": 750,
+      "control_action": "SP - PV",
+      "equation_form": "Independent"
+    },
+    "process_variables": {
+      "sp_range": {
+        "min": 70.55,
+        "max": 70.55,
+        "mean": 70.55
+      },
+      "pv_range": {
+        "min": 80.256355,
+        "max": 86.71563,
+        "mean": 83.02589504882792
+      },
+      "cv_range": {
+        "min": 41.782786,
+        "max": 51.412504,
+        "mean": 47.25367540638399
+      },
+      "error_stats": {
+        "mean": -12.475895048827923,
+        "std": 0.7662827252997492,
+        "rms": 12.499405845257678,
+        "max_abs": 16.165630000000007
+      }
+    },
+    "performance_indicators": {
+      "iae": 130934.51853744904,
+      "ise": 1639687.862354427,
+      "itae": 137225603.0292737,
+      "tracking_accuracy": 82.3162366423417,
+      "control_effort": 3.4419280338088702,
+      "steady_state_error": -12.447571867258004
+    }
+  },
+  "control_loop_behavior": {
+    "stability_analysis": {
+      "oscillation_detected": {
+        "oscillation_rate_percent": 0.0,
+        "is_oscillating": false,
+        "zero_crossings": 0
+      },
+      "control_effort_variability": 3.4419280338088702,
+      "error_variance": 0.5871892150928109,
+      "settling_behavior": {
+        "settling_time_minutes": 0.3333333333333333,
+        "is_settled": true,
+        "settling_threshold": 0.03831413626498746
+      }
+    },
+    "performance_characteristics": {
+      "response_time": 0.75,
+      "overshoot": 22.91372076541461,
+      "steady_state_accuracy": 12.493678888644288
+    },
+    "disturbance_rejection": {
+      "disturbance_correlation": {
+        "correlation": -0.021567427019269735,
+        "analysis": "Weak correlation"
+      },
+      "recovery_time": 0.0
+    }
+  },
+  "recommendations": [
+    {
+      "category": "Performance",
+      "priority": "High",
+      "issue": "Low tracking accuracy: 82.3%",
+      "recommendation": "Consider increasing proportional gain (Kp) for better tracking",
+      "current_kp": 0.625,
+      "suggested_kp_range": "0.750 - 0.938"
+    },
+    {
+      "category": "Steady State",
+      "priority": "Medium",
+      "issue": "Steady-state error: 12.448 GPM",
+      "recommendation": "Consider increasing integral gain (Ki) to eliminate steady-state error",
+      "current_ki": 0.0235,
+      "suggested_ki_range": "0.0259 - 0.0306"
+    }
+  ]
+}
