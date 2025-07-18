@@ -1,0 +1,765 @@
+{
+  "total_tests": 32,
+  "passed_tests": 28,
+  "failed_tests": 4,
+  "methods": {
+    "Ziegler-Nichols Ultimate Gain": {
+      "passed": 4,
+      "failed": 0,
+      "success_rate": 100.0,
+      "avg_execution_time": 1.2516975402832031e-05,
+      "errors": [],
+      "detailed_results": [
+        {
+          "method": "Ziegler-Nichols Ultimate Gain",
+          "parameters": {
+            "Kp": 2.52,
+            "Ti": 4.0,
+            "Td": 1.0
+          },
+          "execution_time": 3.0040740966796875e-05,
+          "performance": {
+            "predicted_overshoot_percent": 25.0,
+            "predicted_settling_time": 32.0,
+            "predicted_rise_time": 2.8,
+            "performance_index": 0.09999999999999998,
+            "damping_ratio": 0.3
+          },
+          "stability": {
+            "gain_margin": 1.6666666666666667,
+            "gain_margin_db": 4.436974992327128,
+            "phase_margin_deg": 30.0,
+            "stable": "False",
+            "robustness_level": "low"
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Ziegler-Nichols Ultimate Gain",
+          "parameters": {
+            "Kp": 3.6599999999999997,
+            "Ti": 2.6,
+            "Td": 0.65
+          },
+          "execution_time": 8.344650268554688e-06,
+          "performance": {
+            "predicted_overshoot_percent": 25.0,
+            "predicted_settling_time": 20.8,
+            "predicted_rise_time": 1.8199999999999998,
+            "performance_index": 0.09999999999999998,
+            "damping_ratio": 0.3
+          },
+          "stability": {
+            "gain_margin": 1.6666666666666667,
+            "gain_margin_db": 4.436974992327128,
+            "phase_margin_deg": 30.0,
+            "stable": "False",
+            "robustness_level": "low"
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Ziegler-Nichols Ultimate Gain",
+          "parameters": {
+            "Kp": 0.5599999999999999,
+            "Ti": 7.8,
+            "Td": 5.148
+          },
+          "execution_time": 5.9604644775390625e-06,
+          "performance": {
+            "predicted_overshoot_percent": 0.0,
+            "predicted_settling_time": 124.8,
+            "predicted_rise_time": 15.6,
+            "performance_index": 0.20000000000000007,
+            "damping_ratio": 0.7
+          },
+          "stability": {
+            "gain_margin": 5.0,
+            "gain_margin_db": 13.979400086720377,
+            "phase_margin_deg": 30.0,
+            "stable": true,
+            "robustness_level": "high"
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Ziegler-Nichols Ultimate Gain",
+          "parameters": {
+            "Kp": 1.155,
+            "Ti": 10.0,
+            "Td": 6.6000000000000005
+          },
+          "execution_time": 5.7220458984375e-06,
+          "performance": {
+            "predicted_overshoot_percent": 10.0,
+            "predicted_settling_time": 120.0,
+            "predicted_rise_time": 10.0,
+            "performance_index": 0.20000000000000007,
+            "damping_ratio": 0.3
+          },
+          "stability": {
+            "gain_margin": 3.0303030303030303,
+            "gain_margin_db": 9.629721202442251,
+            "phase_margin_deg": 30.0,
+            "stable": true,
+            "robustness_level": "medium"
+          },
+          "confidence": 0.85
+        }
+      ]
+    },
+    "Ziegler-Nichols Process Reaction": {
+      "passed": 4,
+      "failed": 0,
+      "success_rate": 100.0,
+      "avg_execution_time": 7.331371307373047e-06,
+      "errors": [],
+      "detailed_results": [
+        {
+          "method": "Ziegler-Nichols Process Reaction",
+          "parameters": {
+            "Kp": 2.4,
+            "Ti": 2.0,
+            "Td": 0.5
+          },
+          "execution_time": 1.1205673217773438e-05,
+          "performance": {
+            "predicted_overshoot_percent": 30.0,
+            "predicted_settling_time": 24.0,
+            "predicted_rise_time": 6.0,
+            "performance_index": 0.5,
+            "lt_ratio": 0.2
+          },
+          "stability": {
+            "lt_ratio": 0.2,
+            "stability_level": "medium",
+            "gain_margin": 0.16666666666666666,
+            "gain_margin_db": -15.563025007672874,
+            "phase_margin_deg": 48.54,
+            "stable": "False"
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Ziegler-Nichols Process Reaction",
+          "parameters": {
+            "Kp": 3.9999999999999996,
+            "Ti": 1.0,
+            "Td": 0.25
+          },
+          "execution_time": 5.9604644775390625e-06,
+          "performance": {
+            "predicted_overshoot_percent": 29.166666666666668,
+            "predicted_settling_time": 14.0,
+            "predicted_rise_time": 3.5,
+            "performance_index": 0.5416666666666667,
+            "lt_ratio": 0.16666666666666666
+          },
+          "stability": {
+            "lt_ratio": 0.16666666666666666,
+            "stability_level": "medium",
+            "gain_margin": 0.1388888888888889,
+            "gain_margin_db": -17.14664992862537,
+            "phase_margin_deg": 50.45,
+            "stable": "False"
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Ziegler-Nichols Process Reaction",
+          "parameters": {
+            "Kp": 0.6666666666666667,
+            "Ti": 24.0,
+            "Td": 6.0
+          },
+          "execution_time": 6.198883056640625e-06,
+          "performance": {
+            "predicted_overshoot_percent": 0.0,
+            "predicted_settling_time": 112.0,
+            "predicted_rise_time": 28.0,
+            "performance_index": 0.25,
+            "lt_ratio": 0.75
+          },
+          "stability": {
+            "lt_ratio": 0.75,
+            "stability_level": "low",
+            "gain_margin": 1.25,
+            "gain_margin_db": 1.9382002601611283,
+            "phase_margin_deg": 17.025000000000006,
+            "stable": "False"
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Ziegler-Nichols Process Reaction",
+          "parameters": {
+            "Kp": 1.08,
+            "Ti": 7.5,
+            "Td": 1.25
+          },
+          "execution_time": 5.9604644775390625e-06,
+          "performance": {
+            "predicted_overshoot_percent": 12.083333333333332,
+            "predicted_settling_time": 87.0,
+            "predicted_rise_time": 21.75,
+            "performance_index": 0.6708333333333333,
+            "lt_ratio": 0.20833333333333334
+          },
+          "stability": {
+            "lt_ratio": 0.20833333333333334,
+            "stability_level": "medium",
+            "gain_margin": 0.23148148148148145,
+            "gain_margin_db": -12.709674936298242,
+            "phase_margin_deg": 48.0625,
+            "stable": "False"
+          },
+          "confidence": 0.85
+        }
+      ]
+    },
+    "Cohen-Coon": {
+      "passed": 4,
+      "failed": 0,
+      "success_rate": 100.0,
+      "avg_execution_time": 9.5367431640625e-06,
+      "errors": [],
+      "detailed_results": [
+        {
+          "method": "Cohen-Coon",
+          "parameters": {
+            "Kp": 14.000000000000002,
+            "Ti": 2.62,
+            "Td": 0.296
+          },
+          "execution_time": 1.5020370483398438e-05,
+          "performance": {
+            "predicted_overshoot_percent": 16.5,
+            "predicted_settling_time": 30.0,
+            "predicted_rise_time": 7.199999999999999,
+            "predicted_iae": 11.399999999999999,
+            "performance_index": 0,
+            "damping_ratio": 0.6399999999999999,
+            "lt_ratio_impact": 0.2
+          },
+          "stability": {
+            "gain_margin": 0.028571428571428567,
+            "gain_margin_db": -30.881360887005513,
+            "phase_margin_deg": 39.0,
+            "robustness_level": "low",
+            "stable": "False",
+            "lt_ratio": 0.2,
+            "open_loop_gain": 35.00000000000001
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Cohen-Coon",
+          "parameters": {
+            "Kp": 13.916666666666668,
+            "Ti": 1.3,
+            "Td": 0.15416666666666667
+          },
+          "execution_time": 9.298324584960938e-06,
+          "performance": {
+            "predicted_overshoot_percent": 16.25,
+            "predicted_settling_time": 17.5,
+            "predicted_rise_time": 4.2,
+            "predicted_iae": 6.416666666666666,
+            "performance_index": 0,
+            "damping_ratio": 0.6499999999999999,
+            "lt_ratio_impact": 0.16666666666666666
+          },
+          "stability": {
+            "gain_margin": 0.039920159680638716,
+            "gain_margin_db": -27.976154604065293,
+            "phase_margin_deg": 40.0,
+            "robustness_level": "low",
+            "stable": "False",
+            "lt_ratio": 0.16666666666666666,
+            "open_loop_gain": 25.050000000000004
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Cohen-Coon",
+          "parameters": {
+            "Kp": 10.222222222222223,
+            "Ti": 21.6,
+            "Td": 0.45000000000000007
+          },
+          "execution_time": 6.9141387939453125e-06,
+          "performance": {
+            "predicted_overshoot_percent": 6.875,
+            "predicted_settling_time": 98.0,
+            "predicted_rise_time": 28.0,
+            "predicted_iae": 42.0,
+            "performance_index": 0,
+            "damping_ratio": 0.475,
+            "lt_ratio_impact": 0.75
+          },
+          "stability": {
+            "gain_margin": 0.08152173913043478,
+            "gain_margin_db": -21.774531279077106,
+            "phase_margin_deg": 22.5,
+            "robustness_level": "low",
+            "stable": "False",
+            "lt_ratio": 0.75,
+            "open_loop_gain": 12.266666666666667
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Cohen-Coon",
+          "parameters": {
+            "Kp": 25.379999999999995,
+            "Ti": 5.208333333333334,
+            "Td": 0.7916666666666666
+          },
+          "execution_time": 6.9141387939453125e-06,
+          "performance": {
+            "predicted_overshoot_percent": 27.604166666666668,
+            "predicted_settling_time": 58.0,
+            "predicted_rise_time": 11.600000000000001,
+            "predicted_iae": 27.791666666666668,
+            "performance_index": 0,
+            "damping_ratio": 0.6375,
+            "lt_ratio_impact": 0.20833333333333334
+          },
+          "stability": {
+            "gain_margin": 0.009850275807722618,
+            "gain_margin_db": -40.13103218173296,
+            "phase_margin_deg": 38.75,
+            "robustness_level": "low",
+            "stable": "False",
+            "lt_ratio": 0.20833333333333334,
+            "open_loop_gain": 101.51999999999998
+          },
+          "confidence": 0.85
+        }
+      ]
+    },
+    "Tyreus-Luyben": {
+      "passed": 4,
+      "failed": 0,
+      "success_rate": 100.0,
+      "avg_execution_time": 1.1265277862548828e-05,
+      "errors": [],
+      "detailed_results": [
+        {
+          "method": "Tyreus-Luyben",
+          "parameters": {
+            "Kp": 1.3125,
+            "Ti": 17.6,
+            "Td": 1.2698412698412698
+          },
+          "execution_time": 1.5974044799804688e-05,
+          "performance": {
+            "predicted_overshoot_percent": 10.0,
+            "predicted_settling_time": 48.0,
+            "predicted_rise_time": 16.0,
+            "performance_index": 0.68,
+            "damping_ratio": 0.9,
+            "control_effort_factor": 0.6,
+            "oscillation_tendency": "low",
+            "robustness_vs_speed_ratio": 5.4
+          },
+          "stability": {
+            "gain_margin": 3.2,
+            "gain_margin_db": 10.102999566398122,
+            "phase_margin_deg": 50.0,
+            "stable": true,
+            "stability_class": "stable",
+            "bandwidth_ratio": 0.125,
+            "oscillation_tendency": "low"
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Tyreus-Luyben",
+          "parameters": {
+            "Kp": 1.9062499999999998,
+            "Ti": 11.440000000000001,
+            "Td": 0.8253968253968255
+          },
+          "execution_time": 1.1920928955078125e-05,
+          "performance": {
+            "predicted_overshoot_percent": 10.0,
+            "predicted_settling_time": 31.200000000000003,
+            "predicted_rise_time": 10.4,
+            "performance_index": 0.68,
+            "damping_ratio": 0.9,
+            "control_effort_factor": 0.6,
+            "oscillation_tendency": "low",
+            "robustness_vs_speed_ratio": 5.4
+          },
+          "stability": {
+            "gain_margin": 3.2,
+            "gain_margin_db": 10.102999566398122,
+            "phase_margin_deg": 50.0,
+            "stable": true,
+            "stability_class": "stable",
+            "bandwidth_ratio": 0.1923076923076923,
+            "oscillation_tendency": "low"
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Tyreus-Luyben",
+          "parameters": {
+            "Kp": 0.8749999999999999,
+            "Ti": 34.32,
+            "Td": 2.4761904761904763
+          },
+          "execution_time": 9.059906005859375e-06,
+          "performance": {
+            "predicted_overshoot_percent": 10.0,
+            "predicted_settling_time": 93.6,
+            "predicted_rise_time": 31.2,
+            "performance_index": 0.68,
+            "damping_ratio": 0.9,
+            "control_effort_factor": 0.6,
+            "oscillation_tendency": "low",
+            "robustness_vs_speed_ratio": 5.4
+          },
+          "stability": {
+            "gain_margin": 3.2,
+            "gain_margin_db": 10.102999566398122,
+            "phase_margin_deg": 50.0,
+            "stable": true,
+            "stability_class": "stable",
+            "bandwidth_ratio": 0.06410256410256411,
+            "oscillation_tendency": "low"
+          },
+          "confidence": 0.85
+        },
+        {
+          "method": "Tyreus-Luyben",
+          "parameters": {
+            "Kp": 1.09375,
+            "Ti": 44.0,
+            "Td": 3.174603174603175
+          },
+          "execution_time": 8.106231689453125e-06,
+          "performance": {
+            "predicted_overshoot_percent": 10.0,
+            "predicted_settling_time": 120.0,
+            "predicted_rise_time": 40.0,
+            "performance_index": 0.68,
+            "damping_ratio": 0.9,
+            "control_effort_factor": 0.6,
+            "oscillation_tendency": "low",
+            "robustness_vs_speed_ratio": 5.4
+          },
+          "stability": {
+            "gain_margin": 3.2,
+            "gain_margin_db": 10.102999566398122,
+            "phase_margin_deg": 50.0,
+            "stable": true,
+            "stability_class": "stable",
+            "bandwidth_ratio": 0.05,
+            "oscillation_tendency": "low"
+          },
+          "confidence": 0.85
+        }
+      ]
+    },
+    "\u00c5str\u00f6m-H\u00e4gglund": {
+      "passed": 4,
+      "failed": 0,
+      "success_rate": 100.0,
+      "avg_execution_time": 9.357929229736328e-06,
+      "errors": [],
+      "detailed_results": [
+        {
+          "method": "\u00c5str\u00f6m-H\u00e4gglund",
+          "parameters": {
+            "Kp": 1.8900000000000001,
+            "Ti": 6.8,
+            "Td": 1.2
+          },
+          "execution_time": 1.5735626220703125e-05,
+          "performance": {},
+          "stability": {},
+          "confidence": 0.85
+        },
+        {
+          "method": "\u00c5str\u00f6m-H\u00e4gglund",
+          "parameters": {
+            "Kp": 2.745,
+            "Ti": 4.42,
+            "Td": 0.78
+          },
+          "execution_time": 8.106231689453125e-06,
+          "performance": {},
+          "stability": {},
+          "confidence": 0.85
+        },
+        {
+          "method": "\u00c5str\u00f6m-H\u00e4gglund",
+          "parameters": {
+            "Kp": 1.26,
+            "Ti": 13.26,
+            "Td": 2.34
+          },
+          "execution_time": 7.3909759521484375e-06,
+          "performance": {},
+          "stability": {},
+          "confidence": 0.85
+        },
+        {
+          "method": "\u00c5str\u00f6m-H\u00e4gglund",
+          "parameters": {
+            "Kp": 1.575,
+            "Ti": 17.0,
+            "Td": 3.0
+          },
+          "execution_time": 6.198883056640625e-06,
+          "performance": {},
+          "stability": {},
+          "confidence": 0.85
+        }
+      ]
+    },
+    "Chien-Hrones-Reswick": {
+      "passed": 4,
+      "failed": 0,
+      "success_rate": 100.0,
+      "avg_execution_time": 3.6776065826416016e-05,
+      "errors": [],
+      "detailed_results": [
+        {
+          "method": "Chien-Hrones-Reswick",
+          "parameters": {
+            "Kp": 1.9,
+            "Ti": 1.4,
+            "Td": 0.47
+          },
+          "execution_time": 6.985664367675781e-05,
+          "performance": {
+            "predicted_overshoot_percent": 20.0,
+            "predicted_settling_time": 30.0,
+            "predicted_rise_time": 9.0,
+            "predicted_iae": 8.639999999999999,
+            "performance_index": 0.875,
+            "damping_ratio": 0.45,
+            "optimization_target": "twenty_percent_overshoot"
+          },
+          "stability": {},
+          "confidence": 0.85
+        },
+        {
+          "method": "Chien-Hrones-Reswick",
+          "parameters": {
+            "Kp": 3.166666666666666,
+            "Ti": 0.7,
+            "Td": 0.235
+          },
+          "execution_time": 2.9087066650390625e-05,
+          "performance": {
+            "predicted_overshoot_percent": 20.0,
+            "predicted_settling_time": 17.5,
+            "predicted_rise_time": 5.25,
+            "predicted_iae": 4.9,
+            "performance_index": 0.875,
+            "damping_ratio": 0.45,
+            "optimization_target": "twenty_percent_overshoot"
+          },
+          "stability": {},
+          "confidence": 0.85
+        },
+        {
+          "method": "Chien-Hrones-Reswick",
+          "parameters": {
+            "Kp": 1.3333333333333335,
+            "Ti": 12.0,
+            "Td": 2.52
+          },
+          "execution_time": 2.4080276489257812e-05,
+          "performance": {
+            "predicted_overshoot_percent": 20.0,
+            "predicted_settling_time": 70.0,
+            "predicted_rise_time": 21.0,
+            "predicted_iae": 29.400000000000002,
+            "performance_index": 0.875,
+            "damping_ratio": 0.45,
+            "optimization_target": "twenty_percent_overshoot"
+          },
+          "stability": {},
+          "confidence": 0.85
+        },
+        {
+          "method": "Chien-Hrones-Reswick",
+          "parameters": {
+            "Kp": 1.14,
+            "Ti": 3.5,
+            "Td": 1.1749999999999998
+          },
+          "execution_time": 2.4080276489257812e-05,
+          "performance": {
+            "predicted_overshoot_percent": 20.0,
+            "predicted_settling_time": 72.5,
+            "predicted_rise_time": 21.75,
+            "predicted_iae": 21.025,
+            "performance_index": 0.875,
+            "damping_ratio": 0.45,
+            "optimization_target": "twenty_percent_overshoot"
+          },
+          "stability": {},
+          "confidence": 0.85
+        }
+      ]
+    },
+    "Lambda Tuning": {
+      "passed": 4,
+      "failed": 0,
+      "success_rate": 100.0,
+      "avg_execution_time": 5.137920379638672e-05,
+      "errors": [],
+      "detailed_results": [
+        {
+          "method": "Lambda Tuning",
+          "parameters": {
+            "Kp": 0.3333333333333333,
+            "Ti": 5.0,
+            "Td": 0.8333333333333334
+          },
+          "execution_time": 9.107589721679688e-05,
+          "performance": {
+            "predicted_rise_time": 13.200000000000001,
+            "predicted_settling_time": 24.0,
+            "predicted_overshoot_percent": 0,
+            "predicted_iae": 10.2,
+            "performance_index": 0.95,
+            "damping_ratio": 1.25,
+            "control_effort_factor": 0.7,
+            "response_type": "overdamped",
+            "smooth_response": true
+          },
+          "stability": {},
+          "confidence": 0.85
+        },
+        {
+          "method": "Lambda Tuning",
+          "parameters": {
+            "Kp": 0.4761904761904762,
+            "Ti": 3.0,
+            "Td": 0.42857142857142855
+          },
+          "execution_time": 4.315376281738281e-05,
+          "performance": {
+            "predicted_rise_time": 7.700000000000001,
+            "predicted_settling_time": 14.0,
+            "predicted_overshoot_percent": 0,
+            "predicted_iae": 5.95,
+            "performance_index": 0.9571428571428571,
+            "damping_ratio": 1.25,
+            "control_effort_factor": 0.7,
+            "response_type": "overdamped",
+            "smooth_response": true
+          },
+          "stability": {},
+          "confidence": 0.85
+        },
+        {
+          "method": "Lambda Tuning",
+          "parameters": {
+            "Kp": 0.4444444444444444,
+            "Ti": 8.0,
+            "Td": 3.2
+          },
+          "execution_time": 3.600120544433594e-05,
+          "performance": {
+            "predicted_rise_time": 33.0,
+            "predicted_settling_time": 60.0,
+            "predicted_overshoot_percent": 0,
+            "predicted_iae": 24.675,
+            "performance_index": 0.86,
+            "damping_ratio": 1.28125,
+            "control_effort_factor": 0.7,
+            "response_type": "overdamped",
+            "smooth_response": true
+          },
+          "stability": {},
+          "confidence": 0.85
+        },
+        {
+          "method": "Lambda Tuning",
+          "parameters": {
+            "Kp": 0.20689655172413793,
+            "Ti": 12.0,
+            "Td": 2.0689655172413794
+          },
+          "execution_time": 3.528594970703125e-05,
+          "performance": {
+            "predicted_rise_time": 31.900000000000002,
+            "predicted_settling_time": 58.0,
+            "predicted_overshoot_percent": 0,
+            "predicted_iae": 24.65,
+            "performance_index": 0.9482758620689655,
+            "damping_ratio": 1.25,
+            "control_effort_factor": 0.7,
+            "response_type": "overdamped",
+            "smooth_response": true
+          },
+          "stability": {},
+          "confidence": 0.85
+        }
+      ]
+    },
+    "Classical Manager": {
+      "passed": 0,
+      "failed": 4,
+      "success_rate": 0.0,
+      "avg_execution_time": 2.9802322387695312e-06,
+      "errors": [
+        "Classical tuning methods not available",
+        "Classical tuning methods not available",
+        "Classical tuning methods not available",
+        "Classical tuning methods not available"
+      ],
+      "detailed_results": [
+        {},
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "execution_times": [
+    3.0040740966796875e-05,
+    8.344650268554688e-06,
+    5.9604644775390625e-06,
+    5.7220458984375e-06,
+    1.1205673217773438e-05,
+    5.9604644775390625e-06,
+    6.198883056640625e-06,
+    5.9604644775390625e-06,
+    1.5020370483398438e-05,
+    9.298324584960938e-06,
+    6.9141387939453125e-06,
+    6.9141387939453125e-06,
+    1.5974044799804688e-05,
+    1.1920928955078125e-05,
+    9.059906005859375e-06,
+    8.106231689453125e-06,
+    1.5735626220703125e-05,
+    8.106231689453125e-06,
+    7.3909759521484375e-06,
+    6.198883056640625e-06,
+    6.985664367675781e-05,
+    2.9087066650390625e-05,
+    2.4080276489257812e-05,
+    2.4080276489257812e-05,
+    9.107589721679688e-05,
+    4.315376281738281e-05,
+    3.600120544433594e-05,
+    3.528594970703125e-05,
+    5.7220458984375e-06,
+    2.1457672119140625e-06,
+    1.9073486328125e-06,
+    2.1457672119140625e-06
+  ],
+  "validation_score": 87.5,
+  "timestamp": "2025-07-18T13:55:17.026782",
+  "production_ready": true
+}

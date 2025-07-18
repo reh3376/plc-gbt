@@ -1,0 +1,187 @@
+{
+  "total_tests": 32,
+  "passed_tests": 0,
+  "failed_tests": 32,
+  "methods": {
+    "Ziegler-Nichols Ultimate Gain": {
+      "passed": 0,
+      "failed": 4,
+      "success_rate": 0.0,
+      "avg_execution_time": 2.5033950805664062e-06,
+      "errors": [
+        "Ziegler-Nichols Ultimate Gain test failed: 'ZieglerNicholsUltimateGain' object has no attribute 'tune'",
+        "Ziegler-Nichols Ultimate Gain test failed: 'ZieglerNicholsUltimateGain' object has no attribute 'tune'",
+        "Ziegler-Nichols Ultimate Gain test failed: 'ZieglerNicholsUltimateGain' object has no attribute 'tune'",
+        "Ziegler-Nichols Ultimate Gain test failed: 'ZieglerNicholsUltimateGain' object has no attribute 'tune'"
+      ],
+      "detailed_results": [
+        {},
+        {},
+        {},
+        {}
+      ]
+    },
+    "Ziegler-Nichols Process Reaction": {
+      "passed": 0,
+      "failed": 4,
+      "success_rate": 0.0,
+      "avg_execution_time": 1.8477439880371094e-06,
+      "errors": [
+        "Ziegler-Nichols Process Reaction test failed: 'ZieglerNicholsProcessReaction' object has no attribute 'tune'",
+        "Ziegler-Nichols Process Reaction test failed: 'ZieglerNicholsProcessReaction' object has no attribute 'tune'",
+        "Ziegler-Nichols Process Reaction test failed: 'ZieglerNicholsProcessReaction' object has no attribute 'tune'",
+        "Ziegler-Nichols Process Reaction test failed: 'ZieglerNicholsProcessReaction' object has no attribute 'tune'"
+      ],
+      "detailed_results": [
+        {},
+        {},
+        {},
+        {}
+      ]
+    },
+    "Cohen-Coon": {
+      "passed": 0,
+      "failed": 4,
+      "success_rate": 0.0,
+      "avg_execution_time": 1.6689300537109375e-06,
+      "errors": [
+        "Cohen-Coon test failed: 'CohenCoonTuner' object has no attribute 'tune'",
+        "Cohen-Coon test failed: 'CohenCoonTuner' object has no attribute 'tune'",
+        "Cohen-Coon test failed: 'CohenCoonTuner' object has no attribute 'tune'",
+        "Cohen-Coon test failed: 'CohenCoonTuner' object has no attribute 'tune'"
+      ],
+      "detailed_results": [
+        {},
+        {},
+        {},
+        {}
+      ]
+    },
+    "Tyreus-Luyben": {
+      "passed": 0,
+      "failed": 4,
+      "success_rate": 0.0,
+      "avg_execution_time": 1.7881393432617188e-06,
+      "errors": [
+        "Tyreus-Luyben test failed: 'TyreusLuybenTuner' object has no attribute 'tune'",
+        "Tyreus-Luyben test failed: 'TyreusLuybenTuner' object has no attribute 'tune'",
+        "Tyreus-Luyben test failed: 'TyreusLuybenTuner' object has no attribute 'tune'",
+        "Tyreus-Luyben test failed: 'TyreusLuybenTuner' object has no attribute 'tune'"
+      ],
+      "detailed_results": [
+        {},
+        {},
+        {},
+        {}
+      ]
+    },
+    "\u00c5str\u00f6m-H\u00e4gglund": {
+      "passed": 0,
+      "failed": 4,
+      "success_rate": 0.0,
+      "avg_execution_time": 1.4901161193847656e-06,
+      "errors": [
+        "\u00c5str\u00f6m-H\u00e4gglund test failed: 'AstromHagglundTuner' object has no attribute 'tune'",
+        "\u00c5str\u00f6m-H\u00e4gglund test failed: 'AstromHagglundTuner' object has no attribute 'tune'",
+        "\u00c5str\u00f6m-H\u00e4gglund test failed: 'AstromHagglundTuner' object has no attribute 'tune'",
+        "\u00c5str\u00f6m-H\u00e4gglund test failed: 'AstromHagglundTuner' object has no attribute 'tune'"
+      ],
+      "detailed_results": [
+        {},
+        {},
+        {},
+        {}
+      ]
+    },
+    "Chien-Hrones-Reswick": {
+      "passed": 0,
+      "failed": 4,
+      "success_rate": 0.0,
+      "avg_execution_time": 1.8477439880371094e-06,
+      "errors": [
+        "Chien-Hrones-Reswick test failed: 'ChienHronesReswickTuner' object has no attribute 'tune'",
+        "Chien-Hrones-Reswick test failed: 'ChienHronesReswickTuner' object has no attribute 'tune'",
+        "Chien-Hrones-Reswick test failed: 'ChienHronesReswickTuner' object has no attribute 'tune'",
+        "Chien-Hrones-Reswick test failed: 'ChienHronesReswickTuner' object has no attribute 'tune'"
+      ],
+      "detailed_results": [
+        {},
+        {},
+        {},
+        {}
+      ]
+    },
+    "Lambda Tuning": {
+      "passed": 0,
+      "failed": 4,
+      "success_rate": 0.0,
+      "avg_execution_time": 1.3113021850585938e-06,
+      "errors": [
+        "Lambda Tuning test failed: 'LambdaTuner' object has no attribute 'tune'",
+        "Lambda Tuning test failed: 'LambdaTuner' object has no attribute 'tune'",
+        "Lambda Tuning test failed: 'LambdaTuner' object has no attribute 'tune'",
+        "Lambda Tuning test failed: 'LambdaTuner' object has no attribute 'tune'"
+      ],
+      "detailed_results": [
+        {},
+        {},
+        {},
+        {}
+      ]
+    },
+    "Classical Manager": {
+      "passed": 0,
+      "failed": 4,
+      "success_rate": 0.0,
+      "avg_execution_time": 0.001,
+      "errors": [
+        "'ClassicalTuningManager' object has no attribute 'tune_all'",
+        "'ClassicalTuningManager' object has no attribute 'tune_all'",
+        "'ClassicalTuningManager' object has no attribute 'tune_all'",
+        "'ClassicalTuningManager' object has no attribute 'tune_all'"
+      ],
+      "detailed_results": [
+        {},
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "execution_times": [
+    6.198883056640625e-06,
+    2.1457672119140625e-06,
+    9.5367431640625e-07,
+    7.152557373046875e-07,
+    4.0531158447265625e-06,
+    1.1920928955078125e-06,
+    9.5367431640625e-07,
+    1.1920928955078125e-06,
+    3.0994415283203125e-06,
+    1.1920928955078125e-06,
+    1.1920928955078125e-06,
+    1.1920928955078125e-06,
+    3.0994415283203125e-06,
+    1.9073486328125e-06,
+    9.5367431640625e-07,
+    1.1920928955078125e-06,
+    2.86102294921875e-06,
+    9.5367431640625e-07,
+    9.5367431640625e-07,
+    1.1920928955078125e-06,
+    2.86102294921875e-06,
+    2.1457672119140625e-06,
+    1.1920928955078125e-06,
+    1.1920928955078125e-06,
+    2.1457672119140625e-06,
+    1.1920928955078125e-06,
+    9.5367431640625e-07,
+    9.5367431640625e-07,
+    0.001,
+    0.001,
+    0.001,
+    0.001
+  ],
+  "validation_score": 0.0,
+  "timestamp": "2025-07-18T13:51:38.700949"
+}

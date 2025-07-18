@@ -1,0 +1,472 @@
+{
+  "timestamp": "2025-07-18T15:15:10.538632",
+  "total_tests": 22,
+  "passed_tests": 17,
+  "failed_tests": 5,
+  "strategy_results": {
+    "MPC Tuning": {
+      "strategy_name": "MPC Tuning",
+      "total_tests": 2,
+      "passed_tests": 2,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": true,
+          "execution_time": 0.0012362003326416016,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": true,
+          "execution_time": 0.0010480880737304688,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0011421442031860352,
+      "performance_metrics": {}
+    },
+    "Economic MPC": {
+      "strategy_name": "Economic MPC",
+      "total_tests": 2,
+      "passed_tests": 2,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": true,
+          "execution_time": 0.0010280609130859375,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": true,
+          "execution_time": 0.0010056495666503906,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.001016855239868164,
+      "performance_metrics": {}
+    },
+    "Robust MPC": {
+      "strategy_name": "Robust MPC",
+      "total_tests": 2,
+      "passed_tests": 2,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": true,
+          "execution_time": 0.0010039806365966797,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": true,
+          "execution_time": 0.0010721683502197266,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0010380744934082031,
+      "performance_metrics": {}
+    },
+    "Hybrid MPC": {
+      "strategy_name": "Hybrid MPC",
+      "total_tests": 2,
+      "passed_tests": 2,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": true,
+          "execution_time": 0.0011258125305175781,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": true,
+          "execution_time": 0.0009949207305908203,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0010603666305541992,
+      "performance_metrics": {}
+    },
+    "Adaptive Controller": {
+      "strategy_name": "Adaptive Controller",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Time-Varying Flow Process",
+          "success": true,
+          "execution_time": 0.0042018890380859375,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0042018890380859375,
+      "performance_metrics": {}
+    },
+    "RLS Adaptive": {
+      "strategy_name": "RLS Adaptive",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Time-Varying Flow Process",
+          "success": true,
+          "execution_time": 0.0014417171478271484,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0014417171478271484,
+      "performance_metrics": {}
+    },
+    "Gradient Descent Adaptive": {
+      "strategy_name": "Gradient Descent Adaptive",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Time-Varying Flow Process",
+          "success": true,
+          "execution_time": 0.0004069805145263672,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0004069805145263672,
+      "performance_metrics": {}
+    },
+    "Gain Scheduler": {
+      "strategy_name": "Gain Scheduler",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Nonlinear Level Control",
+          "success": true,
+          "execution_time": 0.00043201446533203125,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.00043201446533203125,
+      "performance_metrics": {}
+    },
+    "Linear Gain Scheduler": {
+      "strategy_name": "Linear Gain Scheduler",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Nonlinear Level Control",
+          "success": true,
+          "execution_time": 0.00013685226440429688,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.00013685226440429688,
+      "performance_metrics": {}
+    },
+    "Fuzzy Gain Scheduler": {
+      "strategy_name": "Fuzzy Gain Scheduler",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Nonlinear Level Control",
+          "success": true,
+          "execution_time": 7.200241088867188e-05,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 7.200241088867188e-05,
+      "performance_metrics": {}
+    },
+    "Multi-Loop Coordinator": {
+      "strategy_name": "Multi-Loop Coordinator",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Multi-Loop Interacting System",
+          "success": true,
+          "execution_time": 0.0007839202880859375,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0007839202880859375,
+      "performance_metrics": {}
+    },
+    "Decentralized Coordinator": {
+      "strategy_name": "Decentralized Coordinator",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Multi-Loop Interacting System",
+          "success": true,
+          "execution_time": 0.00014400482177734375,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.00014400482177734375,
+      "performance_metrics": {}
+    },
+    "Centralized Coordinator": {
+      "strategy_name": "Centralized Coordinator",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Multi-Loop Interacting System",
+          "success": true,
+          "execution_time": 0.002609729766845703,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.002609729766845703,
+      "performance_metrics": {}
+    },
+    "Advanced Tuning Manager": {
+      "strategy_name": "Advanced Tuning Manager",
+      "total_tests": 5,
+      "passed_tests": 0,
+      "failed_tests": 5,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": false,
+          "execution_time": 0.0017712116241455078,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Time-Varying Flow Process",
+          "success": false,
+          "execution_time": 0.00023221969604492188,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Nonlinear Level Control",
+          "success": false,
+          "execution_time": 7.295608520507812e-05,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Multi-Loop Interacting System",
+          "success": false,
+          "execution_time": 8.082389831542969e-05,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": false,
+          "execution_time": 3.790855407714844e-05,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 0.0,
+      "average_execution_time": 0.0004390239715576172,
+      "performance_metrics": {}
+    }
+  },
+  "performance_summary": {
+    "best_performing_strategies": [
+      {
+        "strategy": "MPC Tuning",
+        "success_rate": 100.0,
+        "avg_execution_time": 0.0011421442031860352,
+        "tests_passed": 2,
+        "total_tests": 2
+      },
+      {
+        "strategy": "Economic MPC",
+        "success_rate": 100.0,
+        "avg_execution_time": 0.001016855239868164,
+        "tests_passed": 2,
+        "total_tests": 2
+      },
+      {
+        "strategy": "Robust MPC",
+        "success_rate": 100.0,
+        "avg_execution_time": 0.0010380744934082031,
+        "tests_passed": 2,
+        "total_tests": 2
+      }
+    ],
+    "total_execution_time": 0.014925575256347657,
+    "average_strategy_success_rate": 92.85714285714286,
+    "strategies_tested": 14,
+    "scenarios_tested": 5
+  },
+  "validation_score": 77.27272727272727,
+  "status": "GOOD"
+}

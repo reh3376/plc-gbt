@@ -1,0 +1,448 @@
+{
+  "timestamp": "2025-07-18T15:14:31.265432",
+  "total_tests": 22,
+  "passed_tests": 9,
+  "failed_tests": 13,
+  "strategy_results": {
+    "MPC Tuning": {
+      "strategy_name": "MPC Tuning",
+      "total_tests": 2,
+      "passed_tests": 0,
+      "failed_tests": 2,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": false,
+          "execution_time": 0.0019028186798095703,
+          "validation_details": {
+            "reason": "Strategy failed: name 'execution_time' is not defined"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": false,
+          "execution_time": 0.0010607242584228516,
+          "validation_details": {
+            "reason": "Strategy failed: name 'execution_time' is not defined"
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 0.0,
+      "average_execution_time": 0.001481771469116211,
+      "performance_metrics": {}
+    },
+    "Economic MPC": {
+      "strategy_name": "Economic MPC",
+      "total_tests": 2,
+      "passed_tests": 0,
+      "failed_tests": 2,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": false,
+          "execution_time": 0.001171112060546875,
+          "validation_details": {
+            "reason": "Strategy failed: name 'execution_time' is not defined"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": false,
+          "execution_time": 0.0011219978332519531,
+          "validation_details": {
+            "reason": "Strategy failed: name 'execution_time' is not defined"
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 0.0,
+      "average_execution_time": 0.001146554946899414,
+      "performance_metrics": {}
+    },
+    "Robust MPC": {
+      "strategy_name": "Robust MPC",
+      "total_tests": 2,
+      "passed_tests": 0,
+      "failed_tests": 2,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": false,
+          "execution_time": 0.001035928726196289,
+          "validation_details": {
+            "reason": "Strategy failed: name 'execution_time' is not defined"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": false,
+          "execution_time": 0.001071929931640625,
+          "validation_details": {
+            "reason": "Strategy failed: name 'execution_time' is not defined"
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 0.0,
+      "average_execution_time": 0.001053929328918457,
+      "performance_metrics": {}
+    },
+    "Hybrid MPC": {
+      "strategy_name": "Hybrid MPC",
+      "total_tests": 2,
+      "passed_tests": 0,
+      "failed_tests": 2,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": false,
+          "execution_time": 0.001013040542602539,
+          "validation_details": {
+            "reason": "Strategy failed: name 'execution_time' is not defined"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": false,
+          "execution_time": 0.001013040542602539,
+          "validation_details": {
+            "reason": "Strategy failed: name 'execution_time' is not defined"
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 0.0,
+      "average_execution_time": 0.001013040542602539,
+      "performance_metrics": {}
+    },
+    "Adaptive Controller": {
+      "strategy_name": "Adaptive Controller",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Time-Varying Flow Process",
+          "success": true,
+          "execution_time": 0.004519939422607422,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.004519939422607422,
+      "performance_metrics": {}
+    },
+    "RLS Adaptive": {
+      "strategy_name": "RLS Adaptive",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Time-Varying Flow Process",
+          "success": true,
+          "execution_time": 0.0015408992767333984,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0015408992767333984,
+      "performance_metrics": {}
+    },
+    "Gradient Descent Adaptive": {
+      "strategy_name": "Gradient Descent Adaptive",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Time-Varying Flow Process",
+          "success": true,
+          "execution_time": 0.00042700767517089844,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.00042700767517089844,
+      "performance_metrics": {}
+    },
+    "Gain Scheduler": {
+      "strategy_name": "Gain Scheduler",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Nonlinear Level Control",
+          "success": true,
+          "execution_time": 0.0004749298095703125,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0004749298095703125,
+      "performance_metrics": {}
+    },
+    "Linear Gain Scheduler": {
+      "strategy_name": "Linear Gain Scheduler",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Nonlinear Level Control",
+          "success": true,
+          "execution_time": 0.00019478797912597656,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.00019478797912597656,
+      "performance_metrics": {}
+    },
+    "Fuzzy Gain Scheduler": {
+      "strategy_name": "Fuzzy Gain Scheduler",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Nonlinear Level Control",
+          "success": true,
+          "execution_time": 7.486343383789062e-05,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 7.486343383789062e-05,
+      "performance_metrics": {}
+    },
+    "Multi-Loop Coordinator": {
+      "strategy_name": "Multi-Loop Coordinator",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Multi-Loop Interacting System",
+          "success": true,
+          "execution_time": 0.0008397102355957031,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0008397102355957031,
+      "performance_metrics": {}
+    },
+    "Decentralized Coordinator": {
+      "strategy_name": "Decentralized Coordinator",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Multi-Loop Interacting System",
+          "success": true,
+          "execution_time": 0.0001671314239501953,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0001671314239501953,
+      "performance_metrics": {}
+    },
+    "Centralized Coordinator": {
+      "strategy_name": "Centralized Coordinator",
+      "total_tests": 1,
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "test_details": [
+        {
+          "scenario": "Multi-Loop Interacting System",
+          "success": true,
+          "execution_time": 0.0027740001678466797,
+          "validation_details": {
+            "checks_performed": 3,
+            "issues_found": [],
+            "parameter_found": true,
+            "has_performance_metrics": true
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 100.0,
+      "average_execution_time": 0.0027740001678466797,
+      "performance_metrics": {}
+    },
+    "Advanced Tuning Manager": {
+      "strategy_name": "Advanced Tuning Manager",
+      "total_tests": 5,
+      "passed_tests": 0,
+      "failed_tests": 5,
+      "test_details": [
+        {
+          "scenario": "Single Loop Temperature Control",
+          "success": false,
+          "execution_time": 0.0020661354064941406,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Time-Varying Flow Process",
+          "success": false,
+          "execution_time": 0.00026226043701171875,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Nonlinear Level Control",
+          "success": false,
+          "execution_time": 7.390975952148438e-05,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Multi-Loop Interacting System",
+          "success": false,
+          "execution_time": 7.987022399902344e-05,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        },
+        {
+          "scenario": "Economic Optimization Process",
+          "success": false,
+          "execution_time": 3.910064697265625e-05,
+          "validation_details": {
+            "checks_performed": 4,
+            "issues_found": [
+              "No parameters found in result"
+            ],
+            "parameter_found": false,
+            "has_performance_metrics": true,
+            "reason": "No parameters found in result"
+          },
+          "error": null
+        }
+      ],
+      "success_rate": 0.0,
+      "average_execution_time": 0.0005042552947998047,
+      "performance_metrics": {}
+    }
+  },
+  "performance_summary": {
+    "best_performing_strategies": [
+      {
+        "strategy": "Adaptive Controller",
+        "success_rate": 100.0,
+        "avg_execution_time": 0.004519939422607422,
+        "tests_passed": 1,
+        "total_tests": 1
+      },
+      {
+        "strategy": "RLS Adaptive",
+        "success_rate": 100.0,
+        "avg_execution_time": 0.0015408992767333984,
+        "tests_passed": 1,
+        "total_tests": 1
+      },
+      {
+        "strategy": "Gradient Descent Adaptive",
+        "success_rate": 100.0,
+        "avg_execution_time": 0.00042700767517089844,
+        "tests_passed": 1,
+        "total_tests": 1
+      }
+    ],
+    "total_execution_time": 0.016212821006774902,
+    "average_strategy_success_rate": 64.28571428571429,
+    "strategies_tested": 14,
+    "scenarios_tested": 5
+  },
+  "validation_score": 40.909090909090914,
+  "status": "NEEDS IMPROVEMENT"
+}
