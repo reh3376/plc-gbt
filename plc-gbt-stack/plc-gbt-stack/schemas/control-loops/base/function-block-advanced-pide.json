@@ -1,0 +1,604 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-gbt.industrial.ai/schemas/function-block-advanced-pide.json",
+  "title": "Function Block Advanced PIDE Controller",
+  "description": "Advanced PIDE function block with comprehensive feature set and diagnostics",
+  "type": "object",
+  "properties": {
+    "tag_name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "Unique identifier for the control loop tag"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Human-readable description of the control loop"
+    },
+    "process_variable": {
+      "type": "object",
+      "properties": {
+        "tag_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Tag name for process variable input"
+        },
+        "engineering_units": {
+          "type": "string",
+          "enum": [
+            "Percent",
+            "PSI",
+            "Bar",
+            "Celsius",
+            "Fahrenheit",
+            "Kelvin",
+            "GPM",
+            "M3/H",
+            "LBS/H",
+            "KG/H",
+            "Volts",
+            "mA"
+          ],
+          "description": "Engineering units for process variable"
+        },
+        "range_min": {
+          "type": "number",
+          "description": "Minimum expected value for process variable"
+        },
+        "range_max": {
+          "type": "number",
+          "description": "Maximum expected value for process variable"
+        }
+      },
+      "required": [
+        "tag_name",
+        "engineering_units",
+        "range_min",
+        "range_max"
+      ],
+      "description": "Process variable configuration"
+    },
+    "setpoint": {
+      "type": "object",
+      "properties": {
+        "tag_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Tag name for setpoint input"
+        },
+        "value": {
+          "type": "number",
+          "description": "Current setpoint value"
+        },
+        "engineering_units": {
+          "type": "string",
+          "enum": [
+            "Percent",
+            "PSI",
+            "Bar",
+            "Celsius",
+            "Fahrenheit",
+            "Kelvin",
+            "GPM",
+            "M3/H",
+            "LBS/H",
+            "KG/H",
+            "Volts",
+            "mA"
+          ],
+          "description": "Engineering units for setpoint (must match PV units)"
+        },
+        "range_min": {
+          "type": "number",
+          "description": "Minimum allowable setpoint value"
+        },
+        "range_max": {
+          "type": "number",
+          "description": "Maximum allowable setpoint value"
+        }
+      },
+      "required": [
+        "tag_name",
+        "value",
+        "engineering_units",
+        "range_min",
+        "range_max"
+      ],
+      "description": "Setpoint configuration"
+    },
+    "control_output": {
+      "type": "object",
+      "properties": {
+        "tag_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Tag name for control output"
+        },
+        "engineering_units": {
+          "type": "string",
+          "enum": [
+            "Percent",
+            "PSI",
+            "Bar",
+            "Celsius",
+            "Fahrenheit",
+            "Kelvin",
+            "GPM",
+            "M3/H",
+            "LBS/H",
+            "KG/H",
+            "Volts",
+            "mA"
+          ],
+          "description": "Engineering units for control output"
+        },
+        "range_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum output value (typically 0-100%)"
+        },
+        "range_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Maximum output value (typically 0-100%)"
+        },
+        "initial_value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Initial output value on startup"
+        }
+      },
+      "required": [
+        "tag_name",
+        "engineering_units",
+        "range_min",
+        "range_max"
+      ],
+      "description": "Control output configuration"
+    },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Automatic",
+        "Cascade",
+        "Override",
+        "Program"
+      ],
+      "description": "Current control mode"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether the control loop is enabled"
+    },
+    "scan_time": {
+      "type": "number",
+      "minimum": 0.001,
+      "maximum": 60.0,
+      "description": "Controller execution scan time in seconds"
+    },
+    "advanced_pide_parameters": {
+      "type": "object",
+      "properties": {
+        "proportional_gain": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 999.9
+        },
+        "integral_gain": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 999.9
+        },
+        "derivative_gain": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 999.9
+        },
+        "lambda_tuning": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "closed_loop_time_constant": {
+              "type": "number",
+              "minimum": 0.1
+            }
+          }
+        },
+        "model_reference_tuning": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "process_gain": {
+              "type": "number"
+            },
+            "time_constant": {
+              "type": "number",
+              "minimum": 0.1
+            },
+            "dead_time": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "setpoint_weighting": {
+          "type": "object",
+          "properties": {
+            "proportional_weight": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "derivative_weight": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "filtering": {
+          "type": "object",
+          "properties": {
+            "pv_filter_time": {
+              "type": "number",
+              "minimum": 0
+            },
+            "derivative_filter_time": {
+              "type": "number",
+              "minimum": 0
+            },
+            "setpoint_filter_time": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "required": [
+        "proportional_gain",
+        "integral_gain",
+        "derivative_gain"
+      ],
+      "description": "Advanced PIDE parameter configuration"
+    },
+    "advanced_alarms": {
+      "type": "object",
+      "properties": {
+        "pv_high_alarm": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "number"
+            },
+            "deadband": {
+              "type": "number",
+              "minimum": 0
+            },
+            "delay": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "description": "Process variable high alarm configuration"
+        },
+        "pv_low_alarm": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "number"
+            },
+            "deadband": {
+              "type": "number",
+              "minimum": 0
+            },
+            "delay": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "description": "Process variable low alarm configuration"
+        },
+        "deviation_high_alarm": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "number",
+              "minimum": 0
+            },
+            "deadband": {
+              "type": "number",
+              "minimum": 0
+            },
+            "delay": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "description": "High deviation alarm configuration"
+        },
+        "deviation_low_alarm": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "number",
+              "minimum": 0
+            },
+            "deadband": {
+              "type": "number",
+              "minimum": 0
+            },
+            "delay": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "description": "Low deviation alarm configuration"
+        },
+        "output_high_alarm": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "deadband": {
+              "type": "number",
+              "minimum": 0
+            },
+            "delay": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "description": "Control output high alarm configuration"
+        },
+        "output_low_alarm": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "deadband": {
+              "type": "number",
+              "minimum": 0
+            },
+            "delay": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "description": "Control output low alarm configuration"
+        },
+        "controller_performance_alarms": {
+          "type": "object",
+          "properties": {
+            "poor_tuning_alarm": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "oscillation_threshold": {
+                  "type": "number"
+                },
+                "sluggish_response_threshold": {
+                  "type": "number"
+                }
+              }
+            },
+            "valve_stiction_alarm": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "detection_threshold": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Advanced alarm configuration"
+    },
+    "control_strategies": {
+      "type": "object",
+      "properties": {
+        "primary_strategy": {
+          "type": "string",
+          "enum": [
+            "pid",
+            "fuzzy",
+            "model_predictive",
+            "adaptive",
+            "neural_network"
+          ]
+        },
+        "strategy_parameters": {
+          "type": "object",
+          "properties": {
+            "fuzzy_logic": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "rule_base": {
+                  "type": "array"
+                },
+                "membership_functions": {
+                  "type": "object"
+                }
+              }
+            },
+            "model_predictive": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "prediction_horizon": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "control_horizon": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Multiple control strategies configuration"
+    },
+    "advanced_diagnostics": {
+      "type": "object",
+      "properties": {
+        "loop_performance_assessment": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "performance_index_calculation": {
+              "type": "boolean"
+            },
+            "minimum_variance_benchmarking": {
+              "type": "boolean"
+            },
+            "harris_index_calculation": {
+              "type": "boolean"
+            }
+          }
+        },
+        "oscillation_detection": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "detection_method": {
+              "type": "string",
+              "enum": [
+                "autocorrelation",
+                "power_spectral_density",
+                "zero_crossing"
+              ]
+            },
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "valve_diagnostics": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "stiction_detection": {
+              "type": "boolean"
+            },
+            "deadband_estimation": {
+              "type": "boolean"
+            },
+            "hysteresis_detection": {
+              "type": "boolean"
+            }
+          }
+        },
+        "process_model_identification": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "continuous_identification": {
+              "type": "boolean"
+            },
+            "model_validation": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "description": "Advanced diagnostic capabilities"
+    },
+    "multivariable_integration": {
+      "type": "object",
+      "properties": {
+        "decoupling_enabled": {
+          "type": "boolean"
+        },
+        "interaction_matrix": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "rga_analysis": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "pairing_recommendation": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "description": "Multi-variable control integration"
+    }
+  },
+  "required": [
+    "tag_name",
+    "process_variable",
+    "setpoint",
+    "control_output",
+    "advanced_pide_parameters",
+    "advanced_alarms",
+    "control_strategies",
+    "control_mode",
+    "enabled"
+  ],
+  "additionalProperties": false
+}

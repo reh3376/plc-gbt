@@ -1,0 +1,62 @@
+{
+  "session_id": "phase21_2_1752698881",
+  "phase": "21.2",
+  "component": "Schema Management Commands",
+  "timestamp": "2025-07-16T16:48:03.845988",
+  "overall_status": "FAILED",
+  "summary": {
+    "total_tests": 22,
+    "passed": 20,
+    "failed": 1,
+    "warnings": 1,
+    "skipped": 0,
+    "success_rate": 90.9090909090909,
+    "total_execution_time": 2.478123426437378,
+    "session_duration": 2.480378
+  },
+  "category_summaries": {
+    "schema_listing": {
+      "total": 4,
+      "passed": 4,
+      "success_rate": 100.0
+    },
+    "schema_creation": {
+      "total": 3,
+      "passed": 3,
+      "success_rate": 100.0
+    },
+    "schema_modification": {
+      "total": 3,
+      "passed": 3,
+      "success_rate": 100.0
+    },
+    "schema_validation": {
+      "total": 3,
+      "passed": 3,
+      "success_rate": 100.0
+    },
+    "cli_integration": {
+      "total": 3,
+      "passed": 2,
+      "success_rate": 66.66666666666666
+    },
+    "performance": {
+      "total": 2,
+      "passed": 2,
+      "success_rate": 100.0
+    },
+    "error_handling": {
+      "total": 2,
+      "passed": 1,
+      "success_rate": 50.0
+    },
+    "user_experience": {
+      "total": 2,
+      "passed": 2,
+      "success_rate": 100.0
+    }
+  },
+  "detailed_results": [
+    {
+      "test_id": "schema_list_basic",
+      "category": 

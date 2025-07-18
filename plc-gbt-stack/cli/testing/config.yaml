@@ -1,0 +1,320 @@
+# PLC-GBT CLI Testing Framework Configuration
+# ===========================================
+
+# Core CLI Settings
+cli_command: "plc-memory"
+timeout: 60
+memory_limit_mb: 1024
+performance_threshold: 0.2  # 20% degradation threshold
+parallel_tests: 4
+retry_count: 3
+
+# Output and Reporting
+results_dir: "./test_results"
+baselines_file: "performance_baselines.json"
+report_formats: ["json", "junit", "html"]
+enable_detailed_logging: true
+log_level: "INFO"
+
+# Test Execution Settings
+benchmark_iterations: 5
+test_timeout_scaling: 1.5  # Multiply base timeout by this factor
+enable_cleanup: true
+cleanup_on_failure: false
+
+# Test Environment Configuration
+test_environments:
+  - "development"
+  - "staging"
+  # - "production"  # Enable for production testing
+
+# Integration Test Settings
+integration_tests:
+  enable_plc_tests: false  # Requires real PLC connection
+  plc_host: "192.168.1.100"
+  plc_slot: 0
+  plc_timeout: 30
+  test_schemas:
+    - "basic"
+    - "pid-control"
+    - "data-acquisition"
+  test_instances: 3
+  instance_startup_timeout: 60
+  
+  # Test data configuration
+  test_data:
+    schema_count: 10
+    instance_count_per_schema: 3
+    batch_job_count: 5
+    max_test_duration: 300  # 5 minutes
+
+# Performance Testing
+performance_tests:
+  enable_benchmarks: true
+  baseline_update_mode: "auto"  # auto, manual, never
+  memory_profiling: true
+  cpu_profiling: true
+  
+  # Performance thresholds
+  thresholds:
+    max_schema_create_time: 5.0
+    max_instance_create_time: 10.0
+    max_memory_usage_mb: 512
+    max_cpu_percentage: 80
+    
+  # Benchmark categories
+  categories:
+    - name: "schema_operations"
+      operations:
+        - "schema_create"
+        - "schema_list"
+        - "schema_validate"
+        - "schema_export"
+        - "schema_import"
+    
+    - name: "instance_operations"
+      operations:
+        - "instance_create"
+        - "instance_start"
+        - "instance_stop"
+        - "instance_status"
+        - "instance_delete"
+    
+    - name: "memory_operations"
+      operations:
+        - "memory_status"
+        - "memory_search"
+        - "memory_stats"
+        - "memory_optimize"
+    
+    - name: "batch_operations"
+      operations:
+        - "batch_create"
+        - "batch_run"
+        - "batch_list"
+        - "batch_status"
+
+# Load Testing Configuration
+load_tests:
+  enable_load_testing: false
+  concurrent_users: [1, 5, 10, 20]
+  test_duration: 60  # seconds
+  ramp_up_time: 10   # seconds
+  operations_per_user: 50
+  
+  # Load test scenarios
+  scenarios:
+    - name: "schema_management_load"
+      operations:
+        - { command: "schema create", weight: 30 }
+        - { command: "schema list", weight: 40 }
+        - { command: "schema validate", weight: 20 }
+        - { command: "schema delete", weight: 10 }
+    
+    - name: "instance_management_load"
+      operations:
+        - { command: "instance create", weight: 20 }
+        - { command: "instance list", weight: 30 }
+        - { command: "instance status", weight: 40 }
+        - { command: "instance delete", weight: 10 }
+
+# Memory System Testing
+memory_tests:
+  enable_memory_validation: true
+  test_all_databases: true
+  databases:
+    - "redis"
+    - "neo4j"
+    - "postgresql"
+    - "qdrant"
+  
+  # Memory test scenarios
+  scenarios:
+    - name: "basic_crud"
+      operations:
+        - "create_schema"
+        - "read_schema"
+        - "update_schema"
+        - "delete_schema"
+    
+    - name: "search_performance"
+      operations:
+        - "semantic_search"
+        - "keyword_search"
+        - "filtered_search"
+    
+    - name: "memory_optimization"
+      operations:
+        - "memory_status"
+        - "memory_optimize"
+        - "memory_stats"
+
+# Security Testing
+security_tests:
+  enable_security_testing: false
+  test_authentication: true
+  test_authorization: true
+  test_input_validation: true
+  
+  # Security test cases
+  test_cases:
+    - name: "command_injection"
+      inputs:
+        - "; rm -rf /"
+        - "$(malicious_command)"
+        - "`evil_script`"
+    
+    - name: "path_traversal"
+      inputs:
+        - "../../../etc/passwd"
+        - "..\\..\\windows\\system32"
+    
+    - name: "large_inputs"
+      inputs:
+        - { type: "string", size: 10000 }
+        - { type: "json", size: 100000 }
+
+# Error Handling Tests
+error_tests:
+  enable_error_testing: true
+  test_invalid_commands: true
+  test_invalid_parameters: true
+  test_network_failures: true
+  test_resource_exhaustion: true
+  
+  # Error scenarios
+  scenarios:
+    - name: "invalid_schema_name"
+      command: "schema create --name ''"
+      expected_error: "Invalid schema name"
+    
+    - name: "missing_required_parameter"
+      command: "schema create"
+      expected_error: "Required parameter missing"
+    
+    - name: "non_existent_schema"
+      command: "schema show non_existent_schema"
+      expected_error: "Schema not found"
+    
+    - name: "duplicate_schema"
+      command: "schema create --name existing_schema"
+      expected_error: "Schema already exists"
+
+# Regression Testing
+regression_tests:
+  enable_regression_testing: true
+  baseline_version: "latest"
+  compare_performance: true
+  compare_functionality: true
+  
+  # Regression test suites
+  test_suites:
+    - name: "core_functionality"
+      version_range: ["v1.0.0", "latest"]
+      critical_tests:
+        - "schema_create"
+        - "instance_create"
+        - "memory_status"
+    
+    - name: "performance_regression"
+      performance_tolerance: 0.15  # 15% degradation tolerance
+      critical_operations:
+        - "schema_list"
+        - "instance_list"
+        - "memory_search"
+
+# CI/CD Integration
+ci_cd:
+  enable_ci_integration: true
+  platforms:
+    - "github_actions"
+    - "jenkins"
+    - "gitlab_ci"
+  
+  # CI/CD specific settings
+  github_actions:
+    python_versions: ["3.8", "3.9", "3.10", "3.11"]
+    os_matrix: ["ubuntu-latest", "windows-latest", "macos-latest"]
+    enable_coverage: true
+    coverage_threshold: 80
+  
+  jenkins:
+    enable_parallel_execution: true
+    enable_test_reporting: true
+    enable_performance_trending: true
+  
+  gitlab_ci:
+    enable_artifact_collection: true
+    enable_test_visualization: true
+
+# Notification Settings
+notifications:
+  enable_notifications: false
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#plc-gbt-testing"
+    notify_on: ["failure", "performance_degradation"]
+  
+  email:
+    smtp_server: "${SMTP_SERVER}"
+    recipients: ["team@example.com"]
+    notify_on: ["failure", "completion"]
+
+# Cleanup Configuration
+cleanup:
+  auto_cleanup: true
+  cleanup_on_success: true
+  cleanup_on_failure: false
+  retention_days: 7
+  
+  # Items to clean up
+  cleanup_items:
+    - "test_schemas"
+    - "test_instances"
+    - "test_batch_jobs"
+    - "temporary_files"
+    - "test_databases"
+
+# Advanced Configuration
+advanced:
+  enable_profiling: false
+  profiler_output_dir: "./profiling_results"
+  enable_debugging: false
+  debug_output_dir: "./debug_logs"
+  
+  # Resource monitoring
+  resource_monitoring:
+    enable_monitoring: true
+    monitor_interval: 5  # seconds
+    monitor_duration: 300  # 5 minutes
+    
+    # Metrics to collect
+    metrics:
+      - "cpu_usage"
+      - "memory_usage"
+      - "disk_io"
+      - "network_io"
+      - "database_connections"
+  
+  # Test data generation
+  data_generation:
+    enable_synthetic_data: true
+    data_size_variants: ["small", "medium", "large"]
+    schema_complexity_levels: [1, 2, 3, 4, 5]
+    
+    # Data sizes
+    data_sizes:
+      small: { schemas: 10, instances: 30, records: 1000 }
+      medium: { schemas: 50, instances: 150, records: 10000 }
+      large: { schemas: 200, instances: 600, records: 100000 }
+
+# Environment Variables
+environment:
+  required_vars:
+    - "PLC_MEMORY_CONFIG"
+    - "PLC_MEMORY_LOG_LEVEL"
+  
+  optional_vars:
+    - "PLC_MEMORY_TEST_DB_URL"
+    - "PLC_MEMORY_REDIS_URL"
+    - "PLC_MEMORY_NEO4J_URL" 

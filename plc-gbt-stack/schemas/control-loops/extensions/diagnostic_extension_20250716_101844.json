@@ -1,0 +1,28 @@
+{
+  "extension_id": "diagnostic_extension_20250716_101844",
+  "name": "Diagnostic Properties",
+  "extension_type": "ExtensionType.PROPERTY_MIXIN",
+  "target_schemas": [
+    "*"
+  ],
+  "extension_data": {
+    "properties": {
+      "diagnostic_interval": {
+        "type": "number",
+        "description": "Diagnostic check interval in seconds",
+        "minimum": 1.0,
+        "maximum": 3600.0,
+        "default": 60.0
+      },
+      "alert_enabled": {
+        "type": "boolean",
+        "description": "Enable diagnostic alerts",
+        "default": true
+      }
+    }
+  },
+  "description": "Diagnostic monitoring properties",
+  "author": "AI Task Orchestrator",
+  "version": "1.0.0",
+  "enabled": true
+}

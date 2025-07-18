@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "custom-safety-interlock-system-20250716_101844",
+  "title": "Safety Interlock System",
+  "description": "Custom schema: Safety Interlock System",
+  "version": "1.0.0",
+  "author": "AI Task Orchestrator",
+  "created_at": "2025-07-16T10:18:44.323161",
+  "type": "object",
+  "properties": {
+    "safety_level": {
+      "type": "enum",
+      "description": "Safety Integrity Level",
+      "enum": [
+        "SIL1",
+        "SIL2",
+        "SIL3",
+        "SIL4"
+      ]
+    },
+    "emergency_stop_enabled": {
+      "type": "boolean",
+      "description": "Emergency stop functionality",
+      "default": true
+    },
+    "response_time_ms": {
+      "type": "number",
+      "description": "Required response time in milliseconds",
+      "minimum": 1.0,
+      "maximum": 1000.0
+    }
+  },
+  "required": [
+    "safety_level",
+    "emergency_stop_enabled",
+    "response_time_ms"
+  ]
+}

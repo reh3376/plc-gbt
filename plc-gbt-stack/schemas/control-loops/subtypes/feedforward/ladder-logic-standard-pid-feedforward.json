@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-gbt.com/schemas/control-loops/subtypes/feedforward/ladder_logic_standard_pid-feedforward.json",
+  "title": "Ladder Logic Standard Pid with Feedforward Control",
+  "description": "Advanced control loop schema with feedforward disturbance compensation for proactive control response",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../base/ladder-logic-standard-pid.json"
+    }
+  ],
+  "properties": {
+    "feedforward_configuration": {
+      "type": "object",
+      "description": "Feedforward control configuration for disturbance rejection",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable/disable feedforward control",
+          "default": true
+        },
+        "feedforward_type": {
+          "type": "string",
+          "enum": [
+            "simple_bias",
+            "dynamic_compensation",
+            "lead_lag_compensation",
+            "multi_variable"
+          ],
+          "description": "Type of feedforward implementation",
+          "default": "simple_bias"
+        },
+        "disturbance_variable": {
+          "type": "object",
+          "description": "Primary disturbance variable for feedforward",
+          "properties": {
+            "tag_name": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+              "description": "PLC tag name for disturbance measurement"
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Human-readable description of disturbance"
+            },
+            "engineering_units": {
+              "type": "string",
+              "enum": [
+                "PSI",
+                "Bar",
+                "kPa",
+                "GPM",
+                "LPM",
+                "CFM",
+                "°C",
+                "°F",
+                "K",
+                "pH",
+                "kg/h",
+                "lb/h",
+                "RPM",
+                "Hz",
+                "%",
+                "mA",
+                "V"
+              ],
+              "description": "Engineering units for disturbance variable"
+            },
+            "ff_min_value": {
+              "type": "number",
+              "description": "Disturbance value corresponding to minimum bias",
+              "minimum": -999999.0,
+              "maximum": 999999.0
+            },
+            "ff_max_value": {
+              "type": "number",
+              "description": "Disturbance value corresponding to maximum bias",
+              "minimum": -999999.0,
+              "maximum": 999999.0
+            }
+          },
+          "required": [
+            "tag_name",
+            "description",
+            "engineering_units",
+            "ff_min_value",
+            "ff_max_value"
+          ]
+        },
+        "bias_configuration": {
+          "type": "object",
+          "description": "Feedforward bias calculation parameters",
+          "properties": {
+            "bias_min": {
+              "type": "number",
+              "description": "Minimum bias percentage applied at ff_min_value",
+              "minimum": -100.0,
+              "maximum": 100.0
+            },
+            "bias_max": {
+              "type": "number",
+              "description": "Maximum bias percentage applied at ff_max_value",
+              "minimum": -100.0,
+              "maximum": 100.0
+            },
+            "bias_scaling": {
+              "type": "string",
+              "enum": [
+                "linear",
+                "square_root",
+                "logarithmic",
+                "exponential",
+                "custom"
+              ],
+              "description": "Scaling function between disturbance and bias",
+              "default": "linear"
+            },
+            "deadband": {
+              "type": "number",
+              "description": "Deadband around neutral position to prevent oscillation",
+              "minimum": 0.0,
+              "maximum": 50.0,
+              "default": 0.5
+            }
+          },
+          "required": [
+            "bias_min",
+            "bias_max",
+            "bias_scaling"
+          ]
+        },
+        "dynamic_compensation": {
+          "type": "object",
+          "description": "Dynamic feedforward compensation parameters",
+          "properties": {
+            "lead_time": {
+              "type": "number",
+              "description": "Lead time constant for feedforward action (seconds)",
+              "minimum": 0.0,
+              "maximum": 3600.0,
+              "default": 0.0
+            },
+            "lag_time": {
+              "type": "number",
+              "description": "Lag time constant for feedforward filtering (seconds)",
+              "minimum": 0.0,
+              "maximum": 3600.0,
+              "default": 0.0
+            },
+            "gain": {
+              "type": "number",
+              "description": "Feedforward gain factor",
+              "minimum": 0.0,
+              "maximum": 10.0,
+              "default": 1.0
+            },
+            "filter_time_constant": {
+              "type": "number",
+              "description": "First-order filter time constant for noise reduction",
+              "minimum": 0.0,
+              "maximum": 300.0,
+              "default": 1.0
+            }
+          }
+        },
+        "performance_monitoring": {
+          "type": "object",
+          "description": "Feedforward performance monitoring configuration",
+          "properties": {
+            "effectiveness_tracking": {
+              "type": "boolean",
+              "description": "Enable feedforward effectiveness monitoring",
+              "default": true
+            },
+            "disturbance_rejection_ratio": {
+              "type": "number",
+              "description": "Target disturbance rejection ratio (%)",
+              "minimum": 0.0,
+              "maximum": 100.0,
+              "default": 80.0
+            },
+            "response_time_improvement": {
+              "type": "number",
+              "description": "Expected response time improvement (%)",
+              "minimum": 0.0,
+              "maximum": 90.0,
+              "default": 30.0
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled",
+        "feedforward_type",
+        "disturbance_variable",
+        "bias_configuration"
+      ]
+    }
+  },
+  "required": [
+    "feedforward_configuration"
+  ]
+}

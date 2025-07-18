@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-gbt.com/schemas/control-loops/subtypes/cascade/function_block_standard_pide-cascade.json",
+  "title": "Function Block Standard Pide Cascade Control System",
+  "description": "Multi-loop cascade control system with master-slave configuration for enhanced performance",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../base/function-block-standard-pide.json"
+    }
+  ],
+  "properties": {
+    "cascade_configuration": {
+      "type": "object",
+      "description": "Cascade control system configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable/disable cascade control mode",
+          "default": true
+        },
+        "cascade_type": {
+          "type": "string",
+          "enum": [
+            "master_slave",
+            "ratio_cascade",
+            "override_cascade",
+            "split_range"
+          ],
+          "description": "Type of cascade control implementation",
+          "default": "master_slave"
+        },
+        "loop_role": {
+          "type": "string",
+          "enum": [
+            "master",
+            "slave"
+          ],
+          "description": "Role of this loop in cascade system"
+        },
+        "master_loop_configuration": {
+          "type": "object",
+          "description": "Master loop configuration (if this is master loop)",
+          "properties": {
+            "control_variable": {
+              "type": "object",
+              "description": "Primary controlled variable for master loop",
+              "properties": {
+                "tag_name": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+                  "description": "PLC tag name for master control variable"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "description": "Description of master controlled variable"
+                },
+                "engineering_units": {
+                  "type": "string",
+                  "enum": [
+                    "PSI",
+                    "Bar",
+                    "kPa",
+                    "GPM",
+                    "LPM",
+                    "CFM",
+                    "°C",
+                    "°F",
+                    "K",
+                    "pH",
+                    "kg/h",
+                    "lb/h",
+                    "RPM",
+                    "Hz",
+                    "%",
+                    "mA",
+                    "V"
+                  ],
+                  "description": "Engineering units for master variable"
+                },
+                "control_range": {
+                  "type": "object",
+                  "properties": {
+                    "min_value": {
+                      "type": "number"
+                    },
+                    "max_value": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "min_value",
+                    "max_value"
+                  ]
+                }
+              },
+              "required": [
+                "tag_name",
+                "description",
+                "engineering_units",
+                "control_range"
+              ]
+            },
+            "slave_loop_references": {
+              "type": "array",
+              "description": "References to slave loops controlled by this master",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "slave_loop_id": {
+                    "type": "string",
+                    "description": "Unique identifier for slave loop"
+                  },
+                  "slave_tag_name": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+                    "description": "PLC tag name for slave loop"
+                  },
+                  "communication_method": {
+                    "type": "string",
+                    "enum": [
+                      "direct_write",
+                      "message_instruction",
+                      "produced_tag",
+                      "ethernet_ip"
+                    ],
+                    "description": "Method for master-slave communication"
+                  },
+                  "setpoint_scaling": {
+                    "type": "object",
+                    "description": "Scaling between master output and slave setpoint",
+                    "properties": {
+                      "master_min": {
+                        "type": "number"
+                      },
+                      "master_max": {
+                        "type": "number"
+                      },
+                      "slave_min": {
+                        "type": "number"
+                      },
+                      "slave_max": {
+                        "type": "number"
+                      },
+                      "scaling_type": {
+                        "type": "string",
+                        "enum": [
+                          "linear",
+                          "square_root",
+                          "custom"
+                        ],
+                        "default": "linear"
+                      }
+                    },
+                    "required": [
+                      "master_min",
+                      "master_max",
+                      "slave_min",
+                      "slave_max"
+                    ]
+                  }
+                },
+                "required": [
+                  "slave_loop_id",
+                  "slave_tag_name",
+                  "communication_method",
+                  "setpoint_scaling"
+                ]
+              },
+              "minItems": 1
+            },
+            "master_tuning": {
+              "type": "object",
+              "description": "Master loop specific tuning parameters",
+              "properties": {
+                "response_time_target": {
+                  "type": "number",
+                  "description": "Target response time for master loop (seconds)",
+                  "minimum": 1.0,
+                  "maximum": 3600.0
+                },
+                "overshoot_limit": {
+                  "type": "number",
+                  "description": "Maximum allowable overshoot (%)",
+                  "minimum": 0.0,
+                  "maximum": 50.0,
+                  "default": 10.0
+                },
+                "interaction_compensation": {
+                  "type": "boolean",
+                  "description": "Enable compensation for loop interactions",
+                  "default": false
+                }
+              }
+            }
+          },
+          "required": [
+            "control_variable",
+            "slave_loop_references"
+          ]
+        },
+        "slave_loop_configuration": {
+          "type": "object",
+          "description": "Slave loop configuration (if this is slave loop)",
+          "properties": {
+            "master_loop_reference": {
+              "type": "object",
+              "description": "Reference to controlling master loop",
+              "properties": {
+                "master_loop_id": {
+                  "type": "string",
+                  "description": "Unique identifier for master loop"
+                },
+                "master_tag_name": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+                  "description": "PLC tag name for master loop output"
+                },
+                "setpoint_source": {
+                  "type": "string",
+                  "enum": [
+                    "master_output",
+                    "remote_setpoint",
+                    "local_setpoint"
+                  ],
+                  "description": "Source of slave loop setpoint",
+                  "default": "master_output"
+                }
+              },
+              "required": [
+                "master_loop_id",
+                "master_tag_name",
+                "setpoint_source"
+              ]
+            },
+            "slave_tuning": {
+              "type": "object",
+              "description": "Slave loop specific tuning parameters",
+              "properties": {
+                "fast_response_mode": {
+                  "type": "boolean",
+                  "description": "Enable aggressive tuning for fast slave response",
+                  "default": true
+                },
+                "response_ratio": {
+                  "type": "number",
+                  "description": "Slave to master response time ratio",
+                  "minimum": 0.1,
+                  "maximum": 1.0,
+                  "default": 0.2
+                },
+                "stability_margin": {
+                  "type": "number",
+                  "description": "Additional stability margin for slave loop",
+                  "minimum": 1.0,
+                  "maximum": 5.0,
+                  "default": 2.0
+                }
+              }
+            },
+            "mode_coordination": {
+              "type": "object",
+              "description": "Coordination between master and slave operating modes",
+              "properties": {
+                "follow_master_mode": {
+                  "type": "boolean",
+                  "description": "Slave automatically follows master mode changes",
+                  "default": true
+                },
+                "manual_mode_behavior": {
+                  "type": "string",
+                  "enum": [
+                    "hold_output",
+                    "track_master",
+                    "independent"
+                  ],
+                  "description": "Slave behavior when master is in manual",
+                  "default": "track_master"
+                },
+                "cascade_fault_action": {
+                  "type": "string",
+                  "enum": [
+                    "manual_mode",
+                    "local_setpoint",
+                    "safe_state"
+                  ],
+                  "description": "Action when cascade communication fails",
+                  "default": "local_setpoint"
+                }
+              }
+            }
+          },
+          "required": [
+            "master_loop_reference"
+          ]
+        },
+        "performance_monitoring": {
+          "type": "object",
+          "description": "Cascade system performance monitoring",
+          "properties": {
+            "interaction_monitoring": {
+              "type": "boolean",
+              "description": "Monitor loop interactions and coupling",
+              "default": true
+            },
+            "stability_monitoring": {
+              "type": "boolean",
+              "description": "Monitor overall cascade stability",
+              "default": true
+            },
+            "performance_improvement": {
+              "type": "number",
+              "description": "Expected performance improvement over single loop (%)",
+              "minimum": 10.0,
+              "maximum": 80.0,
+              "default": 40.0
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled",
+        "cascade_type",
+        "loop_role"
+      ]
+    }
+  },
+  "required": [
+    "cascade_configuration"
+  ]
+}

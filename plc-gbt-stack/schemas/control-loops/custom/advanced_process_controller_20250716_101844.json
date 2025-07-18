@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "custom-advanced-process-controller-20250716_101844",
+  "title": "Advanced Process Controller",
+  "description": "Custom schema: Advanced Process Controller",
+  "version": "1.0.1",
+  "author": "AI Task Orchestrator",
+  "created_at": "2025-07-16T10:18:44.322944",
+  "type": "object",
+  "properties": {
+    "process_tag": {
+      "type": "string",
+      "description": "Process variable tag name",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "control_strategy": {
+      "type": "enum",
+      "description": "Control strategy type",
+      "enum": [
+        "cascade",
+        "feedforward",
+        "multivariable",
+        "adaptive"
+      ]
+    },
+    "optimization_enabled": {
+      "type": "boolean",
+      "description": "Enable optimization algorithms",
+      "default": false
+    },
+    "diagnostic_enabled": {
+      "type": "boolean",
+      "description": "Enable diagnostic monitoring",
+      "default": true
+    }
+  },
+  "required": [
+    "process_tag",
+    "control_strategy"
+  ],
+  "modified_by_phase_20_4": true,
+  "modification_timestamp": "2025-07-16T10:18:44.323377",
+  "modified_at": "2025-07-16T10:18:44.323544"
+}

@@ -1,0 +1,269 @@
+{
+  "validation_timestamp": "2025-07-15T05:38:40.422476",
+  "overall_score": 0.7037037037037037,
+  "overall_status": "warning",
+  "check_results": [
+    {
+      "check_name": "schema_validation_advance-pide-ff-cas.json",
+      "check_type": "schema",
+      "status": "passed",
+      "score": 1.0,
+      "message": "Schema validation: 100%",
+      "details": {
+        "structure_valid": true,
+        "control_valid": true,
+        "missing_properties": [],
+        "property_count": 72
+      },
+      "recommendations": []
+    },
+    {
+      "check_name": "schema_validation_advanced-pid-cascade.json",
+      "check_type": "schema",
+      "status": "warning",
+      "score": 0.5,
+      "message": "Schema validation: 50%",
+      "details": {
+        "structure_valid": true,
+        "control_valid": false,
+        "missing_properties": [
+          "PV",
+          "CV"
+        ],
+        "property_count": 40
+      },
+      "recommendations": [
+        "Add missing PID properties: PV, CV"
+      ]
+    },
+    {
+      "check_name": "schema_validation_advanced-pid-ff-cascade.json",
+      "check_type": "schema",
+      "status": "warning",
+      "score": 0.5,
+      "message": "Schema validation: 50%",
+      "details": {
+        "structure_valid": true,
+        "control_valid": false,
+        "missing_properties": [
+          "PV",
+          "CV"
+        ],
+        "property_count": 45
+      },
+      "recommendations": [
+        "Add missing PID properties: PV, CV"
+      ]
+    },
+    {
+      "check_name": "schema_validation_advanced-pid-ff.json",
+      "check_type": "schema",
+      "status": "warning",
+      "score": 0.5,
+      "message": "Schema validation: 50%",
+      "details": {
+        "structure_valid": true,
+        "control_valid": false,
+        "missing_properties": [
+          "PV",
+          "CV"
+        ],
+        "property_count": 42
+      },
+      "recommendations": [
+        "Add missing PID properties: PV, CV"
+      ]
+    },
+    {
+      "check_name": "schema_validation_advanced-pide-cas-multiff.json",
+      "check_type": "schema",
+      "status": "passed",
+      "score": 1.0,
+      "message": "Schema validation: 100%",
+      "details": {
+        "structure_valid": true,
+        "control_valid": true,
+        "missing_properties": [],
+        "property_count": 73
+      },
+      "recommendations": []
+    },
+    {
+      "check_name": "schema_validation_advanced-pide-cascade.json",
+      "check_type": "schema",
+      "status": "passed",
+      "score": 1.0,
+      "message": "Schema validation: 100%",
+      "details": {
+        "structure_valid": true,
+        "control_valid": true,
+        "missing_properties": [],
+        "property_count": 69
+      },
+      "recommendations": []
+    },
+    {
+      "check_name": "schema_validation_advanced-pide-ff.json",
+      "check_type": "schema",
+      "status": "passed",
+      "score": 1.0,
+      "message": "Schema validation: 100%",
+      "details": {
+        "structure_valid": true,
+        "control_valid": true,
+        "missing_properties": [],
+        "property_count": 58
+      },
+      "recommendations": []
+    },
+    {
+      "check_name": "schema_validation_standard-pid-controller.json",
+      "check_type": "schema",
+      "status": "warning",
+      "score": 0.5,
+      "message": "Schema validation: 50%",
+      "details": {
+        "structure_valid": true,
+        "control_valid": false,
+        "missing_properties": [
+          "PV",
+          "CV"
+        ],
+        "property_count": 39
+      },
+      "recommendations": [
+        "Add missing PID properties: PV, CV"
+      ]
+    },
+    {
+      "check_name": "schema_validation_standard-pide-controller.json",
+      "check_type": "schema",
+      "status": "passed",
+      "score": 1.0,
+      "message": "Schema validation: 100%",
+      "details": {
+        "structure_valid": true,
+        "control_valid": true,
+        "missing_properties": [],
+        "property_count": 55
+      },
+      "recommendations": []
+    },
+    {
+      "check_name": "schema_overall",
+      "check_type": "schema",
+      "status": "warning",
+      "score": 0.5555555555555556,
+      "message": "Schema validation: 5/9 schemas passed",
+      "details": {
+        "passed": 5,
+        "total": 9
+      },
+      "recommendations": []
+    },
+    {
+      "check_name": "code_presence",
+      "check_type": "code",
+      "status": "warning",
+      "score": 0.0,
+      "message": "No code files found",
+      "details": {},
+      "recommendations": [
+        "Add Python code files for analysis"
+      ]
+    },
+    {
+      "check_name": "data_presence",
+      "check_type": "data",
+      "status": "warning",
+      "score": 0.0,
+      "message": "No data files found",
+      "details": {},
+      "recommendations": [
+        "Add data files for analysis"
+      ]
+    },
+    {
+      "check_name": "knowledge_extraction",
+      "check_type": "knowledge",
+      "status": "passed",
+      "score": 1.0,
+      "message": "Knowledge extraction validation: 100%",
+      "details": {
+        "entity_count": 18,
+        "relationship_count": 23,
+        "training_example_count": 23,
+        "entity_score": 1.0,
+        "relationship_score": 1.0,
+        "training_score": 1.0
+      },
+      "recommendations": []
+    },
+    {
+      "check_name": "content_analysis",
+      "check_type": "analysis",
+      "status": "passed",
+      "score": 1.0,
+      "message": "Content analysis validation: 100%",
+      "details": {
+        "pattern_count": 117,
+        "relationship_count": 16,
+        "concept_categories": 2,
+        "pattern_score": 1.0,
+        "relationship_score": 1.0
+      },
+      "recommendations": []
+    },
+    {
+      "check_name": "system_integrity",
+      "check_type": "integrity",
+      "status": "passed",
+      "score": 1.0,
+      "message": "System integrity validation: 100%",
+      "details": {
+        "consistency_score": 1.0,
+        "coverage_score": 1.0,
+        "scan_schemas": 9,
+        "extracted_schemas": 9
+      },
+      "recommendations": []
+    }
+  ],
+  "summary": {
+    "total_checks": 15,
+    "passed_checks": 8,
+    "warning_checks": 7,
+    "failed_checks": 0,
+    "check_types": {
+      "schema": {
+        "count": 10,
+        "avg_score": 0.7555555555555555
+      },
+      "code": {
+        "count": 1,
+        "avg_score": 0.0
+      },
+      "data": {
+        "count": 1,
+        "avg_score": 0.0
+      },
+      "knowledge": {
+        "count": 1,
+        "avg_score": 1.0
+      },
+      "analysis": {
+        "count": 1,
+        "avg_score": 1.0
+      },
+      "integrity": {
+        "count": 1,
+        "avg_score": 1.0
+      }
+    }
+  },
+  "recommendations": [
+    "Add Python code files for analysis",
+    "Add data files for analysis",
+    "Add missing PID properties: PV, CV"
+  ]
+}

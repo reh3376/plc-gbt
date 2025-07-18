@@ -1,0 +1,3957 @@
+{
+  "entities": [
+    {
+      "entity_id": "schema_advance-pide-ff-cas",
+      "entity_type": "schema",
+      "name": "Function Block Advanced PIDE (Cascade + Feedforward)",
+      "description": "Schema for a cascaded PIDE with feedforward. The secondary PIDE uses Cascade mode and has a feedforward bias input for measured disturbances:contentReference[oaicite:201]{index=201}.",
+      "properties": {
+        "control_type": "PIDE",
+        "complexity_level": "Advanced_Cascade_Feedforward",
+        "property_count": 72,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain",
+          "AllowCasRat"
+        ],
+        "version": "unknown",
+        "file_path": "../docs/context/control-schema/advance-pide-ff-cas.json"
+      },
+      "relationships": [],
+      "source_files": [
+        "advance-pide-ff-cas.json"
+      ],
+      "confidence_score": 1.0,
+      "tags": [
+        "control",
+        "schema",
+        "pide",
+        "advanced_cascade_feedforward"
+      ]
+    },
+    {
+      "entity_id": "schema_advanced-pid-cascade",
+      "entity_type": "schema",
+      "name": "Ladder Logic Advanced PID (Cascade)",
+      "description": "Schema for a Ladder Logic cascaded PID controller. One PID (slave) receives its setpoint from another PID (master):contentReference[oaicite:52]{index=52}, enabling a cascade (master-slave) architecture.",
+      "properties": {
+        "control_type": "PID",
+        "complexity_level": "Advanced_Cascade",
+        "property_count": 40,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "CL",
+          "CT",
+          "SP",
+          "KP",
+          "KI",
+          "KD"
+        ],
+        "version": "unknown",
+        "file_path": "../docs/context/control-schema/advanced-pid-cascade.json"
+      },
+      "relationships": [],
+      "source_files": [
+        "advanced-pid-cascade.json"
+      ],
+      "confidence_score": 1.0,
+      "tags": [
+        "control",
+        "schema",
+        "pid",
+        "advanced_cascade"
+      ]
+    },
+    {
+      "entity_id": "schema_advanced-pid-ff-cascade",
+      "entity_type": "schema",
+      "name": "Ladder Logic Advanced PID (Cascade + Feedforward)",
+      "description": "Schema for a Ladder PID with both cascade (master-slave) and feedforward compensation. For example, a slave flow/valve loop that gets its SP from a master temperature loop and adds a feedforward bias for load changes:contentReference[oaicite:65]{index=65}.",
+      "properties": {
+        "control_type": "PID",
+        "complexity_level": "Advanced_Cascade_Feedforward",
+        "property_count": 45,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "CL",
+          "CT",
+          "KP",
+          "KI",
+          "KD",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue",
+          "Bias_Min",
+          "Bias_Max"
+        ],
+        "version": "unknown",
+        "file_path": "../docs/context/control-schema/advanced-pid-ff-cascade.json"
+      },
+      "relationships": [],
+      "source_files": [
+        "advanced-pid-ff-cascade.json"
+      ],
+      "confidence_score": 1.0,
+      "tags": [
+        "control",
+        "schema",
+        "pid",
+        "advanced_cascade_feedforward"
+      ]
+    },
+    {
+      "entity_id": "schema_advanced-pid-ff",
+      "entity_type": "schema",
+      "name": "Ladder Logic Advanced PID (Feedforward)",
+      "description": "Schema for a Ladder Logic PID controller with feedforward augmentation. This uses the bias term as a feedforward input to anticipate disturbances:contentReference[oaicite:45]{index=45}.",
+      "properties": {
+        "control_type": "PID",
+        "complexity_level": "Advanced_Feedforward",
+        "property_count": 42,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "SP",
+          "KP",
+          "KI",
+          "KD",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue",
+          "Bias_Min",
+          "Bias_Max"
+        ],
+        "version": "unknown",
+        "file_path": "../docs/context/control-schema/advanced-pid-ff.json"
+      },
+      "relationships": [],
+      "source_files": [
+        "advanced-pid-ff.json"
+      ],
+      "confidence_score": 1.0,
+      "tags": [
+        "control",
+        "schema",
+        "pid",
+        "advanced_feedforward"
+      ]
+    },
+    {
+      "entity_id": "schema_advanced-pide-cas-multiff",
+      "entity_type": "schema",
+      "name": "Function Block Advanced PIDE (Cascade + Multi-Feedforward)",
+      "description": "Schema for a cascaded PIDE with multiple feedforward inputs. Multiple disturbance variables are used, each with its own bias formula, to compute a combined feedforward signal:contentReference[oaicite:209]{index=209}:contentReference[oaicite:210]{index=210}.",
+      "properties": {
+        "control_type": "PIDE",
+        "complexity_level": "Advanced_Cascade_Feedforward",
+        "property_count": 73,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain",
+          "AllowCasRat",
+          "feedforwards"
+        ],
+        "version": "unknown",
+        "file_path": "../docs/context/control-schema/advanced-pide-cas-multiff.json"
+      },
+      "relationships": [],
+      "source_files": [
+        "advanced-pide-cas-multiff.json"
+      ],
+      "confidence_score": 1.0,
+      "tags": [
+        "control",
+        "schema",
+        "pide",
+        "advanced_cascade_feedforward"
+      ]
+    },
+    {
+      "entity_id": "schema_advanced-pide-cascade",
+      "entity_type": "schema",
+      "name": "Function Block Advanced PIDE (Cascade)",
+      "description": "Schema for a pair of cascaded PIDE controllers (primary & secondary). The secondary (slave) PIDE is configured for Cascade mode and receives SPCascade from the primary’s CV:contentReference[oaicite:164]{index=164}.",
+      "properties": {
+        "control_type": "PIDE",
+        "complexity_level": "Advanced_Cascade",
+        "property_count": 69,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain",
+          "AllowCasRat"
+        ],
+        "version": "unknown",
+        "file_path": "../docs/context/control-schema/advanced-pide-cascade.json"
+      },
+      "relationships": [],
+      "source_files": [
+        "advanced-pide-cascade.json"
+      ],
+      "confidence_score": 1.0,
+      "tags": [
+        "control",
+        "schema",
+        "pide",
+        "advanced_cascade"
+      ]
+    },
+    {
+      "entity_id": "schema_advanced-pide-ff",
+      "entity_type": "schema",
+      "name": "Function Block Advanced PIDE (Feedforward)",
+      "description": "Schema for a PIDE controller with feedforward compensation. An external feedforward value (FF) is added to the PID output to preemptively counteract disturbances:contentReference[oaicite:155]{index=155}.",
+      "properties": {
+        "control_type": "PIDE",
+        "complexity_level": "Advanced_Feedforward",
+        "property_count": 58,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain"
+        ],
+        "version": "unknown",
+        "file_path": "../docs/context/control-schema/advanced-pide-ff.json"
+      },
+      "relationships": [],
+      "source_files": [
+        "advanced-pide-ff.json"
+      ],
+      "confidence_score": 1.0,
+      "tags": [
+        "control",
+        "schema",
+        "pide",
+        "advanced_feedforward"
+      ]
+    },
+    {
+      "entity_id": "schema_standard-pid-controller",
+      "entity_type": "schema",
+      "name": "Ladder Logic Standard PID Controller",
+      "description": "Schema for configuring a standard Ladder Logic PID loop (positional form PID) in Studio 5000:contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}.",
+      "properties": {
+        "control_type": "PID",
+        "complexity_level": "Standard",
+        "property_count": 39,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "SP",
+          "KP",
+          "KI",
+          "KD"
+        ],
+        "version": "unknown",
+        "file_path": "../docs/context/control-schema/standard-pid-controller.json"
+      },
+      "relationships": [],
+      "source_files": [
+        "standard-pid-controller.json"
+      ],
+      "confidence_score": 1.0,
+      "tags": [
+        "control",
+        "schema",
+        "pid",
+        "standard"
+      ]
+    },
+    {
+      "entity_id": "schema_standard-pide-controller",
+      "entity_type": "schema",
+      "name": "Function Block Standard PIDE Controller",
+      "description": "Schema for a standard (single-loop) Enhanced PID (PIDE) function block configuration:contentReference[oaicite:74]{index=74} in Studio 5000.",
+      "properties": {
+        "control_type": "PIDE",
+        "complexity_level": "Standard",
+        "property_count": 55,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain"
+        ],
+        "version": "unknown",
+        "file_path": "../docs/context/control-schema/standard-pide-controller.json"
+      },
+      "relationships": [],
+      "source_files": [
+        "standard-pide-controller.json"
+      ],
+      "confidence_score": 1.0,
+      "tags": [
+        "control",
+        "schema",
+        "pide",
+        "standard"
+      ]
+    },
+    {
+      "entity_id": "concept_PIDE_function_block_advanced_pide_(cascade_+_feedforward)",
+      "entity_type": "concept",
+      "name": "Function Block Advanced PIDE (Cascade + Feedforward)",
+      "description": "Control concept in category: PIDE",
+      "properties": {
+        "category": "PIDE",
+        "domain": "control_systems"
+      },
+      "relationships": [],
+      "source_files": [],
+      "confidence_score": 0.7,
+      "tags": [
+        "concept",
+        "control",
+        "pide"
+      ]
+    },
+    {
+      "entity_id": "concept_PIDE_function_block_advanced_pide_(cascade_+_multi-feedforward)",
+      "entity_type": "concept",
+      "name": "Function Block Advanced PIDE (Cascade + Multi-Feedforward)",
+      "description": "Control concept in category: PIDE",
+      "properties": {
+        "category": "PIDE",
+        "domain": "control_systems"
+      },
+      "relationships": [],
+      "source_files": [],
+      "confidence_score": 0.7,
+      "tags": [
+        "concept",
+        "control",
+        "pide"
+      ]
+    },
+    {
+      "entity_id": "concept_PIDE_function_block_advanced_pide_(cascade)",
+      "entity_type": "concept",
+      "name": "Function Block Advanced PIDE (Cascade)",
+      "description": "Control concept in category: PIDE",
+      "properties": {
+        "category": "PIDE",
+        "domain": "control_systems"
+      },
+      "relationships": [],
+      "source_files": [],
+      "confidence_score": 0.7,
+      "tags": [
+        "concept",
+        "control",
+        "pide"
+      ]
+    },
+    {
+      "entity_id": "concept_PIDE_function_block_advanced_pide_(feedforward)",
+      "entity_type": "concept",
+      "name": "Function Block Advanced PIDE (Feedforward)",
+      "description": "Control concept in category: PIDE",
+      "properties": {
+        "category": "PIDE",
+        "domain": "control_systems"
+      },
+      "relationships": [],
+      "source_files": [],
+      "confidence_score": 0.7,
+      "tags": [
+        "concept",
+        "control",
+        "pide"
+      ]
+    },
+    {
+      "entity_id": "concept_PIDE_function_block_standard_pide_controller",
+      "entity_type": "concept",
+      "name": "Function Block Standard PIDE Controller",
+      "description": "Control concept in category: PIDE",
+      "properties": {
+        "category": "PIDE",
+        "domain": "control_systems"
+      },
+      "relationships": [],
+      "source_files": [],
+      "confidence_score": 0.7,
+      "tags": [
+        "concept",
+        "control",
+        "pide"
+      ]
+    },
+    {
+      "entity_id": "concept_PID_ladder_logic_advanced_pid_(cascade)",
+      "entity_type": "concept",
+      "name": "Ladder Logic Advanced PID (Cascade)",
+      "description": "Control concept in category: PID",
+      "properties": {
+        "category": "PID",
+        "domain": "control_systems"
+      },
+      "relationships": [],
+      "source_files": [],
+      "confidence_score": 0.7,
+      "tags": [
+        "concept",
+        "control",
+        "pid"
+      ]
+    },
+    {
+      "entity_id": "concept_PID_ladder_logic_advanced_pid_(cascade_+_feedforward)",
+      "entity_type": "concept",
+      "name": "Ladder Logic Advanced PID (Cascade + Feedforward)",
+      "description": "Control concept in category: PID",
+      "properties": {
+        "category": "PID",
+        "domain": "control_systems"
+      },
+      "relationships": [],
+      "source_files": [],
+      "confidence_score": 0.7,
+      "tags": [
+        "concept",
+        "control",
+        "pid"
+      ]
+    },
+    {
+      "entity_id": "concept_PID_ladder_logic_advanced_pid_(feedforward)",
+      "entity_type": "concept",
+      "name": "Ladder Logic Advanced PID (Feedforward)",
+      "description": "Control concept in category: PID",
+      "properties": {
+        "category": "PID",
+        "domain": "control_systems"
+      },
+      "relationships": [],
+      "source_files": [],
+      "confidence_score": 0.7,
+      "tags": [
+        "concept",
+        "control",
+        "pid"
+      ]
+    },
+    {
+      "entity_id": "concept_PID_ladder_logic_standard_pid_controller",
+      "entity_type": "concept",
+      "name": "Ladder Logic Standard PID Controller",
+      "description": "Control concept in category: PID",
+      "properties": {
+        "category": "PID",
+        "domain": "control_systems"
+      },
+      "relationships": [],
+      "source_files": [],
+      "confidence_score": 0.7,
+      "tags": [
+        "concept",
+        "control",
+        "pid"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "relationship_id": "rel_schema_advance-pide-ff-cas_schema_advanced-pide-cas-multiff",
+      "source_entity_id": "schema_advance-pide-ff-cas",
+      "target_entity_id": "schema_advanced-pide-cas-multiff",
+      "relationship_type": "extends",
+      "strength": 0.9863013698630136,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "SPCascade",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "WindupHIn",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "RatioOper",
+          "CVInitValue",
+          "IGain",
+          "DevHHLimit",
+          "CVPrevious",
+          "PVTracking",
+          "ProgProgReq",
+          "ControlAction",
+          "RatioHLimit",
+          "CVOverride",
+          "OperOperReq",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DevDeadband",
+          "DGain",
+          "SPLLimit",
+          "FFPrevious",
+          "CVInitReq",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "RatioProg",
+          "UseRatio",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "WindupLIn",
+          "AllowCasRat",
+          "RatioLLimit",
+          "ZCDeadband",
+          "created_at",
+          "FFSetPrevious",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "CVSetPrevious",
+          "CVManLimiting",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "FF",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "OperCasRatReq",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "feedforwards"
+        ],
+        "similarity_score": 0.9863013698630136
+      },
+      "evidence": [
+        "Shared properties: 72",
+        "Similarity score: 0.99"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advance-pide-ff-cas_schema_advanced-pide-cascade",
+      "source_entity_id": "schema_advance-pide-ff-cas",
+      "target_entity_id": "schema_advanced-pide-cascade",
+      "relationship_type": "extends",
+      "strength": 0.9583333333333334,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "SPCascade",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "WindupHIn",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "RatioOper",
+          "CVInitValue",
+          "IGain",
+          "DevHHLimit",
+          "CVPrevious",
+          "PVTracking",
+          "ProgProgReq",
+          "ControlAction",
+          "RatioHLimit",
+          "CVOverride",
+          "OperOperReq",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DevDeadband",
+          "DGain",
+          "SPLLimit",
+          "CVInitReq",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "RatioProg",
+          "UseRatio",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "WindupLIn",
+          "AllowCasRat",
+          "RatioLLimit",
+          "ZCDeadband",
+          "created_at",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "CVSetPrevious",
+          "CVManLimiting",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "OperCasRatReq",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "FFSetPrevious",
+          "FFPrevious",
+          "FF"
+        ],
+        "similarity_score": 0.9583333333333334
+      },
+      "evidence": [
+        "Shared properties: 69",
+        "Similarity score: 0.96"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advance-pide-ff-cas_schema_advanced-pide-ff",
+      "source_entity_id": "schema_advance-pide-ff-cas",
+      "target_entity_id": "schema_advanced-pide-ff",
+      "relationship_type": "extends",
+      "strength": 0.8055555555555556,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "IGain",
+          "DevHHLimit",
+          "PVTracking",
+          "ProgProgReq",
+          "OperOperReq",
+          "ControlAction",
+          "CVOverride",
+          "DevDeadband",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DGain",
+          "SPLLimit",
+          "FFPrevious",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "AllowCasRat",
+          "ZCDeadband",
+          "created_at",
+          "FFSetPrevious",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "FF",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "CVManLimiting",
+          "SPCascade",
+          "RatioProg",
+          "UseRatio",
+          "CVInitReq",
+          "WindupHIn",
+          "RatioLLimit",
+          "WindupLIn",
+          "RatioOper",
+          "CVInitValue",
+          "CVPrevious",
+          "OperCasRatReq",
+          "RatioHLimit",
+          "CVSetPrevious"
+        ],
+        "similarity_score": 0.8055555555555556
+      },
+      "evidence": [
+        "Shared properties: 58",
+        "Similarity score: 0.81"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advance-pide-ff-cas_schema_standard-pide-controller",
+      "source_entity_id": "schema_advance-pide-ff-cas",
+      "target_entity_id": "schema_standard-pide-controller",
+      "relationship_type": "extends",
+      "strength": 0.7638888888888888,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "IGain",
+          "DevHHLimit",
+          "PVTracking",
+          "ProgProgReq",
+          "OperOperReq",
+          "ControlAction",
+          "CVOverride",
+          "DevDeadband",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DGain",
+          "SPLLimit",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "AllowCasRat",
+          "ZCDeadband",
+          "created_at",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "CVManLimiting",
+          "SPCascade",
+          "FFPrevious",
+          "RatioProg",
+          "UseRatio",
+          "CVInitReq",
+          "WindupHIn",
+          "FF",
+          "RatioLLimit",
+          "WindupLIn",
+          "RatioOper",
+          "CVInitValue",
+          "CVPrevious",
+          "FFSetPrevious",
+          "OperCasRatReq",
+          "RatioHLimit",
+          "CVSetPrevious"
+        ],
+        "similarity_score": 0.7638888888888888
+      },
+      "evidence": [
+        "Shared properties: 55",
+        "Similarity score: 0.76"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pid-cascade_schema_advanced-pid-ff-cascade",
+      "source_entity_id": "schema_advanced-pid-cascade",
+      "target_entity_id": "schema_advanced-pid-ff-cascade",
+      "relationship_type": "extends",
+      "strength": 0.8888888888888888,
+      "properties": {
+        "shared_properties": [
+          "MAXO",
+          "MINTIE",
+          "MAXI",
+          "PE",
+          "KP",
+          "PVH",
+          "MINS",
+          "BIAS",
+          "DVP",
+          "created_by",
+          "NOBC",
+          "MasterLoopTag",
+          "MINO",
+          "DVDB",
+          "version",
+          "SP",
+          "SWM",
+          "DOE",
+          "MINI",
+          "DVN",
+          "MAXCV",
+          "MAXTIE",
+          "PVT",
+          "NOZC",
+          "INI",
+          "created_at",
+          "DB",
+          "PVL",
+          "PVDB",
+          "MAXS",
+          "NDF",
+          "KD",
+          "CA",
+          "MINCV",
+          "CL",
+          "MO",
+          "SO",
+          "KI",
+          "UPD",
+          "CT"
+        ],
+        "differences": [
+          "Bias_Min",
+          "Bias_Max",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue"
+        ],
+        "similarity_score": 0.8888888888888888
+      },
+      "evidence": [
+        "Shared properties: 40",
+        "Similarity score: 0.89"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pid-cascade_schema_advanced-pid-ff",
+      "source_entity_id": "schema_advanced-pid-cascade",
+      "target_entity_id": "schema_advanced-pid-ff",
+      "relationship_type": "variant_of",
+      "strength": 0.8222222222222222,
+      "properties": {
+        "shared_properties": [
+          "MAXO",
+          "MINTIE",
+          "MAXI",
+          "PE",
+          "KP",
+          "PVH",
+          "MINS",
+          "BIAS",
+          "DVP",
+          "created_by",
+          "NOBC",
+          "MINO",
+          "DVDB",
+          "version",
+          "SP",
+          "SWM",
+          "DOE",
+          "MINI",
+          "DVN",
+          "MAXCV",
+          "MAXTIE",
+          "PVT",
+          "NOZC",
+          "INI",
+          "created_at",
+          "DB",
+          "PVL",
+          "PVDB",
+          "MAXS",
+          "NDF",
+          "KD",
+          "CA",
+          "MINCV",
+          "MO",
+          "SO",
+          "KI",
+          "UPD"
+        ],
+        "differences": [
+          "Bias_Min",
+          "MasterLoopTag",
+          "CL",
+          "Bias_Max",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue",
+          "CT"
+        ],
+        "similarity_score": 0.8222222222222222
+      },
+      "evidence": [
+        "Shared properties: 37",
+        "Similarity score: 0.82"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pid-cascade_schema_standard-pid-controller",
+      "source_entity_id": "schema_advanced-pid-cascade",
+      "target_entity_id": "schema_standard-pid-controller",
+      "relationship_type": "extends",
+      "strength": 0.975,
+      "properties": {
+        "shared_properties": [
+          "MAXO",
+          "MINTIE",
+          "MAXI",
+          "PE",
+          "KP",
+          "PVH",
+          "MINS",
+          "BIAS",
+          "DVP",
+          "created_by",
+          "NOBC",
+          "MINO",
+          "DVDB",
+          "version",
+          "SP",
+          "SWM",
+          "DOE",
+          "MINI",
+          "DVN",
+          "MAXCV",
+          "MAXTIE",
+          "PVT",
+          "NOZC",
+          "INI",
+          "created_at",
+          "DB",
+          "PVL",
+          "PVDB",
+          "MAXS",
+          "NDF",
+          "KD",
+          "CA",
+          "MINCV",
+          "CL",
+          "MO",
+          "SO",
+          "KI",
+          "UPD",
+          "CT"
+        ],
+        "differences": [
+          "MasterLoopTag"
+        ],
+        "similarity_score": 0.975
+      },
+      "evidence": [
+        "Shared properties: 39",
+        "Similarity score: 0.97"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pid-ff-cascade_schema_advanced-pid-ff",
+      "source_entity_id": "schema_advanced-pid-ff-cascade",
+      "target_entity_id": "schema_advanced-pid-ff",
+      "relationship_type": "extends",
+      "strength": 0.9333333333333333,
+      "properties": {
+        "shared_properties": [
+          "Bias_Min",
+          "MAXO",
+          "MINTIE",
+          "MAXI",
+          "PE",
+          "KP",
+          "PVH",
+          "MINS",
+          "BIAS",
+          "DVP",
+          "created_by",
+          "NOBC",
+          "MINO",
+          "DVDB",
+          "version",
+          "SP",
+          "FF_MinValue",
+          "SWM",
+          "DOE",
+          "MINI",
+          "DVN",
+          "MAXCV",
+          "MAXTIE",
+          "PVT",
+          "Bias_Max",
+          "NOZC",
+          "INI",
+          "created_at",
+          "FeedforwardSource",
+          "FF_MaxValue",
+          "DB",
+          "PVL",
+          "PVDB",
+          "MAXS",
+          "NDF",
+          "KD",
+          "CA",
+          "MINCV",
+          "MO",
+          "SO",
+          "KI",
+          "UPD"
+        ],
+        "differences": [
+          "MasterLoopTag",
+          "CT",
+          "CL"
+        ],
+        "similarity_score": 0.9333333333333333
+      },
+      "evidence": [
+        "Shared properties: 42",
+        "Similarity score: 0.93"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pid-ff-cascade_schema_standard-pid-controller",
+      "source_entity_id": "schema_advanced-pid-ff-cascade",
+      "target_entity_id": "schema_standard-pid-controller",
+      "relationship_type": "extends",
+      "strength": 0.8666666666666667,
+      "properties": {
+        "shared_properties": [
+          "MAXO",
+          "MINTIE",
+          "MAXI",
+          "PE",
+          "KP",
+          "PVH",
+          "MINS",
+          "BIAS",
+          "DVP",
+          "created_by",
+          "NOBC",
+          "MINO",
+          "DVDB",
+          "version",
+          "SP",
+          "SWM",
+          "DOE",
+          "MINI",
+          "DVN",
+          "MAXCV",
+          "MAXTIE",
+          "PVT",
+          "NOZC",
+          "INI",
+          "created_at",
+          "DB",
+          "PVL",
+          "PVDB",
+          "MAXS",
+          "NDF",
+          "KD",
+          "CA",
+          "MINCV",
+          "CL",
+          "MO",
+          "SO",
+          "KI",
+          "UPD",
+          "CT"
+        ],
+        "differences": [
+          "Bias_Min",
+          "MasterLoopTag",
+          "Bias_Max",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue"
+        ],
+        "similarity_score": 0.8666666666666667
+      },
+      "evidence": [
+        "Shared properties: 39",
+        "Similarity score: 0.87"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pid-ff_schema_standard-pid-controller",
+      "source_entity_id": "schema_advanced-pid-ff",
+      "target_entity_id": "schema_standard-pid-controller",
+      "relationship_type": "variant_of",
+      "strength": 0.8409090909090909,
+      "properties": {
+        "shared_properties": [
+          "MAXO",
+          "MINTIE",
+          "MAXI",
+          "PE",
+          "KP",
+          "PVH",
+          "MINS",
+          "BIAS",
+          "DVP",
+          "created_by",
+          "NOBC",
+          "MINO",
+          "DVDB",
+          "version",
+          "SP",
+          "SWM",
+          "DOE",
+          "MINI",
+          "DVN",
+          "MAXCV",
+          "MAXTIE",
+          "PVT",
+          "NOZC",
+          "INI",
+          "created_at",
+          "DB",
+          "PVL",
+          "PVDB",
+          "MAXS",
+          "NDF",
+          "KD",
+          "CA",
+          "MINCV",
+          "MO",
+          "SO",
+          "KI",
+          "UPD"
+        ],
+        "differences": [
+          "Bias_Min",
+          "CL",
+          "Bias_Max",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue",
+          "CT"
+        ],
+        "similarity_score": 0.8409090909090909
+      },
+      "evidence": [
+        "Shared properties: 37",
+        "Similarity score: 0.84"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pide-cas-multiff_schema_advanced-pide-cascade",
+      "source_entity_id": "schema_advanced-pide-cas-multiff",
+      "target_entity_id": "schema_advanced-pide-cascade",
+      "relationship_type": "extends",
+      "strength": 0.9452054794520548,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "SPCascade",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "WindupHIn",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "RatioOper",
+          "CVInitValue",
+          "IGain",
+          "DevHHLimit",
+          "CVPrevious",
+          "PVTracking",
+          "ProgProgReq",
+          "ControlAction",
+          "RatioHLimit",
+          "CVOverride",
+          "OperOperReq",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DevDeadband",
+          "DGain",
+          "SPLLimit",
+          "CVInitReq",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "RatioProg",
+          "UseRatio",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "WindupLIn",
+          "AllowCasRat",
+          "RatioLLimit",
+          "ZCDeadband",
+          "created_at",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "CVSetPrevious",
+          "CVManLimiting",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "OperCasRatReq",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "FFSetPrevious",
+          "feedforwards",
+          "FFPrevious",
+          "FF"
+        ],
+        "similarity_score": 0.9452054794520548
+      },
+      "evidence": [
+        "Shared properties: 69",
+        "Similarity score: 0.95"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pide-cas-multiff_schema_advanced-pide-ff",
+      "source_entity_id": "schema_advanced-pide-cas-multiff",
+      "target_entity_id": "schema_advanced-pide-ff",
+      "relationship_type": "extends",
+      "strength": 0.7945205479452054,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "IGain",
+          "DevHHLimit",
+          "PVTracking",
+          "ProgProgReq",
+          "OperOperReq",
+          "ControlAction",
+          "CVOverride",
+          "DevDeadband",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DGain",
+          "SPLLimit",
+          "FFPrevious",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "AllowCasRat",
+          "ZCDeadband",
+          "created_at",
+          "FFSetPrevious",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "FF",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "CVManLimiting",
+          "feedforwards",
+          "SPCascade",
+          "RatioProg",
+          "UseRatio",
+          "CVInitReq",
+          "WindupHIn",
+          "RatioLLimit",
+          "WindupLIn",
+          "RatioOper",
+          "CVInitValue",
+          "CVPrevious",
+          "OperCasRatReq",
+          "RatioHLimit",
+          "CVSetPrevious"
+        ],
+        "similarity_score": 0.7945205479452054
+      },
+      "evidence": [
+        "Shared properties: 58",
+        "Similarity score: 0.79"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pide-cas-multiff_schema_standard-pide-controller",
+      "source_entity_id": "schema_advanced-pide-cas-multiff",
+      "target_entity_id": "schema_standard-pide-controller",
+      "relationship_type": "extends",
+      "strength": 0.7534246575342466,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "IGain",
+          "DevHHLimit",
+          "PVTracking",
+          "ProgProgReq",
+          "OperOperReq",
+          "ControlAction",
+          "CVOverride",
+          "DevDeadband",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DGain",
+          "SPLLimit",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "AllowCasRat",
+          "ZCDeadband",
+          "created_at",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "CVManLimiting",
+          "feedforwards",
+          "SPCascade",
+          "FFPrevious",
+          "RatioProg",
+          "UseRatio",
+          "CVInitReq",
+          "WindupHIn",
+          "FF",
+          "RatioLLimit",
+          "WindupLIn",
+          "RatioOper",
+          "CVInitValue",
+          "CVPrevious",
+          "FFSetPrevious",
+          "OperCasRatReq",
+          "RatioHLimit",
+          "CVSetPrevious"
+        ],
+        "similarity_score": 0.7534246575342466
+      },
+      "evidence": [
+        "Shared properties: 55",
+        "Similarity score: 0.75"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pide-cascade_schema_advanced-pide-ff",
+      "source_entity_id": "schema_advanced-pide-cascade",
+      "target_entity_id": "schema_advanced-pide-ff",
+      "relationship_type": "variant_of",
+      "strength": 0.7638888888888888,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "IGain",
+          "DevHHLimit",
+          "PVTracking",
+          "ProgProgReq",
+          "OperOperReq",
+          "ControlAction",
+          "CVOverride",
+          "DevDeadband",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DGain",
+          "SPLLimit",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "AllowCasRat",
+          "ZCDeadband",
+          "created_at",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "CVManLimiting",
+          "SPCascade",
+          "FFPrevious",
+          "RatioProg",
+          "UseRatio",
+          "CVInitReq",
+          "WindupHIn",
+          "FF",
+          "RatioLLimit",
+          "WindupLIn",
+          "RatioOper",
+          "CVInitValue",
+          "CVPrevious",
+          "FFSetPrevious",
+          "OperCasRatReq",
+          "RatioHLimit",
+          "CVSetPrevious"
+        ],
+        "similarity_score": 0.7638888888888888
+      },
+      "evidence": [
+        "Shared properties: 55",
+        "Similarity score: 0.76"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pide-cascade_schema_standard-pide-controller",
+      "source_entity_id": "schema_advanced-pide-cascade",
+      "target_entity_id": "schema_standard-pide-controller",
+      "relationship_type": "extends",
+      "strength": 0.7971014492753623,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "IGain",
+          "DevHHLimit",
+          "PVTracking",
+          "ProgProgReq",
+          "OperOperReq",
+          "ControlAction",
+          "CVOverride",
+          "DevDeadband",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DGain",
+          "SPLLimit",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "AllowCasRat",
+          "ZCDeadband",
+          "created_at",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "CVManLimiting",
+          "SPCascade",
+          "RatioProg",
+          "UseRatio",
+          "CVInitReq",
+          "WindupHIn",
+          "RatioLLimit",
+          "WindupLIn",
+          "RatioOper",
+          "CVInitValue",
+          "CVPrevious",
+          "OperCasRatReq",
+          "RatioHLimit",
+          "CVSetPrevious"
+        ],
+        "similarity_score": 0.7971014492753623
+      },
+      "evidence": [
+        "Shared properties: 55",
+        "Similarity score: 0.80"
+      ]
+    },
+    {
+      "relationship_id": "rel_schema_advanced-pide-ff_schema_standard-pide-controller",
+      "source_entity_id": "schema_advanced-pide-ff",
+      "target_entity_id": "schema_standard-pide-controller",
+      "relationship_type": "extends",
+      "strength": 0.9482758620689655,
+      "properties": {
+        "shared_properties": [
+          "CVFault",
+          "PVFault",
+          "DevLLLimit",
+          "PVEDerivative",
+          "SPOper",
+          "ProgAutoReq",
+          "PVEProportional",
+          "PVHLimit",
+          "IGain",
+          "DevHHLimit",
+          "PVTracking",
+          "ProgProgReq",
+          "OperOperReq",
+          "ControlAction",
+          "CVOverride",
+          "DevDeadband",
+          "PV",
+          "CVOper",
+          "DependIndepend",
+          "created_by",
+          "DevLLimit",
+          "DGain",
+          "SPLLimit",
+          "ProgOverrideReq",
+          "version",
+          "SPProg",
+          "ZCOff",
+          "CVLLimit",
+          "CVProg",
+          "OperProgReq",
+          "PVDeadband",
+          "CVROCLimit",
+          "PVEUMax",
+          "CVHLimit",
+          "AllowCasRat",
+          "ZCDeadband",
+          "created_at",
+          "PVROCNegLimit",
+          "DevHLimit",
+          "SPHLimit",
+          "ProgManualReq",
+          "PVEUMin",
+          "PVROCPosLimit",
+          "DSmoothing",
+          "ProgHandReq",
+          "PVROCPeriod",
+          "CVEUMax",
+          "CVEUMin",
+          "PGain",
+          "PVLLimit",
+          "PVLLLimit",
+          "ManualAfterInit",
+          "ProgCasRatReq",
+          "PVHHLimit",
+          "ProgOperReq"
+        ],
+        "differences": [
+          "FFSetPrevious",
+          "FFPrevious",
+          "FF"
+        ],
+        "similarity_score": 0.9482758620689655
+      },
+      "evidence": [
+        "Shared properties: 55",
+        "Similarity score: 0.95"
+      ]
+    },
+    {
+      "relationship_id": "hierarchy_concept_control_types_pide_concept_complexity_advanced_cascade_feedforward",
+      "source_entity_id": "concept_complexity_advanced_cascade_feedforward",
+      "target_entity_id": "concept_control_types_pide",
+      "relationship_type": "part_of",
+      "strength": 1.0,
+      "properties": {
+        "hierarchy_type": "complexity"
+      },
+      "evidence": [
+        "Identified from schema complexity analysis"
+      ]
+    },
+    {
+      "relationship_id": "hierarchy_concept_control_types_pide_concept_complexity_advanced_cascade_feedforward",
+      "source_entity_id": "concept_complexity_advanced_cascade_feedforward",
+      "target_entity_id": "concept_control_types_pide",
+      "relationship_type": "part_of",
+      "strength": 1.0,
+      "properties": {
+        "hierarchy_type": "complexity"
+      },
+      "evidence": [
+        "Identified from schema complexity analysis"
+      ]
+    },
+    {
+      "relationship_id": "hierarchy_concept_control_types_pide_concept_complexity_advanced_cascade",
+      "source_entity_id": "concept_complexity_advanced_cascade",
+      "target_entity_id": "concept_control_types_pide",
+      "relationship_type": "part_of",
+      "strength": 1.0,
+      "properties": {
+        "hierarchy_type": "complexity"
+      },
+      "evidence": [
+        "Identified from schema complexity analysis"
+      ]
+    },
+    {
+      "relationship_id": "hierarchy_concept_control_types_pide_concept_complexity_advanced_feedforward",
+      "source_entity_id": "concept_complexity_advanced_feedforward",
+      "target_entity_id": "concept_control_types_pide",
+      "relationship_type": "part_of",
+      "strength": 1.0,
+      "properties": {
+        "hierarchy_type": "complexity"
+      },
+      "evidence": [
+        "Identified from schema complexity analysis"
+      ]
+    },
+    {
+      "relationship_id": "hierarchy_concept_control_types_pid_concept_complexity_advanced_cascade",
+      "source_entity_id": "concept_complexity_advanced_cascade",
+      "target_entity_id": "concept_control_types_pid",
+      "relationship_type": "part_of",
+      "strength": 1.0,
+      "properties": {
+        "hierarchy_type": "complexity"
+      },
+      "evidence": [
+        "Identified from schema complexity analysis"
+      ]
+    },
+    {
+      "relationship_id": "hierarchy_concept_control_types_pid_concept_complexity_advanced_cascade_feedforward",
+      "source_entity_id": "concept_complexity_advanced_cascade_feedforward",
+      "target_entity_id": "concept_control_types_pid",
+      "relationship_type": "part_of",
+      "strength": 1.0,
+      "properties": {
+        "hierarchy_type": "complexity"
+      },
+      "evidence": [
+        "Identified from schema complexity analysis"
+      ]
+    },
+    {
+      "relationship_id": "hierarchy_concept_control_types_pid_concept_complexity_advanced_feedforward",
+      "source_entity_id": "concept_complexity_advanced_feedforward",
+      "target_entity_id": "concept_control_types_pid",
+      "relationship_type": "part_of",
+      "strength": 1.0,
+      "properties": {
+        "hierarchy_type": "complexity"
+      },
+      "evidence": [
+        "Identified from schema complexity analysis"
+      ]
+    }
+  ],
+  "training_examples": [
+    {
+      "example_id": "schema_explain_advance-pide-ff-cas",
+      "question": "What is the purpose of the Function Block Advanced PIDE (Cascade + Feedforward) schema?",
+      "answer": "The Function Block Advanced PIDE (Cascade + Feedforward) schema is used for Schema for a cascaded PIDE with feedforward. The secondary PIDE uses Cascade mode and has a feedforward bias input for measured disturbances:contentReference[oaicite:201]{index=201}.... It has 72 properties and is classified as Advanced_Cascade_Feedforward complexity in the PIDE category.",
+      "context": "Control schema: Function Block Advanced PIDE (Cascade + Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "intermediate",
+      "tags": [
+        "schema",
+        "explanation",
+        "pide"
+      ],
+      "source_files": [
+        "advance-pide-ff-cas.json"
+      ]
+    },
+    {
+      "example_id": "prop_usage_advance-pide-ff-cas_created_at",
+      "question": "How is the created_at property used in Function Block Advanced PIDE (Cascade + Feedforward)?",
+      "answer": "In Function Block Advanced PIDE (Cascade + Feedforward), the created_at property is a required field that defines created_at for the control loop configuration.",
+      "context": "Property usage in Function Block Advanced PIDE (Cascade + Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "basic",
+      "tags": [
+        "property",
+        "usage",
+        "pide"
+      ],
+      "source_files": [
+        "advance-pide-ff-cas.json"
+      ]
+    },
+    {
+      "example_id": "schema_explain_advanced-pid-cascade",
+      "question": "What is the purpose of the Ladder Logic Advanced PID (Cascade) schema?",
+      "answer": "The Ladder Logic Advanced PID (Cascade) schema is used for Schema for a Ladder Logic cascaded PID controller. One PID (slave) receives its setpoint from another PID (master):contentReference[oaicite:52]{index=52}, enabling a cascade (master-slave) architectur... It has 40 properties and is classified as Advanced_Cascade complexity in the PID category.",
+      "context": "Control schema: Ladder Logic Advanced PID (Cascade)",
+      "example_type": "qa",
+      "difficulty_level": "intermediate",
+      "tags": [
+        "schema",
+        "explanation",
+        "pid"
+      ],
+      "source_files": [
+        "advanced-pid-cascade.json"
+      ]
+    },
+    {
+      "example_id": "prop_usage_advanced-pid-cascade_created_at",
+      "question": "How is the created_at property used in Ladder Logic Advanced PID (Cascade)?",
+      "answer": "In Ladder Logic Advanced PID (Cascade), the created_at property is a required field that defines created_at for the control loop configuration.",
+      "context": "Property usage in Ladder Logic Advanced PID (Cascade)",
+      "example_type": "qa",
+      "difficulty_level": "basic",
+      "tags": [
+        "property",
+        "usage",
+        "pid"
+      ],
+      "source_files": [
+        "advanced-pid-cascade.json"
+      ]
+    },
+    {
+      "example_id": "schema_explain_advanced-pid-ff-cascade",
+      "question": "What is the purpose of the Ladder Logic Advanced PID (Cascade + Feedforward) schema?",
+      "answer": "The Ladder Logic Advanced PID (Cascade + Feedforward) schema is used for Schema for a Ladder PID with both cascade (master-slave) and feedforward compensation. For example, a slave flow/valve loop that gets its SP from a master temperature loop and adds a feedforward bias ... It has 45 properties and is classified as Advanced_Cascade_Feedforward complexity in the PID category.",
+      "context": "Control schema: Ladder Logic Advanced PID (Cascade + Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "intermediate",
+      "tags": [
+        "schema",
+        "explanation",
+        "pid"
+      ],
+      "source_files": [
+        "advanced-pid-ff-cascade.json"
+      ]
+    },
+    {
+      "example_id": "prop_usage_advanced-pid-ff-cascade_created_at",
+      "question": "How is the created_at property used in Ladder Logic Advanced PID (Cascade + Feedforward)?",
+      "answer": "In Ladder Logic Advanced PID (Cascade + Feedforward), the created_at property is a required field that defines created_at for the control loop configuration.",
+      "context": "Property usage in Ladder Logic Advanced PID (Cascade + Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "basic",
+      "tags": [
+        "property",
+        "usage",
+        "pid"
+      ],
+      "source_files": [
+        "advanced-pid-ff-cascade.json"
+      ]
+    },
+    {
+      "example_id": "schema_explain_advanced-pid-ff",
+      "question": "What is the purpose of the Ladder Logic Advanced PID (Feedforward) schema?",
+      "answer": "The Ladder Logic Advanced PID (Feedforward) schema is used for Schema for a Ladder Logic PID controller with feedforward augmentation. This uses the bias term as a feedforward input to anticipate disturbances:contentReference[oaicite:45]{index=45}.... It has 42 properties and is classified as Advanced_Feedforward complexity in the PID category.",
+      "context": "Control schema: Ladder Logic Advanced PID (Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "intermediate",
+      "tags": [
+        "schema",
+        "explanation",
+        "pid"
+      ],
+      "source_files": [
+        "advanced-pid-ff.json"
+      ]
+    },
+    {
+      "example_id": "prop_usage_advanced-pid-ff_created_at",
+      "question": "How is the created_at property used in Ladder Logic Advanced PID (Feedforward)?",
+      "answer": "In Ladder Logic Advanced PID (Feedforward), the created_at property is a required field that defines created_at for the control loop configuration.",
+      "context": "Property usage in Ladder Logic Advanced PID (Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "basic",
+      "tags": [
+        "property",
+        "usage",
+        "pid"
+      ],
+      "source_files": [
+        "advanced-pid-ff.json"
+      ]
+    },
+    {
+      "example_id": "schema_explain_advanced-pide-cas-multiff",
+      "question": "What is the purpose of the Function Block Advanced PIDE (Cascade + Multi-Feedforward) schema?",
+      "answer": "The Function Block Advanced PIDE (Cascade + Multi-Feedforward) schema is used for Schema for a cascaded PIDE with multiple feedforward inputs. Multiple disturbance variables are used, each with its own bias formula, to compute a combined feedforward signal:contentReference[oaicite:... It has 73 properties and is classified as Advanced_Cascade_Feedforward complexity in the PIDE category.",
+      "context": "Control schema: Function Block Advanced PIDE (Cascade + Multi-Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "intermediate",
+      "tags": [
+        "schema",
+        "explanation",
+        "pide"
+      ],
+      "source_files": [
+        "advanced-pide-cas-multiff.json"
+      ]
+    },
+    {
+      "example_id": "prop_usage_advanced-pide-cas-multiff_created_at",
+      "question": "How is the created_at property used in Function Block Advanced PIDE (Cascade + Multi-Feedforward)?",
+      "answer": "In Function Block Advanced PIDE (Cascade + Multi-Feedforward), the created_at property is a required field that defines created_at for the control loop configuration.",
+      "context": "Property usage in Function Block Advanced PIDE (Cascade + Multi-Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "basic",
+      "tags": [
+        "property",
+        "usage",
+        "pide"
+      ],
+      "source_files": [
+        "advanced-pide-cas-multiff.json"
+      ]
+    },
+    {
+      "example_id": "schema_explain_advanced-pide-cascade",
+      "question": "What is the purpose of the Function Block Advanced PIDE (Cascade) schema?",
+      "answer": "The Function Block Advanced PIDE (Cascade) schema is used for Schema for a pair of cascaded PIDE controllers (primary & secondary). The secondary (slave) PIDE is configured for Cascade mode and receives SPCascade from the primary’s CV:contentReference[oaicite:16... It has 69 properties and is classified as Advanced_Cascade complexity in the PIDE category.",
+      "context": "Control schema: Function Block Advanced PIDE (Cascade)",
+      "example_type": "qa",
+      "difficulty_level": "intermediate",
+      "tags": [
+        "schema",
+        "explanation",
+        "pide"
+      ],
+      "source_files": [
+        "advanced-pide-cascade.json"
+      ]
+    },
+    {
+      "example_id": "prop_usage_advanced-pide-cascade_created_at",
+      "question": "How is the created_at property used in Function Block Advanced PIDE (Cascade)?",
+      "answer": "In Function Block Advanced PIDE (Cascade), the created_at property is a required field that defines created_at for the control loop configuration.",
+      "context": "Property usage in Function Block Advanced PIDE (Cascade)",
+      "example_type": "qa",
+      "difficulty_level": "basic",
+      "tags": [
+        "property",
+        "usage",
+        "pide"
+      ],
+      "source_files": [
+        "advanced-pide-cascade.json"
+      ]
+    },
+    {
+      "example_id": "schema_explain_advanced-pide-ff",
+      "question": "What is the purpose of the Function Block Advanced PIDE (Feedforward) schema?",
+      "answer": "The Function Block Advanced PIDE (Feedforward) schema is used for Schema for a PIDE controller with feedforward compensation. An external feedforward value (FF) is added to the PID output to preemptively counteract disturbances:contentReference[oaicite:155]{index=15... It has 58 properties and is classified as Advanced_Feedforward complexity in the PIDE category.",
+      "context": "Control schema: Function Block Advanced PIDE (Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "intermediate",
+      "tags": [
+        "schema",
+        "explanation",
+        "pide"
+      ],
+      "source_files": [
+        "advanced-pide-ff.json"
+      ]
+    },
+    {
+      "example_id": "prop_usage_advanced-pide-ff_created_at",
+      "question": "How is the created_at property used in Function Block Advanced PIDE (Feedforward)?",
+      "answer": "In Function Block Advanced PIDE (Feedforward), the created_at property is a required field that defines created_at for the control loop configuration.",
+      "context": "Property usage in Function Block Advanced PIDE (Feedforward)",
+      "example_type": "qa",
+      "difficulty_level": "basic",
+      "tags": [
+        "property",
+        "usage",
+        "pide"
+      ],
+      "source_files": [
+        "advanced-pide-ff.json"
+      ]
+    },
+    {
+      "example_id": "schema_explain_standard-pid-controller",
+      "question": "What is the purpose of the Ladder Logic Standard PID Controller schema?",
+      "answer": "The Ladder Logic Standard PID Controller schema is used for Schema for configuring a standard Ladder Logic PID loop (positional form PID) in Studio 5000:contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}.... It has 39 properties and is classified as Standard complexity in the PID category.",
+      "context": "Control schema: Ladder Logic Standard PID Controller",
+      "example_type": "qa",
+      "difficulty_level": "intermediate",
+      "tags": [
+        "schema",
+        "explanation",
+        "pid"
+      ],
+      "source_files": [
+        "standard-pid-controller.json"
+      ]
+    },
+    {
+      "example_id": "prop_usage_standard-pid-controller_created_at",
+      "question": "How is the created_at property used in Ladder Logic Standard PID Controller?",
+      "answer": "In Ladder Logic Standard PID Controller, the created_at property is a required field that defines created_at for the control loop configuration.",
+      "context": "Property usage in Ladder Logic Standard PID Controller",
+      "example_type": "qa",
+      "difficulty_level": "basic",
+      "tags": [
+        "property",
+        "usage",
+        "pid"
+      ],
+      "source_files": [
+        "standard-pid-controller.json"
+      ]
+    },
+    {
+      "example_id": "schema_explain_standard-pide-controller",
+      "question": "What is the purpose of the Function Block Standard PIDE Controller schema?",
+      "answer": "The Function Block Standard PIDE Controller schema is used for Schema for a standard (single-loop) Enhanced PID (PIDE) function block configuration:contentReference[oaicite:74]{index=74} in Studio 5000.... It has 55 properties and is classified as Standard complexity in the PIDE category.",
+      "context": "Control schema: Function Block Standard PIDE Controller",
+      "example_type": "qa",
+      "difficulty_level": "intermediate",
+      "tags": [
+        "schema",
+        "explanation",
+        "pide"
+      ],
+      "source_files": [
+        "standard-pide-controller.json"
+      ]
+    },
+    {
+      "example_id": "prop_usage_standard-pide-controller_created_at",
+      "question": "How is the created_at property used in Function Block Standard PIDE Controller?",
+      "answer": "In Function Block Standard PIDE Controller, the created_at property is a required field that defines created_at for the control loop configuration.",
+      "context": "Property usage in Function Block Standard PIDE Controller",
+      "example_type": "qa",
+      "difficulty_level": "basic",
+      "tags": [
+        "property",
+        "usage",
+        "pide"
+      ],
+      "source_files": [
+        "standard-pide-controller.json"
+      ]
+    },
+    {
+      "example_id": "compare_advance-pide-ff-cas_advanced-pide-cas-multiff",
+      "question": "What's the difference between Advance Pide Ff Cas and Advanced Pide Cas Multiff?",
+      "answer": "Advance Pide Ff Cas and Advanced Pide Cas Multiff are similar control configurations with 72 shared properties. The main differences are in feedforwards. They have a similarity score of 0.99.",
+      "context": "Comparison between Advance Pide Ff Cas and Advanced Pide Cas Multiff",
+      "example_type": "qa",
+      "difficulty_level": "advanced",
+      "tags": [
+        "comparison",
+        "schema",
+        "differences"
+      ],
+      "source_files": [
+        "advance-pide-ff-cas.json",
+        "advanced-pide-cas-multiff.json"
+      ]
+    },
+    {
+      "example_id": "compare_advance-pide-ff-cas_advanced-pide-cascade",
+      "question": "What's the difference between Advance Pide Ff Cas and Advanced Pide Cascade?",
+      "answer": "Advance Pide Ff Cas and Advanced Pide Cascade are similar control configurations with 69 shared properties. The main differences are in FFSetPrevious, FFPrevious, FF. They have a similarity score of 0.96.",
+      "context": "Comparison between Advance Pide Ff Cas and Advanced Pide Cascade",
+      "example_type": "qa",
+      "difficulty_level": "advanced",
+      "tags": [
+        "comparison",
+        "schema",
+        "differences"
+      ],
+      "source_files": [
+        "advance-pide-ff-cas.json",
+        "advanced-pide-cascade.json"
+      ]
+    },
+    {
+      "example_id": "compare_advance-pide-ff-cas_advanced-pide-ff",
+      "question": "What's the difference between Advance Pide Ff Cas and Advanced Pide Ff?",
+      "answer": "Advance Pide Ff Cas and Advanced Pide Ff are similar control configurations with 58 shared properties. The main differences are in CVManLimiting, SPCascade, RatioProg. They have a similarity score of 0.81.",
+      "context": "Comparison between Advance Pide Ff Cas and Advanced Pide Ff",
+      "example_type": "qa",
+      "difficulty_level": "advanced",
+      "tags": [
+        "comparison",
+        "schema",
+        "differences"
+      ],
+      "source_files": [
+        "advance-pide-ff-cas.json",
+        "advanced-pide-ff.json"
+      ]
+    },
+    {
+      "example_id": "compare_advance-pide-ff-cas_standard-pide-controller",
+      "question": "What's the difference between Advance Pide Ff Cas and Standard Pide Controller?",
+      "answer": "Advance Pide Ff Cas and Standard Pide Controller are similar control configurations with 55 shared properties. The main differences are in CVManLimiting, SPCascade, FFPrevious. They have a similarity score of 0.76.",
+      "context": "Comparison between Advance Pide Ff Cas and Standard Pide Controller",
+      "example_type": "qa",
+      "difficulty_level": "advanced",
+      "tags": [
+        "comparison",
+        "schema",
+        "differences"
+      ],
+      "source_files": [
+        "advance-pide-ff-cas.json",
+        "standard-pide-controller.json"
+      ]
+    },
+    {
+      "example_id": "compare_advanced-pid-cascade_advanced-pid-ff-cascade",
+      "question": "What's the difference between Advanced Pid Cascade and Advanced Pid Ff Cascade?",
+      "answer": "Advanced Pid Cascade and Advanced Pid Ff Cascade are similar control configurations with 40 shared properties. The main differences are in Bias_Min, Bias_Max, FeedforwardSource. They have a similarity score of 0.89.",
+      "context": "Comparison between Advanced Pid Cascade and Advanced Pid Ff Cascade",
+      "example_type": "qa",
+      "difficulty_level": "advanced",
+      "tags": [
+        "comparison",
+        "schema",
+        "differences"
+      ],
+      "source_files": [
+        "advanced-pid-cascade.json",
+        "advanced-pid-ff-cascade.json"
+      ]
+    }
+  ],
+  "knowledge_graph": {
+    "nodes": [
+      {
+        "id": "schema_advance-pide-ff-cas",
+        "type": "schema",
+        "name": "Function Block Advanced PIDE (Cascade + Feedforward)",
+        "description": "Schema for a cascaded PIDE with feedforward. The secondary PIDE uses Cascade mode and has a feedforward bias input for measured disturbances:contentReference[oaicite:201]{index=201}.",
+        "properties": {
+          "control_type": "PIDE",
+          "complexity_level": "Advanced_Cascade_Feedforward",
+          "property_count": 72,
+          "required_fields": [
+            "created_at",
+            "created_by",
+            "version",
+            "PV",
+            "PVEUMax",
+            "PVEUMin",
+            "PGain",
+            "IGain",
+            "DGain",
+            "AllowCasRat"
+          ],
+          "version": "unknown",
+          "file_path": "../docs/context/control-schema/advance-pide-ff-cas.json"
+        },
+        "tags": [
+          "control",
+          "schema",
+          "pide",
+          "advanced_cascade_feedforward"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "schema_advanced-pid-cascade",
+        "type": "schema",
+        "name": "Ladder Logic Advanced PID (Cascade)",
+        "description": "Schema for a Ladder Logic cascaded PID controller. One PID (slave) receives its setpoint from another PID (master):contentReference[oaicite:52]{index=52}, enabling a cascade (master-slave) architecture.",
+        "properties": {
+          "control_type": "PID",
+          "complexity_level": "Advanced_Cascade",
+          "property_count": 40,
+          "required_fields": [
+            "created_at",
+            "created_by",
+            "version",
+            "CL",
+            "CT",
+            "SP",
+            "KP",
+            "KI",
+            "KD"
+          ],
+          "version": "unknown",
+          "file_path": "../docs/context/control-schema/advanced-pid-cascade.json"
+        },
+        "tags": [
+          "control",
+          "schema",
+          "pid",
+          "advanced_cascade"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "schema_advanced-pid-ff-cascade",
+        "type": "schema",
+        "name": "Ladder Logic Advanced PID (Cascade + Feedforward)",
+        "description": "Schema for a Ladder PID with both cascade (master-slave) and feedforward compensation. For example, a slave flow/valve loop that gets its SP from a master temperature loop and adds a feedforward bias for load changes:contentReference[oaicite:65]{index=65}.",
+        "properties": {
+          "control_type": "PID",
+          "complexity_level": "Advanced_Cascade_Feedforward",
+          "property_count": 45,
+          "required_fields": [
+            "created_at",
+            "created_by",
+            "version",
+            "CL",
+            "CT",
+            "KP",
+            "KI",
+            "KD",
+            "FeedforwardSource",
+            "FF_MinValue",
+            "FF_MaxValue",
+            "Bias_Min",
+            "Bias_Max"
+          ],
+          "version": "unknown",
+          "file_path": "../docs/context/control-schema/advanced-pid-ff-cascade.json"
+        },
+        "tags": [
+          "control",
+          "schema",
+          "pid",
+          "advanced_cascade_feedforward"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "schema_advanced-pid-ff",
+        "type": "schema",
+        "name": "Ladder Logic Advanced PID (Feedforward)",
+        "description": "Schema for a Ladder Logic PID controller with feedforward augmentation. This uses the bias term as a feedforward input to anticipate disturbances:contentReference[oaicite:45]{index=45}.",
+        "properties": {
+          "control_type": "PID",
+          "complexity_level": "Advanced_Feedforward",
+          "property_count": 42,
+          "required_fields": [
+            "created_at",
+            "created_by",
+            "version",
+            "SP",
+            "KP",
+            "KI",
+            "KD",
+            "FeedforwardSource",
+            "FF_MinValue",
+            "FF_MaxValue",
+            "Bias_Min",
+            "Bias_Max"
+          ],
+          "version": "unknown",
+          "file_path": "../docs/context/control-schema/advanced-pid-ff.json"
+        },
+        "tags": [
+          "control",
+          "schema",
+          "pid",
+          "advanced_feedforward"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "schema_advanced-pide-cas-multiff",
+        "type": "schema",
+        "name": "Function Block Advanced PIDE (Cascade + Multi-Feedforward)",
+        "description": "Schema for a cascaded PIDE with multiple feedforward inputs. Multiple disturbance variables are used, each with its own bias formula, to compute a combined feedforward signal:contentReference[oaicite:209]{index=209}:contentReference[oaicite:210]{index=210}.",
+        "properties": {
+          "control_type": "PIDE",
+          "complexity_level": "Advanced_Cascade_Feedforward",
+          "property_count": 73,
+          "required_fields": [
+            "created_at",
+            "created_by",
+            "version",
+            "PV",
+            "PVEUMax",
+            "PVEUMin",
+            "PGain",
+            "IGain",
+            "DGain",
+            "AllowCasRat",
+            "feedforwards"
+          ],
+          "version": "unknown",
+          "file_path": "../docs/context/control-schema/advanced-pide-cas-multiff.json"
+        },
+        "tags": [
+          "control",
+          "schema",
+          "pide",
+          "advanced_cascade_feedforward"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "schema_advanced-pide-cascade",
+        "type": "schema",
+        "name": "Function Block Advanced PIDE (Cascade)",
+        "description": "Schema for a pair of cascaded PIDE controllers (primary & secondary). The secondary (slave) PIDE is configured for Cascade mode and receives SPCascade from the primary’s CV:contentReference[oaicite:164]{index=164}.",
+        "properties": {
+          "control_type": "PIDE",
+          "complexity_level": "Advanced_Cascade",
+          "property_count": 69,
+          "required_fields": [
+            "created_at",
+            "created_by",
+            "version",
+            "PV",
+            "PVEUMax",
+            "PVEUMin",
+            "PGain",
+            "IGain",
+            "DGain",
+            "AllowCasRat"
+          ],
+          "version": "unknown",
+          "file_path": "../docs/context/control-schema/advanced-pide-cascade.json"
+        },
+        "tags": [
+          "control",
+          "schema",
+          "pide",
+          "advanced_cascade"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "schema_advanced-pide-ff",
+        "type": "schema",
+        "name": "Function Block Advanced PIDE (Feedforward)",
+        "description": "Schema for a PIDE controller with feedforward compensation. An external feedforward value (FF) is added to the PID output to preemptively counteract disturbances:contentReference[oaicite:155]{index=155}.",
+        "properties": {
+          "control_type": "PIDE",
+          "complexity_level": "Advanced_Feedforward",
+          "property_count": 58,
+          "required_fields": [
+            "created_at",
+            "created_by",
+            "version",
+            "PV",
+            "PVEUMax",
+            "PVEUMin",
+            "PGain",
+            "IGain",
+            "DGain"
+          ],
+          "version": "unknown",
+          "file_path": "../docs/context/control-schema/advanced-pide-ff.json"
+        },
+        "tags": [
+          "control",
+          "schema",
+          "pide",
+          "advanced_feedforward"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "schema_standard-pid-controller",
+        "type": "schema",
+        "name": "Ladder Logic Standard PID Controller",
+        "description": "Schema for configuring a standard Ladder Logic PID loop (positional form PID) in Studio 5000:contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}.",
+        "properties": {
+          "control_type": "PID",
+          "complexity_level": "Standard",
+          "property_count": 39,
+          "required_fields": [
+            "created_at",
+            "created_by",
+            "version",
+            "SP",
+            "KP",
+            "KI",
+            "KD"
+          ],
+          "version": "unknown",
+          "file_path": "../docs/context/control-schema/standard-pid-controller.json"
+        },
+        "tags": [
+          "control",
+          "schema",
+          "pid",
+          "standard"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "schema_standard-pide-controller",
+        "type": "schema",
+        "name": "Function Block Standard PIDE Controller",
+        "description": "Schema for a standard (single-loop) Enhanced PID (PIDE) function block configuration:contentReference[oaicite:74]{index=74} in Studio 5000.",
+        "properties": {
+          "control_type": "PIDE",
+          "complexity_level": "Standard",
+          "property_count": 55,
+          "required_fields": [
+            "created_at",
+            "created_by",
+            "version",
+            "PV",
+            "PVEUMax",
+            "PVEUMin",
+            "PGain",
+            "IGain",
+            "DGain"
+          ],
+          "version": "unknown",
+          "file_path": "../docs/context/control-schema/standard-pide-controller.json"
+        },
+        "tags": [
+          "control",
+          "schema",
+          "pide",
+          "standard"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "concept_PIDE_function_block_advanced_pide_(cascade_+_feedforward)",
+        "type": "concept",
+        "name": "Function Block Advanced PIDE (Cascade + Feedforward)",
+        "description": "Control concept in category: PIDE",
+        "properties": {
+          "category": "PIDE",
+          "domain": "control_systems"
+        },
+        "tags": [
+          "concept",
+          "control",
+          "pide"
+        ],
+        "confidence": 0.7
+      },
+      {
+        "id": "concept_PIDE_function_block_advanced_pide_(cascade_+_multi-feedforward)",
+        "type": "concept",
+        "name": "Function Block Advanced PIDE (Cascade + Multi-Feedforward)",
+        "description": "Control concept in category: PIDE",
+        "properties": {
+          "category": "PIDE",
+          "domain": "control_systems"
+        },
+        "tags": [
+          "concept",
+          "control",
+          "pide"
+        ],
+        "confidence": 0.7
+      },
+      {
+        "id": "concept_PIDE_function_block_advanced_pide_(cascade)",
+        "type": "concept",
+        "name": "Function Block Advanced PIDE (Cascade)",
+        "description": "Control concept in category: PIDE",
+        "properties": {
+          "category": "PIDE",
+          "domain": "control_systems"
+        },
+        "tags": [
+          "concept",
+          "control",
+          "pide"
+        ],
+        "confidence": 0.7
+      },
+      {
+        "id": "concept_PIDE_function_block_advanced_pide_(feedforward)",
+        "type": "concept",
+        "name": "Function Block Advanced PIDE (Feedforward)",
+        "description": "Control concept in category: PIDE",
+        "properties": {
+          "category": "PIDE",
+          "domain": "control_systems"
+        },
+        "tags": [
+          "concept",
+          "control",
+          "pide"
+        ],
+        "confidence": 0.7
+      },
+      {
+        "id": "concept_PIDE_function_block_standard_pide_controller",
+        "type": "concept",
+        "name": "Function Block Standard PIDE Controller",
+        "description": "Control concept in category: PIDE",
+        "properties": {
+          "category": "PIDE",
+          "domain": "control_systems"
+        },
+        "tags": [
+          "concept",
+          "control",
+          "pide"
+        ],
+        "confidence": 0.7
+      },
+      {
+        "id": "concept_PID_ladder_logic_advanced_pid_(cascade)",
+        "type": "concept",
+        "name": "Ladder Logic Advanced PID (Cascade)",
+        "description": "Control concept in category: PID",
+        "properties": {
+          "category": "PID",
+          "domain": "control_systems"
+        },
+        "tags": [
+          "concept",
+          "control",
+          "pid"
+        ],
+        "confidence": 0.7
+      },
+      {
+        "id": "concept_PID_ladder_logic_advanced_pid_(cascade_+_feedforward)",
+        "type": "concept",
+        "name": "Ladder Logic Advanced PID (Cascade + Feedforward)",
+        "description": "Control concept in category: PID",
+        "properties": {
+          "category": "PID",
+          "domain": "control_systems"
+        },
+        "tags": [
+          "concept",
+          "control",
+          "pid"
+        ],
+        "confidence": 0.7
+      },
+      {
+        "id": "concept_PID_ladder_logic_advanced_pid_(feedforward)",
+        "type": "concept",
+        "name": "Ladder Logic Advanced PID (Feedforward)",
+        "description": "Control concept in category: PID",
+        "properties": {
+          "category": "PID",
+          "domain": "control_systems"
+        },
+        "tags": [
+          "concept",
+          "control",
+          "pid"
+        ],
+        "confidence": 0.7
+      },
+      {
+        "id": "concept_PID_ladder_logic_standard_pid_controller",
+        "type": "concept",
+        "name": "Ladder Logic Standard PID Controller",
+        "description": "Control concept in category: PID",
+        "properties": {
+          "category": "PID",
+          "domain": "control_systems"
+        },
+        "tags": [
+          "concept",
+          "control",
+          "pid"
+        ],
+        "confidence": 0.7
+      }
+    ],
+    "edges": [
+      {
+        "id": "rel_schema_advance-pide-ff-cas_schema_advanced-pide-cas-multiff",
+        "source": "schema_advance-pide-ff-cas",
+        "target": "schema_advanced-pide-cas-multiff",
+        "type": "extends",
+        "strength": 0.9863013698630136,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "SPCascade",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "WindupHIn",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "RatioOper",
+            "CVInitValue",
+            "IGain",
+            "DevHHLimit",
+            "CVPrevious",
+            "PVTracking",
+            "ProgProgReq",
+            "ControlAction",
+            "RatioHLimit",
+            "CVOverride",
+            "OperOperReq",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DevDeadband",
+            "DGain",
+            "SPLLimit",
+            "FFPrevious",
+            "CVInitReq",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "RatioProg",
+            "UseRatio",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "WindupLIn",
+            "AllowCasRat",
+            "RatioLLimit",
+            "ZCDeadband",
+            "created_at",
+            "FFSetPrevious",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "CVSetPrevious",
+            "CVManLimiting",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "FF",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "OperCasRatReq",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "feedforwards"
+          ],
+          "similarity_score": 0.9863013698630136
+        }
+      },
+      {
+        "id": "rel_schema_advance-pide-ff-cas_schema_advanced-pide-cascade",
+        "source": "schema_advance-pide-ff-cas",
+        "target": "schema_advanced-pide-cascade",
+        "type": "extends",
+        "strength": 0.9583333333333334,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "SPCascade",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "WindupHIn",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "RatioOper",
+            "CVInitValue",
+            "IGain",
+            "DevHHLimit",
+            "CVPrevious",
+            "PVTracking",
+            "ProgProgReq",
+            "ControlAction",
+            "RatioHLimit",
+            "CVOverride",
+            "OperOperReq",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DevDeadband",
+            "DGain",
+            "SPLLimit",
+            "CVInitReq",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "RatioProg",
+            "UseRatio",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "WindupLIn",
+            "AllowCasRat",
+            "RatioLLimit",
+            "ZCDeadband",
+            "created_at",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "CVSetPrevious",
+            "CVManLimiting",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "OperCasRatReq",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "FFSetPrevious",
+            "FFPrevious",
+            "FF"
+          ],
+          "similarity_score": 0.9583333333333334
+        }
+      },
+      {
+        "id": "rel_schema_advance-pide-ff-cas_schema_advanced-pide-ff",
+        "source": "schema_advance-pide-ff-cas",
+        "target": "schema_advanced-pide-ff",
+        "type": "extends",
+        "strength": 0.8055555555555556,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "IGain",
+            "DevHHLimit",
+            "PVTracking",
+            "ProgProgReq",
+            "OperOperReq",
+            "ControlAction",
+            "CVOverride",
+            "DevDeadband",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DGain",
+            "SPLLimit",
+            "FFPrevious",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "AllowCasRat",
+            "ZCDeadband",
+            "created_at",
+            "FFSetPrevious",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "FF",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "CVManLimiting",
+            "SPCascade",
+            "RatioProg",
+            "UseRatio",
+            "CVInitReq",
+            "WindupHIn",
+            "RatioLLimit",
+            "WindupLIn",
+            "RatioOper",
+            "CVInitValue",
+            "CVPrevious",
+            "OperCasRatReq",
+            "RatioHLimit",
+            "CVSetPrevious"
+          ],
+          "similarity_score": 0.8055555555555556
+        }
+      },
+      {
+        "id": "rel_schema_advance-pide-ff-cas_schema_standard-pide-controller",
+        "source": "schema_advance-pide-ff-cas",
+        "target": "schema_standard-pide-controller",
+        "type": "extends",
+        "strength": 0.7638888888888888,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "IGain",
+            "DevHHLimit",
+            "PVTracking",
+            "ProgProgReq",
+            "OperOperReq",
+            "ControlAction",
+            "CVOverride",
+            "DevDeadband",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DGain",
+            "SPLLimit",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "AllowCasRat",
+            "ZCDeadband",
+            "created_at",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "CVManLimiting",
+            "SPCascade",
+            "FFPrevious",
+            "RatioProg",
+            "UseRatio",
+            "CVInitReq",
+            "WindupHIn",
+            "FF",
+            "RatioLLimit",
+            "WindupLIn",
+            "RatioOper",
+            "CVInitValue",
+            "CVPrevious",
+            "FFSetPrevious",
+            "OperCasRatReq",
+            "RatioHLimit",
+            "CVSetPrevious"
+          ],
+          "similarity_score": 0.7638888888888888
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pid-cascade_schema_advanced-pid-ff-cascade",
+        "source": "schema_advanced-pid-cascade",
+        "target": "schema_advanced-pid-ff-cascade",
+        "type": "extends",
+        "strength": 0.8888888888888888,
+        "properties": {
+          "shared_properties": [
+            "MAXO",
+            "MINTIE",
+            "MAXI",
+            "PE",
+            "KP",
+            "PVH",
+            "MINS",
+            "BIAS",
+            "DVP",
+            "created_by",
+            "NOBC",
+            "MasterLoopTag",
+            "MINO",
+            "DVDB",
+            "version",
+            "SP",
+            "SWM",
+            "DOE",
+            "MINI",
+            "DVN",
+            "MAXCV",
+            "MAXTIE",
+            "PVT",
+            "NOZC",
+            "INI",
+            "created_at",
+            "DB",
+            "PVL",
+            "PVDB",
+            "MAXS",
+            "NDF",
+            "KD",
+            "CA",
+            "MINCV",
+            "CL",
+            "MO",
+            "SO",
+            "KI",
+            "UPD",
+            "CT"
+          ],
+          "differences": [
+            "Bias_Min",
+            "Bias_Max",
+            "FeedforwardSource",
+            "FF_MinValue",
+            "FF_MaxValue"
+          ],
+          "similarity_score": 0.8888888888888888
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pid-cascade_schema_advanced-pid-ff",
+        "source": "schema_advanced-pid-cascade",
+        "target": "schema_advanced-pid-ff",
+        "type": "variant_of",
+        "strength": 0.8222222222222222,
+        "properties": {
+          "shared_properties": [
+            "MAXO",
+            "MINTIE",
+            "MAXI",
+            "PE",
+            "KP",
+            "PVH",
+            "MINS",
+            "BIAS",
+            "DVP",
+            "created_by",
+            "NOBC",
+            "MINO",
+            "DVDB",
+            "version",
+            "SP",
+            "SWM",
+            "DOE",
+            "MINI",
+            "DVN",
+            "MAXCV",
+            "MAXTIE",
+            "PVT",
+            "NOZC",
+            "INI",
+            "created_at",
+            "DB",
+            "PVL",
+            "PVDB",
+            "MAXS",
+            "NDF",
+            "KD",
+            "CA",
+            "MINCV",
+            "MO",
+            "SO",
+            "KI",
+            "UPD"
+          ],
+          "differences": [
+            "Bias_Min",
+            "MasterLoopTag",
+            "CL",
+            "Bias_Max",
+            "FeedforwardSource",
+            "FF_MinValue",
+            "FF_MaxValue",
+            "CT"
+          ],
+          "similarity_score": 0.8222222222222222
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pid-cascade_schema_standard-pid-controller",
+        "source": "schema_advanced-pid-cascade",
+        "target": "schema_standard-pid-controller",
+        "type": "extends",
+        "strength": 0.975,
+        "properties": {
+          "shared_properties": [
+            "MAXO",
+            "MINTIE",
+            "MAXI",
+            "PE",
+            "KP",
+            "PVH",
+            "MINS",
+            "BIAS",
+            "DVP",
+            "created_by",
+            "NOBC",
+            "MINO",
+            "DVDB",
+            "version",
+            "SP",
+            "SWM",
+            "DOE",
+            "MINI",
+            "DVN",
+            "MAXCV",
+            "MAXTIE",
+            "PVT",
+            "NOZC",
+            "INI",
+            "created_at",
+            "DB",
+            "PVL",
+            "PVDB",
+            "MAXS",
+            "NDF",
+            "KD",
+            "CA",
+            "MINCV",
+            "CL",
+            "MO",
+            "SO",
+            "KI",
+            "UPD",
+            "CT"
+          ],
+          "differences": [
+            "MasterLoopTag"
+          ],
+          "similarity_score": 0.975
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pid-ff-cascade_schema_advanced-pid-ff",
+        "source": "schema_advanced-pid-ff-cascade",
+        "target": "schema_advanced-pid-ff",
+        "type": "extends",
+        "strength": 0.9333333333333333,
+        "properties": {
+          "shared_properties": [
+            "Bias_Min",
+            "MAXO",
+            "MINTIE",
+            "MAXI",
+            "PE",
+            "KP",
+            "PVH",
+            "MINS",
+            "BIAS",
+            "DVP",
+            "created_by",
+            "NOBC",
+            "MINO",
+            "DVDB",
+            "version",
+            "SP",
+            "FF_MinValue",
+            "SWM",
+            "DOE",
+            "MINI",
+            "DVN",
+            "MAXCV",
+            "MAXTIE",
+            "PVT",
+            "Bias_Max",
+            "NOZC",
+            "INI",
+            "created_at",
+            "FeedforwardSource",
+            "FF_MaxValue",
+            "DB",
+            "PVL",
+            "PVDB",
+            "MAXS",
+            "NDF",
+            "KD",
+            "CA",
+            "MINCV",
+            "MO",
+            "SO",
+            "KI",
+            "UPD"
+          ],
+          "differences": [
+            "MasterLoopTag",
+            "CT",
+            "CL"
+          ],
+          "similarity_score": 0.9333333333333333
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pid-ff-cascade_schema_standard-pid-controller",
+        "source": "schema_advanced-pid-ff-cascade",
+        "target": "schema_standard-pid-controller",
+        "type": "extends",
+        "strength": 0.8666666666666667,
+        "properties": {
+          "shared_properties": [
+            "MAXO",
+            "MINTIE",
+            "MAXI",
+            "PE",
+            "KP",
+            "PVH",
+            "MINS",
+            "BIAS",
+            "DVP",
+            "created_by",
+            "NOBC",
+            "MINO",
+            "DVDB",
+            "version",
+            "SP",
+            "SWM",
+            "DOE",
+            "MINI",
+            "DVN",
+            "MAXCV",
+            "MAXTIE",
+            "PVT",
+            "NOZC",
+            "INI",
+            "created_at",
+            "DB",
+            "PVL",
+            "PVDB",
+            "MAXS",
+            "NDF",
+            "KD",
+            "CA",
+            "MINCV",
+            "CL",
+            "MO",
+            "SO",
+            "KI",
+            "UPD",
+            "CT"
+          ],
+          "differences": [
+            "Bias_Min",
+            "MasterLoopTag",
+            "Bias_Max",
+            "FeedforwardSource",
+            "FF_MinValue",
+            "FF_MaxValue"
+          ],
+          "similarity_score": 0.8666666666666667
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pid-ff_schema_standard-pid-controller",
+        "source": "schema_advanced-pid-ff",
+        "target": "schema_standard-pid-controller",
+        "type": "variant_of",
+        "strength": 0.8409090909090909,
+        "properties": {
+          "shared_properties": [
+            "MAXO",
+            "MINTIE",
+            "MAXI",
+            "PE",
+            "KP",
+            "PVH",
+            "MINS",
+            "BIAS",
+            "DVP",
+            "created_by",
+            "NOBC",
+            "MINO",
+            "DVDB",
+            "version",
+            "SP",
+            "SWM",
+            "DOE",
+            "MINI",
+            "DVN",
+            "MAXCV",
+            "MAXTIE",
+            "PVT",
+            "NOZC",
+            "INI",
+            "created_at",
+            "DB",
+            "PVL",
+            "PVDB",
+            "MAXS",
+            "NDF",
+            "KD",
+            "CA",
+            "MINCV",
+            "MO",
+            "SO",
+            "KI",
+            "UPD"
+          ],
+          "differences": [
+            "Bias_Min",
+            "CL",
+            "Bias_Max",
+            "FeedforwardSource",
+            "FF_MinValue",
+            "FF_MaxValue",
+            "CT"
+          ],
+          "similarity_score": 0.8409090909090909
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pide-cas-multiff_schema_advanced-pide-cascade",
+        "source": "schema_advanced-pide-cas-multiff",
+        "target": "schema_advanced-pide-cascade",
+        "type": "extends",
+        "strength": 0.9452054794520548,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "SPCascade",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "WindupHIn",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "RatioOper",
+            "CVInitValue",
+            "IGain",
+            "DevHHLimit",
+            "CVPrevious",
+            "PVTracking",
+            "ProgProgReq",
+            "ControlAction",
+            "RatioHLimit",
+            "CVOverride",
+            "OperOperReq",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DevDeadband",
+            "DGain",
+            "SPLLimit",
+            "CVInitReq",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "RatioProg",
+            "UseRatio",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "WindupLIn",
+            "AllowCasRat",
+            "RatioLLimit",
+            "ZCDeadband",
+            "created_at",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "CVSetPrevious",
+            "CVManLimiting",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "OperCasRatReq",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "FFSetPrevious",
+            "feedforwards",
+            "FFPrevious",
+            "FF"
+          ],
+          "similarity_score": 0.9452054794520548
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pide-cas-multiff_schema_advanced-pide-ff",
+        "source": "schema_advanced-pide-cas-multiff",
+        "target": "schema_advanced-pide-ff",
+        "type": "extends",
+        "strength": 0.7945205479452054,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "IGain",
+            "DevHHLimit",
+            "PVTracking",
+            "ProgProgReq",
+            "OperOperReq",
+            "ControlAction",
+            "CVOverride",
+            "DevDeadband",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DGain",
+            "SPLLimit",
+            "FFPrevious",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "AllowCasRat",
+            "ZCDeadband",
+            "created_at",
+            "FFSetPrevious",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "FF",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "CVManLimiting",
+            "feedforwards",
+            "SPCascade",
+            "RatioProg",
+            "UseRatio",
+            "CVInitReq",
+            "WindupHIn",
+            "RatioLLimit",
+            "WindupLIn",
+            "RatioOper",
+            "CVInitValue",
+            "CVPrevious",
+            "OperCasRatReq",
+            "RatioHLimit",
+            "CVSetPrevious"
+          ],
+          "similarity_score": 0.7945205479452054
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pide-cas-multiff_schema_standard-pide-controller",
+        "source": "schema_advanced-pide-cas-multiff",
+        "target": "schema_standard-pide-controller",
+        "type": "extends",
+        "strength": 0.7534246575342466,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "IGain",
+            "DevHHLimit",
+            "PVTracking",
+            "ProgProgReq",
+            "OperOperReq",
+            "ControlAction",
+            "CVOverride",
+            "DevDeadband",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DGain",
+            "SPLLimit",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "AllowCasRat",
+            "ZCDeadband",
+            "created_at",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "CVManLimiting",
+            "feedforwards",
+            "SPCascade",
+            "FFPrevious",
+            "RatioProg",
+            "UseRatio",
+            "CVInitReq",
+            "WindupHIn",
+            "FF",
+            "RatioLLimit",
+            "WindupLIn",
+            "RatioOper",
+            "CVInitValue",
+            "CVPrevious",
+            "FFSetPrevious",
+            "OperCasRatReq",
+            "RatioHLimit",
+            "CVSetPrevious"
+          ],
+          "similarity_score": 0.7534246575342466
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pide-cascade_schema_advanced-pide-ff",
+        "source": "schema_advanced-pide-cascade",
+        "target": "schema_advanced-pide-ff",
+        "type": "variant_of",
+        "strength": 0.7638888888888888,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "IGain",
+            "DevHHLimit",
+            "PVTracking",
+            "ProgProgReq",
+            "OperOperReq",
+            "ControlAction",
+            "CVOverride",
+            "DevDeadband",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DGain",
+            "SPLLimit",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "AllowCasRat",
+            "ZCDeadband",
+            "created_at",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "CVManLimiting",
+            "SPCascade",
+            "FFPrevious",
+            "RatioProg",
+            "UseRatio",
+            "CVInitReq",
+            "WindupHIn",
+            "FF",
+            "RatioLLimit",
+            "WindupLIn",
+            "RatioOper",
+            "CVInitValue",
+            "CVPrevious",
+            "FFSetPrevious",
+            "OperCasRatReq",
+            "RatioHLimit",
+            "CVSetPrevious"
+          ],
+          "similarity_score": 0.7638888888888888
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pide-cascade_schema_standard-pide-controller",
+        "source": "schema_advanced-pide-cascade",
+        "target": "schema_standard-pide-controller",
+        "type": "extends",
+        "strength": 0.7971014492753623,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "IGain",
+            "DevHHLimit",
+            "PVTracking",
+            "ProgProgReq",
+            "OperOperReq",
+            "ControlAction",
+            "CVOverride",
+            "DevDeadband",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DGain",
+            "SPLLimit",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "AllowCasRat",
+            "ZCDeadband",
+            "created_at",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "CVManLimiting",
+            "SPCascade",
+            "RatioProg",
+            "UseRatio",
+            "CVInitReq",
+            "WindupHIn",
+            "RatioLLimit",
+            "WindupLIn",
+            "RatioOper",
+            "CVInitValue",
+            "CVPrevious",
+            "OperCasRatReq",
+            "RatioHLimit",
+            "CVSetPrevious"
+          ],
+          "similarity_score": 0.7971014492753623
+        }
+      },
+      {
+        "id": "rel_schema_advanced-pide-ff_schema_standard-pide-controller",
+        "source": "schema_advanced-pide-ff",
+        "target": "schema_standard-pide-controller",
+        "type": "extends",
+        "strength": 0.9482758620689655,
+        "properties": {
+          "shared_properties": [
+            "CVFault",
+            "PVFault",
+            "DevLLLimit",
+            "PVEDerivative",
+            "SPOper",
+            "ProgAutoReq",
+            "PVEProportional",
+            "PVHLimit",
+            "IGain",
+            "DevHHLimit",
+            "PVTracking",
+            "ProgProgReq",
+            "OperOperReq",
+            "ControlAction",
+            "CVOverride",
+            "DevDeadband",
+            "PV",
+            "CVOper",
+            "DependIndepend",
+            "created_by",
+            "DevLLimit",
+            "DGain",
+            "SPLLimit",
+            "ProgOverrideReq",
+            "version",
+            "SPProg",
+            "ZCOff",
+            "CVLLimit",
+            "CVProg",
+            "OperProgReq",
+            "PVDeadband",
+            "CVROCLimit",
+            "PVEUMax",
+            "CVHLimit",
+            "AllowCasRat",
+            "ZCDeadband",
+            "created_at",
+            "PVROCNegLimit",
+            "DevHLimit",
+            "SPHLimit",
+            "ProgManualReq",
+            "PVEUMin",
+            "PVROCPosLimit",
+            "DSmoothing",
+            "ProgHandReq",
+            "PVROCPeriod",
+            "CVEUMax",
+            "CVEUMin",
+            "PGain",
+            "PVLLimit",
+            "PVLLLimit",
+            "ManualAfterInit",
+            "ProgCasRatReq",
+            "PVHHLimit",
+            "ProgOperReq"
+          ],
+          "differences": [
+            "FFSetPrevious",
+            "FFPrevious",
+            "FF"
+          ],
+          "similarity_score": 0.9482758620689655
+        }
+      },
+      {
+        "id": "hierarchy_concept_control_types_pide_concept_complexity_advanced_cascade_feedforward",
+        "source": "concept_complexity_advanced_cascade_feedforward",
+        "target": "concept_control_types_pide",
+        "type": "part_of",
+        "strength": 1.0,
+        "properties": {
+          "hierarchy_type": "complexity"
+        }
+      },
+      {
+        "id": "hierarchy_concept_control_types_pide_concept_complexity_advanced_cascade_feedforward",
+        "source": "concept_complexity_advanced_cascade_feedforward",
+        "target": "concept_control_types_pide",
+        "type": "part_of",
+        "strength": 1.0,
+        "properties": {
+          "hierarchy_type": "complexity"
+        }
+      },
+      {
+        "id": "hierarchy_concept_control_types_pide_concept_complexity_advanced_cascade",
+        "source": "concept_complexity_advanced_cascade",
+        "target": "concept_control_types_pide",
+        "type": "part_of",
+        "strength": 1.0,
+        "properties": {
+          "hierarchy_type": "complexity"
+        }
+      },
+      {
+        "id": "hierarchy_concept_control_types_pide_concept_complexity_advanced_feedforward",
+        "source": "concept_complexity_advanced_feedforward",
+        "target": "concept_control_types_pide",
+        "type": "part_of",
+        "strength": 1.0,
+        "properties": {
+          "hierarchy_type": "complexity"
+        }
+      },
+      {
+        "id": "hierarchy_concept_control_types_pid_concept_complexity_advanced_cascade",
+        "source": "concept_complexity_advanced_cascade",
+        "target": "concept_control_types_pid",
+        "type": "part_of",
+        "strength": 1.0,
+        "properties": {
+          "hierarchy_type": "complexity"
+        }
+      },
+      {
+        "id": "hierarchy_concept_control_types_pid_concept_complexity_advanced_cascade_feedforward",
+        "source": "concept_complexity_advanced_cascade_feedforward",
+        "target": "concept_control_types_pid",
+        "type": "part_of",
+        "strength": 1.0,
+        "properties": {
+          "hierarchy_type": "complexity"
+        }
+      },
+      {
+        "id": "hierarchy_concept_control_types_pid_concept_complexity_advanced_feedforward",
+        "source": "concept_complexity_advanced_feedforward",
+        "target": "concept_control_types_pid",
+        "type": "part_of",
+        "strength": 1.0,
+        "properties": {
+          "hierarchy_type": "complexity"
+        }
+      }
+    ],
+    "metadata": {
+      "total_entities": 18,
+      "total_relationships": 23,
+      "entity_types": {
+        "schema": 9,
+        "concept": 9
+      },
+      "relationship_types": {
+        "extends": 13,
+        "variant_of": 3,
+        "part_of": 7
+      }
+    }
+  },
+  "ingestion_metadata": {
+    "extraction_timestamp": "2025-07-15T05:36:31.484675",
+    "source_files_count": 0,
+    "source_files": [],
+    "total_size_bytes": 0,
+    "file_types": {},
+    "extraction_stats": {
+      "entities_extracted": 18,
+      "relationships_extracted": 23,
+      "training_examples_generated": 23
+    },
+    "confidence_distribution": {
+      "high_confidence": 9,
+      "medium_confidence": 9,
+      "low_confidence": 0
+    },
+    "recommended_ingestion_order": [
+      "schemas",
+      "algorithms",
+      "concepts",
+      "best_practices",
+      "data_patterns"
+    ]
+  }
+}

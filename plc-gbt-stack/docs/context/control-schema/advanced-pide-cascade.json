@@ -1,0 +1,152 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Function Block Advanced PIDE (Cascade)",
+    "description": "Schema for a pair of cascaded PIDE controllers (primary & secondary). The secondary (slave) PIDE is configured for Cascade mode and receives SPCascade from the primary’s CV:contentReference[oaicite:164]{index=164}.",
+    "type": "object",
+    "properties": {
+      "created_at": { "type": "string", "format": "date-time" },
+      "created_by": { "type": "string" },
+      "version": { "type": "string", "enum": ["00.00.001"] },
+      "PV": { "type": "number", "description": "Process Variable (EU) of this controller." },
+      "PVFault": { "type": "boolean", "description": "PV fault flag." },
+      "PVEUMax": { "type": "number", "description": "PV EU max.", "default": 100.0 },
+      "PVEUMin": { "type": "number", "description": "PV EU min.", "default": 0.0 },
+      "SPProg": { "type": "number", "description": "Program setpoint (used if in program control and not cascaded)."},
+      "SPOper": { "type": "number", "description": "Operator setpoint (used if in operator control and not cascaded)."},
+      "SPCascade": {
+        "type": "number",
+        "description": "Cascade Setpoint (EU):contentReference[oaicite:165]{index=165}. This is the remote SP received from a primary loop. When Cascade mode is active (CasRat mode), the PIDE uses SPCascade (or SPCascade * Ratio) as its target:contentReference[oaicite:166]{index=166}:contentReference[oaicite:167]{index=167}. For the secondary controller, this should be wired to the primary’s CVEU output.",
+        "default": 0.0
+      },
+      "SPHLimit": { "type": "number", "description": "SP high limit (EU).", "default": 100.0 },
+      "SPLLimit": { "type": "number", "description": "SP low limit (EU).", "default": 0.0 },
+      "UseRatio": {
+        "type": "boolean",
+        "description": "Use Ratio control:contentReference[oaicite:168]{index=168}. True if performing ratio control (SP = SPCascade * Ratio). In a pure cascade (no ratio scaling), this remains false:contentReference[oaicite:169]{index=169}.",
+        "default": false
+      },
+      "RatioProg": {
+        "type": "number",
+        "description": "Program ratio multiplier:contentReference[oaicite:170]{index=170}. Used if UseRatio=true and in Program control. Multiplies the SPCascade for ratio control. Default 1.0.",
+        "default": 1.0
+      },
+      "RatioOper": {
+        "type": "number",
+        "description": "Operator ratio multiplier:contentReference[oaicite:171]{index=171}. Used if UseRatio=true in Operator control. Default 1.0.",
+        "default": 1.0
+      },
+      "RatioHLimit": {
+        "type": "number",
+        "description": "Ratio high limit:contentReference[oaicite:172]{index=172}. Max allowed Ratio value. Default 1.0. If RatioProg/Oper exceed this, Ratio is clamped and flagged.",
+        "default": 1.0
+      },
+      "RatioLLimit": {
+        "type": "number",
+        "description": "Ratio low limit:contentReference[oaicite:173]{index=173}. Min allowed Ratio (min 0.0). Default 1.0 (meaning ratio cannot drop below 1.0 unless changed). If set <0, it will be forced to 0 at runtime:contentReference[oaicite:174]{index=174}.",
+        "default": 1.0
+      },
+      "CVFault": { "type": "boolean", "description": "CV fault flag." },
+      "CVInitReq": {
+        "type": "boolean",
+        "description": "CV Initialize Request:contentReference[oaicite:175]{index=175}. Should be wired to the 'In Hold' status of the final output or, in cascade, to the primary loop’s InitPrimary output:contentReference[oaicite:176]{index=176}. When true, this secondary loop’s CV will reset to CVInitValue to avoid bumps on startup or mode change.",
+        "default": false
+      },
+      "CVInitValue": {
+        "type": "number",
+        "description": "CV Initialization Value (EU):contentReference[oaicite:177]{index=177}. The output value to use when CVInitReq is true. In cascade, the primary’s CVInitValue should be wired from the secondary’s SP to ensure bumpless transfer when secondary exits cascade:contentReference[oaicite:178]{index=178}.",
+        "default": 0.0
+      },
+      "CVProg": { "type": "number", "description": "Program manual CV (%).", "minimum": 0.0, "maximum": 100.0 },
+      "CVOper": { "type": "number", "description": "Operator manual CV (%).", "minimum": 0.0, "maximum": 100.0 },
+      "CVOverride": { "type": "number", "description": "Override CV (%).", "minimum": 0.0, "maximum": 100.0 },
+      "CVPrevious": {
+        "type": "number",
+        "description": "Previous CV (for bumpless gain changes):contentReference[oaicite:179]{index=179}. Normally managed internally. Can be set if CVSetPrevious=true to preset last CV value.",
+        "default": 0.0
+      },
+      "CVSetPrevious": {
+        "type": "boolean",
+        "description": "Use CVPrevious flag:contentReference[oaicite:180]{index=180}. True = use the provided CVPrevious as last CV for the next scan (to manually initialize CV history, e.g., when integrating loops).",
+        "default": false
+      },
+      "CVManLimiting": {
+        "type": "boolean",
+        "description": "Manual Limiting Enable:contentReference[oaicite:181]{index=181}. If true, CV is also limited by CVHLimit/CVLLimit even in Manual modes. Default false (limits apply only in Auto/Cascade).",
+        "default": false
+      },
+      "CVEUMax": { "type": "number", "description": "CV EU max.", "default": 100.0 },
+      "CVEUMin": { "type": "number", "description": "CV EU min.", "default": 0.0 },
+      "CVHLimit": { 
+        "type": "number", 
+        "description": "CV high limit (%). Might be set lower than 100 in cascade to prevent primary driving secondary beyond its capability (also secondary will have its own limit).", 
+        "default": 100.0 
+      },
+      "CVLLimit": { "type": "number", "description": "CV low limit (%).", "default": 0.0 },
+      "CVROCLimit": { "type": "number", "description": "CV ROC limit.", "minimum": 0.0, "default": 0.0 },
+      "WindupHIn": {
+        "type": "boolean",
+        "description": "Windup High Prevent Input:contentReference[oaicite:182]{index=182}. True = instruct primary loop to stop integrating upwards. In cascade, wire this from the secondary’s WindupHOut output to the primary’s WindupHIn:contentReference[oaicite:183]{index=183}. This helps prevent primary windup if secondary saturates high.",
+        "default": false
+      },
+      "WindupLIn": {
+        "type": "boolean",
+        "description": "Windup Low Prevent Input:contentReference[oaicite:184]{index=184}. True = stop primary from integrating downward. Wire from secondary’s WindupLOut to primary’s WindupLIn:contentReference[oaicite:185]{index=185}.",
+        "default": false
+      },
+      "ControlAction": { "type": "string", "enum": ["Direct", "Reverse"], "description": "Control action.", "default": "Reverse" },
+      "DependIndepend": { "type": "boolean", "description": "Gain mode (false=Independent, true=Dependent).", "default": false },
+      "PGain": { "type": "number", "description": "Proportional gain.", "minimum": 0.0, "default": 0.0 },
+      "IGain": { "type": "number", "description": "Integral gain.", "minimum": 0.0, "default": 0.0 },
+      "DGain": { "type": "number", "description": "Derivative gain.", "minimum": 0.0, "default": 0.0 },
+      "PVEProportional": { "type": "boolean", "description": "Proportional on PV.", "default": false },
+      "PVEDerivative": { "type": "boolean", "description": "Derivative on PV.", "default": true },
+      "DSmoothing": { "type": "boolean", "description": "Derivative smoothing.", "default": false },
+      "PVTracking": { "type": "boolean", "description": "PV tracking (SP track PV in Manual).", "default": false },
+      "ZCDeadband": { "type": "number", "description": "Zero-crossing deadband (EU).", "minimum": 0.0, "default": 0.0 },
+      "ZCOff": { "type": "boolean", "description": "Disable zero-crossing deadband.", "default": false },
+      "PVHHLimit": { "type": "number", "description": "PV HH alarm (EU)." },
+      "PVHLimit": { "type": "number", "description": "PV High alarm (EU)." },
+      "PVLLimit": { "type": "number", "description": "PV Low alarm (EU)." },
+      "PVLLLimit": { "type": "number", "description": "PV LL alarm (EU)." },
+      "PVDeadband": { "type": "number", "description": "PV alarm deadband (EU).", "minimum": 0.0, "default": 0.0 },
+      "PVROCPosLimit": { "type": "number", "description": "PV +ROC alarm (EU/s).", "minimum": 0.0, "default": 0.0 },
+      "PVROCNegLimit": { "type": "number", "description": "PV -ROC alarm (EU/s).", "minimum": 0.0, "default": 0.0 },
+      "PVROCPeriod": { "type": "number", "description": "PV ROC period (s)." },
+      "DevHHLimit": { "type": "number", "description": "Dev HH alarm (EU).", "minimum": 0.0 },
+      "DevHLimit": { "type": "number", "description": "Dev High alarm (EU).", "minimum": 0.0 },
+      "DevLLimit": { "type": "number", "description": "Dev Low alarm (EU).", "minimum": 0.0 },
+      "DevLLLimit": { "type": "number", "description": "Dev LL alarm (EU).", "minimum": 0.0 },
+      "DevDeadband": { "type": "number", "description": "Deviation alarm deadband (EU).", "minimum": 0.0, "default": 0.0 },
+      "AllowCasRat": {
+        "type": "boolean",
+        "description": "Allow Cascade/Ratio mode:contentReference[oaicite:186]{index=186}. **For the secondary (slave)**, set true to allow it to enter Cascade mode (controlled by CasRatReq bits):contentReference[oaicite:187]{index=187}. The primary can keep this false (it doesn't need to go into cascade mode, it operates in Auto).",
+        "default": true
+      },
+      "ManualAfterInit": { "type": "boolean", "description": "Manual After Init.", "default": false },
+      "ProgProgReq": { "type": "boolean", "description": "Program request Program control.", "default": false },
+      "ProgOperReq": { "type": "boolean", "description": "Program request Operator control.", "default": false },
+      "ProgAutoReq": { "type": "boolean", "description": "Program request Auto mode.", "default": false },
+      "ProgManualReq": { "type": "boolean", "description": "Program request Manual mode.", "default": false },
+      "ProgCasRatReq": {
+        "type": "boolean",
+        "description": "Program request Cascade mode:contentReference[oaicite:188]{index=188}. For secondary, set true (via user logic) to put it into Cascade mode (provided AllowCasRat=true):contentReference[oaicite:189]{index=189}. For primary, this remains false (primary stays in normal Auto).",
+        "default": false
+      },
+      "ProgOverrideReq": { "type": "boolean", "description": "Program request Override mode.", "default": false },
+      "ProgHandReq": { "type": "boolean", "description": "Program request Hand mode.", "default": false },
+      "OperProgReq": { "type": "boolean", "description": "Operator request Program control.", "default": false },
+      "OperOperReq": { "type": "boolean", "description": "Operator request Operator control.", "default": false },
+      "OperCasRatReq": {
+        "type": "boolean",
+        "description": "Operator request Cascade mode. Similar to ProgCasRatReq but from an HMI. For secondary loop, an operator could use this to initiate cascade mode (with AllowCasRat true):contentReference[oaicite:190]{index=190}.",
+        "default": false
+      }
+    },
+    "required": [
+      "created_at", "created_by", "version",
+      "PV", "PVEUMax", "PVEUMin",
+      "PGain", "IGain", "DGain",
+      "AllowCasRat"
+    ]
+  }
+  

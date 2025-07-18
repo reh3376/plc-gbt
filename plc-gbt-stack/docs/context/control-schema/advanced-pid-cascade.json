@@ -1,0 +1,72 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Ladder Logic Advanced PID (Cascade)",
+    "description": "Schema for a Ladder Logic cascaded PID controller. One PID (slave) receives its setpoint from another PID (master):contentReference[oaicite:52]{index=52}, enabling a cascade (master-slave) architecture.",
+    "type": "object",
+    "properties": {
+      "created_at": { "type": "string", "format": "date-time" },
+      "created_by": { "type": "string" },
+      "version": { "type": "string", "enum": ["00.00.001"] },
+      "SP": { "type": "number", "description": "Local setpoint (used if master or if not in cascade mode). For a slave PID in cascade mode, this is superseded by the cascade setpoint from the master loop:contentReference[oaicite:53]{index=53}." },
+      "SO": { "type": "number", "description": "Set output % (manual output in SWM).", "minimum": 0.0, "maximum": 100.0 },
+      "BIAS": { "type": "number", "description": "Output bias (%).", "minimum": -100.0, "maximum": 100.0 },
+      "KP": { "type": "number", "description": "Proportional gain.", "minimum": 0.0 },
+      "KI": { "type": "number", "description": "Integral gain.", "minimum": 0.0 },
+      "KD": { "type": "number", "description": "Derivative setting.", "minimum": 0.0 },
+      "MO": { "type": "boolean", "description": "Manual mode flag." },
+      "SWM": { "type": "boolean", "description": "Software manual mode flag." },
+      "PE": { "type": "string", "enum": ["Independent", "Dependent"], "description": "PID equation type." },
+      "CA": { "type": "string", "enum": ["Direct (PV-SP)", "Reverse (SP-PV)"], "description": "Control action." },
+      "DOE": { "type": "string", "enum": ["PV", "Error"], "description": "Derivative on PV or Error." },
+      "UPD": { "type": "number", "description": "Loop update time (s).", "minimum": 0.0 },
+      "MAXO": { "type": "number", "description": "CV high limit (%).", "minimum": 0.0, "maximum": 100.0 },
+      "MINO": { "type": "number", "description": "CV low limit (%).", "minimum": 0.0, "maximum": 100.0 },
+      "DB": { "type": "number", "description": "Deadband (EU).", "minimum": 0.0 },
+      "NDF": { "type": "boolean", "description": "No derivative smoothing." },
+      "NOBC": { "type": "boolean", "description": "No bias back-calculation." },
+      "NOZC": { "type": "boolean", "description": "No zero-crossing in deadband." },
+      "PVT": { "type": "boolean", "description": "PV tracking in manual mode." },
+      "CL": {
+        "type": "boolean",
+        "description": "Cascade enable. Set true to engage cascade mode for this PID:contentReference[oaicite:54]{index=54}. The CT field determines if this is a Master or Slave controller.",
+        "default": true
+      },
+      "CT": {
+        "type": "string",
+        "description": "Cascade Type (role of this controller):contentReference[oaicite:55]{index=55}. 'Master' = primary loop (sends its output as SP to a slave); 'Slave' = secondary loop (receives SP from a master).",
+        "enum": ["Master", "Slave"]
+      },
+      "MasterLoopTag": {
+        "type": "string",
+        "description": "If this controller is a Slave, specify the tag name of the Master PID loop providing the cascade setpoint:contentReference[oaicite:56]{index=56}. If Master (or not used), this can be null or '0'."
+      },
+      "PVH": { "type": "number", "description": "PV high alarm (EU)." },
+      "PVL": { "type": "number", "description": "PV low alarm (EU)." },
+      "PVDB": { "type": "number", "description": "PV alarm deadband (EU).", "minimum": 0.0 },
+      "DVP": { "type": "number", "description": "Positive deviation alarm (EU)." },
+      "DVN": { "type": "number", "description": "Negative deviation alarm (EU)." },
+      "DVDB": { "type": "number", "description": "Deviation alarm deadband (EU).", "minimum": 0.0 },
+      "MAXI": { "type": "number", "description": "PV raw max.", "default": 16383 },
+      "MINI": { "type": "number", "description": "PV raw min." },
+      "MAXS": { "type": "number", "description": "PV EU at raw max." },
+      "MINS": { "type": "number", "description": "PV EU at raw min." },
+      "MAXCV": {
+        "type": "number",
+        "description": "CV EU max (engineering units of the output):contentReference[oaicite:57]{index=57}. **Important**: For a Master PID, scale this to match the Slave's PV range:contentReference[oaicite:58]{index=58}. This ensures the master's 0–100% output corresponds to meaningful SP for the slave.",
+        "default": 100.0
+      },
+      "MINCV": {
+        "type": "number",
+        "description": "CV EU min (engineering units of output). Align with Slave's PV range minimum for Master loops:contentReference[oaicite:59]{index=59}.",
+        "default": 0.0
+      },
+      "MAXTIE": { "type": "number", "description": "Tieback raw max.", "default": 16383 },
+      "MINTIE": { "type": "number", "description": "Tieback raw min." },
+      "INI": { "type": "boolean", "description": "Reinitialize (for scaling changes)." }
+    },
+    "required": [
+      "created_at", "created_by", "version",
+      "CL", "CT", "SP", "KP", "KI", "KD"
+    ]
+  }
+  

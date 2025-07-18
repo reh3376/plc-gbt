@@ -1,0 +1,31 @@
+{
+  "extension_id": "safety_mixin_20250716_101844",
+  "name": "Safety Properties Mixin",
+  "extension_type": "ExtensionType.PROPERTY_MIXIN",
+  "target_schemas": [
+    "*"
+  ],
+  "extension_data": {
+    "properties": {
+      "safety_level": {
+        "type": "string",
+        "enum": [
+          "SIL1",
+          "SIL2",
+          "SIL3",
+          "SIL4"
+        ],
+        "description": "Safety Integrity Level"
+      },
+      "hazard_analysis_required": {
+        "type": "boolean",
+        "description": "Hazard analysis required",
+        "default": true
+      }
+    }
+  },
+  "description": "Common safety properties for control schemas",
+  "author": "AI Task Orchestrator",
+  "version": "1.0.0",
+  "enabled": true
+}

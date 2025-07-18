@@ -1,0 +1,201 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Ladder Logic Standard PID Controller",
+    "description": "Schema for configuring a standard Ladder Logic PID loop (positional form PID) in Studio 5000:contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}.",
+    "type": "object",
+    "properties": {
+      "created_at": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Schema creation timestamp (ISO 8601)."
+      },
+      "created_by": {
+        "type": "string",
+        "description": "Schema creator or tool name (e.g. 'plc-schema-generator')."
+      },
+      "version": {
+        "type": "string",
+        "description": "Schema version in semantic format.",
+        "pattern": "^\\d{2}\\.\\d{2}\\.\\d{3}$",
+        "enum": ["00.00.001"]
+      },
+      "SP": {
+        "type": "number",
+        "description": "Setpoint for the PID loop, in engineering units of the process variable. This is the desired value that the PID will maintain:contentReference[oaicite:2]{index=2}."
+      },
+      "SO": {
+        "type": "number",
+        "description": "Set Output percentage. If the controller is in software manual mode, this value is the manual output (%); in auto mode it reflects the current output percent:contentReference[oaicite:3]{index=3}.",
+        "minimum": 0.0,
+        "maximum": 100.0
+      },
+      "BIAS": {
+        "type": "number",
+        "description": "Output bias (feedforward bias) as a percentage. This bias is added to the controller output to compensate for steady-state offset or to feedforward load changes:contentReference[oaicite:4]{index=4}. Typically 0% if not used, or tuned to maintain PV near SP when integral action is minimal. Range -100 to 100%.",
+        "minimum": -100.0,
+        "maximum": 100.0
+      },
+      "KP": {
+        "type": "number",
+        "description": "Proportional gain (Kp). For Independent gains mode, this is unitless proportional gain; for Dependent mode (ISA), this is the controller gain Kc:contentReference[oaicite:5]{index=5}. Set to 0 to disable proportional action.",
+        "minimum": 0.0
+      },
+      "KI": {
+        "type": "number",
+        "description": "Integral gain (Ki). In Independent mode, units are repeats per second (1/s); in Dependent mode, this is the reset time in minutes per repeat:contentReference[oaicite:6]{index=6}. Set to 0 to disable integral action.",
+        "minimum": 0.0
+      },
+      "KD": {
+        "type": "number",
+        "description": "Derivative setting. In Independent mode, enter derivative gain in seconds; in Dependent mode, enter rate time in minutes:contentReference[oaicite:7]{index=7}. Set to 0 to disable derivative action.",
+        "minimum": 0.0
+      },
+      "MO": {
+        "type": "boolean",
+        "description": "Manual mode flag. When true, the PID is in external/manual mode (e.g., controlled by an external device); this overrides software manual mode if both are true:contentReference[oaicite:8]{index=8}."
+      },
+      "SWM": {
+        "type": "boolean",
+        "description": "Software Manual (SWM) mode flag. When true, the PID is in software manual mode using the specified Set Output value (SO) as the CV. If both hardware Manual and SWM are true, hardware Manual (MO) takes precedence:contentReference[oaicite:9]{index=9}."
+      },
+      "PE": {
+        "type": "string",
+        "description": "PID equation form (gain mode selection):contentReference[oaicite:10]{index=10}. 'Independent' uses separate P, I, D gains; 'Dependent' uses an overall controller gain affecting all terms (ISA standard).",
+        "enum": ["Independent", "Dependent"]
+      },
+      "CA": {
+        "type": "string",
+        "description": "Control Action (error calculation):contentReference[oaicite:11]{index=11}. 'Direct (PV-SP)' means error E = PV − SP (typically for cooling/inverse response processes), while 'Reverse (SP-PV)' means E = SP − PV (for heating/direct acting processes).",
+        "enum": ["Direct (PV-SP)", "Reverse (SP-PV)"]
+      },
+      "DOE": {
+        "type": "string",
+        "description": "Derivative Of Error selection:contentReference[oaicite:12]{index=12}. Determines the derivative term's input: 'PV' = use process variable changes for derivative (reduces CV spikes on setpoint changes), 'Error' = use error changes (faster response to setpoint changes with possible overshoot).",
+        "enum": ["PV", "Error"]
+      },
+      "UPD": {
+        "type": "number",
+        "description": "Loop update time in seconds:contentReference[oaicite:13]{index=13}. This is the execution period of the PID algorithm (should match the routine periodic rate or loop scan time).",
+        "minimum": 0.0
+      },
+      "MAXO": {
+        "type": "number",
+        "description": "Control Variable high limit (%):contentReference[oaicite:14]{index=14}. The maximum output percentage the PID can command. Default 100.0%.",
+        "minimum": 0.0,
+        "maximum": 100.0
+      },
+      "MINO": {
+        "type": "number",
+        "description": "Control Variable low limit (%):contentReference[oaicite:15]{index=15}. The minimum output percentage for the PID. Default 0.0%.",
+        "minimum": 0.0,
+        "maximum": 100.0
+      },
+      "DB": {
+        "type": "number",
+        "description": "Deadband value in engineering units:contentReference[oaicite:16]{index=16}. Error magnitude within this band (±DB/2 around zero error) will be treated as zero error (no controller response). Set 0 to disable deadband.",
+        "minimum": 0.0
+      },
+      "NDF": {
+        "type": "boolean",
+        "description": "No Derivative Filter (NDF). When true, disables derivative smoothing:contentReference[oaicite:17]{index=17}. By default derivative smoothing is off for standard PID (equivalent to NDF=true); clearing this would apply filtering (not typical in the Ladder PID)."
+      },
+      "NOBC": {
+        "type": "boolean",
+        "description": "No Bias Calculation. When true, disables automatic bias back-calculation:contentReference[oaicite:18]{index=18}. Normally, when the PID transitions from manual to auto, the instruction adjusts the bias term to avoid output bumps (back-calculation); setting this bit true prevents that adjustment:contentReference[oaicite:19]{index=19}."
+      },
+      "NOZC": {
+        "type": "boolean",
+        "description": "No Zero Crossing in deadband. When true, zero-crossing adjustment is disabled:contentReference[oaicite:20]{index=20}. If false, the PID will not hold the output at bias within the error deadband (it will allow crossing through 0 error gradually)."
+      },
+      "PVT": {
+        "type": "boolean",
+        "description": "PV Tracking enable. When true, the setpoint (SP) will track the PV whenever the loop is in manual mode:contentReference[oaicite:21]{index=21}:contentReference[oaicite:22]{index=22}. This helps avoid bumps when returning to auto (bumpless transfer)."
+      },
+      "CL": {
+        "type": "boolean",
+        "description": "Cascade Loop enable. Set true if this PID is part of a cascaded pair (slave or master):contentReference[oaicite:23]{index=23}. When enabled, the Cascade Type (CT) must be specified.",
+        "default": false
+      },
+      "CT": {
+        "type": "string",
+        "description": "Cascade Type (role of this PID loop if cascade is enabled):contentReference[oaicite:24]{index=24}. 'Master' indicates this loop provides its output as setpoint to a downstream slave PID; 'Slave' indicates this loop receives its setpoint from an upstream master PID.",
+        "enum": ["Master", "Slave"]
+      },
+      "PVH": {
+        "type": "number",
+        "description": "PV High Alarm limit in engineering units:contentReference[oaicite:25]{index=25}. If the Process Variable exceeds this value, a high alarm condition bit is set. Default is no alarm (can be left at a high value if unused)."
+      },
+      "PVL": {
+        "type": "number",
+        "description": "PV Low Alarm limit in engineering units:contentReference[oaicite:26]{index=26}. If PV falls below this value, a low alarm condition is set."
+      },
+      "PVDB": {
+        "type": "number",
+        "description": "PV Alarm Deadband in engineering units:contentReference[oaicite:27]{index=27}. The hysteresis to apply for clearing PV high/low alarms. Once an alarm trips, PV must return within this band below the high limit (or above the low limit) to reset.",
+        "minimum": 0.0
+      },
+      "DVP": {
+        "type": "number",
+        "description": "Positive Deviation Alarm limit:contentReference[oaicite:28]{index=28}. If (PV − SP) > DVP, a deviation high alarm is raised (PV too far above SP). Specify in engineering units. Set 0 to disable."
+      },
+      "DVN": {
+        "type": "number",
+        "description": "Negative Deviation Alarm limit:contentReference[oaicite:29]{index=29}. If (SP − PV) > |DVN|, a deviation low alarm is raised (PV too far below SP). Given in engineering units as a positive value (the negative direction limit). Set 0 to disable."
+      },
+      "DVDB": {
+        "type": "number",
+        "description": "Deviation Alarm Deadband in engineering units:contentReference[oaicite:30]{index=30}. Hysteresis for deviation alarms (applies to both high and low deviation alarms).",
+        "minimum": 0.0
+      },
+      "MAXI": {
+        "type": "number",
+        "description": "PV Unscaled Maximum (raw input high range):contentReference[oaicite:31]{index=31}. The raw sensor value corresponding to the PV Engineering Units maximum (MAXS). E.g., 16383 for a 14-bit input at 100% range.",
+        "default": 16383
+      },
+      "MINI": {
+        "type": "number",
+        "description": "PV Unscaled Minimum (raw input low range):contentReference[oaicite:32]{index=32}. Raw value corresponding to PV Engineering Units minimum (MINS). Typically 0 for an analog input at 0% range."
+      },
+      "MAXS": {
+        "type": "number",
+        "description": "PV Engineering Units Maximum:contentReference[oaicite:33]{index=33}. The high end of the PV scale in engineering units corresponding to MAXI. For example, if MAXI is 16383 and this loop measures temperature up to 300.0 °F, set MAXS = 300.0."
+      },
+      "MINS": {
+        "type": "number",
+        "description": "PV Engineering Units Minimum:contentReference[oaicite:34]{index=34}. The low end of PV's engineering range corresponding to MINI (e.g., 0.0)."
+      },
+      "MAXCV": {
+        "type": "number",
+        "description": "CV Engineering Units Maximum corresponding to 100% output:contentReference[oaicite:35]{index=35}. This is the value of the final control element at 100% CV. For a valve that is 0–100% open, MAXCV might be 100 (% open).",
+        "default": 100.0
+      },
+      "MINCV": {
+        "type": "number",
+        "description": "CV Engineering Units Minimum corresponding to 0% output:contentReference[oaicite:36]{index=36}. Value of the final control element at 0% CV. E.g., 0. If a reverse-acting output where 0% = fully open, set accordingly.",
+        "default": 0.0
+      },
+      "MAXTIE": {
+        "type": "number",
+        "description": "Tieback Unscaled Maximum (if a hardware hand station is used):contentReference[oaicite:37]{index=37}. The raw value from the manual station analog input that corresponds to 100% tieback.",
+        "default": 16383
+      },
+      "MINTIE": {
+        "type": "number",
+        "description": "Tieback Unscaled Minimum:contentReference[oaicite:38]{index=38}. Raw tieback value for 0%. If no external station is used, this can be 0 and tieback input is not utilized."
+      },
+      "INI": {
+        "type": "boolean",
+        "description": "PID Initialized flag. This is a re-initialization request bit:contentReference[oaicite:39]{index=39}. It should typically remain true. If scaling parameters (MAXI, MINI, etc.) are changed at runtime, set this false then true to have the PID reinitialize internal scaling calculations."
+      }
+    },
+    "required": [
+      "created_at",
+      "created_by",
+      "version",
+      "SP",
+      "KP",
+      "KI",
+      "KD"
+    ]
+  }
+  

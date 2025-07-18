@@ -1,0 +1,80 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Ladder Logic Advanced PID (Feedforward)",
+    "description": "Schema for a Ladder Logic PID controller with feedforward augmentation. This uses the bias term as a feedforward input to anticipate disturbances:contentReference[oaicite:45]{index=45}.",
+    "type": "object",
+    "properties": {
+      "created_at": { "type": "string", "format": "date-time", "description": "ISO 8601 creation timestamp." },
+      "created_by": { "type": "string", "description": "Creator (e.g. 'plc-schema-generator')." },
+      "version": { "type": "string", "enum": ["00.00.001"], "description": "Schema version." },
+      "SP": { "type": "number", "description": "PID setpoint (engineering units of PV)."},
+      "SO": { "type": "number", "description": "Set output % (manual output in SWM).", "minimum": 0.0, "maximum": 100.0 },
+      "BIAS": { 
+        "type": "number", 
+        "description": "Output bias (%) added to PID output, used here as the feedforward bias term:contentReference[oaicite:46]{index=46}. This value will be adjusted based on the measured disturbance to counteract its effect before it alters the PV (feedforward control).",
+        "minimum": -100.0, 
+        "maximum": 100.0 
+      },
+      "KP": { "type": "number", "description": "Proportional gain.", "minimum": 0.0 },
+      "KI": { "type": "number", "description": "Integral gain (or reset time, if Dependent).", "minimum": 0.0 },
+      "KD": { "type": "number", "description": "Derivative setting (time or gain).", "minimum": 0.0 },
+      "MO": { "type": "boolean", "description": "Manual mode flag (hardware/external)."},
+      "SWM": { "type": "boolean", "description": "Software manual mode flag."},
+      "PE": { "type": "string", "enum": ["Independent", "Dependent"], "description": "PID equation form (Independent/Dependent)."},
+      "CA": { "type": "string", "enum": ["Direct (PV-SP)", "Reverse (SP-PV)"], "description": "Control action (direct/reverse)."},
+      "DOE": { "type": "string", "enum": ["PV", "Error"], "description": "Derivative on PV or Error."},
+      "UPD": { "type": "number", "description": "Loop update time (s).", "minimum": 0.0 },
+      "MAXO": { "type": "number", "description": "CV high limit (%).", "minimum": 0.0, "maximum": 100.0 },
+      "MINO": { "type": "number", "description": "CV low limit (%).", "minimum": 0.0, "maximum": 100.0 },
+      "DB": { "type": "number", "description": "Deadband (EU).", "minimum": 0.0 },
+      "NDF": { "type": "boolean", "description": "No derivative smoothing." },
+      "NOBC": { "type": "boolean", "description": "No bias back-calculation (disable bias auto-adjust on mode switch)."},
+      "NOZC": { "type": "boolean", "description": "No zero-crossing in deadband." },
+      "PVT": { "type": "boolean", "description": "PV tracking in manual." },
+      "PVH": { "type": "number", "description": "PV high alarm (EU)." },
+      "PVL": { "type": "number", "description": "PV low alarm (EU)." },
+      "PVDB": { "type": "number", "description": "PV alarm deadband (EU).", "minimum": 0.0 },
+      "DVP": { "type": "number", "description": "Positive deviation alarm limit (EU)." },
+      "DVN": { "type": "number", "description": "Negative deviation alarm limit (EU)." },
+      "DVDB": { "type": "number", "description": "Deviation alarm deadband (EU).", "minimum": 0.0 },
+      "MAXI": { "type": "number", "description": "PV raw max value.", "default": 16383 },
+      "MINI": { "type": "number", "description": "PV raw min value." },
+      "MAXS": { "type": "number", "description": "PV EU at raw max." },
+      "MINS": { "type": "number", "description": "PV EU at raw min." },
+      "MAXCV": { "type": "number", "description": "CV EU at 100% output.", "default": 100.0 },
+      "MINCV": { "type": "number", "description": "CV EU at 0% output.", "default": 0.0 },
+      "MAXTIE": { "type": "number", "description": "Tieback raw max.", "default": 16383 },
+      "MINTIE": { "type": "number", "description": "Tieback raw min." },
+      "INI": { "type": "boolean", "description": "Re-initialize flag for scaling changes." },
+      "FeedforwardSource": {
+        "type": "string",
+        "description": "Name of the disturbance variable (process input) used for feedforward. This is the tag or signal that indicates an upcoming load change (e.g., flow rate, pressure) which the controller should preemptively counter."
+      },
+      "FF_MinValue": {
+        "type": "number",
+        "description": "Lower range of the disturbance variable (FeedforwardSource) for feedforward scaling. When the disturbance is at this value, the feedforward bias will be at its minimum (Bias_Min)."
+      },
+      "FF_MaxValue": {
+        "type": "number",
+        "description": "Upper range of the disturbance variable for feedforward scaling. When the disturbance reaches this value, the feedforward bias will be at its maximum (Bias_Max)."
+      },
+      "Bias_Min": {
+        "type": "number",
+        "description": "Bias percentage to apply when the disturbance is at its minimum value (FF_MinValue). Typically this might be 0 (no bias added at low disturbance).",
+        "minimum": -100.0,
+        "maximum": 100.0
+      },
+      "Bias_Max": {
+        "type": "number",
+        "description": "Bias percentage to apply when the disturbance is at its maximum expected value (FF_MaxValue). For example, if a certain high load corresponds to needing an extra 15% valve opening, Bias_Max would be 15.0:contentReference[oaicite:47]{index=47}.",
+        "minimum": -100.0,
+        "maximum": 100.0
+      }
+    },
+    "required": [
+      "created_at", "created_by", "version",
+      "SP", "KP", "KI", "KD",
+      "FeedforwardSource", "FF_MinValue", "FF_MaxValue", "Bias_Min", "Bias_Max"
+    ]
+  }
+  

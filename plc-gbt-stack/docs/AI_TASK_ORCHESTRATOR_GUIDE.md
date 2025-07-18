@@ -571,6 +571,74 @@ roadmap_update = {
 - ✅ Cross-references between related documents
 - ✅ Version information and timestamps included
 
+## 🚨 CRITICAL REQUIREMENT: Automatic Documentation Updates
+
+**MANDATORY**: Every AI agent using this orchestrator MUST automatically update all relevant documentation upon task completion. This includes:
+
+### Required Documentation Updates
+1. **roadmap.md**: Update phase/task status to "✅ COMPLETED" with completion date and validation score
+2. **Completion Summaries**: Create standardized PHASE{N}_COMPLETION_SUMMARY.md files
+3. **Cross-references**: Add links between related documents and deliverables
+4. **Validation Reports**: Include test results, metrics, and success criteria
+
+### Implementation Requirement
+```python
+# REQUIRED: Every task completion must include this call
+def complete_task_with_documentation(task_results):
+    """
+    Complete task with mandatory documentation updates
+    """
+    # 1. Validate implementation
+    validation = orchestrator.validate_output(
+        code_content=task_results['code'],
+        requirements=task_results['requirements'],
+        validation_tier="comprehensive"
+    )
+    
+    # 2. MANDATORY: Update documentation
+    if validation['overall_score'] >= 90:
+        # Update roadmap.md
+        orchestrator.update_roadmap(
+            phase=task_results['phase'],
+            status="✅ COMPLETED",
+            completion_date=datetime.now().strftime("%Y-%m-%d"),
+            validation_score=validation['overall_score'],
+            deliverables=task_results['deliverables']
+        )
+        
+        # Create completion summary
+        orchestrator.create_completion_summary(
+            phase=task_results['phase'],
+            achievements=task_results['achievements'],
+            deliverables=task_results['deliverables'],
+            validation_results=validation
+        )
+        
+        # Link all related documents
+        orchestrator.link_documents(
+            roadmap_section=task_results['phase'],
+            documents=task_results['documentation']
+        )
+    
+    return validation
+```
+
+### Enforcement Policy
+- **No task is considered complete without documentation updates**
+- **AI agents MUST update roadmap.md after every successful implementation**
+- **All deliverables MUST be linked and cross-referenced**
+- **Completion summaries are MANDATORY for all phases/tasks**
+
+### Validation Criteria
+The orchestrator will verify:
+- ✅ roadmap.md contains updated status and links
+- ✅ Completion summary exists and follows naming conventions
+- ✅ All deliverables are properly linked
+- ✅ Documentation follows standardized format (.md, Mermaid diagrams)
+- ✅ Timestamps and validation scores are included
+
+**Failure to update documentation will result in task completion score reduction and requires immediate remediation.**
+
 ## 🎉 Summary
 
 The Enhanced AI Task Orchestrator provides AI agents with:

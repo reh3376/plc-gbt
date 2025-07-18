@@ -1,0 +1,3540 @@
+{
+  "analysis_timestamp": "2025-07-15T05:27:23.357418",
+  "total_scan_results": 9,
+  "analysis_results": {
+    "schema_patterns": [
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'created_at' appears across multiple schemas",
+        "occurrences": 9,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pid-controller.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "created_at"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'created_by' appears across multiple schemas",
+        "occurrences": 9,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pid-controller.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "created_by"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'version' appears across multiple schemas",
+        "occurrences": 9,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pid-controller.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "version"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PV' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PV"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVFault' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVFault"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVEUMax' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVEUMax"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVEUMin' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVEUMin"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'SPProg' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "SPProg"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'SPOper' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "SPOper"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'SPCascade' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "SPCascade"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'SPHLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "SPHLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'SPLLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "SPLLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'UseRatio' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "UseRatio"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'RatioProg' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "RatioProg"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'RatioOper' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "RatioOper"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'RatioHLimit' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "RatioHLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'RatioLLimit' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "RatioLLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVFault' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "CVFault"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVInitReq' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "CVInitReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVInitValue' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "CVInitValue"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVProg' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "CVProg"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVOper' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "CVOper"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVOverride' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "CVOverride"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVPrevious' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "CVPrevious"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVSetPrevious' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "CVSetPrevious"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVManLimiting' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "CVManLimiting"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVEUMax' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "CVEUMax"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVEUMin' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "CVEUMin"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVHLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "CVHLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVLLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "CVLLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CVROCLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "CVROCLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'WindupHIn' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "WindupHIn"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'WindupLIn' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "WindupLIn"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'FF' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-ff.json"
+        ],
+        "properties": [
+          "FF"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'FFPrevious' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-ff.json"
+        ],
+        "properties": [
+          "FFPrevious"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'FFSetPrevious' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-ff.json"
+        ],
+        "properties": [
+          "FFSetPrevious"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ControlAction' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ControlAction"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DependIndepend' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "DependIndepend"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PGain' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PGain"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'IGain' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "IGain"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DGain' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "DGain"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVEProportional' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVEProportional"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVEDerivative' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVEDerivative"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DSmoothing' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "DSmoothing"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVTracking' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVTracking"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ZCDeadband' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ZCDeadband"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ZCOff' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ZCOff"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVHHLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVHHLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVHLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVHLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVLLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVLLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVLLLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVLLLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVDeadband' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVDeadband"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVROCPosLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVROCPosLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVROCNegLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVROCNegLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVROCPeriod' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVROCPeriod"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DevHHLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "DevHHLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DevHLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "DevHLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DevLLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "DevLLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DevLLLimit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "DevLLLimit"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DevDeadband' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "DevDeadband"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'AllowCasRat' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "AllowCasRat"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ManualAfterInit' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ManualAfterInit"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ProgProgReq' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ProgProgReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ProgOperReq' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ProgOperReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ProgAutoReq' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ProgAutoReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ProgManualReq' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ProgManualReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ProgCasRatReq' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ProgCasRatReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ProgOverrideReq' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ProgOverrideReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'ProgHandReq' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "ProgHandReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'OperProgReq' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "OperProgReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'OperOperReq' appears across multiple schemas",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "OperOperReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'OperCasRatReq' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json"
+        ],
+        "properties": [
+          "OperCasRatReq"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'SP' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "SP"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'SO' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "SO"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'BIAS' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "BIAS"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'KP' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "KP"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'KI' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "KI"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'KD' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "KD"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MO' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MO"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'SWM' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "SWM"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PE' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "PE"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CA' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "CA"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DOE' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "DOE"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'UPD' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "UPD"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MAXO' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MAXO"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MINO' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MINO"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DB' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "DB"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'NDF' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "NDF"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'NOBC' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "NOBC"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'NOZC' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "NOZC"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVT' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "PVT"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CL' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "CL"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'CT' appears across multiple schemas",
+        "occurrences": 3,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "CT"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MasterLoopTag' appears across multiple schemas",
+        "occurrences": 2,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json"
+        ],
+        "properties": [
+          "MasterLoopTag"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVH' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "PVH"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVL' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "PVL"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'PVDB' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "PVDB"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DVP' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "DVP"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DVN' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "DVN"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'DVDB' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "DVDB"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MAXI' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MAXI"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MINI' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MINI"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MAXS' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MAXS"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MINS' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MINS"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MAXCV' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MAXCV"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MINCV' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MINCV"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MAXTIE' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MAXTIE"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'MINTIE' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "MINTIE"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'INI' appears across multiple schemas",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "INI"
+        ],
+        "example_values": {
+          "types": [
+            "boolean"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'FeedforwardSource' appears across multiple schemas",
+        "occurrences": 2,
+        "schema_files": [
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json"
+        ],
+        "properties": [
+          "FeedforwardSource"
+        ],
+        "example_values": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'FF_MinValue' appears across multiple schemas",
+        "occurrences": 2,
+        "schema_files": [
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json"
+        ],
+        "properties": [
+          "FF_MinValue"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'FF_MaxValue' appears across multiple schemas",
+        "occurrences": 2,
+        "schema_files": [
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json"
+        ],
+        "properties": [
+          "FF_MaxValue"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'Bias_Min' appears across multiple schemas",
+        "occurrences": 2,
+        "schema_files": [
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json"
+        ],
+        "properties": [
+          "Bias_Min"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "consistent_property",
+        "description": "Property 'Bias_Max' appears across multiple schemas",
+        "occurrences": 2,
+        "schema_files": [
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json"
+        ],
+        "properties": [
+          "Bias_Max"
+        ],
+        "example_values": {
+          "types": [
+            "number"
+          ]
+        }
+      },
+      {
+        "pattern_type": "complexity_progression",
+        "description": "Property count increases with complexity level",
+        "occurrences": 9,
+        "schema_files": [],
+        "properties": [],
+        "example_values": {
+          "Standard": {
+            "avg": 47.0,
+            "min": 39,
+            "max": 55,
+            "count": 2
+          },
+          "Advanced_Feedforward": {
+            "avg": 50.0,
+            "min": 42,
+            "max": 58,
+            "count": 2
+          },
+          "Advanced_Cascade": {
+            "avg": 54.5,
+            "min": 40,
+            "max": 69,
+            "count": 2
+          },
+          "Advanced_Cascade_Feedforward": {
+            "avg": 63.333333333333336,
+            "min": 45,
+            "max": 73,
+            "count": 3
+          }
+        }
+      },
+      {
+        "pattern_type": "pide_pattern",
+        "description": "Common properties in PIDE controllers",
+        "occurrences": 5,
+        "schema_files": [
+          "advance-pide-ff-cas.json",
+          "advanced-pide-cas-multiff.json",
+          "advanced-pide-cascade.json",
+          "advanced-pide-ff.json",
+          "standard-pide-controller.json"
+        ],
+        "properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "PVHHLimit",
+          "CVFault",
+          "ZCOff",
+          "ProgCasRatReq",
+          "PVTracking",
+          "PVLLLimit",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "DSmoothing",
+          "CVLLimit",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "PGain",
+          "IGain",
+          "created_by",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "PVROCPeriod",
+          "PVEProportional",
+          "ZCDeadband",
+          "DevLLimit",
+          "CVROCLimit"
+        ],
+        "example_values": {
+          "control_type": "PIDE"
+        }
+      },
+      {
+        "pattern_type": "pid_pattern",
+        "description": "Common properties in PID controllers",
+        "occurrences": 4,
+        "schema_files": [
+          "advanced-pid-cascade.json",
+          "advanced-pid-ff-cascade.json",
+          "advanced-pid-ff.json",
+          "standard-pid-controller.json"
+        ],
+        "properties": [
+          "PVH",
+          "SWM",
+          "MAXCV",
+          "MINO",
+          "NOBC",
+          "SP",
+          "UPD",
+          "MINI",
+          "DVDB",
+          "KD",
+          "PVT",
+          "DVP",
+          "SO",
+          "DOE",
+          "KI",
+          "KP",
+          "MINS",
+          "MAXI",
+          "MINTIE",
+          "PVDB",
+          "NDF",
+          "MAXS",
+          "MAXTIE",
+          "version",
+          "DB",
+          "NOZC",
+          "created_by",
+          "created_at",
+          "DVN",
+          "CA",
+          "BIAS",
+          "MO",
+          "PVL",
+          "INI",
+          "MAXO",
+          "MINCV",
+          "PE"
+        ],
+        "example_values": {
+          "control_type": "PID"
+        }
+      }
+    ],
+    "control_relationships": [
+      {
+        "source_schema": "advance-pide-ff-cas.json",
+        "target_schema": "advanced-pide-cas-multiff.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "FFSetPrevious",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "OperCasRatReq",
+          "PVHHLimit",
+          "SPCascade",
+          "CVFault",
+          "CVSetPrevious",
+          "ZCOff",
+          "PVLLLimit",
+          "ProgCasRatReq",
+          "PVTracking",
+          "RatioProg",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "UseRatio",
+          "RatioOper",
+          "DSmoothing",
+          "CVROCLimit",
+          "CVLLimit",
+          "CVInitValue",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "RatioLLimit",
+          "CVManLimiting",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "CVInitReq",
+          "PGain",
+          "IGain",
+          "created_by",
+          "WindupHIn",
+          "created_at",
+          "FF",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "CVPrevious",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "FFPrevious",
+          "PVEProportional",
+          "RatioHLimit",
+          "ZCDeadband",
+          "PVROCPeriod",
+          "DevLLimit",
+          "WindupLIn"
+        ],
+        "differences": [
+          "feedforwards"
+        ],
+        "similarity_score": 0.9863013698630136
+      },
+      {
+        "source_schema": "advance-pide-ff-cas.json",
+        "target_schema": "advanced-pide-cascade.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "OperCasRatReq",
+          "PVHHLimit",
+          "SPCascade",
+          "CVFault",
+          "CVSetPrevious",
+          "ZCOff",
+          "PVLLLimit",
+          "ProgCasRatReq",
+          "PVTracking",
+          "RatioProg",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "UseRatio",
+          "RatioOper",
+          "DSmoothing",
+          "CVROCLimit",
+          "CVLLimit",
+          "CVInitValue",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "RatioLLimit",
+          "CVManLimiting",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "CVInitReq",
+          "PGain",
+          "IGain",
+          "created_by",
+          "WindupHIn",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "CVPrevious",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "PVROCPeriod",
+          "PVEProportional",
+          "RatioHLimit",
+          "ZCDeadband",
+          "DevLLimit",
+          "WindupLIn"
+        ],
+        "differences": [
+          "FFSetPrevious",
+          "FFPrevious",
+          "FF"
+        ],
+        "similarity_score": 0.9583333333333334
+      },
+      {
+        "source_schema": "advance-pide-ff-cas.json",
+        "target_schema": "advanced-pide-ff.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "FFSetPrevious",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "PVHHLimit",
+          "CVFault",
+          "ZCOff",
+          "ProgCasRatReq",
+          "PVTracking",
+          "PVLLLimit",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "DSmoothing",
+          "CVLLimit",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "PGain",
+          "IGain",
+          "created_by",
+          "FF",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "FFPrevious",
+          "PVEProportional",
+          "ZCDeadband",
+          "PVROCPeriod",
+          "DevLLimit",
+          "CVROCLimit"
+        ],
+        "differences": [
+          "WindupHIn",
+          "RatioLLimit",
+          "UseRatio",
+          "RatioOper",
+          "CVManLimiting",
+          "CVPrevious",
+          "OperCasRatReq",
+          "CVInitReq",
+          "CVInitValue",
+          "RatioHLimit",
+          "SPCascade",
+          "CVSetPrevious",
+          "RatioProg",
+          "WindupLIn"
+        ],
+        "similarity_score": 0.8055555555555556
+      },
+      {
+        "source_schema": "advance-pide-ff-cas.json",
+        "target_schema": "standard-pide-controller.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "PVHHLimit",
+          "CVFault",
+          "ZCOff",
+          "ProgCasRatReq",
+          "PVTracking",
+          "PVLLLimit",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "DSmoothing",
+          "CVLLimit",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "PGain",
+          "IGain",
+          "created_by",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "PVROCPeriod",
+          "PVEProportional",
+          "ZCDeadband",
+          "DevLLimit",
+          "CVROCLimit"
+        ],
+        "differences": [
+          "WindupHIn",
+          "FFSetPrevious",
+          "UseRatio",
+          "RatioOper",
+          "RatioLLimit",
+          "CVManLimiting",
+          "CVPrevious",
+          "OperCasRatReq",
+          "CVInitReq",
+          "SPCascade",
+          "FFPrevious",
+          "RatioHLimit",
+          "FF",
+          "CVInitValue",
+          "CVSetPrevious",
+          "RatioProg",
+          "WindupLIn"
+        ],
+        "similarity_score": 0.7638888888888888
+      },
+      {
+        "source_schema": "advanced-pid-cascade.json",
+        "target_schema": "advanced-pid-ff-cascade.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVH",
+          "SWM",
+          "MAXCV",
+          "MINO",
+          "NOBC",
+          "SP",
+          "UPD",
+          "MINI",
+          "DVDB",
+          "KD",
+          "PVT",
+          "DVP",
+          "SO",
+          "DOE",
+          "KI",
+          "KP",
+          "MINS",
+          "MAXI",
+          "CT",
+          "PVDB",
+          "MINTIE",
+          "MAXS",
+          "NDF",
+          "MAXTIE",
+          "version",
+          "DB",
+          "NOZC",
+          "created_by",
+          "created_at",
+          "DVN",
+          "CA",
+          "BIAS",
+          "CL",
+          "MO",
+          "PVL",
+          "MasterLoopTag",
+          "INI",
+          "MAXO",
+          "MINCV",
+          "PE"
+        ],
+        "differences": [
+          "Bias_Min",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue",
+          "Bias_Max"
+        ],
+        "similarity_score": 0.8888888888888888
+      },
+      {
+        "source_schema": "advanced-pid-cascade.json",
+        "target_schema": "advanced-pid-ff.json",
+        "relationship_type": "variant",
+        "shared_properties": [
+          "PVH",
+          "SWM",
+          "MAXCV",
+          "MINO",
+          "NOBC",
+          "SP",
+          "UPD",
+          "MINI",
+          "DVDB",
+          "KD",
+          "PVT",
+          "DVP",
+          "SO",
+          "DOE",
+          "KI",
+          "KP",
+          "MINS",
+          "MAXI",
+          "MINTIE",
+          "PVDB",
+          "NDF",
+          "MAXS",
+          "MAXTIE",
+          "version",
+          "DB",
+          "NOZC",
+          "created_by",
+          "created_at",
+          "DVN",
+          "CA",
+          "BIAS",
+          "MO",
+          "PVL",
+          "INI",
+          "MAXO",
+          "MINCV",
+          "PE"
+        ],
+        "differences": [
+          "CT",
+          "Bias_Min",
+          "CL",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "MasterLoopTag",
+          "FF_MaxValue",
+          "Bias_Max"
+        ],
+        "similarity_score": 0.8222222222222222
+      },
+      {
+        "source_schema": "advanced-pid-cascade.json",
+        "target_schema": "standard-pid-controller.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVH",
+          "SWM",
+          "MAXCV",
+          "MINO",
+          "NOBC",
+          "SP",
+          "UPD",
+          "MINI",
+          "DVDB",
+          "KD",
+          "PVT",
+          "DVP",
+          "SO",
+          "DOE",
+          "KI",
+          "KP",
+          "MINS",
+          "MAXI",
+          "CT",
+          "PVDB",
+          "MINTIE",
+          "MAXS",
+          "NDF",
+          "MAXTIE",
+          "version",
+          "DB",
+          "NOZC",
+          "created_by",
+          "created_at",
+          "DVN",
+          "CA",
+          "BIAS",
+          "CL",
+          "MO",
+          "PVL",
+          "INI",
+          "MAXO",
+          "MINCV",
+          "PE"
+        ],
+        "differences": [
+          "MasterLoopTag"
+        ],
+        "similarity_score": 0.975
+      },
+      {
+        "source_schema": "advanced-pid-ff-cascade.json",
+        "target_schema": "advanced-pid-ff.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVH",
+          "SWM",
+          "MAXCV",
+          "MINO",
+          "NOBC",
+          "SP",
+          "UPD",
+          "Bias_Max",
+          "MINI",
+          "DVDB",
+          "KD",
+          "FeedforwardSource",
+          "PVT",
+          "DVP",
+          "SO",
+          "DOE",
+          "KI",
+          "KP",
+          "MINS",
+          "MAXI",
+          "MINTIE",
+          "PVDB",
+          "NDF",
+          "MAXS",
+          "MAXTIE",
+          "version",
+          "DB",
+          "NOZC",
+          "FF_MinValue",
+          "created_by",
+          "created_at",
+          "FF_MaxValue",
+          "DVN",
+          "CA",
+          "BIAS",
+          "Bias_Min",
+          "MO",
+          "PVL",
+          "INI",
+          "MAXO",
+          "MINCV",
+          "PE"
+        ],
+        "differences": [
+          "MasterLoopTag",
+          "CT",
+          "CL"
+        ],
+        "similarity_score": 0.9333333333333333
+      },
+      {
+        "source_schema": "advanced-pid-ff-cascade.json",
+        "target_schema": "standard-pid-controller.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVH",
+          "SWM",
+          "MAXCV",
+          "MINO",
+          "NOBC",
+          "SP",
+          "UPD",
+          "MINI",
+          "DVDB",
+          "KD",
+          "PVT",
+          "DVP",
+          "SO",
+          "DOE",
+          "KI",
+          "KP",
+          "MINS",
+          "MAXI",
+          "CT",
+          "PVDB",
+          "MINTIE",
+          "MAXS",
+          "NDF",
+          "MAXTIE",
+          "version",
+          "DB",
+          "NOZC",
+          "created_by",
+          "created_at",
+          "DVN",
+          "CA",
+          "BIAS",
+          "CL",
+          "MO",
+          "PVL",
+          "INI",
+          "MAXO",
+          "MINCV",
+          "PE"
+        ],
+        "differences": [
+          "Bias_Min",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "MasterLoopTag",
+          "FF_MaxValue",
+          "Bias_Max"
+        ],
+        "similarity_score": 0.8666666666666667
+      },
+      {
+        "source_schema": "advanced-pid-ff.json",
+        "target_schema": "standard-pid-controller.json",
+        "relationship_type": "variant",
+        "shared_properties": [
+          "PVH",
+          "SWM",
+          "MAXCV",
+          "MINO",
+          "NOBC",
+          "SP",
+          "UPD",
+          "MINI",
+          "DVDB",
+          "KD",
+          "PVT",
+          "DVP",
+          "SO",
+          "DOE",
+          "KI",
+          "KP",
+          "MINS",
+          "MAXI",
+          "MINTIE",
+          "PVDB",
+          "NDF",
+          "MAXS",
+          "MAXTIE",
+          "version",
+          "DB",
+          "NOZC",
+          "created_by",
+          "created_at",
+          "DVN",
+          "CA",
+          "BIAS",
+          "MO",
+          "PVL",
+          "INI",
+          "MAXO",
+          "MINCV",
+          "PE"
+        ],
+        "differences": [
+          "CT",
+          "Bias_Min",
+          "CL",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue",
+          "Bias_Max"
+        ],
+        "similarity_score": 0.8409090909090909
+      },
+      {
+        "source_schema": "advanced-pide-cas-multiff.json",
+        "target_schema": "advanced-pide-cascade.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "OperCasRatReq",
+          "PVHHLimit",
+          "SPCascade",
+          "CVFault",
+          "CVSetPrevious",
+          "ZCOff",
+          "PVLLLimit",
+          "ProgCasRatReq",
+          "PVTracking",
+          "RatioProg",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "UseRatio",
+          "RatioOper",
+          "DSmoothing",
+          "CVROCLimit",
+          "CVLLimit",
+          "CVInitValue",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "RatioLLimit",
+          "CVManLimiting",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "CVInitReq",
+          "PGain",
+          "IGain",
+          "created_by",
+          "WindupHIn",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "CVPrevious",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "PVROCPeriod",
+          "PVEProportional",
+          "RatioHLimit",
+          "ZCDeadband",
+          "DevLLimit",
+          "WindupLIn"
+        ],
+        "differences": [
+          "feedforwards",
+          "FFSetPrevious",
+          "FFPrevious",
+          "FF"
+        ],
+        "similarity_score": 0.9452054794520548
+      },
+      {
+        "source_schema": "advanced-pide-cas-multiff.json",
+        "target_schema": "advanced-pide-ff.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "FFSetPrevious",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "PVHHLimit",
+          "CVFault",
+          "ZCOff",
+          "ProgCasRatReq",
+          "PVTracking",
+          "PVLLLimit",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "DSmoothing",
+          "CVLLimit",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "PGain",
+          "IGain",
+          "created_by",
+          "FF",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "FFPrevious",
+          "PVEProportional",
+          "ZCDeadband",
+          "PVROCPeriod",
+          "DevLLimit",
+          "CVROCLimit"
+        ],
+        "differences": [
+          "feedforwards",
+          "WindupHIn",
+          "RatioLLimit",
+          "UseRatio",
+          "RatioOper",
+          "CVManLimiting",
+          "CVPrevious",
+          "OperCasRatReq",
+          "CVInitReq",
+          "CVInitValue",
+          "RatioHLimit",
+          "SPCascade",
+          "CVSetPrevious",
+          "RatioProg",
+          "WindupLIn"
+        ],
+        "similarity_score": 0.7945205479452054
+      },
+      {
+        "source_schema": "advanced-pide-cas-multiff.json",
+        "target_schema": "standard-pide-controller.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "PVHHLimit",
+          "CVFault",
+          "ZCOff",
+          "ProgCasRatReq",
+          "PVTracking",
+          "PVLLLimit",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "DSmoothing",
+          "CVLLimit",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "PGain",
+          "IGain",
+          "created_by",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "PVROCPeriod",
+          "PVEProportional",
+          "ZCDeadband",
+          "DevLLimit",
+          "CVROCLimit"
+        ],
+        "differences": [
+          "feedforwards",
+          "WindupHIn",
+          "FFSetPrevious",
+          "UseRatio",
+          "RatioOper",
+          "RatioLLimit",
+          "CVManLimiting",
+          "FF",
+          "CVPrevious",
+          "OperCasRatReq",
+          "CVInitReq",
+          "FFPrevious",
+          "CVInitValue",
+          "RatioHLimit",
+          "SPCascade",
+          "CVSetPrevious",
+          "RatioProg",
+          "WindupLIn"
+        ],
+        "similarity_score": 0.7534246575342466
+      },
+      {
+        "source_schema": "advanced-pide-cascade.json",
+        "target_schema": "advanced-pide-ff.json",
+        "relationship_type": "variant",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "PVHHLimit",
+          "CVFault",
+          "ZCOff",
+          "ProgCasRatReq",
+          "PVTracking",
+          "PVLLLimit",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "DSmoothing",
+          "CVLLimit",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "PGain",
+          "IGain",
+          "created_by",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "PVROCPeriod",
+          "PVEProportional",
+          "ZCDeadband",
+          "DevLLimit",
+          "CVROCLimit"
+        ],
+        "differences": [
+          "WindupHIn",
+          "FFSetPrevious",
+          "UseRatio",
+          "RatioOper",
+          "RatioLLimit",
+          "CVManLimiting",
+          "CVPrevious",
+          "OperCasRatReq",
+          "CVInitReq",
+          "SPCascade",
+          "FFPrevious",
+          "RatioHLimit",
+          "FF",
+          "CVInitValue",
+          "CVSetPrevious",
+          "RatioProg",
+          "WindupLIn"
+        ],
+        "similarity_score": 0.7638888888888888
+      },
+      {
+        "source_schema": "advanced-pide-cascade.json",
+        "target_schema": "standard-pide-controller.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "PVHHLimit",
+          "CVFault",
+          "ZCOff",
+          "ProgCasRatReq",
+          "PVTracking",
+          "PVLLLimit",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "DSmoothing",
+          "CVLLimit",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "PGain",
+          "IGain",
+          "created_by",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "PVROCPeriod",
+          "PVEProportional",
+          "ZCDeadband",
+          "DevLLimit",
+          "CVROCLimit"
+        ],
+        "differences": [
+          "WindupHIn",
+          "RatioLLimit",
+          "UseRatio",
+          "RatioOper",
+          "CVManLimiting",
+          "CVPrevious",
+          "OperCasRatReq",
+          "CVInitReq",
+          "CVInitValue",
+          "RatioHLimit",
+          "SPCascade",
+          "CVSetPrevious",
+          "RatioProg",
+          "WindupLIn"
+        ],
+        "similarity_score": 0.7971014492753623
+      },
+      {
+        "source_schema": "advanced-pide-ff.json",
+        "target_schema": "standard-pide-controller.json",
+        "relationship_type": "extends",
+        "shared_properties": [
+          "PVEUMax",
+          "CVOverride",
+          "PV",
+          "PVLLimit",
+          "SPProg",
+          "ProgManualReq",
+          "PVEUMin",
+          "ProgOperReq",
+          "PVHHLimit",
+          "CVFault",
+          "ZCOff",
+          "ProgCasRatReq",
+          "PVTracking",
+          "PVLLLimit",
+          "ProgOverrideReq",
+          "DevLLLimit",
+          "SPOper",
+          "DSmoothing",
+          "CVLLimit",
+          "ControlAction",
+          "CVHLimit",
+          "ProgHandReq",
+          "CVProg",
+          "CVEUMin",
+          "AllowCasRat",
+          "PVFault",
+          "DevHLimit",
+          "SPLLimit",
+          "OperOperReq",
+          "PVROCPosLimit",
+          "version",
+          "PVEDerivative",
+          "ManualAfterInit",
+          "SPHLimit",
+          "CVEUMax",
+          "PGain",
+          "IGain",
+          "created_by",
+          "created_at",
+          "ProgAutoReq",
+          "CVOper",
+          "DevHHLimit",
+          "ProgProgReq",
+          "DependIndepend",
+          "DGain",
+          "PVHLimit",
+          "PVDeadband",
+          "DevDeadband",
+          "OperProgReq",
+          "PVROCNegLimit",
+          "PVROCPeriod",
+          "PVEProportional",
+          "ZCDeadband",
+          "DevLLimit",
+          "CVROCLimit"
+        ],
+        "differences": [
+          "FFSetPrevious",
+          "FFPrevious",
+          "FF"
+        ],
+        "similarity_score": 0.9482758620689655
+      }
+    ],
+    "algorithm_patterns": [],
+    "knowledge_graph": {
+      "concepts": {
+        "PIDE": [
+          "Function Block Advanced PIDE (Cascade + Feedforward)",
+          "Function Block Advanced PIDE (Cascade + Multi-Feedforward)",
+          "Function Block Advanced PIDE (Cascade)",
+          "Function Block Advanced PIDE (Feedforward)",
+          "Function Block Standard PIDE Controller"
+        ],
+        "PID": [
+          "Ladder Logic Advanced PID (Cascade)",
+          "Ladder Logic Advanced PID (Cascade + Feedforward)",
+          "Ladder Logic Advanced PID (Feedforward)",
+          "Ladder Logic Standard PID Controller"
+        ]
+      },
+      "hierarchies": {
+        "PIDE": [
+          "Advanced_Cascade_Feedforward",
+          "Advanced_Cascade_Feedforward",
+          "Advanced_Cascade",
+          "Advanced_Feedforward"
+        ],
+        "PID": [
+          "Advanced_Cascade",
+          "Advanced_Cascade_Feedforward",
+          "Advanced_Feedforward"
+        ]
+      },
+      "dependencies": {},
+      "best_practices": {}
+    },
+    "data_insights": {},
+    "recommendations": [
+      "Found 9 control schemas - excellent foundation for Phase 20 JSON Schema Framework",
+      "Multiple control types (PIDE, PID) - good coverage for comprehensive system",
+      "Multiple complexity levels - enables progressive learning approach"
+    ]
+  }
+}

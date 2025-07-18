@@ -257,19 +257,27 @@ jobs:
             const coverage = JSON.parse(fs.readFileSync(path, 'utf8'));
             const totalCoverage = coverage.totals.percent_covered;
             
+            const threshold = ${{ env.COVERAGE_THRESHOLD }};
+            const currentCategory = '${{ matrix.test-category }}';
+            const status = totalCoverage >= threshold ? '✅ PASS' : '❌ FAIL';
+            
+            const categoryStatus = (category) => {
+              return currentCategory === category ? '✅ Completed' : '⏳ Pending';
+            };
+            
             const comment = `## 📊 Phase 16 Test Coverage Report
             
             **Overall Coverage**: ${totalCoverage.toFixed(2)}%
-            **Threshold**: ${{ env.COVERAGE_THRESHOLD }}%
-            **Status**: ${totalCoverage >= ${{ env.COVERAGE_THRESHOLD }} ? '✅ PASS' : '❌ FAIL'}
+            **Threshold**: ${threshold}%
+            **Status**: ${status}
             
             ### Coverage by Category
-            - **Unit Tests**: ${{ matrix.test-category == 'unit' ? '✅ Completed' : '⏳ Pending' }}
-            - **Integration Tests**: ${{ matrix.test-category == 'integration' ? '✅ Completed' : '⏳ Pending' }}
-            - **Security Tests**: ${{ matrix.test-category == 'security' ? '✅ Completed' : '⏳ Pending' }}
-            - **Performance Tests**: ${{ matrix.test-category == 'performance' ? '✅ Completed' : '⏳ Pending' }}
-            - **E2E Tests**: ${{ matrix.test-category == 'e2e' ? '✅ Completed' : '⏳ Pending' }}
-            - **Production Tests**: ${{ matrix.test-category == 'production' ? '✅ Completed' : '⏳ Pending' }}
+            - **Unit Tests**: ${categoryStatus('unit')}
+            - **Integration Tests**: ${categoryStatus('integration')}
+            - **Security Tests**: ${categoryStatus('security')}
+            - **Performance Tests**: ${categoryStatus('performance')}
+            - **E2E Tests**: ${categoryStatus('e2e')}
+            - **Production Tests**: ${categoryStatus('production')}
             
             [View Full Coverage Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             `;

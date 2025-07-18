@@ -1,0 +1,372 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-gbt.industrial.ai/schemas/ladder-logic-standard-pid.json",
+  "title": "Ladder Logic Standard PID Controller",
+  "description": "Standard PID controller implemented in ladder logic with basic functionality",
+  "type": "object",
+  "properties": {
+    "tag_name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "Unique identifier for the control loop tag"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Human-readable description of the control loop"
+    },
+    "process_variable": {
+      "type": "object",
+      "properties": {
+        "tag_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Tag name for process variable input"
+        },
+        "engineering_units": {
+          "type": "string",
+          "enum": [
+            "Percent",
+            "PSI",
+            "Bar",
+            "Celsius",
+            "Fahrenheit",
+            "Kelvin",
+            "GPM",
+            "M3/H",
+            "LBS/H",
+            "KG/H",
+            "Volts",
+            "mA"
+          ],
+          "description": "Engineering units for process variable"
+        },
+        "range_min": {
+          "type": "number",
+          "description": "Minimum expected value for process variable"
+        },
+        "range_max": {
+          "type": "number",
+          "description": "Maximum expected value for process variable"
+        }
+      },
+      "required": [
+        "tag_name",
+        "engineering_units",
+        "range_min",
+        "range_max"
+      ],
+      "description": "Process variable configuration"
+    },
+    "setpoint": {
+      "type": "object",
+      "properties": {
+        "tag_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Tag name for setpoint input"
+        },
+        "value": {
+          "type": "number",
+          "description": "Current setpoint value"
+        },
+        "engineering_units": {
+          "type": "string",
+          "enum": [
+            "Percent",
+            "PSI",
+            "Bar",
+            "Celsius",
+            "Fahrenheit",
+            "Kelvin",
+            "GPM",
+            "M3/H",
+            "LBS/H",
+            "KG/H",
+            "Volts",
+            "mA"
+          ],
+          "description": "Engineering units for setpoint (must match PV units)"
+        },
+        "range_min": {
+          "type": "number",
+          "description": "Minimum allowable setpoint value"
+        },
+        "range_max": {
+          "type": "number",
+          "description": "Maximum allowable setpoint value"
+        }
+      },
+      "required": [
+        "tag_name",
+        "value",
+        "engineering_units",
+        "range_min",
+        "range_max"
+      ],
+      "description": "Setpoint configuration"
+    },
+    "control_output": {
+      "type": "object",
+      "properties": {
+        "tag_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Tag name for control output"
+        },
+        "engineering_units": {
+          "type": "string",
+          "enum": [
+            "Percent",
+            "PSI",
+            "Bar",
+            "Celsius",
+            "Fahrenheit",
+            "Kelvin",
+            "GPM",
+            "M3/H",
+            "LBS/H",
+            "KG/H",
+            "Volts",
+            "mA"
+          ],
+          "description": "Engineering units for control output"
+        },
+        "range_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum output value (typically 0-100%)"
+        },
+        "range_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Maximum output value (typically 0-100%)"
+        },
+        "initial_value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Initial output value on startup"
+        }
+      },
+      "required": [
+        "tag_name",
+        "engineering_units",
+        "range_min",
+        "range_max"
+      ],
+      "description": "Control output configuration"
+    },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Automatic",
+        "Cascade",
+        "Override",
+        "Program"
+      ],
+      "description": "Current control mode"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether the control loop is enabled"
+    },
+    "scan_time": {
+      "type": "number",
+      "minimum": 0.001,
+      "maximum": 60.0,
+      "description": "Controller execution scan time in seconds"
+    },
+    "pid_parameters": {
+      "type": "object",
+      "properties": {
+        "proportional_gain": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 999.9,
+          "description": "Proportional gain (Kp)"
+        },
+        "integral_time": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 9999.0,
+          "description": "Integral time constant (Ti) in minutes"
+        },
+        "derivative_time": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 99.99,
+          "description": "Derivative time constant (Td) in minutes"
+        },
+        "integral_hold": {
+          "type": "boolean",
+          "description": "Integral action hold (prevents integral windup)"
+        },
+        "derivative_hold": {
+          "type": "boolean",
+          "description": "Derivative action hold"
+        }
+      },
+      "required": [
+        "proportional_gain",
+        "integral_time",
+        "derivative_time"
+      ]
+    },
+    "scaling": {
+      "type": "object",
+      "properties": {
+        "process_variable": {
+          "type": "object",
+          "properties": {
+            "scaled_min": {
+              "type": "number",
+              "description": "PV scaled minimum"
+            },
+            "scaled_max": {
+              "type": "number",
+              "description": "PV scaled maximum"
+            },
+            "raw_min": {
+              "type": "number",
+              "description": "PV raw minimum"
+            },
+            "raw_max": {
+              "type": "number",
+              "description": "PV raw maximum"
+            }
+          },
+          "required": [
+            "scaled_min",
+            "scaled_max",
+            "raw_min",
+            "raw_max"
+          ]
+        },
+        "setpoint": {
+          "type": "object",
+          "properties": {
+            "scaled_min": {
+              "type": "number"
+            },
+            "scaled_max": {
+              "type": "number"
+            },
+            "raw_min": {
+              "type": "number"
+            },
+            "raw_max": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "scaled_min",
+            "scaled_max",
+            "raw_min",
+            "raw_max"
+          ]
+        },
+        "control_output": {
+          "type": "object",
+          "properties": {
+            "scaled_min": {
+              "type": "number"
+            },
+            "scaled_max": {
+              "type": "number"
+            },
+            "raw_min": {
+              "type": "number"
+            },
+            "raw_max": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "scaled_min",
+            "scaled_max",
+            "raw_min",
+            "raw_max"
+          ]
+        }
+      },
+      "required": [
+        "process_variable",
+        "setpoint",
+        "control_output"
+      ],
+      "description": "Input/output scaling configuration"
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "output_high_limit": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Maximum output limit (0-100%)"
+        },
+        "output_low_limit": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum output limit (0-100%)"
+        },
+        "setpoint_high_limit": {
+          "type": "number",
+          "description": "Maximum setpoint limit"
+        },
+        "setpoint_low_limit": {
+          "type": "number",
+          "description": "Minimum setpoint limit"
+        }
+      },
+      "required": [
+        "output_high_limit",
+        "output_low_limit"
+      ],
+      "description": "Control limits configuration"
+    },
+    "controller_options": {
+      "type": "object",
+      "properties": {
+        "auto_manual_station": {
+          "type": "boolean",
+          "description": "Enable auto/manual station"
+        },
+        "output_tracking": {
+          "type": "boolean",
+          "description": "Enable output tracking in manual mode"
+        },
+        "setpoint_tracking": {
+          "type": "boolean",
+          "description": "Enable setpoint tracking"
+        },
+        "zero_cross_time": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3600,
+          "description": "Zero crossing time in seconds"
+        }
+      },
+      "description": "Standard PID controller options"
+    }
+  },
+  "required": [
+    "tag_name",
+    "process_variable",
+    "setpoint",
+    "control_output",
+    "pid_parameters",
+    "scaling",
+    "limits",
+    "control_mode",
+    "enabled"
+  ],
+  "additionalProperties": false
+}

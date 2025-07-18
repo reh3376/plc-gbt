@@ -1,0 +1,375 @@
+{
+  "scan_timestamp": "2025-07-15T05:25:24.367408",
+  "context_path": "../docs/context/control-schema",
+  "summary": {
+    "total_files": 9,
+    "file_types": {
+      "schema": 9
+    },
+    "control_types": {
+      "PIDE": 5,
+      "PID": 4
+    },
+    "complexity_levels": {
+      "Advanced_Cascade_Feedforward": 3,
+      "Advanced_Cascade": 2,
+      "Advanced_Feedforward": 2,
+      "Standard": 2
+    },
+    "total_size_bytes": 74957,
+    "processing_errors": 0
+  },
+  "results": [
+    {
+      "metadata": {
+        "path": "../docs/context/control-schema/advance-pide-ff-cas.json",
+        "name": "advance-pide-ff-cas.json",
+        "extension": ".json",
+        "size_bytes": 5135,
+        "mime_type": "application/json",
+        "file_type": "schema",
+        "content_hash": "8e019d1aaa330659040256e20151f3d8349d1c2df5ef58994c828af6956ad9ea",
+        "created_time": "2025-07-15T04:50:06.808672",
+        "modified_time": "2025-07-15T04:50:06.808672"
+      },
+      "schema_analysis": {
+        "schema_type": "control_loop",
+        "title": "Function Block Advanced PIDE (Cascade + Feedforward)",
+        "description": "Schema for a cascaded PIDE with feedforward. The secondary PIDE uses Cascade mode and has a feedforward bias input for measured disturbances:contentReference[oaicite:201]{index=201}.",
+        "version": "unknown",
+        "property_count": 72,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain",
+          "AllowCasRat"
+        ],
+        "control_type": "PIDE",
+        "complexity_level": "Advanced_Cascade_Feedforward"
+      },
+      "code_analysis": null,
+      "document_analysis": null,
+      "data_analysis": null,
+      "raw_content": null,
+      "processing_errors": []
+    },
+    {
+      "metadata": {
+        "path": "../docs/context/control-schema/advanced-pid-cascade.json",
+        "name": "advanced-pid-cascade.json",
+        "extension": ".json",
+        "size_bytes": 5132,
+        "mime_type": "application/json",
+        "file_type": "schema",
+        "content_hash": "726f698ad84742bac0e7d0bc5f7c5cdf3335a775dc8c2b945d41b89e51adac13",
+        "created_time": "2025-07-15T04:43:57.791156",
+        "modified_time": "2025-07-15T04:43:57.791156"
+      },
+      "schema_analysis": {
+        "schema_type": "control_loop",
+        "title": "Ladder Logic Advanced PID (Cascade)",
+        "description": "Schema for a Ladder Logic cascaded PID controller. One PID (slave) receives its setpoint from another PID (master):contentReference[oaicite:52]{index=52}, enabling a cascade (master-slave) architecture.",
+        "version": "unknown",
+        "property_count": 40,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "CL",
+          "CT",
+          "SP",
+          "KP",
+          "KI",
+          "KD"
+        ],
+        "control_type": "PID",
+        "complexity_level": "Advanced_Cascade"
+      },
+      "code_analysis": null,
+      "document_analysis": null,
+      "data_analysis": null,
+      "raw_content": null,
+      "processing_errors": []
+    },
+    {
+      "metadata": {
+        "path": "../docs/context/control-schema/advanced-pid-ff-cascade.json",
+        "name": "advanced-pid-ff-cascade.json",
+        "extension": ".json",
+        "size_bytes": 4346,
+        "mime_type": "application/json",
+        "file_type": "schema",
+        "content_hash": "068e4107884c76bff0cf8923bba277c9e57e789ba11ca7589e772fc7674e9399",
+        "created_time": "2025-07-15T04:45:17.226460",
+        "modified_time": "2025-07-15T04:45:17.226460"
+      },
+      "schema_analysis": {
+        "schema_type": "control_loop",
+        "title": "Ladder Logic Advanced PID (Cascade + Feedforward)",
+        "description": "Schema for a Ladder PID with both cascade (master-slave) and feedforward compensation. For example, a slave flow/valve loop that gets its SP from a master temperature loop and adds a feedforward bias for load changes:contentReference[oaicite:65]{index=65}.",
+        "version": "unknown",
+        "property_count": 45,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "CL",
+          "CT",
+          "KP",
+          "KI",
+          "KD",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue",
+          "Bias_Min",
+          "Bias_Max"
+        ],
+        "control_type": "PID",
+        "complexity_level": "Advanced_Cascade_Feedforward"
+      },
+      "code_analysis": null,
+      "document_analysis": null,
+      "data_analysis": null,
+      "raw_content": null,
+      "processing_errors": []
+    },
+    {
+      "metadata": {
+        "path": "../docs/context/control-schema/advanced-pid-ff.json",
+        "name": "advanced-pid-ff.json",
+        "extension": ".json",
+        "size_bytes": 5789,
+        "mime_type": "application/json",
+        "file_type": "schema",
+        "content_hash": "1cfeb7181fef320746eace164d2619ccbfcdba2f186a8f96ed9d641fbfbdb112",
+        "created_time": "2025-07-15T04:42:58.019517",
+        "modified_time": "2025-07-15T04:42:58.019517"
+      },
+      "schema_analysis": {
+        "schema_type": "control_loop",
+        "title": "Ladder Logic Advanced PID (Feedforward)",
+        "description": "Schema for a Ladder Logic PID controller with feedforward augmentation. This uses the bias term as a feedforward input to anticipate disturbances:contentReference[oaicite:45]{index=45}.",
+        "version": "unknown",
+        "property_count": 42,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "SP",
+          "KP",
+          "KI",
+          "KD",
+          "FeedforwardSource",
+          "FF_MinValue",
+          "FF_MaxValue",
+          "Bias_Min",
+          "Bias_Max"
+        ],
+        "control_type": "PID",
+        "complexity_level": "Advanced_Feedforward"
+      },
+      "code_analysis": null,
+      "document_analysis": null,
+      "data_analysis": null,
+      "raw_content": null,
+      "processing_errors": []
+    },
+    {
+      "metadata": {
+        "path": "../docs/context/control-schema/advanced-pide-cas-multiff.json",
+        "name": "advanced-pide-cas-multiff.json",
+        "extension": ".json",
+        "size_bytes": 6082,
+        "mime_type": "application/json",
+        "file_type": "schema",
+        "content_hash": "71a42ef782db81cd80bd3e6ec1254d7d328564f10a6612eb70be7a77560d7988",
+        "created_time": "2025-07-15T04:50:58.057114",
+        "modified_time": "2025-07-15T04:50:58.057114"
+      },
+      "schema_analysis": {
+        "schema_type": "control_loop",
+        "title": "Function Block Advanced PIDE (Cascade + Multi-Feedforward)",
+        "description": "Schema for a cascaded PIDE with multiple feedforward inputs. Multiple disturbance variables are used, each with its own bias formula, to compute a combined feedforward signal:contentReference[oaicite:209]{index=209}:contentReference[oaicite:210]{index=210}.",
+        "version": "unknown",
+        "property_count": 73,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain",
+          "AllowCasRat",
+          "feedforwards"
+        ],
+        "control_type": "PIDE",
+        "complexity_level": "Advanced_Cascade_Feedforward"
+      },
+      "code_analysis": null,
+      "document_analysis": null,
+      "data_analysis": null,
+      "raw_content": null,
+      "processing_errors": []
+    },
+    {
+      "metadata": {
+        "path": "../docs/context/control-schema/advanced-pide-cascade.json",
+        "name": "advanced-pide-cascade.json",
+        "extension": ".json",
+        "size_bytes": 11551,
+        "mime_type": "application/json",
+        "file_type": "schema",
+        "content_hash": "6ef8ed6268c9cee22261e3743650571055ea3a135918a130f90018a9001f4eec",
+        "created_time": "2025-07-15T04:48:41.755558",
+        "modified_time": "2025-07-15T04:48:41.755558"
+      },
+      "schema_analysis": {
+        "schema_type": "control_loop",
+        "title": "Function Block Advanced PIDE (Cascade)",
+        "description": "Schema for a pair of cascaded PIDE controllers (primary & secondary). The secondary (slave) PIDE is configured for Cascade mode and receives SPCascade from the primary’s CV:contentReference[oaicite:164]{index=164}.",
+        "version": "unknown",
+        "property_count": 69,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain",
+          "AllowCasRat"
+        ],
+        "control_type": "PIDE",
+        "complexity_level": "Advanced_Cascade"
+      },
+      "code_analysis": null,
+      "document_analysis": null,
+      "data_analysis": null,
+      "raw_content": null,
+      "processing_errors": []
+    },
+    {
+      "metadata": {
+        "path": "../docs/context/control-schema/advanced-pide-ff.json",
+        "name": "advanced-pide-ff.json",
+        "extension": ".json",
+        "size_bytes": 7151,
+        "mime_type": "application/json",
+        "file_type": "schema",
+        "content_hash": "b561f3ac356f520344d969458b110560376b9edc1dc2fc3af4a793f773717895",
+        "created_time": "2025-07-15T04:47:40.912114",
+        "modified_time": "2025-07-15T04:47:40.912114"
+      },
+      "schema_analysis": {
+        "schema_type": "control_loop",
+        "title": "Function Block Advanced PIDE (Feedforward)",
+        "description": "Schema for a PIDE controller with feedforward compensation. An external feedforward value (FF) is added to the PID output to preemptively counteract disturbances:contentReference[oaicite:155]{index=155}.",
+        "version": "unknown",
+        "property_count": 58,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain"
+        ],
+        "control_type": "PIDE",
+        "complexity_level": "Advanced_Feedforward"
+      },
+      "code_analysis": null,
+      "document_analysis": null,
+      "data_analysis": null,
+      "raw_content": null,
+      "processing_errors": []
+    },
+    {
+      "metadata": {
+        "path": "../docs/context/control-schema/standard-pid-controller.json",
+        "name": "standard-pid-controller.json",
+        "extension": ".json",
+        "size_bytes": 12149,
+        "mime_type": "application/json",
+        "file_type": "schema",
+        "content_hash": "bdad7e1878a525289b6555151dae3b198944342c1da4018a82e98ae0a0e72b5c",
+        "created_time": "2025-07-15T04:41:40.335585",
+        "modified_time": "2025-07-15T04:41:40.335585"
+      },
+      "schema_analysis": {
+        "schema_type": "control_loop",
+        "title": "Ladder Logic Standard PID Controller",
+        "description": "Schema for configuring a standard Ladder Logic PID loop (positional form PID) in Studio 5000:contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}.",
+        "version": "unknown",
+        "property_count": 39,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "SP",
+          "KP",
+          "KI",
+          "KD"
+        ],
+        "control_type": "PID",
+        "complexity_level": "Standard"
+      },
+      "code_analysis": null,
+      "document_analysis": null,
+      "data_analysis": null,
+      "raw_content": null,
+      "processing_errors": []
+    },
+    {
+      "metadata": {
+        "path": "../docs/context/control-schema/standard-pide-controller.json",
+        "name": "standard-pide-controller.json",
+        "extension": ".json",
+        "size_bytes": 17622,
+        "mime_type": "application/json",
+        "file_type": "schema",
+        "content_hash": "5e357d9d149a5833c9bacb945e5e0fe253ddd844ee5be6f40e2247b495d36309",
+        "created_time": "2025-07-15T04:46:46.597419",
+        "modified_time": "2025-07-15T04:46:46.597419"
+      },
+      "schema_analysis": {
+        "schema_type": "control_loop",
+        "title": "Function Block Standard PIDE Controller",
+        "description": "Schema for a standard (single-loop) Enhanced PID (PIDE) function block configuration:contentReference[oaicite:74]{index=74} in Studio 5000.",
+        "version": "unknown",
+        "property_count": 55,
+        "required_fields": [
+          "created_at",
+          "created_by",
+          "version",
+          "PV",
+          "PVEUMax",
+          "PVEUMin",
+          "PGain",
+          "IGain",
+          "DGain"
+        ],
+        "control_type": "PIDE",
+        "complexity_level": "Standard"
+      },
+      "code_analysis": null,
+      "document_analysis": null,
+      "data_analysis": null,
+      "raw_content": null,
+      "processing_errors": []
+    }
+  ]
+}

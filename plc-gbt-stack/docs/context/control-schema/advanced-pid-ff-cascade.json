@@ -1,0 +1,78 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Ladder Logic Advanced PID (Cascade + Feedforward)",
+    "description": "Schema for a Ladder PID with both cascade (master-slave) and feedforward compensation. For example, a slave flow/valve loop that gets its SP from a master temperature loop and adds a feedforward bias for load changes:contentReference[oaicite:65]{index=65}.",
+    "type": "object",
+    "properties": {
+      "created_at": { "type": "string", "format": "date-time" },
+      "created_by": { "type": "string" },
+      "version": { "type": "string", "enum": ["00.00.001"] },
+      "SP": { "type": "number", "description": "Local setpoint (used only if not in cascade mode). In cascade mode, SP is given by master loop." },
+      "SO": { "type": "number", "description": "Set output % (manual).", "minimum": 0.0, "maximum": 100.0 },
+      "BIAS": { "type": "number", "description": "Bias (%) for feedforward addition to output:contentReference[oaicite:66]{index=66}.", "minimum": -100.0, "maximum": 100.0 },
+      "KP": { "type": "number", "description": "Proportional gain.", "minimum": 0.0 },
+      "KI": { "type": "number", "description": "Integral gain.", "minimum": 0.0 },
+      "KD": { "type": "number", "description": "Derivative setting.", "minimum": 0.0 },
+      "MO": { "type": "boolean", "description": "Manual mode flag." },
+      "SWM": { "type": "boolean", "description": "Software manual mode flag." },
+      "PE": { "type": "string", "enum": ["Independent", "Dependent"] },
+      "CA": { "type": "string", "enum": ["Direct (PV-SP)", "Reverse (SP-PV)"] },
+      "DOE": { "type": "string", "enum": ["PV", "Error"] },
+      "UPD": { "type": "number", "minimum": 0.0 },
+      "MAXO": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+      "MINO": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+      "DB": { "type": "number", "minimum": 0.0 },
+      "NDF": { "type": "boolean" },
+      "NOBC": { "type": "boolean" },
+      "NOZC": { "type": "boolean" },
+      "PVT": { "type": "boolean" },
+      "CL": { "type": "boolean", "description": "Cascade enabled.", "default": true },
+      "CT": { "type": "string", "enum": ["Master", "Slave"], "description": "Cascade role (likely 'Slave' for the feedforward loop that is subordinate to a master)." },
+      "MasterLoopTag": { "type": "string", "description": "Master PID tag name (if this loop is Slave)."},
+      "PVH": { "type": "number" },
+      "PVL": { "type": "number" },
+      "PVDB": { "type": "number", "minimum": 0.0 },
+      "DVP": { "type": "number" },
+      "DVN": { "type": "number" },
+      "DVDB": { "type": "number", "minimum": 0.0 },
+      "MAXI": { "type": "number", "default": 16383 },
+      "MINI": { "type": "number" },
+      "MAXS": { "type": "number" },
+      "MINS": { "type": "number" },
+      "MAXCV": { "type": "number", "default": 100.0, "description": "For master loop: align with slave PV EU max:contentReference[oaicite:67]{index=67}." },
+      "MINCV": { "type": "number", "default": 0.0 },
+      "MAXTIE": { "type": "number", "default": 16383 },
+      "MINTIE": { "type": "number" },
+      "INI": { "type": "boolean" },
+      "FeedforwardSource": {
+        "type": "string",
+        "description": "Disturbance variable name for feedforward (e.g., a flow or pressure affecting the slave loop):contentReference[oaicite:68]{index=68}."
+      },
+      "FF_MinValue": {
+        "type": "number",
+        "description": "Disturbance value corresponding to no bias (Bias_Min)."
+      },
+      "FF_MaxValue": {
+        "type": "number",
+        "description": "Disturbance value corresponding to maximum bias (Bias_Max)."
+      },
+      "Bias_Min": {
+        "type": "number",
+        "description": "Bias (%) applied at low disturbance (FF_MinValue).",
+        "minimum": -100.0,
+        "maximum": 100.0
+      },
+      "Bias_Max": {
+        "type": "number",
+        "description": "Bias (%) at high disturbance (FF_MaxValue). This bias is added to the output when the disturbance reaches its high range:contentReference[oaicite:69]{index=69}.",
+        "minimum": -100.0,
+        "maximum": 100.0
+      }
+    },
+    "required": [
+      "created_at", "created_by", "version",
+      "CL", "CT", "KP", "KI", "KD",
+      "FeedforwardSource", "FF_MinValue", "FF_MaxValue", "Bias_Min", "Bias_Max"
+    ]
+  }
+  

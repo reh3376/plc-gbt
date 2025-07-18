@@ -1,0 +1,581 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-gbt.com/schemas/control-loops/subtypes/multi-formula/ladder_logic_standard_pid-multi-ff.json",
+  "title": "Ladder Logic Standard Pid Multi-Formula Weighted Feedforward Control",
+  "description": "Advanced multi-variable feedforward control with weighted formula combinations for complex disturbance rejection",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../base/ladder-logic-standard-pid.json"
+    }
+  ],
+  "properties": {
+    "multi_feedforward_configuration": {
+      "type": "object",
+      "description": "Multi-formula weighted feedforward control configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable/disable multi-formula feedforward control",
+          "default": true
+        },
+        "combination_strategy": {
+          "type": "string",
+          "enum": [
+            "weighted_sum",
+            "weighted_product",
+            "max_selector",
+            "min_selector",
+            "fuzzy_logic",
+            "neural_network"
+          ],
+          "description": "Strategy for combining multiple feedforward signals",
+          "default": "weighted_sum"
+        },
+        "feedforward_sources": {
+          "type": "array",
+          "description": "Array of feedforward source configurations",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source_id": {
+                "type": "string",
+                "description": "Unique identifier for this feedforward source",
+                "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+              },
+              "disturbance_variable": {
+                "type": "object",
+                "description": "Disturbance variable configuration",
+                "properties": {
+                  "tag_name": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+                    "description": "PLC tag name for disturbance measurement"
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Description of disturbance variable"
+                  },
+                  "engineering_units": {
+                    "type": "string",
+                    "enum": [
+                      "PSI",
+                      "Bar",
+                      "kPa",
+                      "GPM",
+                      "LPM",
+                      "CFM",
+                      "°C",
+                      "°F",
+                      "K",
+                      "pH",
+                      "kg/h",
+                      "lb/h",
+                      "RPM",
+                      "Hz",
+                      "%",
+                      "mA",
+                      "V"
+                    ],
+                    "description": "Engineering units for disturbance"
+                  },
+                  "variable_type": {
+                    "type": "string",
+                    "enum": [
+                      "measured",
+                      "calculated",
+                      "inferred",
+                      "estimated"
+                    ],
+                    "description": "Type of disturbance variable",
+                    "default": "measured"
+                  },
+                  "update_rate": {
+                    "type": "number",
+                    "description": "Update rate for this variable (Hz)",
+                    "minimum": 0.1,
+                    "maximum": 100.0,
+                    "default": 1.0
+                  }
+                },
+                "required": [
+                  "tag_name",
+                  "description",
+                  "engineering_units"
+                ]
+              },
+              "formula_configuration": {
+                "type": "object",
+                "description": "Mathematical formula for this feedforward source",
+                "properties": {
+                  "formula_type": {
+                    "type": "string",
+                    "enum": [
+                      "linear",
+                      "polynomial",
+                      "exponential",
+                      "logarithmic",
+                      "custom_equation",
+                      "lookup_table"
+                    ],
+                    "description": "Type of mathematical formula",
+                    "default": "linear"
+                  },
+                  "coefficients": {
+                    "type": "array",
+                    "description": "Polynomial coefficients [a0, a1, a2, ...] for equation",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 10
+                  },
+                  "input_range": {
+                    "type": "object",
+                    "description": "Valid input range for formula",
+                    "properties": {
+                      "min_value": {
+                        "type": "number"
+                      },
+                      "max_value": {
+                        "type": "number"
+                      },
+                      "clamp_out_of_range": {
+                        "type": "boolean",
+                        "description": "Clamp values outside range vs. extrapolate",
+                        "default": true
+                      }
+                    },
+                    "required": [
+                      "min_value",
+                      "max_value"
+                    ]
+                  },
+                  "output_scaling": {
+                    "type": "object",
+                    "description": "Output scaling for formula result",
+                    "properties": {
+                      "scale_factor": {
+                        "type": "number",
+                        "description": "Multiplicative scale factor",
+                        "default": 1.0
+                      },
+                      "offset": {
+                        "type": "number",
+                        "description": "Additive offset",
+                        "default": 0.0
+                      },
+                      "output_limits": {
+                        "type": "object",
+                        "properties": {
+                          "min_output": {
+                            "type": "number"
+                          },
+                          "max_output": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "min_output",
+                          "max_output"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "scale_factor",
+                      "offset"
+                    ]
+                  },
+                  "lookup_table": {
+                    "type": "array",
+                    "description": "Lookup table for custom formula (if formula_type is lookup_table)",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "input": {
+                          "type": "number"
+                        },
+                        "output": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "input",
+                        "output"
+                      ]
+                    },
+                    "minItems": 2
+                  }
+                },
+                "required": [
+                  "formula_type"
+                ]
+              },
+              "weighting_configuration": {
+                "type": "object",
+                "description": "Weighting configuration for this feedforward source",
+                "properties": {
+                  "static_weight": {
+                    "type": "number",
+                    "description": "Static weight factor for this source",
+                    "minimum": 0.0,
+                    "maximum": 10.0,
+                    "default": 1.0
+                  },
+                  "dynamic_weighting": {
+                    "type": "object",
+                    "description": "Dynamic weighting based on operating conditions",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Enable dynamic weight adjustment",
+                        "default": false
+                      },
+                      "weighting_variable": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+                        "description": "Variable used to adjust weight dynamically"
+                      },
+                      "weight_formula": {
+                        "type": "string",
+                        "enum": [
+                          "linear",
+                          "exponential",
+                          "step",
+                          "custom"
+                        ],
+                        "description": "Formula for dynamic weight calculation",
+                        "default": "linear"
+                      },
+                      "weight_range": {
+                        "type": "object",
+                        "properties": {
+                          "min_weight": {
+                            "type": "number",
+                            "minimum": 0.0
+                          },
+                          "max_weight": {
+                            "type": "number",
+                            "minimum": 0.0
+                          }
+                        },
+                        "required": [
+                          "min_weight",
+                          "max_weight"
+                        ]
+                      }
+                    }
+                  },
+                  "reliability_factor": {
+                    "type": "number",
+                    "description": "Reliability factor for this source (0.0-1.0)",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                    "default": 1.0
+                  },
+                  "priority": {
+                    "type": "integer",
+                    "description": "Priority level for this source (1=highest)",
+                    "minimum": 1,
+                    "maximum": 10,
+                    "default": 5
+                  }
+                },
+                "required": [
+                  "static_weight"
+                ]
+              },
+              "filtering_configuration": {
+                "type": "object",
+                "description": "Signal filtering for this feedforward source",
+                "properties": {
+                  "enable_filtering": {
+                    "type": "boolean",
+                    "description": "Enable signal filtering",
+                    "default": true
+                  },
+                  "filter_type": {
+                    "type": "string",
+                    "enum": [
+                      "low_pass",
+                      "high_pass",
+                      "band_pass",
+                      "notch",
+                      "moving_average",
+                      "median"
+                    ],
+                    "description": "Type of signal filter",
+                    "default": "low_pass"
+                  },
+                  "filter_parameters": {
+                    "type": "object",
+                    "properties": {
+                      "time_constant": {
+                        "type": "number",
+                        "description": "Filter time constant (seconds)",
+                        "minimum": 0.1,
+                        "maximum": 300.0,
+                        "default": 5.0
+                      },
+                      "cutoff_frequency": {
+                        "type": "number",
+                        "description": "Cutoff frequency (Hz)",
+                        "minimum": 0.001,
+                        "maximum": 50.0
+                      },
+                      "filter_order": {
+                        "type": "integer",
+                        "description": "Filter order",
+                        "minimum": 1,
+                        "maximum": 8,
+                        "default": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "validation_configuration": {
+                "type": "object",
+                "description": "Validation and fault detection for this source",
+                "properties": {
+                  "enable_validation": {
+                    "type": "boolean",
+                    "description": "Enable input validation",
+                    "default": true
+                  },
+                  "range_checking": {
+                    "type": "object",
+                    "properties": {
+                      "enable_range_check": {
+                        "type": "boolean",
+                        "default": true
+                      },
+                      "valid_range": {
+                        "type": "object",
+                        "properties": {
+                          "min_valid": {
+                            "type": "number"
+                          },
+                          "max_valid": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "min_valid",
+                          "max_valid"
+                        ]
+                      }
+                    }
+                  },
+                  "rate_of_change_check": {
+                    "type": "object",
+                    "properties": {
+                      "enable_roc_check": {
+                        "type": "boolean",
+                        "default": false
+                      },
+                      "max_rate_of_change": {
+                        "type": "number",
+                        "description": "Maximum allowable rate of change per second"
+                      }
+                    }
+                  },
+                  "fault_action": {
+                    "type": "string",
+                    "enum": [
+                      "disable_source",
+                      "use_last_good",
+                      "use_default",
+                      "reduce_weight"
+                    ],
+                    "description": "Action when fault detected",
+                    "default": "reduce_weight"
+                  }
+                }
+              }
+            },
+            "required": [
+              "source_id",
+              "disturbance_variable",
+              "formula_configuration",
+              "weighting_configuration"
+            ]
+          },
+          "minItems": 2,
+          "maxItems": 10
+        },
+        "combination_logic": {
+          "type": "object",
+          "description": "Logic for combining multiple feedforward signals",
+          "properties": {
+            "normalization_method": {
+              "type": "string",
+              "enum": [
+                "sum_to_one",
+                "max_to_one",
+                "individual_scaling",
+                "none"
+              ],
+              "description": "Method for normalizing weights",
+              "default": "sum_to_one"
+            },
+            "dead_zone": {
+              "type": "number",
+              "description": "Dead zone around zero output (%)",
+              "minimum": 0.0,
+              "maximum": 10.0,
+              "default": 0.5
+            },
+            "rate_limiting": {
+              "type": "object",
+              "properties": {
+                "enable_rate_limiting": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "max_rate_of_change": {
+                  "type": "number",
+                  "description": "Maximum rate of change (%/sec)",
+                  "minimum": 0.1,
+                  "maximum": 100.0,
+                  "default": 5.0
+                }
+              }
+            },
+            "output_limiting": {
+              "type": "object",
+              "properties": {
+                "enable_output_limits": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "min_output": {
+                  "type": "number",
+                  "description": "Minimum combined output (%)",
+                  "minimum": -100.0,
+                  "maximum": 0.0,
+                  "default": -50.0
+                },
+                "max_output": {
+                  "type": "number",
+                  "description": "Maximum combined output (%)",
+                  "minimum": 0.0,
+                  "maximum": 100.0,
+                  "default": 50.0
+                }
+              }
+            }
+          },
+          "required": [
+            "normalization_method"
+          ]
+        },
+        "adaptive_features": {
+          "type": "object",
+          "description": "Adaptive features for multi-formula feedforward",
+          "properties": {
+            "enable_adaptation": {
+              "type": "boolean",
+              "description": "Enable adaptive weight adjustment",
+              "default": false
+            },
+            "learning_algorithm": {
+              "type": "string",
+              "enum": [
+                "gradient_descent",
+                "recursive_least_squares",
+                "kalman_filter",
+                "genetic_algorithm"
+              ],
+              "description": "Algorithm for adaptive learning",
+              "default": "recursive_least_squares"
+            },
+            "adaptation_rate": {
+              "type": "number",
+              "description": "Rate of adaptation (0.0-1.0)",
+              "minimum": 0.001,
+              "maximum": 0.1,
+              "default": 0.01
+            },
+            "performance_metric": {
+              "type": "string",
+              "enum": [
+                "iae",
+                "ise",
+                "itae",
+                "variance_reduction",
+                "custom"
+              ],
+              "description": "Performance metric for adaptation",
+              "default": "iae"
+            },
+            "adaptation_window": {
+              "type": "number",
+              "description": "Time window for adaptation (seconds)",
+              "minimum": 60.0,
+              "maximum": 3600.0,
+              "default": 300.0
+            }
+          }
+        },
+        "monitoring_and_diagnostics": {
+          "type": "object",
+          "description": "Monitoring and diagnostics for multi-formula system",
+          "properties": {
+            "individual_source_monitoring": {
+              "type": "boolean",
+              "description": "Monitor individual source performance",
+              "default": true
+            },
+            "weight_tracking": {
+              "type": "boolean",
+              "description": "Track weight changes over time",
+              "default": true
+            },
+            "effectiveness_analysis": {
+              "type": "boolean",
+              "description": "Analyze individual source effectiveness",
+              "default": true
+            },
+            "correlation_analysis": {
+              "type": "boolean",
+              "description": "Analyze correlations between sources",
+              "default": false
+            },
+            "alert_configuration": {
+              "type": "object",
+              "properties": {
+                "source_fault_alert": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "weight_deviation_alert": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "performance_degradation_alert": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "correlation_change_alert": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled",
+        "combination_strategy",
+        "feedforward_sources",
+        "combination_logic"
+      ]
+    }
+  },
+  "required": [
+    "multi_feedforward_configuration"
+  ]
+}

@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-gbt.com/schemas/control-loops/subtypes/combined/ladder_logic_standard_pid-ff-cascade.json",
+  "title": "Ladder Logic Standard Pid Combined Feedforward-Cascade Control",
+  "description": "Advanced control combining cascade and feedforward strategies for optimal disturbance rejection and performance",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../base/ladder-logic-standard-pid.json"
+    }
+  ],
+  "properties": {
+    "combined_control_configuration": {
+      "type": "object",
+      "description": "Combined feedforward-cascade control system configuration",
+      "properties": {
+        "control_strategy": {
+          "type": "string",
+          "enum": [
+            "cascade_primary_ff_secondary",
+            "ff_primary_cascade_secondary",
+            "parallel_ff_cascade",
+            "adaptive_priority"
+          ],
+          "description": "Strategy for combining feedforward and cascade control",
+          "default": "parallel_ff_cascade"
+        },
+        "integration_method": {
+          "type": "string",
+          "enum": [
+            "additive",
+            "multiplicative",
+            "selective",
+            "weighted_average"
+          ],
+          "description": "Method for integrating feedforward and cascade signals",
+          "default": "additive"
+        },
+        "cascade_configuration": {
+          "type": "object",
+          "description": "Cascade control configuration within combined system",
+          "$ref": "#/$defs/cascade_configuration"
+        },
+        "feedforward_configuration": {
+          "type": "object",
+          "description": "Feedforward control configuration within combined system",
+          "$ref": "#/$defs/feedforward_configuration"
+        },
+        "interaction_management": {
+          "type": "object",
+          "description": "Management of interactions between feedforward and cascade",
+          "properties": {
+            "priority_logic": {
+              "type": "string",
+              "enum": [
+                "cascade_priority",
+                "feedforward_priority",
+                "dynamic_priority",
+                "equal_weight"
+              ],
+              "description": "Priority logic when both controls are active",
+              "default": "dynamic_priority"
+            },
+            "conflict_resolution": {
+              "type": "string",
+              "enum": [
+                "limit_feedforward",
+                "limit_cascade",
+                "weighted_blending",
+                "momentary_disable"
+              ],
+              "description": "Resolution method for conflicting control actions",
+              "default": "weighted_blending"
+            },
+            "coordination_gain": {
+              "type": "number",
+              "description": "Gain factor for coordinating FF and cascade actions",
+              "minimum": 0.0,
+              "maximum": 2.0,
+              "default": 1.0
+            },
+            "cross_coupling_compensation": {
+              "type": "boolean",
+              "description": "Enable compensation for cross-coupling effects",
+              "default": true
+            }
+          },
+          "required": [
+            "priority_logic",
+            "conflict_resolution"
+          ]
+        },
+        "adaptive_control": {
+          "type": "object",
+          "description": "Adaptive control features for combined system",
+          "properties": {
+            "adaptive_weighting": {
+              "type": "boolean",
+              "description": "Enable adaptive weighting between FF and cascade",
+              "default": false
+            },
+            "performance_based_tuning": {
+              "type": "boolean",
+              "description": "Enable performance-based auto-tuning",
+              "default": false
+            },
+            "disturbance_classification": {
+              "type": "boolean",
+              "description": "Classify disturbances to optimize control strategy",
+              "default": false
+            },
+            "learning_rate": {
+              "type": "number",
+              "description": "Learning rate for adaptive algorithms",
+              "minimum": 0.001,
+              "maximum": 0.1,
+              "default": 0.01
+            }
+          }
+        },
+        "performance_optimization": {
+          "type": "object",
+          "description": "Performance optimization parameters for combined system",
+          "properties": {
+            "target_disturbance_rejection": {
+              "type": "number",
+              "description": "Target disturbance rejection performance (%)",
+              "minimum": 70.0,
+              "maximum": 95.0,
+              "default": 85.0
+            },
+            "target_response_time": {
+              "type": "number",
+              "description": "Target overall response time (seconds)",
+              "minimum": 0.5,
+              "maximum": 300.0
+            },
+            "stability_margin": {
+              "type": "number",
+              "description": "Stability margin for combined system",
+              "minimum": 1.5,
+              "maximum": 5.0,
+              "default": 2.5
+            },
+            "energy_efficiency_weight": {
+              "type": "number",
+              "description": "Weight factor for energy efficiency in optimization",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "default": 0.2
+            }
+          },
+          "required": [
+            "target_disturbance_rejection"
+          ]
+        },
+        "monitoring_and_diagnostics": {
+          "type": "object",
+          "description": "Enhanced monitoring for combined control system",
+          "properties": {
+            "individual_performance_tracking": {
+              "type": "boolean",
+              "description": "Track performance of individual FF and cascade components",
+              "default": true
+            },
+            "interaction_analysis": {
+              "type": "boolean",
+              "description": "Analyze interactions between control components",
+              "default": true
+            },
+            "optimization_reporting": {
+              "type": "boolean",
+              "description": "Generate optimization performance reports",
+              "default": true
+            },
+            "alert_thresholds": {
+              "type": "object",
+              "properties": {
+                "performance_degradation": {
+                  "type": "number",
+                  "description": "Threshold for performance degradation alert (%)",
+                  "minimum": 5.0,
+                  "maximum": 50.0,
+                  "default": 15.0
+                },
+                "control_conflict": {
+                  "type": "number",
+                  "description": "Threshold for control conflict detection (%)",
+                  "minimum": 10.0,
+                  "maximum": 80.0,
+                  "default": 30.0
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "control_strategy",
+        "integration_method",
+        "cascade_configuration",
+        "feedforward_configuration",
+        "interaction_management"
+      ]
+    }
+  },
+  "$defs": {
+    "cascade_configuration": {
+      "type": "object",
+      "description": "Simplified cascade configuration for combined system",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "loop_role": {
+          "type": "string",
+          "enum": [
+            "master",
+            "slave"
+          ]
+        },
+        "response_time_target": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 3600.0
+        }
+      },
+      "required": [
+        "enabled",
+        "loop_role"
+      ]
+    },
+    "feedforward_configuration": {
+      "type": "object",
+      "description": "Simplified feedforward configuration for combined system",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "feedforward_type": {
+          "type": "string",
+          "enum": [
+            "simple_bias",
+            "dynamic_compensation"
+          ]
+        },
+        "disturbance_tag": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+        },
+        "gain": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 10.0,
+          "default": 1.0
+        }
+      },
+      "required": [
+        "enabled",
+        "feedforward_type",
+        "disturbance_tag"
+      ]
+    }
+  },
+  "required": [
+    "combined_control_configuration"
+  ]
+}

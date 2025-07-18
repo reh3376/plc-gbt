@@ -1,0 +1,18 @@
+{
+  "package_id": "phase24_2_1752573167",
+  "timestamp": "2025-07-15T05:52:47.385290",
+  "source_path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/docs/context",
+  "files_processed": 23,
+  "schemas_found": 117,
+  "entities_extracted": 199,
+  "relationships_extracted": 32,
+  "training_examples_generated": 50,
+  "validation_score": 0.8335587761674718,
+  "overall_confidence": 0.6859296482412056,
+  "memory_distribution": {
+    "redis": 100,
+    "neo4j": 149,
+    "postgresql": 1,
+    "qdrant": 1
+  }
+}

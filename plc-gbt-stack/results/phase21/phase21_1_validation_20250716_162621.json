@@ -1,0 +1,231 @@
+{
+  "phase_id": "21.1",
+  "phase_name": "Core CLI Infrastructure",
+  "status": "failed",
+  "overall_score": 14.705882352941176,
+  "component_results": [
+    {
+      "test_name": "CLI Help Command",
+      "category": "Basic Functionality",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.101124,
+      "details": [
+        "Help command failed"
+      ],
+      "error_message": "No output received",
+      "metadata": null
+    },
+    {
+      "test_name": "Version Command",
+      "category": "Basic Functionality",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.094009,
+      "details": [
+        "Version command failed"
+      ],
+      "error_message": "Usage: plc_control_loop_cli.py version [OPTIONS]\nTry 'plc_control_loop_cli.py version --help' for help.\n\nError: No such option: --config-dir\n",
+      "metadata": null
+    },
+    {
+      "test_name": "Status Command",
+      "category": "Basic Functionality",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.091307,
+      "details": [
+        "Status command failed"
+      ],
+      "error_message": "Usage: plc_control_loop_cli.py status [OPTIONS]\nTry 'plc_control_loop_cli.py status --help' for help.\n\nError: No such option: --config-dir\n",
+      "metadata": null
+    },
+    {
+      "test_name": "Command Groups Structure",
+      "category": "Basic Functionality",
+      "status": "passed",
+      "score": 100.0,
+      "duration_seconds": 0.091296,
+      "details": [
+        "All expected command groups found: config, auth, schema, instance, batch, repl"
+      ],
+      "error_message": null,
+      "metadata": null
+    },
+    {
+      "test_name": "Configuration Show",
+      "category": "Configuration Management",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.093762,
+      "details": [
+        "Configuration show failed"
+      ],
+      "error_message": "Usage: plc_control_loop_cli.py config show [OPTIONS]\nTry 'plc_control_loop_cli.py config show --help' for help.\n\nError: No such option: --config-dir\n",
+      "metadata": null
+    },
+    {
+      "test_name": "Configuration Set/Get",
+      "category": "Configuration Management",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.092964,
+      "details": [
+        "Configuration set command failed"
+      ],
+      "error_message": "Usage: plc_control_loop_cli.py config set [OPTIONS] KEY VALUE\nTry 'plc_control_loop_cli.py config set --help' for help.\n\nError: No such option: --config-dir\n",
+      "metadata": null
+    },
+    {
+      "test_name": "Configuration File Persistence",
+      "category": "Configuration Management",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.0,
+      "details": [
+        "Configuration file not created"
+      ],
+      "error_message": "Expected config file not found",
+      "metadata": null
+    },
+    {
+      "test_name": "Authentication Status (Unauthenticated)",
+      "category": "Authentication System",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.092376,
+      "details": [
+        "Authentication status command failed"
+      ],
+      "error_message": "Usage: plc_control_loop_cli.py auth status [OPTIONS]\nTry 'plc_control_loop_cli.py auth status --help' for help.\n\nError: No such option: --config-dir\n",
+      "metadata": null
+    },
+    {
+      "test_name": "Authentication Commands Available",
+      "category": "Authentication System",
+      "status": "warning",
+      "score": 0.0,
+      "duration_seconds": 0.093045,
+      "details": [
+        "Found: ",
+        "Missing: login, logout, status"
+      ],
+      "error_message": null,
+      "metadata": null
+    },
+    {
+      "test_name": "Default Users Creation",
+      "category": "Authentication System",
+      "status": "warning",
+      "score": 0.0,
+      "duration_seconds": 0.0,
+      "details": [
+        "Default users file not created yet"
+      ],
+      "error_message": "Users file not found - may be created on first auth attempt",
+      "metadata": null
+    },
+    {
+      "test_name": "Output Format - TABLE",
+      "category": "Output Formatting",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.09302,
+      "details": [
+        "TABLE format command failed"
+      ],
+      "error_message": "Usage: plc_control_loop_cli.py config show [OPTIONS]\nTry 'plc_control_loop_cli.py config show --help' for help.\n\nError: No such option: --config-dir\n",
+      "metadata": null
+    },
+    {
+      "test_name": "Output Format - JSON",
+      "category": "Output Formatting",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.095039,
+      "details": [
+        "JSON format command failed"
+      ],
+      "error_message": "Usage: plc_control_loop_cli.py config show [OPTIONS]\nTry 'plc_control_loop_cli.py config show --help' for help.\n\nError: No such option: --config-dir\n",
+      "metadata": null
+    },
+    {
+      "test_name": "Output Format - YAML",
+      "category": "Output Formatting",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.094892,
+      "details": [
+        "YAML format command failed"
+      ],
+      "error_message": "Usage: plc_control_loop_cli.py config show [OPTIONS]\nTry 'plc_control_loop_cli.py config show --help' for help.\n\nError: No such option: --config-dir\n",
+      "metadata": null
+    },
+    {
+      "test_name": "Invalid Command Handling",
+      "category": "Error Handling",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.093534,
+      "details": [
+        "Invalid command not handled properly"
+      ],
+      "error_message": "Expected command rejection but got different result",
+      "metadata": null
+    },
+    {
+      "test_name": "Invalid Configuration Key Handling",
+      "category": "Error Handling",
+      "status": "warning",
+      "score": 50.0,
+      "duration_seconds": 0.093465,
+      "details": [
+        "Invalid configuration key not clearly rejected"
+      ],
+      "error_message": null,
+      "metadata": {
+        "stdout": "",
+        "stderr": "Usage: plc_control_loop_cli.py config set [OPTIONS] KEY VALUE\nTry 'plc_control_loop_cli.py config set --help' for help.\n\nError: No such option: --config-dir\n"
+      }
+    },
+    {
+      "test_name": "PLC Integration Configuration Readiness",
+      "category": "PLC Integration Readiness",
+      "status": "failed",
+      "score": 0.0,
+      "duration_seconds": 0.093326,
+      "details": [
+        "Could not validate PLC integration configuration"
+      ],
+      "error_message": "Usage: plc_control_loop_cli.py config show [OPTIONS]\nTry 'plc_control_loop_cli.py config show --help' for help.\n\nError: No such option: --config-dir\n",
+      "metadata": null
+    },
+    {
+      "test_name": "Read-Only CLX PLC Integration Readiness",
+      "category": "PLC Integration Readiness",
+      "status": "passed",
+      "score": 100.0,
+      "duration_seconds": 0.0,
+      "details": [
+        "CLI infrastructure ready for read-only CLX PLC integration",
+        "Authentication system supports permission restriction",
+        "Configuration management ready for PLC parameters",
+        "Error handling and session management prepared"
+      ],
+      "error_message": null,
+      "metadata": {
+        "integration_notes": "Note: CLX PLC Integration Readiness Assessment\n        \n        The CLI infrastructure is ready for CLX PLC integration with read-only enforcement:\n        \n        1. Authentication system can restrict permissions to READ-only\n        2. Configuration management supports PLC connection parameters\n        3. Error handling framework ready for PLC communication errors\n        4. Session management can track PLC interactions\n        5. Output formatting supports various data presentation formats\n        \n        For CLX PLC integration in Phase 21.2/21.3:\n        - Use pylogix or similar library for read-only ControlLogix access\n        - Implement connection validation before any PLC operations\n        - Add PLC-specific error handling and timeout management\n        - Create PLC connection status monitoring\n        - Implement tag browsing and data visualization"
+      }
+    }
+  ],
+  "summary": "Phase 21.1 validation completed with 14.7% score. Tests: 2 passed, 3 warnings, 12 failed.",
+  "execution_time": 1.334044,
+  "recommendations": [
+    "Address 12 failed tests before proceeding to Phase 21.2",
+    "Review 3 warning tests for potential improvements",
+    "CLI infrastructure ready for Phase 21.2 Schema Management Commands",
+    "Consider CLX PLC integration in Phase 21.3 with read-only enforcement",
+    "Implement comprehensive error handling for production PLC connections",
+    "Add PLC connection status monitoring and validation"
+  ]
+}

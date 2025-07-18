@@ -1,0 +1,279 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Function Block Standard PIDE Controller",
+    "description": "Schema for a standard (single-loop) Enhanced PID (PIDE) function block configuration:contentReference[oaicite:74]{index=74} in Studio 5000.",
+    "type": "object",
+    "properties": {
+      "created_at": { "type": "string", "format": "date-time" },
+      "created_by": { "type": "string" },
+      "version": { "type": "string", "enum": ["00.00.001"] },
+      "PV": {
+        "type": "number",
+        "description": "Process Variable input (engineering units):contentReference[oaicite:75]{index=75}. This is the scaled measurement of the process (e.g., temperature, level) that the PIDE loop is controlling."
+      },
+      "PVFault": {
+        "type": "boolean",
+        "description": "PV Fault indicator:contentReference[oaicite:76]{index=76}. True if the PV input is bad (e.g., analog input fault), in which case the PIDE can take protective action (such as hold last output or go to manual). Default false (good health)."
+      },
+      "PVEUMax": {
+        "type": "number",
+        "description": "PV Engineering Units Maximum:contentReference[oaicite:77]{index=77}. The value of PV that corresponds to 100% of PV span. Defines the scaling of PV% for internal calculations. Must be greater than PVEUMin.",
+        "default": 100.0
+      },
+      "PVEUMin": {
+        "type": "number",
+        "description": "PV Engineering Units Minimum:contentReference[oaicite:78]{index=78}. The value of PV at 0% of PV span. Typically 0.0 for an input spanning from 0 to some max. Must be less than PVEUMax.",
+        "default": 0.0
+      },
+      "SPProg": {
+        "type": "number",
+        "description": "Setpoint (Program) in engineering units:contentReference[oaicite:79]{index=79}. This is the target value for PV when the loop is in Program control mode (ProgOper = true) and not in cascade. If SPProg is outside [SPLLimit, SPHLimit], it will be clamped and a status flag set:contentReference[oaicite:80]{index=80}."
+      },
+      "SPOper": {
+        "type": "number",
+        "description": "Setpoint (Operator) in engineering units:contentReference[oaicite:81]{index=81}. This is the target PV when the loop is in Operator control (ProgOper = false) and not cascaded. If outside allowable limits, it is clamped and flagged:contentReference[oaicite:82]{index=82}."
+      },
+      "SPHLimit": {
+        "type": "number",
+        "description": "SP High Limit (engineering units):contentReference[oaicite:83]{index=83}. The maximum allowed setpoint. If a setpoint (SPProg/SPOper/SPCascade) is set above this, the PIDE clamps it to SPHLimit and sets a high limit status bit.",
+        "default": 100.0
+      },
+      "SPLLimit": {
+        "type": "number",
+        "description": "SP Low Limit (engineering units):contentReference[oaicite:84]{index=84}. Minimum allowed setpoint. If SP is below this, it is clamped to SPLLimit and a low limit status is flagged. If SPHLimit < SPLLimit, SP is limited to SPLimit (and a configuration error flag would set):contentReference[oaicite:85]{index=85}.",
+        "default": 0.0
+      },
+      "CVFault": {
+        "type": "boolean",
+        "description": "CV Fault indicator:contentReference[oaicite:86]{index=86}. True if the output (e.g., analog output module) has a fault. When set, the PIDE declares a fault condition and can halt integration (to prevent windup). Default false."
+      },
+      "CVProg": {
+        "type": "number",
+        "description": "CV Program Manual Value (%):contentReference[oaicite:87]{index=87}. The output value to use when the loop is in Program Manual mode (ProgOper=true *and* in manual). Range 0–100. If out of [CVLLimit, CVHLimit] (or outside 0–100), it is clamped and flagged:contentReference[oaicite:88]{index=88}.",
+        "minimum": 0.0,
+        "maximum": 100.0
+      },
+      "CVOper": {
+        "type": "number",
+        "description": "CV Operator Manual Value (%):contentReference[oaicite:89]{index=89}. The output value when in Operator Manual mode (ProgOper=false manual). If not in operator manual, the PIDE updates this to track the actual CV for bumpless transfer:contentReference[oaicite:90]{index=90}. Clamped to limits if out of range.",
+        "minimum": 0.0,
+        "maximum": 100.0
+      },
+      "CVOverride": {
+        "type": "number",
+        "description": "CV Override Value (%):contentReference[oaicite:91]{index=91}. Output value used if the loop is forced into override mode. Should represent a safe output (e.g., 0% or a safe state). If outside 0–100, it’s clamped:contentReference[oaicite:92]{index=92}.",
+        "minimum": 0.0,
+        "maximum": 100.0
+      },
+      "CVEUMax": {
+        "type": "number",
+        "description": "CV Engineering Units Maximum:contentReference[oaicite:93]{index=93}. The real-world value of the controlled output at 100% CV. For example, if 100% corresponds to a valve fully open at 100.0%, CVEUMax = 100.0. If CV drives something like speed (0–3600 RPM), CVEUMax could be 3600.",
+        "default": 100.0
+      },
+      "CVEUMin": {
+        "type": "number",
+        "description": "CV Engineering Units Minimum:contentReference[oaicite:94]{index=94}. The value of the output at 0% CV. Default 0.0.",
+        "default": 0.0
+      },
+      "CVHLimit": {
+        "type": "number",
+        "description": "CV High Limit (%):contentReference[oaicite:95]{index=95}. Upper bound on CV (in percent) in Auto/Cascade modes (and in Manual if CVManLimiting is true). Default 100%. If set above 100 or below CVLLimit, it’s corrected and flagged:contentReference[oaicite:96]{index=96}.",
+        "default": 100.0
+      },
+      "CVLLimit": {
+        "type": "number",
+        "description": "CV Low Limit (%):contentReference[oaicite:97]{index=97}. Lower bound on CV (percent). Default 0%. If set <0 or >CVHLimit, it’s corrected and flagged:contentReference[oaicite:98]{index=98}.",
+        "default": 0.0
+      },
+      "CVROCLimit": {
+        "type": "number",
+        "description": "CV Rate of Change Limit (%/second):contentReference[oaicite:99]{index=99}. Limits how fast the CV can change when in Auto or Cascade (and in Manual if CVManLimiting is true). 0 = no limit (disabled):contentReference[oaicite:100]{index=100}:contentReference[oaicite:101]{index=101}. Default 0.",
+        "minimum": 0.0,
+        "default": 0.0
+      },
+      "ControlAction": {
+        "type": "string",
+        "description": "Control action (direct/reverse) flag:contentReference[oaicite:102]{index=102}. If true, the error E = PV − SP (direct acting, so CV decreases as PV exceeds SP); if false, E = SP − PV (reverse acting, CV increases when PV below SP).",
+        "enum": ["Direct", "Reverse"],
+        "default": "Reverse"
+      },
+      "DependIndepend": {
+        "type": "boolean",
+        "description": "Dependent/Independent gain mode:contentReference[oaicite:103]{index=103}. False = Independent gains (Kp, Ki, Kd as separate) ; True = Dependent/ISA (Kc, Ti, Td where Kc affects all terms):contentReference[oaicite:104]{index=104}:contentReference[oaicite:105]{index=105}.",
+        "default": false
+      },
+      "PGain": {
+        "type": "number",
+        "description": "Proportional Gain:contentReference[oaicite:106]{index=106}. In Independent mode, this is the dimensionless proportional gain. In Dependent mode, this is the *controller* gain Kc (unitless):contentReference[oaicite:107]{index=107}. 0 disables P action. Default 0.",
+        "minimum": 0.0,
+        "default": 0.0
+      },
+      "IGain": {
+        "type": "number",
+        "description": "Integral Gain:contentReference[oaicite:108]{index=108}. In Independent mode, units are 1/min (repeats per minute); in Dependent mode, this is the reset time Ti in minutes/repeat:contentReference[oaicite:109]{index=109}. 0 disables I action. Default 0.",
+        "minimum": 0.0,
+        "default": 0.0
+      },
+      "DGain": {
+        "type": "number",
+        "description": "Derivative Gain:contentReference[oaicite:110]{index=110}. In Independent mode, units are minutes (derivative time constant); in Dependent mode, same (Td in minutes):contentReference[oaicite:111]{index=111}. 0 disables D action. Default 0.",
+        "minimum": 0.0,
+        "default": 0.0
+      },
+      "PVEProportional": {
+        "type": "boolean",
+        "description": "Proportional on PV enable:contentReference[oaicite:112]{index=112}. True = use change in PV for proportional term; False = use change in error for proportional term. Default false (proportional on error):contentReference[oaicite:113]{index=113}.",
+        "default": false
+      },
+      "PVEDerivative": {
+        "type": "boolean",
+        "description": "Derivative on PV enable:contentReference[oaicite:114]{index=114}. True = derivative term uses change in PV; False = uses change in error:contentReference[oaicite:115]{index=115}. Default true (derivative on PV to avoid setpoint-change spikes).",
+        "default": true
+      },
+      "DSmoothing": {
+        "type": "boolean",
+        "description": "Derivative Smoothing enable:contentReference[oaicite:116]{index=116}. True = apply smoothing filter to derivative term (reduces noise-induced jitter at expense of responsiveness); False = no smoothing (raw derivative). Default false.",
+        "default": false
+      },
+      "PVTracking": {
+        "type": "boolean",
+        "description": "PV Track SP in Manual request:contentReference[oaicite:117]{index=117}. True = when loop is in manual, SP is driven to follow PV (so controller output starts from neutral when returning to auto); False = no tracking. Ignored in cascade mode. Default false.",
+        "default": false
+      },
+      "ZCDeadband": {
+        "type": "number",
+        "description": "Zero-Crossing Deadband (EU):contentReference[oaicite:118]{index=118}. A small range around zero error where the velocity-form PID won't integrate changes (prevents output dither around 0). Enter 0 to disable:contentReference[oaicite:119]{index=119}.",
+        "minimum": 0.0,
+        "default": 0.0
+      },
+      "ZCOff": {
+        "type": "boolean",
+        "description": "Zero-Crossing Disable:contentReference[oaicite:120]{index=120}. True = completely disable zero-crossing deadband logic; False = allow zero-crossing deadband if ZCDeadband > 0.",
+        "default": false
+      },
+      "PVHHLimit": {
+        "type": "number",
+        "description": "PV High-High Alarm Limit (EU):contentReference[oaicite:121]{index=121}. If PV > PVHHLimit, a high-high alarm condition is indicated. Default is a very high value (effectively disabled)."
+      },
+      "PVHLimit": {
+        "type": "number",
+        "description": "PV High Alarm Limit (EU):contentReference[oaicite:122]{index=122}. If PV > PVHLimit, a high alarm is indicated. Defaults to max positive float (disabled if not set)."
+      },
+      "PVLLimit": {
+        "type": "number",
+        "description": "PV Low Alarm Limit (EU):contentReference[oaicite:123]{index=123}. If PV < PVLLimit, a low alarm condition occurs."
+      },
+      "PVLLLimit": {
+        "type": "number",
+        "description": "PV Low-Low Alarm Limit (EU):contentReference[oaicite:124]{index=124}. If PV < PVLLLimit, a low-low alarm is indicated. Default max negative (disabled)."
+      },
+      "PVDeadband": {
+        "type": "number",
+        "description": "PV Alarm Deadband (EU):contentReference[oaicite:125]{index=125}. The hysteresis band for clearing PV high/low alarms. Must be >= 0. Default 0 (no deadband beyond exact limit).",
+        "minimum": 0.0,
+        "default": 0.0
+      },
+      "PVROCPosLimit": {
+        "type": "number",
+        "description": "PV Positive Rate-of-Change Alarm Limit (EU per second):contentReference[oaicite:126]{index=126}. If PV increases faster than this rate, a positive ROC alarm is triggered. 0 = disabled. Default 0.",
+        "minimum": 0.0,
+        "default": 0.0
+      },
+      "PVROCNegLimit": {
+        "type": "number",
+        "description": "PV Negative Rate-of-Change Alarm Limit (EU/sec):contentReference[oaicite:127]{index=127}. If PV falls faster than this rate (as a positive number), a negative ROC alarm triggers. 0 = disabled. Default 0.",
+        "minimum": 0.0,
+        "default": 0.0
+      },
+      "PVROCPeriod": {
+        "type": "number",
+        "description": "PV ROC Measurement Period (seconds):contentReference[oaicite:128]{index=128}. The time window over which PV rate-of-change is calculated for alarm purposes. Default 0 (ROC alarms disabled)."
+      },
+      "DevHHLimit": {
+        "type": "number",
+        "description": "Deviation High-High Alarm (EU):contentReference[oaicite:129]{index=129}. If (PV - SP) > DevHHLimit, a very high deviation alarm is set. 0 = disabled or used as threshold. Default max positive (disabled).",
+        "minimum": 0.0
+      },
+      "DevHLimit": {
+        "type": "number",
+        "description": "Deviation High Alarm (EU):contentReference[oaicite:130]{index=130}. If (PV - SP) > DevHLimit, a high deviation alarm. 0 = treat as disabled if not used.",
+        "minimum": 0.0
+      },
+      "DevLLimit": {
+        "type": "number",
+        "description": "Deviation Low Alarm (EU):contentReference[oaicite:131]{index=131}. If (SP - PV) > DevLLimit, a low deviation alarm triggers.",
+        "minimum": 0.0
+      },
+      "DevLLLimit": {
+        "type": "number",
+        "description": "Deviation Low-Low Alarm (EU):contentReference[oaicite:132]{index=132}. If (SP - PV) > DevLLLimit, a very low (large negative) deviation alarm triggers. 0 = not used typically.",
+        "minimum": 0.0
+      },
+      "DevDeadband": {
+        "type": "number",
+        "description": "Deviation Alarm Deadband (EU):contentReference[oaicite:133]{index=133}. Hysteresis for deviation alarms. Default 0.",
+        "minimum": 0.0,
+        "default": 0.0
+      },
+      "AllowCasRat": {
+        "type": "boolean",
+        "description": "Allow Cascade/Ratio Mode:contentReference[oaicite:134]{index=134}. Master enable for cascade or ratio control. **Standard PIDE**: this will be false (disabling cascade/ratio mode) since we are not using those features in the standard schema.",
+        "default": false
+      },
+      "ManualAfterInit": {
+        "type": "boolean",
+        "description": "Manual After Init:contentReference[oaicite:135]{index=135}. If true, the PIDE will enter Manual mode automatically after a controller initialization (CVInitializing event), unless already in Override/Hand. Default false.",
+        "default": false
+      },
+      "ProgProgReq": {
+        "type": "boolean",
+        "description": "Program Request Program control:contentReference[oaicite:136]{index=136}. Set by user logic to true to request Program (automatic) control. This is typically latched true in logic if we want the loop under program control. Ignored if ProgOperReq is true. Default false.",
+        "default": false
+      },
+      "ProgOperReq": {
+        "type": "boolean",
+        "description": "Program Request Operator control:contentReference[oaicite:137]{index=137}. True requests Operator control (manual via HMI). If true, it overrides ProgProgReq. Typically false for program-controlled loops. Default false.",
+        "default": false
+      },
+      "ProgAutoReq": {
+        "type": "boolean",
+        "description": "Program Auto Mode Request:contentReference[oaicite:138]{index=138}. True to request Auto mode (PID computing CV) under Program control. Ignored if ProgOper (operator control) is false. Default false.",
+        "default": false
+      },
+      "ProgManualReq": {
+        "type": "boolean",
+        "description": "Program Manual Mode Request:contentReference[oaicite:139]{index=139}. True to request Manual mode under Program control. Only honored in Program control. Default false.",
+        "default": false
+      },
+      "ProgCasRatReq": {
+        "type": "boolean",
+        "description": "Program Cascade/Ratio Mode Request:contentReference[oaicite:140]{index=140}. True to request Cascade/Ratio mode under Program control. Ignored if AllowCasRat is false or other mode requests active. (Not used in standard single-loop mode).",
+        "default": false
+      },
+      "ProgOverrideReq": {
+        "type": "boolean",
+        "description": "Program Override Mode Request:contentReference[oaicite:141]{index=141}. True to force Override mode under Program control. Puts loop output to CVOverride. Default false.",
+        "default": false
+      },
+      "ProgHandReq": {
+        "type": "boolean",
+        "description": "Program Hand Mode Request:contentReference[oaicite:142]{index=142}. True to request 'Hand' mode under Program control (for use with a physical Hand/Auto station input). Default false.",
+        "default": false
+      },
+      "OperProgReq": {
+        "type": "boolean",
+        "description": "Operator Request Program control:contentReference[oaicite:143]{index=143}. Set by an HMI/operator to give control to the program (i.e., switch from operator mode to program mode). The PIDE will clear it each scan after processing. Default false.",
+        "default": false
+      },
+      "OperOperReq": {
+        "type": "boolean",
+        "description": "Operator Request Operator (local) control:contentReference[oaicite:144]{index=144}. True if operator wants to take manual control (opposite of OperProgReq). Cleared each scan. Default false."
+      }
+    },
+    "required": [
+      "created_at", "created_by", "version",
+      "PV", "PVEUMax", "PVEUMin",
+      "PGain", "IGain", "DGain"
+    ]
+  }
+  

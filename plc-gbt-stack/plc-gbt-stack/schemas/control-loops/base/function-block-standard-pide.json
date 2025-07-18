@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-gbt.industrial.ai/schemas/function-block-standard-pide.json",
+  "title": "Function Block Standard PIDE Controller",
+  "description": "Standard PIDE (Enhanced PID) function block controller",
+  "type": "object",
+  "properties": {
+    "tag_name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "Unique identifier for the control loop tag"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Human-readable description of the control loop"
+    },
+    "process_variable": {
+      "type": "object",
+      "properties": {
+        "tag_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Tag name for process variable input"
+        },
+        "engineering_units": {
+          "type": "string",
+          "enum": [
+            "Percent",
+            "PSI",
+            "Bar",
+            "Celsius",
+            "Fahrenheit",
+            "Kelvin",
+            "GPM",
+            "M3/H",
+            "LBS/H",
+            "KG/H",
+            "Volts",
+            "mA"
+          ],
+          "description": "Engineering units for process variable"
+        },
+        "range_min": {
+          "type": "number",
+          "description": "Minimum expected value for process variable"
+        },
+        "range_max": {
+          "type": "number",
+          "description": "Maximum expected value for process variable"
+        }
+      },
+      "required": [
+        "tag_name",
+        "engineering_units",
+        "range_min",
+        "range_max"
+      ],
+      "description": "Process variable configuration"
+    },
+    "setpoint": {
+      "type": "object",
+      "properties": {
+        "tag_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Tag name for setpoint input"
+        },
+        "value": {
+          "type": "number",
+          "description": "Current setpoint value"
+        },
+        "engineering_units": {
+          "type": "string",
+          "enum": [
+            "Percent",
+            "PSI",
+            "Bar",
+            "Celsius",
+            "Fahrenheit",
+            "Kelvin",
+            "GPM",
+            "M3/H",
+            "LBS/H",
+            "KG/H",
+            "Volts",
+            "mA"
+          ],
+          "description": "Engineering units for setpoint (must match PV units)"
+        },
+        "range_min": {
+          "type": "number",
+          "description": "Minimum allowable setpoint value"
+        },
+        "range_max": {
+          "type": "number",
+          "description": "Maximum allowable setpoint value"
+        }
+      },
+      "required": [
+        "tag_name",
+        "value",
+        "engineering_units",
+        "range_min",
+        "range_max"
+      ],
+      "description": "Setpoint configuration"
+    },
+    "control_output": {
+      "type": "object",
+      "properties": {
+        "tag_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Tag name for control output"
+        },
+        "engineering_units": {
+          "type": "string",
+          "enum": [
+            "Percent",
+            "PSI",
+            "Bar",
+            "Celsius",
+            "Fahrenheit",
+            "Kelvin",
+            "GPM",
+            "M3/H",
+            "LBS/H",
+            "KG/H",
+            "Volts",
+            "mA"
+          ],
+          "description": "Engineering units for control output"
+        },
+        "range_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum output value (typically 0-100%)"
+        },
+        "range_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Maximum output value (typically 0-100%)"
+        },
+        "initial_value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Initial output value on startup"
+        }
+      },
+      "required": [
+        "tag_name",
+        "engineering_units",
+        "range_min",
+        "range_max"
+      ],
+      "description": "Control output configuration"
+    },
+    "control_mode": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Automatic",
+        "Cascade",
+        "Override",
+        "Program"
+      ],
+      "description": "Current control mode"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether the control loop is enabled"
+    },
+    "scan_time": {
+      "type": "number",
+      "minimum": 0.001,
+      "maximum": 60.0,
+      "description": "Controller execution scan time in seconds"
+    },
+    "pide_parameters": {
+      "type": "object",
+      "properties": {
+        "proportional_gain": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 999.9,
+          "description": "Proportional gain (PGain)"
+        },
+        "integral_gain": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 999.9,
+          "description": "Integral gain (IGain) - repeats per minute"
+        },
+        "derivative_gain": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 999.9,
+          "description": "Derivative gain (DGain) in minutes"
+        },
+        "enhanced_derivative_filter": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 10.0,
+          "description": "Enhanced derivative filter time constant"
+        },
+        "setpoint_weighting": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Setpoint weighting for proportional action"
+        },
+        "bias": {
+          "type": "number",
+          "minimum": -100.0,
+          "maximum": 100.0,
+          "description": "Controller bias value"
+        },
+        "master_loop_error": {
+          "type": "number",
+          "description": "Error from master loop in cascade configuration"
+        }
+      },
+      "required": [
+        "proportional_gain",
+        "integral_gain",
+        "derivative_gain"
+      ],
+      "description": "PIDE parameter configuration"
+    },
+    "execution_parameters": {
+      "type": "object",
+      "properties": {
+        "update_time": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 60.0,
+          "description": "Function block execution time in seconds"
+        },
+        "initialization_request": {
+          "type": "boolean",
+          "description": "Initialize function block request"
+        },
+        "manual_mode_request": {
+          "type": "boolean",
+          "description": "Manual mode request"
+        },
+        "operator_station_enable": {
+          "type": "boolean",
+          "description": "Enable operator station control"
+        },
+        "cascade_ratio": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 10.0,
+          "description": "Cascade ratio for master/slave configuration"
+        }
+      },
+      "required": [
+        "update_time"
+      ],
+      "description": "Function block execution configuration"
+    },
+    "io_configuration": {
+      "type": "object",
+      "properties": {
+        "process_variable_input": {
+          "type": "object",
+          "properties": {
+            "tag_name": {
+              "type": "string"
+            },
+            "fault_value": {
+              "type": "number"
+            },
+            "use_fault_value": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "tag_name"
+          ]
+        },
+        "setpoint_input": {
+          "type": "object",
+          "properties": {
+            "tag_name": {
+              "type": "string"
+            },
+            "local_setpoint": {
+              "type": "number"
+            },
+            "remote_setpoint_enable": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "tag_name"
+          ]
+        },
+        "feedforward_input": {
+          "type": "object",
+          "properties": {
+            "tag_name": {
+              "type": "string"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "gain": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "control_output": {
+          "type": "object",
+          "properties": {
+            "tag_name": {
+              "type": "string"
+            },
+            "manual_command": {
+              "type": "number"
+            },
+            "wind_up_high_limit": {
+              "type": "number"
+            },
+            "wind_up_low_limit": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "tag_name"
+          ]
+        }
+      },
+      "required": [
+        "process_variable_input",
+        "setpoint_input",
+        "control_output"
+      ],
+      "description": "PIDE I/O configuration"
+    },
+    "enhanced_features": {
+      "type": "object",
+      "properties": {
+        "anti_windup": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "method": {
+              "type": "string",
+              "enum": [
+                "back_calculation",
+                "conditional_integration",
+                "limited_integrator"
+              ]
+            }
+          }
+        },
+        "bumpless_transfer": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "transfer_time": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "derivative_on_measurement": {
+          "type": "boolean",
+          "description": "Apply derivative action to measurement instead of error"
+        }
+      },
+      "description": "Enhanced PIDE features"
+    }
+  },
+  "required": [
+    "tag_name",
+    "process_variable",
+    "setpoint",
+    "control_output",
+    "pide_parameters",
+    "execution_parameters",
+    "io_configuration",
+    "control_mode",
+    "enabled"
+  ],
+  "additionalProperties": false
+}
