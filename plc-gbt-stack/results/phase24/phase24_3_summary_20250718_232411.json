@@ -1,0 +1,30 @@
+{
+  "generation_date": "2025-07-18T23:24:11.363058",
+  "session_id": "phase24_3_1752895445",
+  "total_examples": 16,
+  "training_examples": 14,
+  "validation_examples": 2,
+  "category_distribution": {
+    "schema_based_qa": 3,
+    "control_theory": 3,
+    "conversation_flows": 4,
+    "best_practices": 4,
+    "troubleshooting": 2
+  },
+  "quality_metrics": {
+    "avg_question_length": 11.4375,
+    "avg_answer_length": 89.375,
+    "avg_confidence": 0.903125,
+    "format_compliance": 1.0
+  },
+  "files": {
+    "training_data": "results/phase24/phase24_3_training_data_20250718_232411.jsonl",
+    "validation_data": "results/phase24/phase24_3_validation_data_20250718_232411.jsonl",
+    "summary": "results/phase24/phase24_3_summary_20250718_232411.json"
+  },
+  "phase24_integration": {
+    "phase24_1_examples_used": true,
+    "phase24_2_memory_queries_used": true,
+    "existing_infrastructure_leveraged": true
+  }
+}

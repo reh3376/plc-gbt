@@ -76,7 +76,6 @@ class FineTuningConfig:
     n_epochs: int = 3
     batch_size: int = 1
     learning_rate_multiplier: float = 0.1
-    prompt_loss_weight: float = 0.1
     suffix: str = "industrial-control"
     seed: int = 42
     
@@ -87,8 +86,7 @@ class FineTuningConfig:
             "hyperparameters": {
                 "n_epochs": self.n_epochs,
                 "batch_size": self.batch_size,
-                "learning_rate_multiplier": self.learning_rate_multiplier,
-                "prompt_loss_weight": self.prompt_loss_weight
+                "learning_rate_multiplier": self.learning_rate_multiplier
             },
             "suffix": self.suffix,
             "seed": self.seed

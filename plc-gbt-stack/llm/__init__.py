@@ -304,6 +304,10 @@ def optimize_context_for_model(context: ApplicationContext, max_tokens: int = 60
     
     return optimized_context
 
+# Import additional classes for Phase 23.2/23.3 integration
+from .intent_recognition import ExtractedEntity, EntityType, IntentRecognitionResult
+from .command_generator import CommandGenerationResult
+
 # Export main components
 __all__ = [
     "LLM_CONFIG",
@@ -319,6 +323,10 @@ __all__ = [
     "Intent",
     "TaskPlan",
     "ExecutionResult",
+    "ExtractedEntity",
+    "EntityType", 
+    "IntentRecognitionResult",
+    "CommandGenerationResult",
     "get_model_info",
     "create_system_message",
     "validate_llm_response",

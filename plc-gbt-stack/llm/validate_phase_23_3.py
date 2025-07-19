@@ -98,7 +98,10 @@ class Phase23_3Validator:
         
         # Test task_executor.py implementation
         try:
-            with open("task_executor.py", 'r') as f:
+            import os
+            script_dir = os.path.dirname(__file__)
+            executor_path = os.path.join(script_dir, "task_executor.py")
+            with open(executor_path, 'r') as f:
                 content = f.read()
                 
             # Check for key classes
@@ -129,7 +132,8 @@ class Phase23_3Validator:
             
         # Test task_planner.py implementation
         try:
-            with open("task_planner.py", 'r') as f:
+            planner_path = os.path.join(script_dir, "task_planner.py")
+            with open(planner_path, 'r') as f:
                 content = f.read()
                 
             # Check for key components
@@ -216,43 +220,101 @@ class Phase23_3Validator:
         print("\n🔗 Validating Integration Architecture...")
         
         # Test Phase 23.1 integration points
+        llm_service_available = False
         try:
-            from llm_service import LLMService
-            self._record_test("integration", "llm_service_available", True, "LLM service integration available")
+            from .llm_service import LLMService
+            llm_service_available = True
         except ImportError:
-            self._record_test("integration", "llm_service_available", False, "LLM service not available")
+            try:
+                from .service import LLMService
+                llm_service_available = True
+            except ImportError:
+                try:
+                    # Try absolute import when running as standalone script
+                    import sys
+                    import os
+                    sys.path.insert(0, os.path.dirname(__file__))
+                    from llm_service import LLMService
+                    llm_service_available = True
+                except ImportError:
+                    try:
+                        from service import LLMService
+                        llm_service_available = True
+                    except ImportError:
+                        pass
+                        
+        self._record_test("integration", "llm_service_available", llm_service_available, 
+                         "LLM service integration available" if llm_service_available else "LLM service not available")
             
         # Test Phase 23.2 integration points
         integration_components = [
-            ("intent_recognition", "IntentRecognizer"),
+            ("intent_recognition", "IntentRecognitionEngine"),
             ("command_generator", "CommandGenerator"), 
-            ("domain_understanding", "DomainExpert"),
+            ("domain_understanding", "DomainUnderstandingEngine"),
             ("safety", "SafetyValidator"),
             ("conversation", "ConversationManager")
         ]
         
         for module_name, class_name in integration_components:
+            has_class = False
             try:
-                module = __import__(module_name)
+                # Try relative import from current package using importlib
+                import importlib
+                module = importlib.import_module(f".{module_name}", package="llm")
                 has_class = hasattr(module, class_name)
-                self._record_test("integration", f"integration_{module_name}", has_class, 
-                                f"Should integrate with {class_name}")
             except ImportError:
-                self._record_test("integration", f"integration_{module_name}", False, 
-                                f"{module_name} integration not available")
+                try:
+                    # Try direct import for validation script context
+                    module = __import__(module_name)
+                    has_class = hasattr(module, class_name)
+                except ImportError:
+                    try:
+                        # Try absolute import with current directory in path
+                        import sys
+                        import os
+                        if os.path.dirname(__file__) not in sys.path:
+                            sys.path.insert(0, os.path.dirname(__file__))
+                        module = __import__(module_name)
+                        has_class = hasattr(module, class_name)
+                    except ImportError:
+                        pass
+                        
+            self._record_test("integration", f"integration_{module_name}", has_class, 
+                            f"Should integrate with {class_name}" if has_class else f"{module_name} integration not available")
                 
         # Test planner integration
+        planner_integration_success = False
+        template_system_success = False
+        
         try:
-            from task_planner import TaskPlanner
-            planner = TaskPlanner()
-            self._record_test("integration", "planner_integration", planner is not None, "TaskPlanner should integrate")
-            
-            # Test template system
-            has_templates = hasattr(planner, 'templates') and len(planner.templates) > 0
-            self._record_test("integration", "template_system", has_templates, "Should have template system")
-            
+            # Try multiple import strategies for TaskPlanner
+            TaskPlanner = None
+            try:
+                from .task_planner import TaskPlanner
+            except ImportError:
+                try:
+                    import sys
+                    import os
+                    if os.path.dirname(__file__) not in sys.path:
+                        sys.path.insert(0, os.path.dirname(__file__))
+                    from task_planner import TaskPlanner
+                except ImportError:
+                    pass
+                    
+            if TaskPlanner:
+                planner = TaskPlanner()
+                planner_integration_success = planner is not None
+                
+                # Test template system
+                if planner_integration_success:
+                    template_system_success = hasattr(planner, 'templates') and len(planner.templates) > 0
+                    
         except Exception as e:
-            self._record_test("integration", "planner_integration_error", False, f"Planner integration failed: {e}")
+            # Log error but don't fail - record results below
+            pass
+            
+        self._record_test("integration", "planner_integration", planner_integration_success, "TaskPlanner should integrate")
+        self._record_test("integration", "template_system", template_system_success, "Should have template system")
             
     def _validate_performance_quality(self):
         """Validate performance and quality (10 tests)"""
@@ -260,10 +322,14 @@ class Phase23_3Validator:
         
         # Code quality metrics
         try:
-            with open("task_executor.py", 'r') as f:
+            import os
+            script_dir = os.path.dirname(__file__)
+            executor_path = os.path.join(script_dir, "task_executor.py")
+            with open(executor_path, 'r') as f:
                 executor_content = f.read()
                 
-            with open("task_planner.py", 'r') as f:
+            planner_path = os.path.join(script_dir, "task_planner.py")
+            with open(planner_path, 'r') as f:
                 planner_content = f.read()
                 
             # Test documentation

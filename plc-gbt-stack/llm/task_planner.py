@@ -36,12 +36,13 @@ from pathlib import Path
 
 # Import Phase 23.1 and 23.2 components
 try:
-    from .llm_service import LLMService
-    from .intent_recognition import IntentRecognizer, Intent, Entity
+    from .service import LLMService
+    from .intent_recognition import IntentRecognitionEngine, IntentRecognitionResult
     from .command_generator import CommandGenerator
-    from .domain_understanding import DomainExpert
+    from .domain_understanding import DomainUnderstandingEngine
     from .safety import SafetyValidator
-    from .task_executor import TaskPlan, TaskStep, StepType, TaskPriority, TaskStatus
+    from . import ApplicationContext
+    # Avoid circular import - import TaskExecutor classes locally where needed
 except ImportError as e:
     # Fallback for testing
     logging.warning(f"Import error: {e}. Using mock implementations for testing.")
@@ -85,7 +86,7 @@ class DependencyAnalyzer:
             "database_modification": ["safety_check", "user_confirmation"]
         }
         
-    def analyze_dependencies(self, steps: List[TaskStep]) -> List[TaskStep]:
+    def analyze_dependencies(self, steps: List) -> List:
         """Analyze and reorder steps based on dependencies"""
         # Create dependency graph
         step_map = {step.step_id: step for step in steps}
@@ -102,7 +103,7 @@ class DependencyAnalyzer:
         logger.debug(f"Reordered {len(steps)} steps based on dependencies")
         return ordered_steps
         
-    def _determine_dependencies(self, step: TaskStep, all_steps: List[TaskStep]) -> List[str]:
+    def _determine_dependencies(self, step, all_steps: List) -> List[str]:
         """Determine dependencies for a single step"""
         dependencies = []
         step_category = self._categorize_step(step)
@@ -133,7 +134,7 @@ class DependencyAnalyzer:
                     
         return list(set(dependencies))  # Remove duplicates
         
-    def _categorize_step(self, step: TaskStep) -> str:
+    def _categorize_step(self, step) -> str:
         """Categorize a step for dependency analysis"""
         description = step.description.lower()
         command = step.command.lower()
@@ -159,7 +160,7 @@ class DependencyAnalyzer:
         else:
             return "generic"
             
-    def _topological_sort(self, graph: Dict[str, List[str]], step_map: Dict[str, TaskStep]) -> List[TaskStep]:
+    def _topological_sort(self, graph: Dict[str, List[str]], step_map: Dict[str, Any]) -> List:
         """Perform topological sort on dependency graph"""
         # Calculate in-degree for each node
         in_degree = {node: 0 for node in graph}
@@ -211,8 +212,11 @@ class SafetyAnalyzer:
             r'configure|setup|install'
         ]
         
-    def analyze_safety(self, task_plan: TaskPlan) -> float:
+    def analyze_safety(self, task_plan) -> float:
         """Analyze overall safety score for a task plan"""
+        # Local import to avoid circular import
+        from .task_executor import StepType
+        
         total_risk = 0.0
         step_count = len(task_plan.steps)
         
@@ -244,7 +248,7 @@ class SafetyAnalyzer:
         logger.debug(f"Task safety analysis: {safety_score}/5.0 (requires_approval: {task_plan.requires_approval})")
         return safety_score
         
-    def _analyze_step_safety(self, step: TaskStep) -> float:
+    def _analyze_step_safety(self, step) -> float:
         """Analyze safety risk for a single step"""
         risk_score = 1.0  # Base risk
         
@@ -285,7 +289,7 @@ class PlanOptimizer:
             self._timeout_optimization
         ]
         
-    def optimize_plan(self, task_plan: TaskPlan) -> TaskPlan:
+    def optimize_plan(self, task_plan):
         """Apply optimization strategies to a task plan"""
         logger.debug(f"Optimizing task plan: {task_plan.name}")
         
@@ -294,7 +298,7 @@ class PlanOptimizer:
             
         return task_plan
         
-    def _parallel_optimization(self, task_plan: TaskPlan) -> TaskPlan:
+    def _parallel_optimization(self, task_plan):
         """Identify steps that can be executed in parallel"""
         independent_steps = []
         
@@ -307,7 +311,7 @@ class PlanOptimizer:
             
         return task_plan
         
-    def _cache_optimization(self, task_plan: TaskPlan) -> TaskPlan:
+    def _cache_optimization(self, task_plan):
         """Optimize for caching opportunities"""
         data_loading_steps = [s for s in task_plan.steps 
                             if "load" in s.description.lower() or "ingest" in s.description.lower()]
@@ -320,7 +324,7 @@ class PlanOptimizer:
                 
         return task_plan
         
-    def _batch_optimization(self, task_plan: TaskPlan) -> TaskPlan:
+    def _batch_optimization(self, task_plan):
         """Combine similar operations into batches"""
         similar_steps = {}
         
@@ -337,7 +341,7 @@ class PlanOptimizer:
                 
         return task_plan
         
-    def _timeout_optimization(self, task_plan: TaskPlan) -> TaskPlan:
+    def _timeout_optimization(self, task_plan):
         """Optimize step timeouts based on operation type"""
         for step in task_plan.steps:
             if step.step_type == StepType.CLI_COMMAND:
@@ -353,9 +357,9 @@ class TaskPlanner:
     
     def __init__(self, llm_service: Optional['LLMService'] = None):
         self.llm_service = llm_service
-        self.intent_recognizer = IntentRecognizer() if 'IntentRecognizer' in globals() else None
+        self.intent_recognizer = IntentRecognitionEngine() if 'IntentRecognitionEngine' in globals() else None
         self.command_generator = CommandGenerator() if 'CommandGenerator' in globals() else None
-        self.domain_expert = DomainExpert() if 'DomainExpert' in globals() else None
+        self.domain_expert = DomainUnderstandingEngine() if 'DomainUnderstandingEngine' in globals() else None
         self.safety_validator = SafetyValidator() if 'SafetyValidator' in globals() else None
         
         self.dependency_analyzer = DependencyAnalyzer()
@@ -519,7 +523,7 @@ class TaskPlanner:
         logger.info(f"Loaded {len(templates)} task templates")
         return templates
         
-    async def create_task_plan(self, natural_language_request: str, user_context: Optional[Dict[str, Any]] = None) -> TaskPlan:
+    async def create_task_plan(self, natural_language_request: str, user_context: Optional[Dict[str, Any]] = None):
         """
         Create a comprehensive task plan from a natural language request
         
@@ -563,13 +567,15 @@ class TaskPlanner:
         """Analyze natural language request to extract intent and entities"""
         if self.intent_recognizer:
             try:
-                intent = await self.intent_recognizer.recognize_intent(request)
-                entities = await self.intent_recognizer.extract_entities(request)
+                # Create application context for intent recognition
+                context = ApplicationContext()
+                intent_result = self.intent_recognizer.recognize_intent(request, context)
+                entities = intent_result.entities if intent_result else []
                 
                 return {
-                    "intent": intent.intent_type if intent else "general_task",
-                    "confidence": intent.confidence if intent else 0.5,
-                    "entities": {e.name: e.value for e in entities} if entities else {},
+                    "intent": intent_result.primary_intent.intent_type.value if intent_result and intent_result.primary_intent else "general_task",
+                    "confidence": intent_result.primary_intent.confidence if intent_result and intent_result.primary_intent else 0.5,
+                    "entities": {e.entity_type.value: e.value for e in entities} if entities else {},
                     "original_request": request
                 }
             except Exception as e:
@@ -643,8 +649,11 @@ class TaskPlanner:
             logger.debug("No suitable template found, will create custom plan")
             return None
             
-    async def _create_plan_from_template(self, template: PlanTemplate, intent_data: Dict[str, Any], user_context: Optional[Dict[str, Any]]) -> TaskPlan:
+    async def _create_plan_from_template(self, template: PlanTemplate, intent_data: Dict[str, Any], user_context: Optional[Dict[str, Any]]):
         """Create a task plan from a template"""
+        # Local import to avoid circular import
+        from .task_executor import TaskPlan, TaskStep, TaskPriority
+        
         task_id = f"task_{int(time.time())}_{len(template.name)}"
         entities = intent_data.get("entities", {})
         
@@ -681,8 +690,11 @@ class TaskPlanner:
             
         return task_plan
         
-    async def _create_custom_plan(self, intent_data: Dict[str, Any], user_context: Optional[Dict[str, Any]]) -> TaskPlan:
+    async def _create_custom_plan(self, intent_data: Dict[str, Any], user_context: Optional[Dict[str, Any]]):
         """Create a custom task plan using LLM assistance"""
+        # Local import to avoid circular import
+        from .task_executor import TaskPlan, TaskPriority
+        
         task_id = f"custom_{int(time.time())}"
         intent = intent_data.get("intent", "general_task")
         request = intent_data["original_request"]
@@ -711,7 +723,7 @@ class TaskPlanner:
             
         return task_plan
         
-    async def _generate_steps_with_llm(self, intent_data: Dict[str, Any]) -> List[TaskStep]:
+    async def _generate_steps_with_llm(self, intent_data: Dict[str, Any]) -> List:
         """Generate task steps using LLM assistance"""
         prompt = f"""
         Create a detailed task plan for the following request:
@@ -733,8 +745,11 @@ class TaskPlanner:
         # For now, return empty list as fallback
         return []
         
-    def _create_fallback_steps(self, intent_data: Dict[str, Any]) -> List[TaskStep]:
+    def _create_fallback_steps(self, intent_data: Dict[str, Any]) -> List:
         """Create basic fallback steps when LLM is not available"""
+        # Local import to avoid circular import
+        from .task_executor import TaskStep, StepType
+        
         intent = intent_data.get("intent", "general_task")
         entities = intent_data.get("entities", {})
         task_id = f"fallback_{int(time.time())}"
@@ -826,8 +841,11 @@ class TaskPlanner:
         else:
             return f"echo 'Executing {step_type} step'"
             
-    def _map_step_type(self, template_type: str) -> StepType:
+    def _map_step_type(self, template_type: str):
         """Map template step type to StepType enum"""
+        # Local import to avoid circular import
+        from .task_executor import StepType
+        
         mapping = {
             "validation": StepType.VALIDATION,
             "data_loading": StepType.CLI_COMMAND,
@@ -842,7 +860,7 @@ class TaskPlanner:
         }
         return mapping.get(template_type, StepType.CLI_COMMAND)
         
-    async def _validate_plan(self, task_plan: TaskPlan) -> None:
+    async def _validate_plan(self, task_plan) -> None:
         """Perform final validation of the task plan"""
         if not task_plan.steps:
             raise ValueError("Task plan must have at least one step")

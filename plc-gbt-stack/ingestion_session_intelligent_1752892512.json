@@ -1,0 +1,44 @@
+{
+  "session_id": "ingestion_orch_1752892512",
+  "root_path": "ui",
+  "analysis_depth": "structural",
+  "methodology": "AI Task Orchestrator Intelligent Ingestion",
+  "total_files_analyzed": 11,
+  "total_batches_created": 3,
+  "successfully_processed": 11,
+  "failed_files": 0,
+  "processing_time_ms": 603.834867477417,
+  "files_per_second": 18.216900998038827,
+  "bandwidth_management": {
+    "peak_load": "0.0%",
+    "rate_limited_operations": 11,
+    "avg_operation_interval_ms": 57.324814796447754
+  },
+  "complexity_analysis": {
+    "complexity_distribution": {
+      "simple": 5,
+      "moderate": 2,
+      "complex": 4,
+      "extensive": 0
+    },
+    "strategy_distribution": {
+      "sequential": 0,
+      "small_batch": 4,
+      "medium_batch": 2,
+      "large_batch": 5
+    },
+    "total_batches": 3,
+    "average_batch_size": 3.6666666666666665
+  },
+  "performance_metrics": {
+    "total_files": 11,
+    "completed_files": 11,
+    "failed_files": 0,
+    "skipped_files": 0,
+    "total_batches": 3,
+    "completed_batches": 3,
+    "total_processing_time_ms": 603.834867477417,
+    "average_file_time_ms": 54.89407886158336
+  },
+  "checkpoints_created": 0
+}

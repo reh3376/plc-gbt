@@ -18,7 +18,7 @@ Components:
 - ErrorRecovery: Intelligent error handling and recovery strategies
 
 Author: PLC-GPT Development Team
-Date: January 18, 2025
+Date: June 18, 2025
 Phase: 23.3 - Task Execution Engine
 Methodology: AI Task Orchestrator Guide
 """
@@ -326,6 +326,41 @@ class TaskExecutor:
             StepType.PARALLEL: self._execute_parallel
         }
         
+    def create_task_plan(self, name: str, description: str, steps: List[TaskStep], 
+                        priority: TaskPriority = TaskPriority.NORMAL) -> TaskPlan:
+        """
+        Create a new task plan with the given specifications
+        
+        Args:
+            name: Name of the task plan
+            description: Description of what the task does
+            steps: List of task steps to execute
+            priority: Priority level for the task
+            
+        Returns:
+            TaskPlan: Newly created task plan ready for execution
+        """
+        import time
+        from datetime import timedelta
+        
+        task_id = f"task_{int(time.time())}_{len(name)}"
+        
+        task_plan = TaskPlan(
+            task_id=task_id,
+            name=name,
+            description=description,
+            original_request=description,  # Use description as original request
+            steps=steps,
+            priority=priority,
+            estimated_duration=timedelta(minutes=len(steps) * 2),  # Estimate 2 minutes per step
+            safety_score=2.0,  # Default medium safety score
+            requires_approval=False,
+            created_at=time.time()
+        )
+        
+        logger.info(f"Created task plan: {name} ({task_id}) with {len(steps)} steps")
+        return task_plan
+        
     async def execute_task(self, task_plan: TaskPlan) -> bool:
         """
         Execute a complete task plan
@@ -474,23 +509,42 @@ class TaskExecutor:
         """Execute a CLI command step"""
         import subprocess
         
-        command = step.command
-        # Substitute variables from context
-        for var_name, var_value in context.variables.items():
-            command = command.replace(f"{{{var_name}}}", str(var_value))
+        try:
+            command = step.command
             
-        result = subprocess.run(
-            command,
-            shell=True,
-            capture_output=True,
-            text=True,
-            timeout=step.timeout_seconds
-        )
-        
-        if result.returncode != 0:
-            raise RuntimeError(f"Command failed: {result.stderr}")
+            # Validate command safety
+            if not command or not command.strip():
+                raise ValueError("Empty command provided")
+                
+            # Substitute variables from context
+            try:
+                for var_name, var_value in context.variables.items():
+                    command = command.replace(f"{{{var_name}}}", str(var_value))
+            except Exception as var_error:
+                raise ValueError(f"Variable substitution failed: {var_error}")
+                
+            # Execute command with comprehensive error handling
+            try:
+                result = subprocess.run(
+                    command,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=step.timeout_seconds
+                )
+            except subprocess.TimeoutExpired as timeout_error:
+                raise RuntimeError(f"Command timeout after {step.timeout_seconds} seconds: {command}")
+            except OSError as os_error:
+                raise RuntimeError(f"OS error executing command: {os_error}")
+                
+            if result.returncode != 0:
+                raise RuntimeError(f"Command failed with code {result.returncode}: {result.stderr}")
+                
+            return result.stdout.strip() if result.stdout else ""
             
-        return result.stdout.strip()
+        except Exception as e:
+            context.log_event("cli_command_error", {"step_id": step.step_id, "error": str(e)})
+            raise
         
     async def _execute_api_call(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute an API call step"""
@@ -501,38 +555,154 @@ class TaskExecutor:
         
     async def _execute_file_operation(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a file operation step"""
-        operation = step.parameters.get("operation", "read")
-        file_path = step.parameters.get("path", "")
+        import os
         
-        if operation == "read":
-            with open(file_path, 'r') as f:
-                return f.read()
-        elif operation == "write":
-            content = step.parameters.get("content", "")
-            with open(file_path, 'w') as f:
-                f.write(content)
-            return f"Written {len(content)} characters to {file_path}"
-        else:
-            raise ValueError(f"Unknown file operation: {operation}")
+        try:
+            operation = step.parameters.get("operation", "read")
+            file_path = step.parameters.get("path", "")
+            
+            # Validate file path
+            if not file_path or not file_path.strip():
+                raise ValueError("File path cannot be empty")
+                
+            # Normalize and validate path security
+            try:
+                file_path = os.path.abspath(file_path)
+            except Exception as path_error:
+                raise ValueError(f"Invalid file path: {path_error}")
+                
+            if operation == "read":
+                try:
+                    # Check if file exists and is readable
+                    if not os.path.exists(file_path):
+                        raise FileNotFoundError(f"File not found: {file_path}")
+                    if not os.access(file_path, os.R_OK):
+                        raise PermissionError(f"No read permission for file: {file_path}")
+                        
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    context.log_event("file_read", {"path": file_path, "size": len(content)})
+                    return content
+                except UnicodeDecodeError as decode_error:
+                    raise ValueError(f"File encoding error: {decode_error}")
+                except IOError as io_error:
+                    raise RuntimeError(f"IO error reading file: {io_error}")
+                    
+            elif operation == "write":
+                try:
+                    content = step.parameters.get("content", "")
+                    
+                    # Check directory exists and is writable
+                    directory = os.path.dirname(file_path)
+                    if directory and not os.path.exists(directory):
+                        raise FileNotFoundError(f"Directory not found: {directory}")
+                    if directory and not os.access(directory, os.W_OK):
+                        raise PermissionError(f"No write permission for directory: {directory}")
+                        
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        f.write(content)
+                    context.log_event("file_write", {"path": file_path, "size": len(content)})
+                    return f"Written {len(content)} characters to {file_path}"
+                except IOError as io_error:
+                    raise RuntimeError(f"IO error writing file: {io_error}")
+            else:
+                raise ValueError(f"Unknown file operation: {operation}")
+                
+        except Exception as e:
+            context.log_event("file_operation_error", {"step_id": step.step_id, "error": str(e)})
+            raise
             
     async def _execute_database_query(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a database query step"""
-        # Implementation would depend on the database type
-        await asyncio.sleep(0.1)  # Simulate query
-        return {"rows_affected": 1, "data": []}
+        try:
+            query = step.parameters.get("query", "")
+            if not query or not query.strip():
+                raise ValueError("Database query cannot be empty")
+                
+            # Validate query safety (basic SQL injection prevention)
+            dangerous_keywords = ["DROP", "DELETE", "TRUNCATE", "ALTER"]
+            query_upper = query.upper()
+            for keyword in dangerous_keywords:
+                if keyword in query_upper:
+                    raise ValueError(f"Dangerous SQL keyword detected: {keyword}")
+                    
+            try:
+                # Implementation would depend on the database type
+                await asyncio.sleep(0.1)  # Simulate query execution time
+                
+                # Log successful query execution
+                context.log_event("database_query", {"query_length": len(query)})
+                return {"rows_affected": 1, "data": [], "query_time": 0.1}
+                
+            except asyncio.TimeoutError:
+                raise RuntimeError("Database query timeout")
+            except ConnectionError as conn_error:
+                raise RuntimeError(f"Database connection error: {conn_error}")
+                
+        except Exception as e:
+            context.log_event("database_error", {"step_id": step.step_id, "error": str(e)})
+            raise
         
     async def _execute_validation(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a validation step"""
-        validation_type = step.parameters.get("type", "generic")
-        value = context.get_variable(step.parameters.get("variable", ""))
-        
-        # Simple validation examples
-        if validation_type == "not_empty":
-            if not value:
-                raise ValueError("Value is empty")
-        elif validation_type == "numeric":
-            if not isinstance(value, (int, float)):
-                raise ValueError("Value is not numeric")
+        try:
+            validation_type = step.parameters.get("type", "generic")
+            variable_name = step.parameters.get("variable", "")
+            
+            if not variable_name:
+                raise ValueError("Variable name required for validation")
+                
+            try:
+                value = context.get_variable(variable_name)
+            except KeyError:
+                raise ValueError(f"Variable '{variable_name}' not found in context")
+            except Exception as var_error:
+                raise RuntimeError(f"Error accessing variable '{variable_name}': {var_error}")
+            
+            # Comprehensive validation patterns
+            try:
+                if validation_type == "not_empty":
+                    if value is None or (isinstance(value, str) and not value.strip()):
+                        raise ValueError(f"Value for '{variable_name}' is empty")
+                elif validation_type == "numeric":
+                    if not isinstance(value, (int, float)):
+                        try:
+                            float(value)  # Try to convert to numeric
+                        except (ValueError, TypeError):
+                            raise ValueError(f"Value '{value}' is not numeric")
+                elif validation_type == "range":
+                    min_val = step.parameters.get("min", 0)
+                    max_val = step.parameters.get("max", 100)
+                    if not (min_val <= value <= max_val):
+                        raise ValueError(f"Value {value} not in range [{min_val}, {max_val}]")
+                elif validation_type == "regex":
+                    import re
+                    pattern = step.parameters.get("pattern", "")
+                    if not pattern:
+                        raise ValueError("Regex pattern required for regex validation")
+                    if not re.match(pattern, str(value)):
+                        raise ValueError(f"Value '{value}' does not match pattern '{pattern}'")
+                else:
+                    raise ValueError(f"Unknown validation type: {validation_type}")
+                    
+                context.log_event("validation_success", {
+                    "variable": variable_name, 
+                    "type": validation_type, 
+                    "value": str(value)[:100]  # Truncate long values
+                })
+                return f"Validation passed for {variable_name}"
+                
+            except Exception as validation_error:
+                context.log_event("validation_failed", {
+                    "variable": variable_name, 
+                    "type": validation_type,
+                    "error": str(validation_error)
+                })
+                raise
+                
+        except Exception as e:
+            context.log_event("validation_error", {"step_id": step.step_id, "error": str(e)})
+            raise
                 
         return True
         
