@@ -1,0 +1,66 @@
+# AI Enhancement Framework - Cursor Rules
+# Auto-generated for python project
+# Last updated: 2025-01-19 12:09:45
+
+# Core Framework Configuration
+ai_framework:
+  enabled: true
+  mode: "development"
+  version: "1.0.0"
+
+# Project Configuration
+project:
+  type: "python"
+  complexity: "moderate"
+  workspace_path: "/Users/reh3376/repos/plc-gbt/ai-enhancement-framework"
+  
+# AI Assistant Behavior
+assistant:
+  task_orchestrator:
+    enabled: true
+    analysis_depth: "comprehensive"
+    methodical_approach: true
+    validation_strict: true
+  
+  memory:
+    enabled: true
+    project_scoped: true
+    cross_session_persistence: true
+    retention_days: 30
+  
+  code_analysis:
+    enabled: true
+    real_time: true
+    validation_on_save: true
+    hallucination_detection: true
+    quality_threshold: 85
+
+# Code Quality Standards
+standards:
+  code_quality:
+    type_hints: "required"
+    docstrings: "required"
+    test_coverage: 95
+    complexity_limit: 10
+  
+  documentation:
+    auto_generate: true
+    mermaid_diagrams: true
+    api_documentation: true
+    inline_comments: true
+
+# Project-Specific Settings
+python:
+  style: "pep8"
+  formatter: "black"
+  linter: ["flake8", "mypy"]
+  testing: "pytest"
+  type_checking: "strict"
+
+# Framework Integration
+framework:
+  ai_enhancement: true
+  auto_analysis: true
+  validation_on_save: true
+  memory_persistence: true
+  context_awareness: true 

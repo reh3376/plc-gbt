@@ -1,0 +1,123 @@
+# 🤖 N8N Environment Variables Configuration
+# Phase 26.2: N8N Service Integration
+# Created: June 19, 2025
+
+# This file documents all environment variables required for N8N integration
+# Copy these to your .env file for proper configuration
+
+database:
+  postgresql:
+    POSTGRES_DB: "plc_gbt"
+    POSTGRES_USER: "plc_user" 
+    POSTGRES_PASSWORD: "plc_secure_password_2025"
+    POSTGRES_HOST: "postgres"
+    POSTGRES_PORT: "5432"
+    
+  neo4j:
+    NEO4J_PASSWORD: "neo4j_secure_password_2025"
+    NEO4J_USER: "neo4j"
+    NEO4J_URI: "bolt://neo4j:7687"
+    
+  redis:
+    REDIS_HOST: "redis"
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: ""
+    REDIS_DB: "0"
+    
+  qdrant:
+    QDRANT_HOST: "qdrant"
+    QDRANT_PORT: "6333"
+    QDRANT_API_KEY: "qdrant_api_key_2025"
+
+n8n:
+  core:
+    N8N_HOST: "0.0.0.0"
+    N8N_PORT: "5678"
+    N8N_PROTOCOL: "http"
+    NODE_ENV: "production"
+    WEBHOOK_URL: "http://localhost:5678/"
+    
+  security:
+    N8N_ENCRYPTION_KEY: "plc-gbt-n8n-encryption-key-very-secure-2025-industrial-automation"
+    N8N_JWT_SECRET: "plc-gbt-jwt-secret-very-secure-2025-industrial-control"
+    N8N_USER_MANAGEMENT_JWT_SECRET: "plc-gbt-user-mgmt-jwt-secret-2025-plc-control"
+    
+  database:
+    DB_TYPE: "postgresdb"
+    DB_POSTGRESDB_HOST: "postgres"
+    DB_POSTGRESDB_PORT: "5432"
+    DB_POSTGRESDB_DATABASE: "plc_gbt"
+    DB_POSTGRESDB_USER: "plc_user"
+    DB_POSTGRESDB_PASSWORD: "plc_secure_password_2025"
+    DB_POSTGRESDB_SCHEMA: "n8n"
+    
+  queue:
+    QUEUE_BULL_REDIS_HOST: "redis"
+    QUEUE_BULL_REDIS_PORT: "6379"
+    QUEUE_BULL_REDIS_DB: "2"
+    EXECUTIONS_MODE: "queue"
+    
+  performance:
+    N8N_PAYLOAD_SIZE_MAX: "16"
+    N8N_METRICS: "true"
+    N8N_DISABLE_UI: "false"
+
+vault:
+  VAULT_ROOT_TOKEN: "vault-root-token-plc-gbt-2025"
+  VAULT_TOKEN: "vault-access-token-plc-gbt-2025"
+  VAULT_ADDR: "http://vault:8200"
+
+security:
+  SAFETY_LOG_LEVEL: "INFO"
+  SAFETY_CONFIG_PATH: "/app/config/safety.json"
+  SAFETY_SCORE_THRESHOLD: "80"
+  
+  certificates:
+    CERT_DIR: "/certs"
+    CA_CERT_PATH: "/certs/ca.crt"
+    SERVER_CERT_PATH: "/certs/server.crt"
+    SERVER_KEY_PATH: "/certs/server.key"
+
+logging:
+  LOG_LEVEL: "info"
+  ETL_LOG_LEVEL: "info"
+
+performance:
+  ETL_BATCH_SIZE: "1000"
+  ETL_WORKER_THREADS: "4"
+  RATE_LIMIT_REQUESTS: "100"
+  RATE_LIMIT_WINDOW: "60"
+
+timezone:
+  GENERIC_TIMEZONE: "America/Kentucky/Louisville"
+  TZ: "America/Kentucky/Louisville"
+
+plc_integration:
+  PLC_POSTGRES_HOST: "postgres"
+  PLC_POSTGRES_USER: "plc_user"
+  PLC_POSTGRES_PASSWORD: "plc_secure_password_2025"
+  PLC_NEO4J_URI: "bolt://neo4j:7687"
+  PLC_NEO4J_USER: "neo4j"
+  PLC_NEO4J_PASSWORD: "neo4j_secure_password_2025"
+  PLC_NEO4J_DATABASE: "n8n"
+  PLC_REDIS_HOST: "redis"
+  PLC_REDIS_PORT: "6379"
+  PLC_QDRANT_URL: "http://qdrant:6333"
+
+monitoring:
+  MONITORING_ENABLED: "true"
+  HEALTH_CHECK_INTERVAL: "30"
+  METRICS_COLLECTION: "true"
+  
+backup:
+  BACKUP_ENABLED: "true"
+  BACKUP_FREQUENCY: "daily"
+  BACKUP_RETENTION_DAYS: "30"
+
+industrial:
+  OPC_UA_ENABLED: "true"
+  MODBUS_ENABLED: "true"
+  ETHERNET_IP_ENABLED: "true"
+  SAFETY_INTERLOCKS_ENABLED: "true"
+  EMERGENCY_STOP_ENABLED: "true"
+  APPROVAL_WORKFLOWS_ENABLED: "true" 

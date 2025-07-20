@@ -1,0 +1,539 @@
+{
+  "name": "PLC Memory Operations Template",
+  "version": 1,
+  "description": "Comprehensive workflow template for PLC Memory system operations including status monitoring, querying, ingestion, and maintenance tasks.",
+  "metadata": {
+    "phase": "26.3.2",
+    "created": "2025-06-19",
+    "purpose": "Parameterized workflow templates for common memory operations",
+    "author": "AI Task Orchestrator Implementation"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "none",
+        "responseFormat": "json",
+        "enableCors": true
+      },
+      "id": "plc-memory-webhook",
+      "name": "PLC Memory Webhook Trigger",
+      "type": "plcMemoryWebhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "webhookId": "plc-memory-operations"
+    },
+    {
+      "parameters": {
+        "operation": "status",
+        "outputFormat": "json",
+        "verbose": false
+      },
+      "id": "system-status",
+      "name": "System Status Check",
+      "type": "plcMemory",
+      "typeVersion": 1,
+      "position": [400, 100]
+    },
+    {
+      "parameters": {
+        "operation": "query",
+        "queryText": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"query_text\"]}}",
+        "queryType": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"query_type\"] || \"code_function\"}}",
+        "queryStrategy": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"strategy\"] || \"balanced\"}}",
+        "queryLimit": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"limit\"] || 10}}",
+        "outputFormat": "json"
+      },
+      "id": "memory-query",
+      "name": "Memory Query Operation",
+      "type": "plcMemory",
+      "typeVersion": 1,
+      "position": [400, 200]
+    },
+    {
+      "parameters": {
+        "operation": "ingest",
+        "ingestPath": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"ingest_path\"]}}",
+        "ingestMethod": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"method\"] || \"intelligent\"}}",
+        "ingestDepth": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"depth\"] || \"structural\"}}",
+        "dryRun": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"dry_run\"] || false}}",
+        "outputFormat": "json",
+        "verbose": true
+      },
+      "id": "data-ingestion",
+      "name": "Data Ingestion Operation",
+      "type": "plcMemory",
+      "typeVersion": 1,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "operation": "health",
+        "outputFormat": "json"
+      },
+      "id": "health-check",
+      "name": "Health Check Operation",
+      "type": "plcMemory",
+      "typeVersion": 1,
+      "position": [400, 400]
+    },
+    {
+      "parameters": {
+        "operation": "backup",
+        "backupDatabase": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"database\"] || \"all\"}}",
+        "outputFormat": "json",
+        "verbose": true
+      },
+      "id": "backup-operation",
+      "name": "Backup Operation",
+      "type": "plcMemory",
+      "typeVersion": 1,
+      "position": [400, 500]
+    },
+    {
+      "parameters": {
+        "operation": "optimize",
+        "dryRun": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"dry_run\"] || false}}",
+        "outputFormat": "json",
+        "verbose": true
+      },
+      "id": "optimize-operation",
+      "name": "Optimize Operation",
+      "type": "plcMemory",
+      "typeVersion": 1,
+      "position": [400, 600]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"operation\"]}}",
+              "operation": "equal",
+              "value2": "status"
+            }
+          ]
+        }
+      },
+      "id": "status-condition",
+      "name": "Is Status Operation?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [600, 100]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"operation\"]}}",
+              "operation": "equal",
+              "value2": "query"
+            }
+          ]
+        }
+      },
+      "id": "query-condition",
+      "name": "Is Query Operation?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [600, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"operation\"]}}",
+              "operation": "equal",
+              "value2": "ingest"
+            }
+          ]
+        }
+      },
+      "id": "ingest-condition",
+      "name": "Is Ingest Operation?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"operation\"]}}",
+              "operation": "equal",
+              "value2": "health"
+            }
+          ]
+        }
+      },
+      "id": "health-condition",
+      "name": "Is Health Operation?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [600, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"operation\"]}}",
+              "operation": "equal",
+              "value2": "backup"
+            }
+          ]
+        }
+      },
+      "id": "backup-condition",
+      "name": "Is Backup Operation?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [600, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"operation\"]}}",
+              "operation": "equal",
+              "value2": "optimize"
+            }
+          ]
+        }
+      },
+      "id": "optimize-condition",
+      "name": "Is Optimize Operation?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [600, 600]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "operation_type",
+              "value": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"operation\"]}}"
+            },
+            {
+              "name": "execution_timestamp",
+              "value": "={{new Date().toISOString()}}"
+            },
+            {
+              "name": "workflow_id",
+              "value": "plc-memory-operations-template"
+            }
+          ],
+          "object": [
+            {
+              "name": "result_data",
+              "value": "={{$json}}"
+            },
+            {
+              "name": "request_parameters",
+              "value": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"]}}"
+            }
+          ]
+        }
+      },
+      "id": "format-response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [800, 350]
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"PLC Memory Webhook Trigger\"].json[\"plc_memory_request\"][\"parameters\"][\"callback_url\"]}}",
+        "options": {
+          "headers": {
+            "Content-Type": "application/json"
+          }
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "operation",
+              "value": "={{$json[\"operation_type\"]}}"
+            },
+            {
+              "name": "status",
+              "value": "completed"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$json[\"execution_timestamp\"]}}"
+            },
+            {
+              "name": "result",
+              "value": "={{$json[\"result_data\"]}}"
+            }
+          ]
+        }
+      },
+      "id": "send-callback",
+      "name": "Send Callback (Optional)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1000, 350],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "no-op",
+      "name": "No Operation",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [800, 700]
+    }
+  ],
+  "connections": {
+    "PLC Memory Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is Status Operation?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Query Operation?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Ingest Operation?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Health Operation?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Backup Operation?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Optimize Operation?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Status Operation?": {
+      "main": [
+        [
+          {
+            "node": "System Status Check",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Query Operation?": {
+      "main": [
+        [
+          {
+            "node": "Memory Query Operation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Ingest Operation?": {
+      "main": [
+        [
+          {
+            "node": "Data Ingestion Operation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Health Operation?": {
+      "main": [
+        [
+          {
+            "node": "Health Check Operation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Backup Operation?": {
+      "main": [
+        [
+          {
+            "node": "Backup Operation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Optimize Operation?": {
+      "main": [
+        [
+          {
+            "node": "Optimize Operation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "System Status Check": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory Query Operation": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Ingestion Operation": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Health Check Operation": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backup Operation": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Optimize Operation": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Send Callback (Optional)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "plc-memory",
+      "name": "PLC Memory"
+    },
+    {
+      "id": "industrial-automation",
+      "name": "Industrial Automation"
+    },
+    {
+      "id": "database-operations",
+      "name": "Database Operations"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-06-19T00:00:00.000Z",
+  "versionId": "1"
+} 

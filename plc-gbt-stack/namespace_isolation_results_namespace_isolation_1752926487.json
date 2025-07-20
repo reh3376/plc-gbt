@@ -1,0 +1,47 @@
+{
+  "session_id": "namespace_isolation_1752926487",
+  "start_time": "2025-07-19T08:01:27.916932",
+  "isolation_results": {
+    "postgresql": {
+      "status": "FAILED",
+      "error": "ERROR:  role \"postgres\" does not exist\n"
+    },
+    "neo4j": {
+      "status": "SUCCESS",
+      "database_created": true,
+      "database_name": "n8n",
+      "isolation_method": "Database isolation"
+    },
+    "redis": {
+      "status": "SUCCESS",
+      "databases_configured": 16,
+      "n8n_database": 2,
+      "isolation_method": "Database separation"
+    },
+    "qdrant": {
+      "status": "FAILED",
+      "error": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\ncurl: (7) Failed to connect to localhost port 6333 after 0 ms: Couldn't connect to server\n"
+    }
+  },
+  "validation_results": {},
+  "errors": [],
+  "n8n_configuration": {
+    "DB_TYPE": "postgresdb",
+    "DB_POSTGRESDB_HOST": "localhost",
+    "DB_POSTGRESDB_PORT": "5432",
+    "DB_POSTGRESDB_DATABASE": "plc_metadata",
+    "DB_POSTGRESDB_SCHEMA": "n8n",
+    "DB_POSTGRESDB_USER": "plc_user",
+    "DB_POSTGRESDB_PASSWORD": "your-postgres-password",
+    "EXECUTIONS_MODE": "queue",
+    "QUEUE_BULL_REDIS_HOST": "localhost",
+    "QUEUE_BULL_REDIS_PORT": "6379",
+    "QUEUE_BULL_REDIS_DB": "2",
+    "QUEUE_BULL_PREFIX": "n8n_",
+    "N8N_DISABLE_PRODUCTION_MAIN_PROCESS": "false",
+    "GENERIC_TIMEZONE": "America/Kentucky/Louisville",
+    "N8N_PORT": "5678"
+  },
+  "end_time": "2025-07-19T08:01:31.646447",
+  "duration_seconds": 3.729518
+}

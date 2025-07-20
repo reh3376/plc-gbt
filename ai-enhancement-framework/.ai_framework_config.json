@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "project_type": "python",
+  "last_updated": "2025-01-19T12:09:45.000Z",
+  "ai_features": {
+    "task_orchestrator": true,
+    "memory_management": true,
+    "code_analysis": true,
+    "hallucination_detection": true,
+    "context_awareness": true,
+    "performance_monitoring": true
+  },
+  "context": {
+    "analysis_depth": "comprehensive",
+    "code_quality_threshold": 85,
+    "documentation_level": "detailed",
+    "validation_strict": true
+  },
+  "memory": {
+    "isolation_level": "project",
+    "retention_days": 30,
+    "compression_enabled": true,
+    "cleanup_interval_hours": 24
+  },
+  "performance": {
+    "max_response_time_ms": 2000,
+    "cache_enabled": true,
+    "optimization_level": "balanced"
+  }
+} 

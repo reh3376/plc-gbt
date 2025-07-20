@@ -149,29 +149,121 @@ services:
       dockerfile: Dockerfile
     container_name: plc-safety-interlocks
     ports:
-      - "127.0.0.1:8300:8300"  # Safety service - localhost only
+      - "127.0.0.1:8300:8300"  # localhost only
     environment:
+      - SAFETY_LOG_LEVEL=${SAFETY_LOG_LEVEL:-INFO}
       - VAULT_ADDR=http://vault:8200
       - VAULT_TOKEN=${VAULT_TOKEN}
-      - SAFETY_CONFIG_PATH=/app/config/safety.json
-      - GUARDLOGIX_CERT_DIR=/app/certs/guardlogix
-      - APPROVAL_TIMEOUT=1800  # 30 minutes
-      - SAFETY_SCORE_THRESHOLD=80
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
     volumes:
-      - ./security/safety/config:/app/config:ro
-      - ./security/guardlogix:/app/certs/guardlogix:ro
       - safety_logs:/app/logs
+      - ./security/safety/policies:/app/policies:ro
     depends_on:
       vault:
         condition: service_healthy
+      neo4j:
+        condition: service_healthy
     networks:
       - plc-security-network
-      - plc-internal-network
+      - plc-database-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8300/health"]
       interval: 30s
       timeout: 10s
       retries: 5
+
+  # N8N Workflow Automation Platform (Phase 26.2)
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: plc-n8n
+    ports:
+      - "127.0.0.1:5678:5678"  # N8N Web UI - localhost only
+    environment:
+      # Core N8N Configuration
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+      
+      # Timezone Configuration (Phase 26.2.4)
+      - GENERIC_TIMEZONE=America/Kentucky/Louisville
+      - TZ=America/Kentucky/Louisville
+      
+      # Database Configuration - PostgreSQL (using n8n schema from Phase 26.1)
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-plc_gbt}
+      - DB_POSTGRESDB_USER=${POSTGRES_USER:-plc_user}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_POSTGRESDB_SCHEMA=n8n
+      
+      # Queue Configuration - Redis (using database 2 from Phase 26.1)
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - QUEUE_BULL_REDIS_DB=2
+      - EXECUTIONS_MODE=queue
+      
+      # Security and Encryption
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-plc-gbt-n8n-encryption-key-2025}
+      - N8N_USER_MANAGEMENT_JWT_SECRET=${N8N_JWT_SECRET:-plc-gbt-jwt-secret-2025}
+      
+      # Logging and Monitoring
+      - N8N_LOG_LEVEL=${LOG_LEVEL:-info}
+      - N8N_LOG_OUTPUT=console,file
+      - N8N_LOG_FILE_LOCATION=/home/node/.n8n/logs/
+      
+      # Performance Optimization
+      - N8N_PAYLOAD_SIZE_MAX=16
+      - N8N_METRICS=true
+      - N8N_DISABLE_UI=${N8N_DISABLE_UI:-false}
+      
+      # Integration with PLC Memory Stack
+      - PLC_POSTGRES_HOST=postgres
+      - PLC_POSTGRES_USER=${POSTGRES_USER:-plc_user}
+      - PLC_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PLC_NEO4J_URI=bolt://neo4j:7687
+      - PLC_NEO4J_USER=neo4j
+      - PLC_NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - PLC_NEO4J_DATABASE=n8n
+      - PLC_REDIS_HOST=redis
+      - PLC_REDIS_PORT=6379
+      - PLC_QDRANT_URL=http://qdrant:6333
+      
+    volumes:
+      # N8N Data Persistence
+      - n8n_data:/home/node/.n8n
+      - n8n_logs:/home/node/.n8n/logs
+      
+      # Custom Nodes and Workflows
+      - ./n8n/custom-nodes:/home/node/.n8n/custom
+      - ./n8n/workflows:/home/node/.n8n/workflows
+      - ./n8n/credentials:/home/node/.n8n/credentials
+      
+      # PLC Integration Files
+      - ./n8n/plc-integration:/home/node/.n8n/plc-integration:ro
+      
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      # qdrant:
+      #   condition: service_healthy  # Deferred to Phase 26.3
+    networks:
+      - plc-internal-network
+      - plc-database-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
 
   # ETL Worker
   etl-worker:
@@ -307,4 +399,8 @@ volumes:
   vault_logs:
     driver: local
   safety_logs:
+    driver: local
+  n8n_data:
+    driver: local
+  n8n_logs:
     driver: local
