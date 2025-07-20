@@ -1,98 +1,108 @@
-# AI Enhancement Framework - Comprehensive Requirements
-# Enhanced with AI Task Orchestrator Guide Methodology Support
+# AI Enhancement Framework - Modular Requirements
+# Install only the modules you need for optimized performance
+# 
+# Quick Install Options:
+# pip install ai-enhancement-framework                                    # Core only
+# pip install ai-enhancement-framework[code-analysis]                     # + Code analysis
+# pip install ai-enhancement-framework[database-providers]                # + Database providers  
+# pip install ai-enhancement-framework[llm-integration]                   # + LLM integration
+# pip install ai-enhancement-framework[wolfram-alpha]                     # + WolframAlpha Pro
+# pip install ai-enhancement-framework[full]                              # Everything
 
-# Core Dependencies
-asyncio-mqtt>=0.13.0
-aiohttp>=3.8.0
+# Core Dependencies (Always Required)
 pydantic>=2.0.0
 dataclasses-json>=0.6.0
 python-dotenv>=1.0.0
-
-# Database Integrations (Multi-database Memory System)
-redis>=4.5.0
-neo4j>=5.8.0
-psycopg2-binary>=2.9.0
-asyncpg>=0.28.0
-qdrant-client>=1.6.0
-
-# Mathematical Validation & Analysis
-numpy>=1.24.0
-scipy>=1.10.0
-sympy>=1.12.0
-matplotlib>=3.7.0
-
-# LLM Integration
-openai>=1.0.0
-anthropic>=0.7.0
-tiktoken>=0.5.0
-
-# Validation & Testing
-pytest>=7.4.0
-pytest-asyncio>=0.21.0
-pytest-cov>=4.1.0
-black>=23.0.0
-flake8>=6.0.0
-mypy>=1.5.0
-
-# Documentation & Reporting
-markdown>=3.5.0
-jinja2>=3.1.0
-pyyaml>=6.0.0
-mermaid-py>=0.1.0
-
-# Performance & Monitoring
-psutil>=5.9.0
-memory-profiler>=0.61.0
-line-profiler>=4.0.0
-
-# Web Framework (Optional for API endpoints)
-fastapi>=0.100.0
-uvicorn>=0.23.0
-
-# Development Tools
-ipython>=8.14.0
-jupyter>=1.0.0
-notebook>=7.0.0
-
-# Security & Encryption
-cryptography>=41.0.0
-bcrypt>=4.0.0
-
-# File Format Support
-xmltodict>=0.13.0
-openpyxl>=3.1.0
-pandas>=2.0.0
-
-# HTTP & API Clients
-httpx>=0.24.0
-requests>=2.31.0
-
-# Logging & Configuration
-structlog>=23.1.0
 click>=8.1.0
-rich>=13.5.0
 
-# Task Scheduling & Queues
-celery>=5.3.0
-redis>=4.5.0  # For Celery broker
+# ===================================================================
+# MODULAR DEPENDENCIES - Install only what you need
+# ===================================================================
 
-# Optional Mathematical Libraries (for advanced mathematical validation)
-# Uncomment if using advanced mathematical features
-# wolfram-alpha-api>=1.0.0  # Requires API key
-# maxima>=5.46.0  # Symbolic computation
-# octave>=8.0.0   # MATLAB alternative
+# Database Providers Module (pip install ai-enhancement-framework[database-providers])
+# redis>=4.5.0
+# neo4j>=5.8.0
+# psycopg2-binary>=2.9.0
+# asyncpg>=0.28.0
+# qdrant-client>=1.6.0
 
-# Optional Machine Learning (for advanced analysis)
-# scikit-learn>=1.3.0
-# tensorflow>=2.13.0
-# torch>=2.0.0
+# Code Analysis Module (pip install ai-enhancement-framework[code-analysis])
+# libcst>=1.0.0
+# astroid>=3.0.0
+# black>=23.0.0
+# isort>=5.12.0
 
-# Optional NLP (for advanced text analysis)
-# spacy>=3.7.0
-# nltk>=3.8.0
+# LLM Integration Module (pip install ai-enhancement-framework[llm-integration])
+# openai>=1.0.0
+# anthropic>=0.7.0
+# tiktoken>=0.5.0
 # transformers>=4.30.0
 
-# Development Dependencies (install with: pip install -r requirements-dev.txt)
-# pre-commit>=3.4.0
-# bandit>=1.7.0
-# safety>=2.3.0 
+# WolframAlpha Integration Module (pip install ai-enhancement-framework[wolfram-alpha])
+# requests>=2.31.0
+# sympy>=1.12.0
+# numpy>=1.24.0
+
+# Optimization Module (pip install ai-enhancement-framework[optimization])
+# libcst>=1.0.0
+# astroid>=3.0.0
+
+# Monitoring Module (pip install ai-enhancement-framework[monitoring])
+# aiohttp>=3.8.0
+# psutil>=5.9.0
+# structlog>=23.1.0
+
+# Docker Integration Module (pip install ai-enhancement-framework[docker])
+# docker>=6.0.0
+# docker-compose>=1.29.0
+
+# ===================================================================
+# DEVELOPMENT DEPENDENCIES - For framework development only
+# ===================================================================
+
+# Testing & Validation (Development only)
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# pytest-cov>=4.1.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.5.0
+
+# Documentation Generation (Development only)
+# markdown>=3.5.0
+# jinja2>=3.1.0
+# pyyaml>=6.0.0
+# mermaid-py>=0.1.0
+
+# Performance Profiling (Development only)
+# memory-profiler>=0.61.0
+# line-profiler>=4.0.0
+
+# Web Framework (Optional for API endpoints)
+# fastapi>=0.100.0
+# uvicorn>=0.23.0
+
+# ===================================================================
+# INSTALLATION INSTRUCTIONS
+# ===================================================================
+#
+# 1. Core Framework Only:
+#    pip install ai-enhancement-framework
+#
+# 2. With Specific Modules:
+#    pip install ai-enhancement-framework[code-analysis]
+#    pip install ai-enhancement-framework[database-providers]
+#    pip install ai-enhancement-framework[llm-integration]
+#    pip install ai-enhancement-framework[wolfram-alpha]
+#
+# 3. Multiple Modules:
+#    pip install ai-enhancement-framework[code-analysis,llm-integration]
+#
+# 4. Everything (Full Installation):
+#    pip install ai-enhancement-framework[full]
+#
+# 5. Development Setup:
+#    pip install ai-enhancement-framework[full,dev]
+#
+# For more information, see the installation guide:
+# https://github.com/ai-enhancement-framework/ai-enhancement-framework/README.md 

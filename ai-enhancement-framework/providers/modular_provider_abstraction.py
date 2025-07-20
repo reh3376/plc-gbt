@@ -111,14 +111,14 @@ class ConnectionStatus(Enum):
 @dataclass
 class DatabaseProviderConfig(ProviderConfig):
     """Extended configuration for database providers"""
-    database_type: DatabaseType
+    database_type: DatabaseType = DatabaseType.REDIS
     host: str = "localhost"
     port: Optional[int] = None
     username: Optional[str] = None
     password: Optional[str] = None
     database: Optional[str] = None
     ssl_enabled: bool = False
-    ssl_config: Optional[Dict[str, Any]] = None
+    ssl_config: Optional[Dict[str, Any]] = field(default_factory=dict)
     pool_size: int = 10
     pool_timeout: int = 30
     connection_timeout: int = 30

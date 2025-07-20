@@ -117,8 +117,8 @@ class ModelPriority(Enum):
 @dataclass
 class ModelConfig(ProviderConfig):
     """Extended configuration for AI models"""
-    model_type: ModelType
-    model_name: str
+    model_type: ModelType = ModelType.OPENAI_GPT
+    model_name: str = "gpt-3.5-turbo"
     api_key: Optional[str] = None
     api_base: Optional[str] = None
     model_path: Optional[str] = None  # For local models
