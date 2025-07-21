@@ -1,0 +1,53 @@
+{
+  "mcpServers": {
+    "plc-gbt-industrial-automation": {
+      "command": "python3",
+      "args": [
+        "-m", 
+        "simple_mcp_server"
+      ],
+      "cwd": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/mcp",
+      "env": {
+        "PYTHONPATH": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack",
+        "PLC_GBT_API_URL": "http://localhost:8000/api/v1",
+        "MCP_SERVER_NAME": "plc-gbt-industrial-automation",
+        "MCP_LOG_LEVEL": "INFO"
+      },
+      "description": "PLC-GBT Industrial Automation MCP Server - Natural Language Interface to Industrial Control Systems (Simplified Version Compatible with Python 3.9+)",
+      "capabilities": [
+        "tools",
+        "prompts", 
+        "resources"
+      ],
+      "version": "1.0.0",
+      "author": "PLC-GBT Project",
+      "homepage": "https://github.com/plc-gbt/plc-gbt",
+      "category": "Industrial Automation",
+      "tags": [
+        "industrial",
+        "automation", 
+        "plc",
+        "control-systems",
+        "pid",
+        "scada",
+        "manufacturing"
+      ],
+      "features": [
+        "8 Industrial Automation Tools",
+        "4 Expert Assistance Prompts", 
+        "5 Knowledge Resources",
+        "Natural Language Control Loop Creation",
+        "PLC System Integration",
+        "AI-Powered PID Tuning",
+        "Safety System Validation",
+        "Real-time System Monitoring"
+      ]
+    }
+  },
+  "globalSettings": {
+    "logLevel": "INFO",
+    "timeout": 30000,
+    "retryAttempts": 3,
+    "enableCaching": true
+  }
+} 

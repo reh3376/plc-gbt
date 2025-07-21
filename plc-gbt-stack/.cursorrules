@@ -1,0 +1,80 @@
+# PLC-GBT Industrial Automation Project - Cursor Rules
+# AI Enhancement Framework Configuration
+
+# Core Framework Configuration
+ai_framework:
+  enabled: true
+  mode: "development"
+  version: "1.0.0"
+
+# Project Configuration
+project:
+  name: "plc-gbt-industrial-automation"
+  type: "industrial_automation"
+  complexity: "extensive"
+  domain: "industrial_control"
+  
+# AI Assistant Behavior
+assistant:
+  task_orchestrator:
+    enabled: true
+    analysis_depth: "comprehensive"
+    methodical_approach: true
+    domain_expertise: "industrial_automation"
+  
+  memory:
+    enabled: true
+    project_scoped: true
+    cross_session_persistence: true
+    auto_cleanup: true
+  
+  code_analysis:
+    enabled: true
+    real_time: true
+    validation_on_save: true
+    hallucination_detection: true
+    safety_analysis: true
+    performance_analysis: true
+
+# Industrial Automation Standards
+standards:
+  code_quality:
+    type_hints: "required"
+    docstrings: "required"
+    test_coverage: 95
+    complexity_limit: 10
+  
+  industrial_compliance:
+    safety_standards: ["IEC 61511", "ISA 84"]
+    control_standards: ["IEC 61131", "ISA 88"]
+    cybersecurity: ["IEC 62443"]
+  
+  documentation:
+    auto_generate: true
+    mermaid_diagrams: true
+    api_documentation: true
+    safety_documentation: true
+
+# MCP Integration
+mcp_integration:
+  enabled: true
+  server_name: "plc-gbt-industrial-automation"
+  natural_language_interface: true
+  real_time_monitoring: true
+  
+# Industrial Features
+industrial_features:
+  control_loop_management: true
+  plc_integration: true
+  safety_systems: true
+  process_optimization: true
+  predictive_maintenance: true
+  
+# Framework Integration
+framework:
+  ai_enhancement: true
+  auto_analysis: true
+  validation_on_save: true
+  memory_persistence: true
+  context_awareness: true
+  industrial_expertise: true
