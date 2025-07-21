@@ -675,6 +675,20 @@ except ImportError as e:
     logger.warning(f"Batch commands not available: {e}")
     BATCH_COMMANDS_AVAILABLE = False
 
+try:
+    from cli.plugins.plugin_manager import plugin_commands
+    PLUGIN_COMMANDS_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Plugin commands not available: {e}")
+    PLUGIN_COMMANDS_AVAILABLE = False
+
+try:
+    from cli.automation.script_engine import automation_commands
+    AUTOMATION_COMMANDS_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Automation commands not available: {e}")
+    AUTOMATION_COMMANDS_AVAILABLE = False
+
 # Register schema commands if available
 if SCHEMA_COMMANDS_AVAILABLE:
     cli.add_command(schema_commands, name='schema')
@@ -707,6 +721,28 @@ else:
     def batch(ctx):
         """Batch operations commands (Phase 21.4)"""
         console.print("[yellow]⚠️  Batch commands not available - check installation[/yellow]")
+
+# Register plugin commands if available
+if PLUGIN_COMMANDS_AVAILABLE:
+    cli.add_command(plugin_commands, name='plugin')
+else:
+    # Fallback placeholder
+    @cli.group()
+    @click.pass_context
+    def plugin(ctx):
+        """Plugin management commands (Phase 21.5)"""
+        console.print("[yellow]⚠️  Plugin commands not available - check installation[/yellow]")
+
+# Register automation commands if available
+if AUTOMATION_COMMANDS_AVAILABLE:
+    cli.add_command(automation_commands, name='automation')
+else:
+    # Fallback placeholder
+    @cli.group()
+    @click.pass_context
+    def automation(ctx):
+        """Automation commands (Phase 21.6)"""
+        console.print("[yellow]⚠️  Automation commands not available - check installation[/yellow]")
 
 @cli.command()
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')

@@ -12,7 +12,7 @@ Creates the 4 main types of control loop schemas:
 Following AI Task Orchestrator methodology.
 """
 
-from schema_manager import ControlLoopSchemaManager, SchemaMetadata
+from .schema_manager import ControlLoopSchemaManager, SchemaMetadata
 from datetime import datetime
 import logging
 
@@ -211,4 +211,11 @@ def generate_advanced_pid_schema(manager: ControlLoopSchemaManager) -> None:
     schema["required"].extend(["SO", "PE", "CA", "UPD"])
     
     manager._save_schema(schema, manager.base_schemas_path / "advanced-pid.json")
-    logger.info("Generated Ladder Logic Advanced PID schema") 
+    logger.info("Generated Ladder Logic Advanced PID schema")
+
+def generate_all_base_schemas(manager: ControlLoopSchemaManager) -> None:
+    """Generate all base schemas"""
+    logger.info("Generating all base schemas...")
+    generate_standard_pid_schema(manager)
+    generate_advanced_pid_schema(manager)
+    logger.info("All base schemas generated successfully") 

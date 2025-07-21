@@ -58,17 +58,21 @@ from rich.status import Status
 # Import CLI framework components
 from ..framework import CLICommand, requires_permission, Permission
 
-# Import configuration from main CLI
-try:
-    from ..plc_control_loop_cli import CLIConfiguration
-except ImportError:
-    # Fallback minimal configuration
-    @dataclass
-    class CLIConfiguration:
-        verbose: bool = False
-        quiet: bool = False
-        default_output_format: str = "table"
-        max_concurrent_operations: int = 5
+# Import configuration - avoid circular import by lazy loading
+def get_cli_configuration():
+    """Get CLI configuration with lazy loading to avoid circular imports"""
+    try:
+        from ..plc_control_loop_cli import CLIConfiguration
+        return CLIConfiguration
+    except ImportError:
+        # Fallback minimal configuration
+        @dataclass
+        class CLIConfiguration:
+            verbose: bool = False
+            quiet: bool = False
+            default_output_format: str = "table"
+            max_concurrent_operations: int = 5
+        return CLIConfiguration
 
 # Import existing managers
 try:
