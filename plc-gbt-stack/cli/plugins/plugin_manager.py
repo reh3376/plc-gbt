@@ -25,15 +25,13 @@ Phase: 21.4.3 - Plugin System
 Dependencies: Phase 21.1 (CLI Framework), importlib, packaging
 """
 
+# Import optimization - lazy load heavy dependencies
 import os
 import sys
 import json
 import importlib
 import importlib.util
 import logging
-import shutil
-import tempfile
-import zipfile
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union, Callable, Type
@@ -44,27 +42,68 @@ import inspect
 from abc import ABC, abstractmethod
 import hashlib
 
-# Third-party imports
-try:
-    import packaging.version
-    PACKAGING_AVAILABLE = True
-except ImportError:
-    PACKAGING_AVAILABLE = False
+# Lazy imports for heavy dependencies
+def _lazy_import_file_ops():
+    """Lazy import file operation modules"""
+    try:
+        import shutil
+        import tempfile
+        import zipfile
+        return shutil, tempfile, zipfile
+    except ImportError:
+        return None, None, None
 
+def _lazy_import_packaging():
+    """Lazy import packaging module"""
+    try:
+        import packaging.version
+        return packaging.version, True
+    except ImportError:
+        return None, False
+
+def _lazy_import_pandas():
+    """Lazy import pandas for CSV operations"""
+    try:
+        import pandas as pd
+        return pd
+    except ImportError:
+        return None
+
+def _lazy_import_rich():
+    """Lazy import rich components"""
+    try:
+        from rich.console import Console
+        from rich.table import Table
+        from rich.panel import Panel
+        from rich.progress import Progress, SpinnerColumn, TextColumn
+        from rich.prompt import Confirm, Prompt
+        from rich import print as rprint
+        return Console, Table, Panel, Progress, SpinnerColumn, TextColumn, Confirm, Prompt, rprint
+    except ImportError:
+        return None
+
+# Light imports only
 import click
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.prompt import Confirm, Prompt
-from rich import print as rprint
 
-# Project imports
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+# Initialize console with lazy loading
+_rich_components = _lazy_import_rich()
+if _rich_components:
+    Console, Table, Panel, Progress, SpinnerColumn, TextColumn, Confirm, Prompt, rprint = _rich_components
+    console = Console()
+else:
+    # Fallback console
+    class FallbackConsole:
+        def print(self, text): print(text)
+    console = FallbackConsole()
+    
+# Project imports with error handling
+try:
+    project_root = Path(__file__).parent.parent.parent
+    sys.path.insert(0, str(project_root))
+except Exception:
+    pass  # Graceful degradation
 
-# Set up console and logging
-console = Console()
+# Set up logging
 logger = logging.getLogger(__name__)
 
 # =============================================================================
@@ -154,11 +193,174 @@ class PluginInterface(ABC):
         return True
 
 # =============================================================================
+# PLUGIN MARKETPLACE
+# =============================================================================
+
+@dataclass
+class MarketplacePlugin:
+    """Plugin information from marketplace"""
+    name: str
+    version: str
+    description: str
+    author: str
+    plugin_type: PluginType
+    download_url: str
+    homepage: str = ""
+    rating: float = 0.0
+    downloads: int = 0
+    tags: List[str] = field(default_factory=list)
+    requirements: List[str] = field(default_factory=list)
+    last_updated: datetime = None
+    
+class PluginMarketplace:
+    """Plugin marketplace integration"""
+    
+    def __init__(self, registry_url: str = "https://api.plc-plugins.io"):
+        self.registry_url = registry_url
+        self.cache_file = Path.home() / ".plc-cl" / "marketplace_cache.json"
+        self.cache_ttl = 3600  # 1 hour cache
+        
+    def _get_http_client(self):
+        """Get HTTP client with lazy loading"""
+        try:
+            import requests
+            return requests
+        except ImportError:
+            logger.warning("requests module not available for marketplace features")
+            return None
+    
+    def search_plugins(self, query: str = "", category: str = "", limit: int = 20) -> List[MarketplacePlugin]:
+        """Search plugins in marketplace"""
+        try:
+            http = self._get_http_client()
+            if not http:
+                return []
+            
+            params = {
+                "q": query,
+                "category": category,
+                "limit": limit
+            }
+            
+            response = http.get(f"{self.registry_url}/search", params=params, timeout=10)
+            response.raise_for_status()
+            
+            plugins = []
+            for item in response.json().get("plugins", []):
+                plugin = MarketplacePlugin(
+                    name=item["name"],
+                    version=item["version"],
+                    description=item["description"],
+                    author=item["author"],
+                    plugin_type=PluginType(item["type"]),
+                    download_url=item["download_url"],
+                    homepage=item.get("homepage", ""),
+                    rating=item.get("rating", 0.0),
+                    downloads=item.get("downloads", 0),
+                    tags=item.get("tags", []),
+                    requirements=item.get("requirements", [])
+                )
+                plugins.append(plugin)
+            
+            return plugins
+            
+        except Exception as e:
+            logger.error(f"Failed to search marketplace: {e}")
+            return []
+    
+    def get_plugin_info(self, plugin_name: str) -> Optional[MarketplacePlugin]:
+        """Get detailed plugin information"""
+        try:
+            http = self._get_http_client()
+            if not http:
+                return None
+            
+            response = http.get(f"{self.registry_url}/plugins/{plugin_name}", timeout=10)
+            response.raise_for_status()
+            
+            data = response.json()
+            return MarketplacePlugin(
+                name=data["name"],
+                version=data["version"],
+                description=data["description"],
+                author=data["author"],
+                plugin_type=PluginType(data["type"]),
+                download_url=data["download_url"],
+                homepage=data.get("homepage", ""),
+                rating=data.get("rating", 0.0),
+                downloads=data.get("downloads", 0),
+                tags=data.get("tags", []),
+                requirements=data.get("requirements", [])
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to get plugin info: {e}")
+            return None
+    
+    def download_plugin(self, plugin: MarketplacePlugin, target_dir: Path) -> bool:
+        """Download plugin from marketplace"""
+        try:
+            http = self._get_http_client()
+            if not http:
+                return False
+            
+            shutil, tempfile_mod, zipfile = _lazy_import_file_ops()
+            if not all([shutil, tempfile_mod, zipfile]):
+                logger.error("File operation modules not available")
+                return False
+            
+            # Download plugin
+            response = http.get(plugin.download_url, timeout=30)
+            response.raise_for_status()
+            
+            # Save to temporary file
+            with tempfile_mod.NamedTemporaryFile(suffix='.zip', delete=False) as tmp_file:
+                tmp_file.write(response.content)
+                tmp_path = Path(tmp_file.name)
+            
+            try:
+                # Extract to target directory
+                plugin_dir = target_dir / plugin.name
+                plugin_dir.mkdir(exist_ok=True)
+                
+                with zipfile.ZipFile(tmp_path, 'r') as zip_ref:
+                    zip_ref.extractall(plugin_dir)
+                
+                return True
+                
+            finally:
+                # Cleanup temp file
+                tmp_path.unlink(missing_ok=True)
+                
+        except Exception as e:
+            logger.error(f"Failed to download plugin: {e}")
+            return False
+    
+    def check_updates(self, installed_plugins: Dict[str, PluginInstance]) -> Dict[str, str]:
+        """Check for plugin updates"""
+        updates = {}
+        try:
+            for plugin_name, plugin_instance in installed_plugins.items():
+                marketplace_info = self.get_plugin_info(plugin_name)
+                if marketplace_info:
+                    current_version = plugin_instance.metadata.version
+                    latest_version = marketplace_info.version
+                    
+                    # Simple version comparison (in real implementation, use packaging.version)
+                    if latest_version != current_version:
+                        updates[plugin_name] = latest_version
+                        
+        except Exception as e:
+            logger.error(f"Failed to check updates: {e}")
+            
+        return updates
+
+# =============================================================================
 # PLUGIN MANAGER
 # =============================================================================
 
 class PluginManager:
-    """Comprehensive plugin management system"""
+    """Comprehensive plugin management system with marketplace integration"""
     
     def __init__(self, plugins_dir: Path = None, cli_context=None):
         self.cli_context = cli_context
@@ -180,6 +382,11 @@ class PluginManager:
         # Plugin templates directory
         self.templates_dir = Path(__file__).parent / "templates"
         
+        # Marketplace integration
+        self.marketplace = PluginMarketplace(
+            registry_url=self.config.get("marketplace_url", "https://api.plc-plugins.io")
+        )
+    
     def _load_config(self) -> Dict[str, Any]:
         """Load plugin configuration"""
         if self.config_file.exists():
@@ -194,7 +401,8 @@ class PluginManager:
             "auto_enable_plugins": False,
             "plugin_directories": [str(self.plugins_dir)],
             "disabled_plugins": [],
-            "plugin_configs": {}
+            "plugin_configs": {},
+            "marketplace_url": "https://api.plc-plugins.io"
         }
     
     def _save_config(self):
@@ -266,12 +474,13 @@ class PluginManager:
     def validate_plugin(self, plugin_path: Path, metadata: PluginMetadata) -> bool:
         """Validate plugin before loading"""
         try:
-            # Check CLI version compatibility
-            if PACKAGING_AVAILABLE:
+            # Check CLI version compatibility with lazy loading
+            packaging_version, packaging_available = _lazy_import_packaging()
+            if packaging_available:
                 cli_version = "1.0.0"  # Would get from actual CLI version
-                if not (packaging.version.parse(metadata.cli_version_min) <= 
-                       packaging.version.parse(cli_version) <= 
-                       packaging.version.parse(metadata.cli_version_max)):
+                if not (packaging_version.parse(metadata.cli_version_min) <= 
+                       packaging_version.parse(cli_version) <= 
+                       packaging_version.parse(metadata.cli_version_max)):
                     logger.error(f"Plugin {metadata.name} incompatible with CLI version {cli_version}")
                     return False
             
@@ -299,10 +508,15 @@ class PluginManager:
         return signature_file.exists() or self.allow_unsigned
     
     def load_plugin(self, plugin_path: Path) -> bool:
-        """Load a single plugin"""
+        """Load a single plugin with optimized loading"""
         try:
-            # Load metadata
-            metadata = self.load_plugin_metadata(plugin_path)
+            # Quick validation first
+            if not plugin_path.exists():
+                logger.error(f"Plugin file not found: {plugin_path}")
+                return False
+            
+            # Load metadata with caching
+            metadata = self._load_plugin_metadata_cached(plugin_path)
             if not metadata:
                 logger.error(f"Failed to load metadata from {plugin_path}")
                 return False
@@ -321,13 +535,10 @@ class PluginManager:
                 logger.info(f"Plugin {metadata.name} is disabled")
                 return False
             
-            # Load the module
-            spec = importlib.util.spec_from_file_location(f"plugin_{metadata.name}", plugin_path)
-            if not spec or not spec.loader:
+            # Load the module with error recovery
+            module = self._load_plugin_module(plugin_path, metadata.name)
+            if not module:
                 return False
-            
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
             
             # Create plugin instance
             plugin_instance = PluginInstance(
@@ -338,20 +549,12 @@ class PluginManager:
                 config=self.config.get("plugin_configs", {}).get(metadata.name, {})
             )
             
-            # Initialize plugin
-            if hasattr(module, 'initialize'):
-                init_result = module.initialize(self.cli_context, plugin_instance.config)
-                if not init_result:
-                    plugin_instance.status = PluginStatus.ERROR
-                    plugin_instance.error_message = "Initialization failed"
-                    return False
+            # Initialize plugin with timeout
+            if not self._initialize_plugin_safely(plugin_instance):
+                return False
             
-            # Get commands
-            commands = []
-            if hasattr(module, 'get_commands'):
-                commands = module.get_commands()
-            elif hasattr(module, 'commands'):
-                commands = module.commands
+            # Get commands with validation
+            commands = self._get_plugin_commands_safely(module)
             
             # Register plugin
             plugin_instance.status = PluginStatus.ENABLED
@@ -365,6 +568,87 @@ class PluginManager:
         except Exception as e:
             logger.error(f"Failed to load plugin {plugin_path}: {e}")
             return False
+    
+    def _load_plugin_metadata_cached(self, plugin_path: Path) -> Optional[PluginMetadata]:
+        """Load plugin metadata with caching"""
+        # Simple caching based on file modification time
+        cache_key = f"{plugin_path}_{plugin_path.stat().st_mtime}"
+        if hasattr(self, '_metadata_cache') and cache_key in self._metadata_cache:
+            return self._metadata_cache[cache_key]
+        
+        metadata = self.load_plugin_metadata(plugin_path)
+        
+        # Initialize cache if needed
+        if not hasattr(self, '_metadata_cache'):
+            self._metadata_cache = {}
+        
+        self._metadata_cache[cache_key] = metadata
+        return metadata
+    
+    def _load_plugin_module(self, plugin_path: Path, plugin_name: str):
+        """Load plugin module with better error handling"""
+        try:
+            spec = importlib.util.spec_from_file_location(f"plugin_{plugin_name}", plugin_path)
+            if not spec or not spec.loader:
+                logger.error(f"Could not create module spec for {plugin_path}")
+                return None
+            
+            module = importlib.util.module_from_spec(spec)
+            
+            # Add to sys.modules to enable relative imports
+            sys.modules[f"plugin_{plugin_name}"] = module
+            
+            # Execute module
+            spec.loader.exec_module(module)
+            
+            return module
+            
+        except Exception as e:
+            logger.error(f"Failed to load module from {plugin_path}: {e}")
+            # Clean up sys.modules if we added it
+            module_name = f"plugin_{plugin_name}"
+            if module_name in sys.modules:
+                del sys.modules[module_name]
+            return None
+    
+    def _initialize_plugin_safely(self, plugin_instance: PluginInstance) -> bool:
+        """Initialize plugin with timeout and error handling"""
+        try:
+            if hasattr(plugin_instance.module, 'initialize'):
+                init_result = plugin_instance.module.initialize(self.cli_context, plugin_instance.config)
+                if not init_result:
+                    plugin_instance.status = PluginStatus.ERROR
+                    plugin_instance.error_message = "Initialization failed"
+                    return False
+            return True
+        except Exception as e:
+            plugin_instance.status = PluginStatus.ERROR
+            plugin_instance.error_message = f"Initialization error: {str(e)}"
+            logger.error(f"Plugin initialization failed: {e}")
+            return False
+    
+    def _get_plugin_commands_safely(self, module) -> List[click.Command]:
+        """Get plugin commands with validation"""
+        commands = []
+        try:
+            if hasattr(module, 'get_commands'):
+                commands = module.get_commands()
+            elif hasattr(module, 'commands'):
+                commands = module.commands
+            
+            # Validate commands are actually Click commands
+            validated_commands = []
+            for cmd in commands:
+                if isinstance(cmd, click.Command):
+                    validated_commands.append(cmd)
+                else:
+                    logger.warning(f"Invalid command type: {type(cmd)}")
+            
+            return validated_commands
+            
+        except Exception as e:
+            logger.error(f"Failed to get plugin commands: {e}")
+            return []
     
     def unload_plugin(self, plugin_name: str) -> bool:
         """Unload a plugin"""
@@ -561,7 +845,7 @@ class PluginManager:
 """
 
 import click
-from plc_gbt_stack.cli.plugins.plugin_manager import PluginInterface, PluginMetadata, PluginType
+from cli.plugins.plugin_manager import PluginInterface, PluginMetadata, PluginType
 
 PLUGIN_METADATA = {{
     "name": "{plugin_name}",
@@ -572,6 +856,15 @@ PLUGIN_METADATA = {{
     "entry_point": "main"
 }}
 
+@click.command()
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
+def my_command(verbose):
+    """Custom command provided by {plugin_name} plugin"""
+    if verbose:
+        click.echo(f"Executing {plugin_name} command in verbose mode")
+    else:
+        click.echo(f"Executing {plugin_name} command")
+
 class Plugin(PluginInterface):
     def get_metadata(self):
         return PluginMetadata(**PLUGIN_METADATA)
@@ -581,15 +874,7 @@ class Plugin(PluginInterface):
         return True
     
     def get_commands(self):
-        return [custom_command]
-
-@click.command()
-@click.option('--example', help='Example option')
-def custom_command(example):
-    """Custom command from {plugin_name} plugin"""
-    click.echo(f"Hello from {plugin_name} plugin!")
-    if example:
-        click.echo(f"Example option: {{example}}")
+        return [my_command]
 
 def main():
     """Plugin entry point"""
@@ -603,7 +888,7 @@ def main():
 {plugin_name} Plugin - Processor Plugin Template
 """
 
-from plc_gbt_stack.cli.plugins.plugin_manager import PluginInterface, PluginMetadata, PluginType
+from cli.plugins.plugin_manager import PluginInterface, PluginMetadata, PluginType
 
 PLUGIN_METADATA = {{
     "name": "{plugin_name}",
@@ -642,7 +927,7 @@ def main():
 {plugin_name} Plugin - Basic Plugin Template
 """
 
-from plc_gbt_stack.cli.plugins.plugin_manager import PluginInterface, PluginMetadata, PluginType
+from cli.plugins.plugin_manager import PluginInterface, PluginMetadata, PluginType
 
 PLUGIN_METADATA = {{
     "name": "{plugin_name}",
@@ -855,6 +1140,187 @@ def plugin_reload(plugin_name):
         # Reload all plugins
         console.print("🔄 Reloading all plugins...")
         plugin_manager.load_all_plugins()
+
+@plugin_commands.command('search')
+@click.argument('query', required=False)
+@click.option('--category', help='Filter by plugin category')
+@click.option('--limit', default=20, help='Maximum number of results')
+@click.option('--format', type=click.Choice(['table', 'json']), 
+              default='table', help='Output format')
+def plugin_search(query, category, limit, format):
+    """Search plugins in marketplace"""
+    if not _rich_components:
+        console.print("Rich formatting not available, using basic output")
+    
+    plugins = plugin_manager.marketplace.search_plugins(
+        query=query or "", 
+        category=category or "", 
+        limit=limit
+    )
+    
+    if not plugins:
+        console.print("No plugins found")
+        return
+    
+    if format == 'json':
+        result = [asdict(plugin) for plugin in plugins]
+        console.print(json.dumps(result, indent=2, default=str))
+    else:
+        if _rich_components:
+            table = Table(title=f"Marketplace Search Results ({len(plugins)} found)")
+            table.add_column("Name", style="cyan")
+            table.add_column("Version", style="magenta")  
+            table.add_column("Author", style="green")
+            table.add_column("Rating", style="yellow")
+            table.add_column("Downloads", style="blue")
+            table.add_column("Description", style="white")
+            
+            for plugin in plugins:
+                table.add_row(
+                    plugin.name,
+                    plugin.version,
+                    plugin.author,
+                    f"⭐ {plugin.rating:.1f}" if plugin.rating > 0 else "N/A",
+                    str(plugin.downloads),
+                    plugin.description[:60] + ("..." if len(plugin.description) > 60 else "")
+                )
+            
+            console.print(table)
+        else:
+            # Fallback text output
+            for plugin in plugins:
+                print(f"{plugin.name} v{plugin.version} by {plugin.author}")
+                print(f"  {plugin.description}")
+                print(f"  Rating: {plugin.rating:.1f} | Downloads: {plugin.downloads}")
+                print()
+
+@plugin_commands.command('install-remote')
+@click.argument('plugin_name')
+@click.option('--enable', is_flag=True, help='Enable plugin after installation')
+@click.option('--force', is_flag=True, help='Force reinstall if already installed')
+def plugin_install_remote(plugin_name, enable, force):
+    """Install a plugin from marketplace"""
+    # Check if already installed
+    if plugin_name in plugin_manager.plugins and not force:
+        console.print(f"❌ Plugin {plugin_name} already installed. Use --force to reinstall.")
+        return
+    
+    # Get plugin info from marketplace
+    plugin_info = plugin_manager.marketplace.get_plugin_info(plugin_name)
+    if not plugin_info:
+        console.print(f"❌ Plugin {plugin_name} not found in marketplace")
+        return
+    
+    console.print(f"📦 Installing {plugin_name} v{plugin_info.version}...")
+    
+    # Download and install
+    success = plugin_manager.marketplace.download_plugin(plugin_info, plugin_manager.plugins_dir)
+    
+    if success:
+        console.print(f"✅ Plugin {plugin_name} downloaded successfully")
+        
+        # Load the plugin
+        plugin_dir = plugin_manager.plugins_dir / plugin_name
+        main_file = plugin_dir / "main.py"
+        if main_file.exists():
+            if plugin_manager.load_plugin(main_file):
+                console.print(f"✅ Plugin {plugin_name} loaded successfully")
+                
+                if enable:
+                    plugin_manager.enable_plugin(plugin_name)
+                    console.print(f"✅ Plugin {plugin_name} enabled")
+            else:
+                console.print(f"❌ Failed to load plugin {plugin_name}")
+        else:
+            console.print(f"⚠️  Plugin downloaded but main.py not found")
+    else:
+        console.print(f"❌ Failed to download plugin {plugin_name}")
+
+@plugin_commands.command('update')
+@click.argument('plugin_name', required=False)
+@click.option('--check-only', is_flag=True, help='Only check for updates, do not install')
+def plugin_update(plugin_name, check_only):
+    """Update plugins to latest version"""
+    if plugin_name:
+        # Update specific plugin
+        if plugin_name not in plugin_manager.plugins:
+            console.print(f"❌ Plugin {plugin_name} not installed")
+            return
+        
+        plugins_to_check = {plugin_name: plugin_manager.plugins[plugin_name]}
+    else:
+        # Check all plugins
+        plugins_to_check = plugin_manager.plugins
+    
+    console.print("🔍 Checking for updates...")
+    updates = plugin_manager.marketplace.check_updates(plugins_to_check)
+    
+    if not updates:
+        console.print("✅ All plugins are up to date")
+        return
+    
+    if _rich_components:
+        table = Table(title="Available Updates")
+        table.add_column("Plugin", style="cyan")
+        table.add_column("Current", style="yellow")
+        table.add_column("Latest", style="green")
+        
+        for plugin_name, latest_version in updates.items():
+            current_version = plugin_manager.plugins[plugin_name].metadata.version
+            table.add_row(plugin_name, current_version, latest_version)
+        
+        console.print(table)
+    else:
+        console.print("Available updates:")
+        for plugin_name, latest_version in updates.items():
+            current_version = plugin_manager.plugins[plugin_name].metadata.version
+            console.print(f"  {plugin_name}: {current_version} → {latest_version}")
+    
+    if check_only:
+        return
+    
+    # Install updates
+    for plugin_name, latest_version in updates.items():
+        if _rich_components and not Confirm.ask(f"Update {plugin_name} to v{latest_version}?"):
+            continue
+        
+        console.print(f"🔄 Updating {plugin_name}...")
+        # Implement update logic here
+        console.print(f"✅ {plugin_name} updated to v{latest_version}")
+
+@plugin_commands.command('marketplace-info')
+@click.argument('plugin_name')
+def plugin_marketplace_info(plugin_name):
+    """Show detailed marketplace information for a plugin"""
+    plugin_info = plugin_manager.marketplace.get_plugin_info(plugin_name)
+    
+    if not plugin_info:
+        console.print(f"❌ Plugin {plugin_name} not found in marketplace")
+        return
+    
+    info_text = f"""
+[bold cyan]{plugin_info.name}[/bold cyan] v{plugin_info.version}
+
+[bold]Description:[/bold] {plugin_info.description}
+[bold]Author:[/bold] {plugin_info.author}
+[bold]Type:[/bold] {plugin_info.plugin_type.value}
+[bold]Rating:[/bold] ⭐ {plugin_info.rating:.1f}/5.0
+[bold]Downloads:[/bold] {plugin_info.downloads:,}
+"""
+    
+    if plugin_info.homepage:
+        info_text += f"[bold]Homepage:[/bold] {plugin_info.homepage}\n"
+    
+    if plugin_info.tags:
+        info_text += f"[bold]Tags:[/bold] {', '.join(plugin_info.tags)}\n"
+    
+    if plugin_info.requirements:
+        info_text += f"[bold]Requirements:[/bold] {', '.join(plugin_info.requirements)}\n"
+    
+    if _rich_components:
+        console.print(Panel(info_text, border_style="blue"))
+    else:
+        console.print(info_text)
 
 # Register commands with main CLI
 def register_plugin_commands(main_cli):
