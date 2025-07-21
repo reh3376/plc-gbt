@@ -1,0 +1,234 @@
+version: '3.8'
+
+services:
+  # Redis - High-speed caching and session storage
+  redis:
+    image: redis:7-alpine
+    container_name: ai-framework-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - ai-enhancement-network
+
+  # Neo4j - Knowledge graph and relationship data
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: ai-framework-neo4j
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/ai_framework_password
+      - NEO4J_dbms_security_procedures_unrestricted=gds.*,apoc.*
+      - NEO4J_dbms_security_procedures_allowlist=gds.*,apoc.*
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_dbms_memory_heap_initial__size=512m
+      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_dbms_memory_pagecache_size=1G
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "ai_framework_password", "RETURN 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - ai-enhancement-network
+
+  # PostgreSQL - Structured data and configuration storage
+  postgresql:
+    image: postgres:15-alpine
+    container_name: ai-framework-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=ai_framework
+      - POSTGRES_USER=ai_framework_user
+      - POSTGRES_PASSWORD=ai_framework_password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai_framework_user -d ai_framework"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ai-enhancement-network
+
+  # Qdrant - Vector database for similarity search
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    container_name: ai-framework-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+      - ./docker/qdrant-config.yaml:/qdrant/config/production.yaml
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ai-enhancement-network
+
+  # AI Enhancement Framework Application
+  ai-framework:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ai-framework-app
+    ports:
+      - "8000:8000"
+      - "8001:8001"  # Debug port
+    volumes:
+      - ../:/app
+      - framework_logs:/app/logs
+      - framework_cache:/app/cache
+    environment:
+      # Framework Configuration
+      - AI_FRAMEWORK_ENV=development
+      - AI_FRAMEWORK_LOG_LEVEL=INFO
+      - AI_FRAMEWORK_DEBUG=true
+      - AI_FRAMEWORK_PORT=8000
+      
+      # Database Connections
+      - AI_FRAMEWORK_REDIS_URL=redis://redis:6379
+      - AI_FRAMEWORK_NEO4J_URI=bolt://neo4j:7687
+      - AI_FRAMEWORK_NEO4J_USER=neo4j
+      - AI_FRAMEWORK_NEO4J_PASSWORD=ai_framework_password
+      - AI_FRAMEWORK_POSTGRES_URL=postgresql://ai_framework_user:ai_framework_password@postgresql:5432/ai_framework
+      - AI_FRAMEWORK_QDRANT_URL=http://qdrant:6333
+      
+      # Security Settings
+      - AI_FRAMEWORK_JWT_SECRET=ai_framework_development_secret_key_change_in_production
+      - AI_FRAMEWORK_API_RATE_LIMIT=1000
+      - AI_FRAMEWORK_CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+      
+      # Performance Settings
+      - AI_FRAMEWORK_MAX_WORKERS=4
+      - AI_FRAMEWORK_TIMEOUT=30
+      - AI_FRAMEWORK_CACHE_SIZE=256MB
+      - AI_FRAMEWORK_MEMORY_LIMIT=2GB
+    depends_on:
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      postgresql:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    restart: on-failure:3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
+    networks:
+      - ai-enhancement-network
+
+  # Development Tools (Optional)
+  adminer:
+    image: adminer:4.8.1
+    container_name: ai-framework-adminer
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgresql
+      - ADMINER_DESIGN=hydra
+    depends_on:
+      - postgresql
+    restart: unless-stopped
+    profiles:
+      - dev-tools
+    networks:
+      - ai-enhancement-network
+
+  # Redis Insight (Optional)
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: ai-framework-redis-insight
+    ports:
+      - "8081:8001"
+    volumes:
+      - redis_insight_data:/db
+    depends_on:
+      - redis
+    restart: unless-stopped
+    profiles:
+      - dev-tools
+    networks:
+      - ai-enhancement-network
+
+# Persistent volume definitions
+volumes:
+  redis_data:
+    driver: local
+    name: ai_framework_redis_data
+  neo4j_data:
+    driver: local
+    name: ai_framework_neo4j_data
+  neo4j_logs:
+    driver: local
+    name: ai_framework_neo4j_logs
+  neo4j_import:
+    driver: local
+    name: ai_framework_neo4j_import
+  neo4j_plugins:
+    driver: local
+    name: ai_framework_neo4j_plugins
+  postgres_data:
+    driver: local
+    name: ai_framework_postgres_data
+  qdrant_data:
+    driver: local
+    name: ai_framework_qdrant_data
+  framework_logs:
+    driver: local
+    name: ai_framework_logs
+  framework_cache:
+    driver: local
+    name: ai_framework_cache
+  redis_insight_data:
+    driver: local
+    name: ai_framework_redis_insight_data
+
+# Network definition
+networks:
+  ai-enhancement-network:
+    driver: bridge
+    name: ai_enhancement_network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1 
