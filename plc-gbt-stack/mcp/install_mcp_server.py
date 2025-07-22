@@ -142,10 +142,10 @@ class MCPServerInstaller:
             # Add PLC-GBT MCP server configuration
             plc_gbt_config = {
                 "command": "python3",
-                "args": ["-m", "__main__", "stdio"],
+                "args": ["__main__.py", "stdio"],
                 "cwd": str(self.current_dir),
                 "env": {
-                    "PYTHONPATH": str(self.plc_gbt_root),
+                    "PYTHONPATH": f"{str(self.plc_gbt_stack)}:{str(self.plc_gbt_root)}",
                     "PLC_GBT_API_URL": "http://localhost:8000/api/v1",
                     "MCP_SERVER_NAME": "plc-gbt-industrial-automation",
                     "MCP_LOG_LEVEL": "INFO"

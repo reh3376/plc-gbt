@@ -75,46 +75,88 @@ async def run_stdio_server():
         # Read from stdin and write to stdout for MCP protocol
         while True:
             try:
-                # Read JSON-RPC message from stdin
+                # Read JSON-RPC message from stdin (line-based protocol)
                 line = await asyncio.get_event_loop().run_in_executor(None, sys.stdin.readline)
                 if not line:
                     break
                 
-                # Parse request
-                try:
-                    request = json.loads(line.strip())
-                except json.JSONDecodeError:
+                line = line.strip()
+                if not line:
                     continue
                 
-                # Handle request
-                response = await server.handle_request(request)
+                logger.info(f"📨 Received request: {line}")
                 
-                # Add JSON-RPC fields
-                response_msg = {
-                    "jsonrpc": "2.0",
-                    "id": request.get("id"),
-                    "result": response
-                }
+                # Parse JSON-RPC request
+                try:
+                    request = json.loads(line)
+                except json.JSONDecodeError as e:
+                    logger.error(f"❌ Invalid JSON: {e}")
+                    continue
                 
-                # Write response to stdout
-                print(json.dumps(response_msg))
-                sys.stdout.flush()
+                # Extract request details
+                method = request.get("method")
+                params = request.get("params", {})
+                request_id = request.get("id")
+                
+                logger.info(f"🔧 Processing method: {method}")
+                
+                # Handle MCP request
+                try:
+                    result = await server.handle_request(request)
+                    
+                    # Create JSON-RPC response
+                    response = {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "result": result
+                    }
+                    
+                    # Send response
+                    response_str = json.dumps(response)
+                    print(response_str)
+                    sys.stdout.flush()
+                    
+                    logger.info(f"✅ Sent response for {method}")
+                    
+                except Exception as e:
+                    logger.error(f"❌ Error handling {method}: {e}")
+                    
+                    # Send error response
+                    error_response = {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "error": {
+                            "code": -32603,
+                            "message": f"Internal error: {str(e)}",
+                            "data": {"method": method, "error_type": type(e).__name__}
+                        }
+                    }
+                    
+                    error_str = json.dumps(error_response)
+                    print(error_str)
+                    sys.stdout.flush()
                 
             except Exception as e:
-                # Send error response
-                error_response = {
-                    "jsonrpc": "2.0",
-                    "id": request.get("id") if 'request' in locals() else None,
-                    "error": {
-                        "code": -32603,
-                        "message": f"Internal error: {str(e)}"
+                logger.error(f"❌ Stdio communication error: {e}")
+                
+                # Try to send a generic error response if possible
+                try:
+                    generic_error = {
+                        "jsonrpc": "2.0",
+                        "id": None,
+                        "error": {
+                            "code": -32700,
+                            "message": f"Parse error: {str(e)}"
+                        }
                     }
-                }
-                print(json.dumps(error_response))
-                sys.stdout.flush()
+                    print(json.dumps(generic_error))
+                    sys.stdout.flush()
+                except:
+                    pass
                 
     finally:
         await server.stop()
+        logger.info("🛑 MCP server stopped")
 
 if __name__ == "__main__":
     main() 

@@ -3,12 +3,12 @@
     "plc-gbt-industrial-automation": {
       "command": "python3",
       "args": [
-        "-m", 
-        "simple_mcp_server"
+        "__main__.py",
+        "stdio"
       ],
       "cwd": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/mcp",
       "env": {
-        "PYTHONPATH": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack",
+        "PYTHONPATH": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack:/Users/reh3376/repos/plc-gbt",
         "PLC_GBT_API_URL": "http://localhost:8000/api/v1",
         "MCP_SERVER_NAME": "plc-gbt-industrial-automation",
         "MCP_LOG_LEVEL": "INFO"
