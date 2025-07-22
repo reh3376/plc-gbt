@@ -213,26 +213,28 @@ class DatabaseManager:
 
     def _load_from_environment(self) -> None:
         """Load configuration from environment variables"""
+        # For Docker container networking, use container names directly
+        # This resolves the Docker Compose port mapping issue
         self.configs = {
             DatabaseType.NEO4J: DatabaseConfig(
-                host=os.getenv("NEO4J_HOST", "localhost"),
+                host=os.getenv("NEO4J_HOST", "neo4j"),  # Use container name for Docker networking
                 port=int(os.getenv("NEO4J_PORT", "7687")),
                 username=os.getenv("NEO4J_USER", "neo4j"),
                 password=os.getenv("NEO4J_PASSWORD", "password")
             ),
             DatabaseType.POSTGRESQL: DatabaseConfig(
-                host=os.getenv("POSTGRES_HOST", "localhost"),
+                host=os.getenv("POSTGRES_HOST", "postgres"),  # Use container name for Docker networking
                 port=int(os.getenv("POSTGRES_PORT", "5432")),
                 database=os.getenv("POSTGRES_DB", "plc_metadata"),
                 username=os.getenv("POSTGRES_USER", "plc_user"),
                 password=os.getenv("POSTGRES_PASSWORD", "password")
             ),
             DatabaseType.QDRANT: DatabaseConfig(
-                host=os.getenv("QDRANT_HOST", "localhost"),
+                host=os.getenv("QDRANT_HOST", "qdrant"),  # Use container name for Docker networking
                 port=int(os.getenv("QDRANT_PORT", "6333"))
             ),
             DatabaseType.REDIS: DatabaseConfig(
-                host=os.getenv("REDIS_HOST", "localhost"),
+                host=os.getenv("REDIS_HOST", "redis"),  # Use container name for Docker networking
                 port=int(os.getenv("REDIS_PORT", "6379"))
             )
         }

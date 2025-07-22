@@ -340,7 +340,7 @@ class SpecializedLLMManager:
         """Load default model configurations"""
         return {
             "ft:gpt-4o:industrial-control:20250117": LLMModelConfig(
-                model_id="ft:gpt-4o:industrial-control:20250117",
+                model_id="ft:gpt-4o-mini-2024-07-18:whiskey-house:industrial-control:But1jpnl",
                 domain=LLMDomain.INDUSTRIAL_CONTROL,
                 api_provider="openai",
                 model_version="20250117",

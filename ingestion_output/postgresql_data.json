@@ -1,0 +1,10 @@
+{
+  "files_processed": 14,
+  "entities_extracted": 0,
+  "ingestion_log": {
+    "session_id": "direct_ingestion_1753205820",
+    "timestamp": "2025-07-22T13:36:57.191309",
+    "method": "direct_file_ingestion",
+    "status": "completed"
+  }
+}

@@ -7,6 +7,17 @@ xmlschema>=2.0.0
 pathlib-abc>=0.1.0
 typing-extensions>=4.0.0
 
+# Security dependencies for vault secrets manager
+hvac>=2.3.0
+cryptography>=45.0.0
+
+# MCP server dependencies
+aiohttp>=3.12.0
+
+# CLI-to-API Bridge dependencies
+fastapi>=0.104.0
+uvicorn>=0.24.0
+
 # Development dependencies
 pytest>=7.0.0
 pytest-cov>=4.0.0

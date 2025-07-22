@@ -279,7 +279,7 @@ class SimpleMCPServer:
     async def _handle_initialize(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle initialization request"""
         return {
-            "protocolVersion": "1.0.0",
+            "protocolVersion": "2024-11-05",
             "capabilities": {
                 "tools": {},
                 "prompts": {},

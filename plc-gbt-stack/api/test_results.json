@@ -1,0 +1,59 @@
+{
+  "total_tests": 7,
+  "passed": 0,
+  "failed": 7,
+  "success_rate": 0.0,
+  "total_execution_time": 0.007745027542114258,
+  "bridge_url": "http://127.0.0.1:8080",
+  "test_results": [
+    {
+      "test": "Bridge Health Check",
+      "success": false,
+      "message": "Connection failed: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/v1/health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102d98a60>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "execution_time": 0.003975868225097656,
+      "timestamp": 1753204962.532716
+    },
+    {
+      "test": "Capabilities Discovery",
+      "success": false,
+      "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/v1/capabilities (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102db9400>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "execution_time": 0.0005497932434082031,
+      "timestamp": 1753204962.533293
+    },
+    {
+      "test": "System Status Check",
+      "success": false,
+      "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/v1/cli/system/status (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102db9df0>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "execution_time": 0.0006196498870849609,
+      "timestamp": 1753204962.5339499
+    },
+    {
+      "test": "Schema Operations",
+      "success": false,
+      "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/v1/cli/schema/list (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102dc57f0>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "execution_time": 0.0006971359252929688,
+      "timestamp": 1753204962.534682
+    },
+    {
+      "test": "Generic Command Execution",
+      "success": false,
+      "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/v1/cli/execute (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102db9610>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "execution_time": 0.0006101131439208984,
+      "timestamp": 1753204962.535317
+    },
+    {
+      "test": "Command History",
+      "success": false,
+      "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/v1/history?limit=5 (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102d98c70>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "execution_time": 0.0005438327789306641,
+      "timestamp": 1753204962.535886
+    },
+    {
+      "test": "Error Handling",
+      "success": false,
+      "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/v1/cli/execute (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102d98160>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "execution_time": 0.0005159378051757812,
+      "timestamp": 1753204962.5364249
+    }
+  ]
+}

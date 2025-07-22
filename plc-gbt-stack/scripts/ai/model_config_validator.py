@@ -171,7 +171,7 @@ class ModelConfigValidator:
         suggestions = []
         
         if not config['fine_tuned_model']:
-            suggestions.append("OPENAI_FINETUNE_MODEL=ft:gpt-4o:industrial-control:20250117")
+            suggestions.append("OPENAI_FINETUNE_MODEL=ft:gpt-4o-mini-2024-07-18:whiskey-house:industrial-control:But1jpnl")
         
         if config['base_model'] != 'gpt-4o':
             suggestions.append("OPENAI_FINETUNE_BASE_MODEL=gpt-4o")

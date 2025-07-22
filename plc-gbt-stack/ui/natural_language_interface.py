@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 UI_VERSION = "1.0.0"
-FINE_TUNED_MODEL = "ft:gpt-4o:industrial-control:20250117"
+FINE_TUNED_MODEL = "ft:gpt-4o-mini-2024-07-18:whiskey-house:industrial-control:But1jpnl"
 MAX_CONVERSATION_HISTORY = 20
 SESSION_TIMEOUT_MINUTES = 60
 

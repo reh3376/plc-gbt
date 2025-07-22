@@ -1,0 +1,15 @@
+{
+  "ingestion_summary": {
+    "total_files_processed": 0,
+    "total_entities": 0,
+    "total_chunks": 0,
+    "total_relationships": 0,
+    "completion_time": "2025-07-22T13:36:57.191446",
+    "status": "SUCCESS"
+  },
+  "breakdown": {
+    "critical_files": 0,
+    "high_priority_files": 0,
+    "medium_priority_files": 0
+  }
+}
