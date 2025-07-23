@@ -1,0 +1,349 @@
+# N8N Alerting Rules Configuration
+# Phase 26.6.1: Production Monitoring & Observability
+# AI Task Orchestrator Implementation
+
+groups:
+  # Critical System Health Alerts
+  - name: n8n_critical_health
+    rules:
+      - alert: N8N_Service_Down
+        expr: up{job="n8n"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: n8n
+          component: core
+        annotations:
+          summary: "N8N service is down"
+          description: "N8N service has been down for more than 1 minute. Immediate attention required."
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-service-down"
+
+      - alert: N8N_High_Memory_Usage
+        expr: (process_resident_memory_bytes{job="n8n"} / 1024 / 1024 / 1024) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: n8n
+          component: memory
+        annotations:
+          summary: "N8N high memory usage"
+          description: "N8N is using more than 2GB of memory. Current usage: {{ $value }}GB"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-high-memory"
+
+      - alert: N8N_Database_Connection_Failed
+        expr: n8n_db_connections_active{database_type="postgresql"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: n8n
+          component: database
+        annotations:
+          summary: "N8N database connection failed"
+          description: "N8N has lost connection to PostgreSQL database"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-db-connection"
+
+  # Workflow Performance Alerts
+  - name: n8n_workflow_performance
+    rules:
+      - alert: N8N_High_Workflow_Error_Rate
+        expr: rate(n8n_workflow_executions_error_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          service: n8n
+          component: workflow
+        annotations:
+          summary: "High workflow error rate"
+          description: "Workflow error rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-high-error-rate"
+
+      - alert: N8N_Workflow_Execution_Timeout
+        expr: histogram_quantile(0.95, rate(n8n_workflow_execution_duration_seconds_bucket[5m])) > 300
+        for: 5m
+        labels:
+          severity: warning
+          service: n8n
+          component: workflow
+        annotations:
+          summary: "Slow workflow executions"
+          description: "95th percentile workflow execution time is {{ $value }}s, exceeding 5-minute threshold"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-slow-workflows"
+
+      - alert: N8N_Queue_Backlog
+        expr: n8n_waiting_executions > 100
+        for: 2m
+        labels:
+          severity: warning
+          service: n8n
+          component: queue
+        annotations:
+          summary: "Large workflow queue backlog"
+          description: "{{ $value }} workflows are waiting in queue"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-queue-backlog"
+
+      - alert: N8N_No_Workflow_Executions
+        expr: rate(n8n_workflow_executions_total[10m]) == 0
+        for: 15m
+        labels:
+          severity: warning
+          service: n8n
+          component: workflow
+        annotations:
+          summary: "No workflow executions detected"
+          description: "No workflow executions have occurred in the last 15 minutes"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-no-executions"
+
+  # Industrial Protocol Alerts
+  - name: n8n_industrial_protocols
+    rules:
+      - alert: N8N_Industrial_Protocol_High_Error_Rate
+        expr: rate(n8n_industrial_protocol_errors_total[5m]) / rate(n8n_industrial_protocol_operations_total[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+          service: n8n
+          component: industrial_protocol
+        annotations:
+          summary: "High industrial protocol error rate"
+          description: "{{ $labels.protocol }} protocol error rate is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-protocol-errors"
+
+      - alert: N8N_OPC_UA_Connection_Lost
+        expr: n8n_industrial_protocol_operations_total{protocol="opcua"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: n8n
+          component: opcua
+        annotations:
+          summary: "OPC-UA connection lost"
+          description: "No OPC-UA operations detected for 5 minutes"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-opcua-connection"
+
+      - alert: N8N_Modbus_Communication_Failure
+        expr: rate(n8n_industrial_protocol_errors_total{protocol="modbus"}[5m]) > 1
+        for: 3m
+        labels:
+          severity: warning
+          service: n8n
+          component: modbus
+        annotations:
+          summary: "Modbus communication issues"
+          description: "High Modbus error rate: {{ $value }} errors/second"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-modbus-errors"
+
+  # LLM Integration Alerts
+  - name: n8n_llm_integration
+    rules:
+      - alert: N8N_LLM_High_Response_Time
+        expr: histogram_quantile(0.95, rate(n8n_llm_response_time_seconds_bucket[5m])) > 30
+        for: 3m
+        labels:
+          severity: warning
+          service: n8n
+          component: llm
+        annotations:
+          summary: "High LLM response time"
+          description: "95th percentile LLM response time is {{ $value }}s"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-llm-slow"
+
+      - alert: N8N_LLM_High_Cost
+        expr: increase(n8n_llm_cost_total[1h]) > 10
+        for: 1m
+        labels:
+          severity: warning
+          service: n8n
+          component: llm
+        annotations:
+          summary: "High LLM usage cost"
+          description: "LLM cost in the last hour: ${{ $value }}"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-llm-cost"
+
+      - alert: N8N_LLM_API_Errors
+        expr: rate(n8n_llm_requests_total{status!="success"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: n8n
+          component: llm
+        annotations:
+          summary: "LLM API errors detected"
+          description: "LLM API error rate: {{ $value }} errors/second"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-llm-errors"
+
+  # Database Performance Alerts
+  - name: n8n_database_performance
+    rules:
+      - alert: N8N_Database_Slow_Queries
+        expr: histogram_quantile(0.95, rate(n8n_db_query_duration_seconds_bucket[5m])) > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: n8n
+          component: database
+        annotations:
+          summary: "Slow database queries"
+          description: "95th percentile database query time: {{ $value }}s"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-slow-queries"
+
+      - alert: N8N_Database_Connection_Pool_Exhausted
+        expr: n8n_db_connections_waiting > 10
+        for: 1m
+        labels:
+          severity: critical
+          service: n8n
+          component: database
+        annotations:
+          summary: "Database connection pool exhausted"
+          description: "{{ $value }} connections waiting for database access"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-connection-pool"
+
+      - alert: N8N_Redis_Queue_Connection_Lost
+        expr: n8n_db_connections_active{database_type="redis"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: n8n
+          component: redis
+        annotations:
+          summary: "Redis queue connection lost"
+          description: "N8N has lost connection to Redis queue database"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-redis-connection"
+
+  # Memory System Alerts
+  - name: n8n_memory_system
+    rules:
+      - alert: N8N_Memory_Operation_Errors
+        expr: rate(n8n_memory_operations_total{status="error"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: n8n
+          component: memory_system
+        annotations:
+          summary: "PLC memory operation errors"
+          description: "Memory operation error rate: {{ $value }} errors/second"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-memory-errors"
+
+      - alert: N8N_Memory_Query_Slow
+        expr: histogram_quantile(0.95, rate(n8n_memory_query_duration_seconds_bucket[5m])) > 10
+        for: 3m
+        labels:
+          severity: warning
+          service: n8n
+          component: memory_system
+        annotations:
+          summary: "Slow PLC memory queries"
+          description: "95th percentile memory query time: {{ $value }}s"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-slow-memory-queries"
+
+  # Security and Compliance Alerts
+  - name: n8n_security
+    rules:
+      - alert: N8N_Unauthorized_Access_Attempts
+        expr: increase(n8n_http_requests_total{code=~"4.."}[5m]) > 50
+        for: 1m
+        labels:
+          severity: warning
+          service: n8n
+          component: security
+        annotations:
+          summary: "Multiple unauthorized access attempts"
+          description: "{{ $value }} 4xx HTTP responses in 5 minutes"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-security-incidents"
+
+      - alert: N8N_SSL_Certificate_Expiring
+        expr: (n8n_ssl_cert_expiry_timestamp - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+          service: n8n
+          component: security
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate expires in {{ $value }} days"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-ssl-renewal"
+
+  # Capacity and Resource Alerts
+  - name: n8n_capacity
+    rules:
+      - alert: N8N_High_CPU_Usage
+        expr: rate(process_cpu_seconds_total{job="n8n"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: n8n
+          component: cpu
+        annotations:
+          summary: "High CPU usage"
+          description: "N8N CPU usage is {{ $value }}%"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-high-cpu"
+
+      - alert: N8N_Disk_Space_Low
+        expr: (node_filesystem_avail_bytes{mountpoint="/home/node/.n8n"} / node_filesystem_size_bytes{mountpoint="/home/node/.n8n"}) * 100 < 20
+        for: 5m
+        labels:
+          severity: warning
+          service: n8n
+          component: storage
+        annotations:
+          summary: "Low disk space"
+          description: "N8N data directory has {{ $value }}% free space remaining"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-disk-space"
+
+      - alert: N8N_File_Descriptor_Limit
+        expr: process_open_fds{job="n8n"} / process_max_fds{job="n8n"} > 0.8
+        for: 2m
+        labels:
+          severity: warning
+          service: n8n
+          component: system
+        annotations:
+          summary: "High file descriptor usage"
+          description: "N8N is using {{ $value | humanizePercentage }} of available file descriptors"
+          runbook_url: "https://docs.plc-gbt.com/runbooks/n8n-file-descriptors"
+
+# Notification Routing
+alertmanager_config:
+  global:
+    smtp_smarthost: 'localhost:587'
+    smtp_from: 'alerts@plc-gbt.com'
+
+  route:
+    group_by: ['alertname', 'service']
+    group_wait: 10s
+    group_interval: 10s
+    repeat_interval: 1h
+    receiver: 'web.hook'
+    routes:
+      - match:
+          severity: critical
+        receiver: 'critical-alerts'
+      - match:
+          service: n8n
+        receiver: 'n8n-team'
+
+  receivers:
+    - name: 'web.hook'
+      webhook_configs:
+        - url: 'http://alertmanager-webhook:5001/'
+
+    - name: 'critical-alerts'
+      email_configs:
+        - to: 'ops-team@plc-gbt.com'
+          subject: 'CRITICAL: {{ .GroupLabels.alertname }}'
+          body: |
+            {{ range .Alerts }}
+            Alert: {{ .Annotations.summary }}
+            Description: {{ .Annotations.description }}
+            Runbook: {{ .Annotations.runbook_url }}
+            {{ end }}
+      slack_configs:
+        - api_url: 'YOUR_SLACK_WEBHOOK_URL'
+          channel: '#critical-alerts'
+          title: 'CRITICAL: {{ .GroupLabels.alertname }}'
+
+    - name: 'n8n-team'
+      email_configs:
+        - to: 'n8n-team@plc-gbt.com'
+          subject: 'N8N Alert: {{ .GroupLabels.alertname }}' 

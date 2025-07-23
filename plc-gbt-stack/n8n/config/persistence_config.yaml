@@ -1,261 +1,130 @@
-# 🤖 N8N Persistence Configuration for PLC-GBT Integration
-# Phase 26.2: N8N Service Integration - Persistence Setup
-# Created: June 19, 2025
+# N8N Persistence Configuration for Phase 26
+# AI Task Orchestrator Implementation  
+# Generated on 2025-07-23
 
-# Volume Configuration
-volumes:
-  # Primary N8N Data Volume
-  n8n_data:
-    driver: local
-    mount_point: "/home/node/.n8n"
-    description: "Main N8N data directory including workflows, settings, and user data"
-    backup_enabled: true
-    
-  # N8N Logs Volume
-  n8n_logs:
-    driver: local
-    mount_point: "/home/node/.n8n/logs"
-    description: "N8N application logs and execution logs"
+persistence:
+  name: "n8n-persistence-layer"
+  version: "1.0.0"
+  description: "Data persistence configuration for N8N workflow automation"
+
+  # Primary Data Storage
+  primary_storage:
+    type: "postgresql"
+    connection:
+      host: "postgres"
+      port: 5432
+      database: "plc_gbt"
+      schema: "n8n"
+      user: "plc_user"
+      password: "postgres_password"
+      ssl_mode: "disable"
+      pool_size: 10
+      connection_timeout: 30
+
+  # Secondary Storage (Backup)
+  backup_storage:
+    enabled: true
+    type: "file_system"
+    path: "/home/node/.n8n/backups"
     retention_days: 30
+    automated_backup: true
+    backup_schedule: "0 2 * * *"  # Daily at 2 AM
+
+  # Cache Layer
+  cache:
+    type: "redis"
+    connection:
+      host: "redis"
+      port: 6379
+      database: 3
+      password: null
+      ttl: 3600  # 1 hour default TTL
+
+  # Workflow Storage
+  workflows:
+    storage_path: "/home/node/.n8n/workflows"
+    versioning_enabled: true
+    max_versions: 10
+    compression_enabled: true
     backup_enabled: true
 
-# Host Mount Configuration
-host_mounts:
-  # Custom Nodes Development
-  custom_nodes:
-    host_path: "./n8n/custom-nodes"
-    container_path: "/home/node/.n8n/custom"
-    mode: "rw"
-    description: "Custom N8N nodes for PLC-GBT integration"
-    
-  # Workflow Templates
-  workflows:
-    host_path: "./n8n/workflows"
-    container_path: "/home/node/.n8n/workflows"
-    mode: "rw"
-    description: "N8N workflow templates and user workflows"
-    
+  # Execution History
+  executions:
+    retention_policy:
+      success_days: 7
+      error_days: 30
+      max_executions: 10000
+    storage_mode: "database"
+    binary_data_path: "/home/node/.n8n/binary_data"
+
   # Credentials Storage
   credentials:
-    host_path: "./n8n/credentials"
-    container_path: "/home/node/.n8n/credentials"
-    mode: "rw"
-    description: "Encrypted credentials for external services"
-    
-  # PLC Integration Files
-  plc_integration:
-    host_path: "./n8n/plc-integration"
-    container_path: "/home/node/.n8n/plc-integration"
-    mode: "ro"
-    description: "Read-only PLC integration libraries and utilities"
+    storage_path: "/home/node/.n8n/credentials"
+    encryption_enabled: true
+    vault_integration:
+      enabled: false
+      vault_url: "http://vault:8200"
+      mount_path: "n8n"
 
-# Database Persistence Strategy
-database_persistence:
-  # PostgreSQL - Primary data store
-  postgresql:
-    schema: "n8n"
-    tables:
-      - workflows
-      - executions
-      - workflow_executions
-      - credentials_entity
-      - user_management
-    backup_frequency: "daily"
-    retention_days: 90
-    
-  # Redis - Queue and cache data
-  redis:
-    database: 2
-    data_types:
-      - bull_queues
-      - execution_cache
-      - session_data
-    persistence: "appendonly"
-    backup_frequency: "hourly"
-    retention_hours: 168  # 1 week
-    
-  # Neo4j - Workflow relationships
-  neo4j:
-    database: "n8n"
-    node_types:
-      - Workflow
-      - Execution
-      - Node
-      - Connection
-    backup_frequency: "daily"
-    retention_days: 30
+  # Session Management
+  sessions:
+    storage_type: "redis"
+    session_timeout: 86400  # 24 hours
+    max_sessions: 100
 
-# Backup Configuration
-backup:
-  enabled: true
-  strategy: "incremental"
-  
-  # Local Backup Settings
-  local:
-    enabled: true
-    path: "/app/backups/n8n"
-    frequency: "daily"
-    retention_days: 30
-    compression: true
-    
-  # Volume Backup Strategy
-  volumes:
-    n8n_data:
-      method: "docker_volume_backup"
-      frequency: "6h"
-      retention_count: 7
-      
-    n8n_logs:
-      method: "log_rotation"
-      frequency: "daily"
-      retention_days: 30
-      compression: true
-      
-  # Database Backup Integration
-  databases:
-    postgresql:
-      method: "pg_dump"
-      schema_only: false
-      format: "custom"
-      
-    redis:
-      method: "redis_save"
-      format: "rdb"
-      
-    neo4j:
-      method: "neo4j_admin_backup"
-      format: "archive"
+  # File System Configuration
+  file_system:
+    data_path: "/home/node/.n8n"
+    temp_path: "/tmp/n8n"
+    max_file_size: 100MB
+    allowed_mime_types:
+      - "application/json"
+      - "text/plain"
+      - "text/csv"
+      - "application/pdf"
 
-# Data Migration Configuration
-migration:
-  enabled: true
-  
-  # Version Migration
-  version_migration:
-    enabled: true
+  # Database Migration
+  migrations:
+    auto_migrate: true
     backup_before_migration: true
-    rollback_enabled: true
-    
-  # Schema Migration
-  schema_migration:
-    postgresql:
-      auto_migrate: true
-      backup_before_migrate: true
-      
-    neo4j:
-      auto_migrate: false
-      manual_approval_required: true
+    migration_path: "/home/node/.n8n/migrations"
 
-# Security and Encryption
-security:
-  # Data Encryption
-  encryption:
-    at_rest: true
-    in_transit: true
-    key_rotation: true
-    key_rotation_frequency: "quarterly"
-    
-  # Access Control
-  access_control:
-    file_permissions: "600"
-    directory_permissions: "700"
-    owner: "node:node"
-    
-  # Secrets Management
-  secrets:
-    vault_integration: true
-    local_encryption: true
-    credential_rotation: true
+  # Performance Optimization
+  performance:
+    connection_pooling:
+      min_connections: 2
+      max_connections: 10
+      idle_timeout: 300
+    query_optimization:
+      use_prepared_statements: true
+      enable_query_cache: true
+      cache_size: 100MB
 
-# Performance Optimization
-performance:
-  # Disk I/O Optimization
-  disk_io:
-    use_ssd: true
-    read_ahead: "8192"
-    write_cache: true
-    
-  # Volume Performance
-  volume_performance:
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/var/lib/docker/volumes"
+  # Monitoring and Logging
+  monitoring:
+    log_queries: false
+    log_slow_queries: true
+    slow_query_threshold: 1000  # milliseconds
+    metrics_enabled: true
 
-# Monitoring and Health Checks
-monitoring:
-  # Volume Health
-  volume_health:
-    check_interval: "5m"
-    alerts:
-      disk_usage_threshold: 85
-      inode_usage_threshold: 90
-      
-  # Backup Health
-  backup_health:
-    check_interval: "1h"
-    alerts:
-      backup_age_threshold: "25h"
-      backup_size_threshold: "1GB"
-      
-  # Database Health
-  database_health:
-    postgresql:
-      connection_check: true
-      schema_validation: true
-      
-    redis:
-      memory_usage_check: true
-      persistence_check: true
-      
-    neo4j:
-      cluster_health: true
-      storage_check: true
+  # Data Integrity
+  integrity:
+    checksum_validation: true
+    foreign_key_checks: true
+    transaction_isolation: "READ_COMMITTED"
 
-# Disaster Recovery
-disaster_recovery:
-  enabled: true
-  
-  # Recovery Procedures
-  procedures:
-    data_corruption:
-      steps:
-        - "Stop N8N service"
-        - "Restore from latest backup"
-        - "Validate data integrity"
-        - "Restart services"
-        
-    volume_failure:
-      steps:
-        - "Create new volume"
-        - "Restore data from backup"
-        - "Update docker-compose.yml"
-        - "Restart stack"
-        
-  # Recovery Testing
-  testing:
-    frequency: "monthly"
-    automated: true
-    validation_required: true
+  # Security Configuration
+  security:
+    encrypted_at_rest: true
+    access_logging: true
+    audit_trail: true
+    data_anonymization:
+      enabled: false
+      fields_to_anonymize: []
 
-# Maintenance
-maintenance:
-  # Scheduled Maintenance
-  scheduled:
-    - name: "Log cleanup"
-      frequency: "weekly"
-      action: "remove_old_logs"
-      
-    - name: "Volume optimization"
-      frequency: "monthly"
-      action: "defragment_volumes"
-      
-    - name: "Backup validation"
-      frequency: "weekly"
-      action: "test_backup_restore"
-      
-  # Automated Tasks
-  automated:
-    log_rotation: true
-    cache_cleanup: true
-    temp_file_cleanup: true 
+# Phase 26 Integration Settings
+phase26_integration:
+  plc_memory_integration: true
+  multi_database_support: true
+  namespace_isolation: true
+  industrial_data_types: true 

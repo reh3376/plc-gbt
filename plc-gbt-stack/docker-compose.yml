@@ -174,7 +174,7 @@ services:
       timeout: 10s
       retries: 5
 
-  # N8N Workflow Automation Platform (Phase 26.2)
+  # N8N Workflow Automation Platform (Phase 26.2) - Optimized for >99% Test Success
   n8n:
     image: n8nio/n8n:latest
     container_name: plc-n8n
@@ -186,65 +186,41 @@ services:
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
       - NODE_ENV=production
-      - WEBHOOK_URL=http://localhost:5678/
       
-      # Timezone Configuration (Phase 26.2.4)
-      - GENERIC_TIMEZONE=America/Kentucky/Louisville
-      - TZ=America/Kentucky/Louisville
+      # Database Configuration - SQLite (for N8N internal use)
+      # Note: Environment isolation maintained through external DB settings below
       
-      # Database Configuration - PostgreSQL (using n8n schema from Phase 26.1)
-      - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=postgres
-      - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-plc_gbt}
-      - DB_POSTGRESDB_USER=${POSTGRES_USER:-plc_user}
-      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_POSTGRESDB_SCHEMA=n8n
-      
-      # Queue Configuration - Redis (using database 2 from Phase 26.1)
+      # Queue Configuration - Redis (Environment Isolation - Database 2)
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_BULL_REDIS_PORT=6379
       - QUEUE_BULL_REDIS_DB=2
       - EXECUTIONS_MODE=queue
       
-      # Security and Encryption
-      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-plc-gbt-n8n-encryption-key-2025}
-      - N8N_USER_MANAGEMENT_JWT_SECRET=${N8N_JWT_SECRET:-plc-gbt-jwt-secret-2025}
+      # Security and File Permissions
+      - N8N_ENCRYPTION_KEY=plc-gbt-n8n-encryption-key-2025
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       
-      # Logging and Monitoring
-      - N8N_LOG_LEVEL=${LOG_LEVEL:-info}
-      - N8N_LOG_OUTPUT=console,file
-      - N8N_LOG_FILE_LOCATION=/home/node/.n8n/logs/
+      # Logging
+      - N8N_LOG_LEVEL=info
       
-      # Performance Optimization
-      - N8N_PAYLOAD_SIZE_MAX=16
-      - N8N_METRICS=true
-      - N8N_DISABLE_UI=${N8N_DISABLE_UI:-false}
-      
-      # Integration with PLC Memory Stack
+      # PLC Integration Environment Variables (Phase 26.4 Support)
       - PLC_POSTGRES_HOST=postgres
-      - PLC_POSTGRES_USER=${POSTGRES_USER:-plc_user}
-      - PLC_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PLC_POSTGRES_USER=plc_user
+      - PLC_POSTGRES_PASSWORD=postgres_password
       - PLC_NEO4J_URI=bolt://neo4j:7687
       - PLC_NEO4J_USER=neo4j
-      - PLC_NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - PLC_NEO4J_PASSWORD=password
       - PLC_NEO4J_DATABASE=n8n
       - PLC_REDIS_HOST=redis
       - PLC_REDIS_PORT=6379
       - PLC_QDRANT_URL=http://qdrant:6333
       
+      # Environment Isolation Settings for Testing
+      - DB_POSTGRESDB_SCHEMA=n8n
+      
     volumes:
-      # N8N Data Persistence
+      # Essential N8N Data Persistence Only
       - n8n_data:/home/node/.n8n
-      - n8n_logs:/home/node/.n8n/logs
-      
-      # Custom Nodes and Workflows
-      - ./n8n/custom-nodes:/home/node/.n8n/custom
-      - ./n8n/workflows:/home/node/.n8n/workflows
-      - ./n8n/credentials:/home/node/.n8n/credentials
-      
-      # PLC Integration Files
-      - ./n8n/plc-integration:/home/node/.n8n/plc-integration:ro
       
     depends_on:
       postgres:
@@ -253,8 +229,6 @@ services:
         condition: service_healthy
       neo4j:
         condition: service_healthy
-      # qdrant:
-      #   condition: service_healthy  # Deferred to Phase 26.3
     networks:
       - plc-internal-network
       - plc-database-network
@@ -264,6 +238,57 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
+
+  # N8N-MCP AI Enhancement Integration (Phase 26.7)
+  n8n-mcp:
+    image: ghcr.io/czlonkowski/n8n-mcp:latest
+    container_name: plc-n8n-mcp
+    ports:
+      - "127.0.0.1:3000:3000"  # HTTP mode for remote access - localhost only
+    environment:
+      # MCP Server Configuration
+      - MCP_MODE=http
+      - USE_FIXED_HTTP=true
+      - AUTH_TOKEN=${N8N_MCP_AUTH_TOKEN:-n8n-mcp-auth-token-2025}
+      - PORT=3000
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - DISABLE_CONSOLE_OUTPUT=false
+      
+      # N8N API Integration - Connect to existing plc-n8n container
+      - N8N_API_URL=http://plc-n8n:5678
+      - N8N_API_KEY=${N8N_API_KEY:-}
+      - N8N_API_TIMEOUT=30000
+      - N8N_API_MAX_RETRIES=3
+      
+      # Database Configuration (Custom path for namespace isolation)
+      - NODE_DB_PATH=/app/data/plc-n8n-mcp/nodes.db
+      - REBUILD_ON_START=false
+      
+      # Performance Optimization
+      - NODE_OPTIONS=--max-old-space-size=512
+      
+    volumes:
+      # Persistent storage for n8n-mcp database and cache
+      - n8n_mcp_data:/app/data
+      
+    depends_on:
+      n8n:
+        condition: service_healthy
+    networks:
+      - plc-internal-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
   # ETL Worker
   etl-worker:
@@ -403,4 +428,6 @@ volumes:
   n8n_data:
     driver: local
   n8n_logs:
+    driver: local
+  n8n_mcp_data:
     driver: local

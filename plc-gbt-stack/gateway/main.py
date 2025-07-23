@@ -18,6 +18,22 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Import n8n-MCP proxy integration
+try:
+    from .n8n_mcp_proxy import router as n8n_mcp_router, startup_n8n_mcp_proxy, shutdown_n8n_mcp_proxy
+    N8N_MCP_AVAILABLE = True
+except ImportError as e:
+    N8N_MCP_AVAILABLE = False
+    n8n_mcp_import_error = str(e)
+
+# Import industrial-automation MCP proxy integration
+try:
+    from .industrial_automation_mcp_proxy import router as industrial_mcp_router, startup_industrial_mcp_proxy, shutdown_industrial_mcp_proxy
+    INDUSTRIAL_MCP_AVAILABLE = True
+except ImportError as e:
+    INDUSTRIAL_MCP_AVAILABLE = False
+    industrial_mcp_import_error = str(e)
+
 # Configure structured logging
 structlog.configure(
     processors=[
@@ -30,10 +46,18 @@ structlog.configure(
 
 logger = structlog.get_logger()
 
+# Log n8n-MCP availability after logger is configured
+if not N8N_MCP_AVAILABLE:
+    logger.warning("n8n-MCP proxy not available", error=n8n_mcp_import_error)
+
+# Log industrial-automation MCP availability
+if not INDUSTRIAL_MCP_AVAILABLE:
+    logger.warning("Industrial automation MCP proxy not available", error=industrial_mcp_import_error)
+
 # Initialize FastAPI
 app = FastAPI(
     title="PLC-GPT Gateway API",
-    description="Gateway for PLC knowledge graph and vector search",
+    description="Gateway for PLC knowledge graph, vector search, n8n-MCP, and industrial automation MCP integration",
     version="1.0.0"
 )
 
@@ -46,6 +70,59 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include n8n-MCP router if available
+if N8N_MCP_AVAILABLE:
+    app.include_router(n8n_mcp_router)
+    logger.info("n8n-MCP proxy router integrated")
+else:
+    logger.warning("n8n-MCP proxy not available", error=n8n_mcp_import_error)
+
+# Include industrial automation MCP router if available
+if INDUSTRIAL_MCP_AVAILABLE:
+    app.include_router(industrial_mcp_router)
+    logger.info("Industrial automation MCP proxy router integrated")
+else:
+    logger.warning("Industrial automation MCP proxy not available", error=industrial_mcp_import_error)
+
+# Add startup and shutdown event handlers
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on startup"""
+    logger.info("Gateway API starting up")
+    
+    if N8N_MCP_AVAILABLE:
+        try:
+            await startup_n8n_mcp_proxy()
+            logger.info("n8n-MCP proxy initialized")
+        except Exception as e:
+            logger.error("Failed to initialize n8n-MCP proxy", error=str(e))
+    
+    if INDUSTRIAL_MCP_AVAILABLE:
+        try:
+            await startup_industrial_mcp_proxy()
+            logger.info("Industrial automation MCP proxy initialized")
+        except Exception as e:
+            logger.error("Failed to initialize industrial automation MCP proxy", error=str(e))
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Clean up services on shutdown"""
+    logger.info("Gateway API shutting down")
+    
+    if N8N_MCP_AVAILABLE:
+        try:
+            await shutdown_n8n_mcp_proxy()
+            logger.info("n8n-MCP proxy cleaned up")
+        except Exception as e:
+            logger.error("Error during n8n-MCP proxy cleanup", error=str(e))
+    
+    if INDUSTRIAL_MCP_AVAILABLE:
+        try:
+            await shutdown_industrial_mcp_proxy()
+            logger.info("Industrial automation MCP proxy cleaned up")
+        except Exception as e:
+            logger.error("Error during industrial automation MCP proxy cleanup", error=str(e))
 
 # Security
 security = HTTPBearer()

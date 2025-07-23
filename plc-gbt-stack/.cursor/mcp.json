@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+    "n8n-mcp-local": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--init",
+        "--network", "plc-gbt-stack_plc-internal-network",
+        "-e", "MCP_MODE=stdio",
+        "-e", "LOG_LEVEL=error",
+        "-e", "DISABLE_CONSOLE_OUTPUT=true",
+        "-e", "N8N_API_URL=http://plc-n8n:5678",
+        "-e", "N8N_API_KEY=",
+        "-e", "NODE_DB_PATH=/app/data/plc-n8n-mcp/nodes.db",
+        "-v", "plc-gbt-stack_n8n_mcp_data:/app/data",
+        "ghcr.io/czlonkowski/n8n-mcp:latest"
+      ],
+      "env": {
+        "DOCKER_BUILDKIT": "1"
+      }
+    },
+    "n8n-mcp-http": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/mcp-remote@latest",
+        "connect",
+        "http://127.0.0.1:3000/mcp"
+      ],
+      "env": {
+        "MCP_AUTH_TOKEN": "n8n-mcp-auth-token-2025"
+      }
+    }
+  }
+} 

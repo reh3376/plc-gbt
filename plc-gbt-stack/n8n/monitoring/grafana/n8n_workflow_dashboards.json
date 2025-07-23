@@ -1,0 +1,286 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "N8N Workflow Performance Dashboard",
+    "tags": ["n8n", "workflows", "plc-gbt", "industrial-automation"],
+    "timezone": "America/Kentucky/Louisville",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Workflow Execution Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(n8n_workflow_executions_total)",
+            "legendFormat": "Total Executions"
+          },
+          {
+            "expr": "sum(rate(n8n_workflow_executions_total[5m]))",
+            "legendFormat": "Executions per Second"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 10},
+                {"color": "red", "value": 50}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Workflow Success Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "sum(rate(n8n_workflow_executions_success_total[5m])) / sum(rate(n8n_workflow_executions_total[5m])) * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 100,
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 80},
+                {"color": "green", "value": 95}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Active Workflows",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "n8n_active_workflows",
+            "legendFormat": "Active Workflows"
+          },
+          {
+            "expr": "n8n_running_executions",
+            "legendFormat": "Running Executions"
+          }
+        ],
+        "yAxes": [
+          {"label": "Count", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Workflow Execution Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(n8n_workflow_execution_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "50th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(n8n_workflow_execution_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(n8n_workflow_execution_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "99th percentile"
+          }
+        ],
+        "yAxes": [
+          {"label": "Duration (seconds)", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 5,
+        "title": "Database Connection Pool",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "n8n_db_connections_active",
+            "legendFormat": "Active Connections"
+          },
+          {
+            "expr": "n8n_db_connections_idle",
+            "legendFormat": "Idle Connections"
+          },
+          {
+            "expr": "n8n_db_connections_waiting",
+            "legendFormat": "Waiting Connections"
+          }
+        ],
+        "yAxes": [
+          {"label": "Connections", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "N8N Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes{job=\"n8n\"}",
+            "legendFormat": "RSS Memory"
+          },
+          {
+            "expr": "process_virtual_memory_bytes{job=\"n8n\"}",
+            "legendFormat": "Virtual Memory"
+          },
+          {
+            "expr": "nodejs_heap_size_used_bytes{job=\"n8n\"}",
+            "legendFormat": "Heap Used"
+          }
+        ],
+        "yAxes": [
+          {"label": "Bytes", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 7,
+        "title": "Custom Node Performance",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "sum by (node_type) (rate(n8n_node_executions_total[5m]))",
+            "legendFormat": "{{node_type}}",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true},
+              "indexByName": {"node_type": 0, "Value": 1}
+            }
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Error Rate by Workflow",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (workflow_name) (rate(n8n_workflow_executions_error_total[5m]))",
+            "legendFormat": "{{workflow_name}}"
+          }
+        ],
+        "yAxes": [
+          {"label": "Errors per Second", "min": 0}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [5], "type": "gt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "avg"},
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "1m",
+          "frequency": "30s",
+          "handler": 1,
+          "name": "High Workflow Error Rate",
+          "noDataState": "no_data",
+          "notifications": [{"id": 1}]
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32}
+      },
+      {
+        "id": 9,
+        "title": "Industrial Protocol Metrics",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (protocol) (rate(n8n_industrial_protocol_operations_total[5m]))",
+            "legendFormat": "{{protocol}} Operations/sec"
+          },
+          {
+            "expr": "sum by (protocol) (rate(n8n_industrial_protocol_errors_total[5m]))",
+            "legendFormat": "{{protocol}} Errors/sec"
+          }
+        ],
+        "yAxes": [
+          {"label": "Operations per Second", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 40}
+      },
+      {
+        "id": 10,
+        "title": "LLM Integration Metrics",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(n8n_llm_requests_total[5m])",
+            "legendFormat": "LLM Requests/sec"
+          },
+          {
+            "expr": "rate(n8n_llm_token_usage_total[5m])",
+            "legendFormat": "Tokens/sec"
+          },
+          {
+            "expr": "n8n_llm_response_time_seconds",
+            "legendFormat": "Response Time"
+          }
+        ],
+        "yAxes": [
+          {"label": "Rate / Time", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 40}
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(n8n_workflow_executions_total, instance)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "workflow",
+          "type": "query", 
+          "query": "label_values(n8n_workflow_executions_total, workflow_name)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "expr": "changes(n8n_build_info[1h])",
+          "textFormat": "N8N Restart"
+        }
+      ]
+    }
+  }
+} 

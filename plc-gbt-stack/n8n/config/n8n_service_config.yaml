@@ -1,151 +1,92 @@
-# 🤖 N8N Service Configuration for PLC-GBT Integration
-# Phase 26.2: N8N Service Integration
-# Created: June 19, 2025
+# N8N Service Configuration for Phase 26
+# AI Task Orchestrator Implementation
+# Generated on 2025-07-23
 
-# Core N8N Configuration
 service:
-  name: "PLC-GBT N8N Workflow Automation"
-  version: "1.0.0"
-  environment: "production"
+  name: "n8n-workflow-automation"
+  version: "1.102.4"
+  description: "N8N Workflow Automation Platform integrated with PLC-GBT Stack"
   
-  # Network Configuration
-  network:
-    host: "0.0.0.0"
-    port: 5678
-    protocol: "http"
-    webhook_url: "http://localhost:5678/"
-    
-  # Timezone Configuration (Phase 26.2.4)
-  timezone:
-    generic: "America/Kentucky/Louisville"
-    system: "America/Kentucky/Louisville"
+  # Service Configuration
+  host: "0.0.0.0"
+  port: 5678
+  protocol: "http"
+  environment: "production"
 
-# Database Integration (Phase 26.1 Namespace Isolation)
-database:
-  # PostgreSQL Configuration - N8N Schema
-  postgresql:
+  # Database Configuration
+  database:
     type: "postgresdb"
     host: "postgres"
     port: 5432
     database: "plc_gbt"
-    schema: "n8n"  # Isolated namespace from Phase 26.1
+    schema: "n8n"
     user: "plc_user"
-    ssl: false
-    
-  # Redis Configuration - Database 2 for BullMQ
-  redis:
-    host: "redis"
-    port: 6379
-    database: 2  # Isolated database from Phase 26.1
-    
-  # Neo4j Configuration - N8N Database
-  neo4j:
-    uri: "bolt://neo4j:7687"
-    database: "n8n"  # Isolated database from Phase 26.1
-    user: "neo4j"
-    
-  # Qdrant Configuration - N8N Memory Collection
-  qdrant:
-    url: "http://qdrant:6333"
-    collection: "n8n_memory"  # Isolated collection from Phase 26.1
+    password: "postgres_password"
 
-# Queue Configuration
-queue:
-  mode: "queue"
-  bull:
+  # Security Configuration
+  security:
+    encryption_key: "plc-gbt-n8n-encryption-key-2025"
+    jwt_secret: "plc-gbt-jwt-secret-2025"
+    enforce_file_permissions: false
+
+  # Logging Configuration
+  logging:
+    level: "info"
+    output: ["console", "file"]
+    file_location: "/home/node/.n8n/logs/"
+
+  # Performance Configuration
+  performance:
+    payload_size_max: 16
+    metrics_enabled: true
+    disable_ui: false
+
+  # Integration Configuration
+  integrations:
+    plc_memory:
+      postgres:
+        host: "postgres"
+        user: "plc_user"
+        password: "postgres_password"
+      neo4j:
+        uri: "bolt://neo4j:7687"
+        user: "neo4j"
+        password: "password"
+        database: "n8n"
+      redis:
+        host: "redis"
+        port: 6379
+      qdrant:
+        url: "http://qdrant:6333"
+
+  # Queue Configuration
+  queue:
     redis:
       host: "redis"
       port: 6379
       database: 2
+    execution_mode: "queue"
 
-# Security Configuration
-security:
-  encryption:
-    key_env: "N8N_ENCRYPTION_KEY"
-    default_key: "plc-gbt-n8n-encryption-key-2025"
-  
-  jwt:
-    secret_env: "N8N_JWT_SECRET"
-    default_secret: "plc-gbt-jwt-secret-2025"
-  
-  user_management:
-    enabled: true
-    jwt_secret_env: "N8N_USER_MANAGEMENT_JWT_SECRET"
+  # Timezone Configuration
+  timezone:
+    generic: "America/Kentucky/Louisville"
+    system: "America/Kentucky/Louisville"
 
-# Logging Configuration
-logging:
-  level: "info"
-  output: ["console", "file"]
-  file_location: "/home/node/.n8n/logs/"
-  
-# Performance Configuration
-performance:
-  payload_size_max: 16  # MB
-  metrics_enabled: true
-  disable_ui: false
-  
-# PLC Memory Stack Integration
-plc_integration:
-  enabled: true
-  
-  # Database Connections
-  databases:
-    postgres:
-      host: "postgres"
-      user: "plc_user"
-      
-    neo4j:
-      uri: "bolt://neo4j:7687"
-      database: "n8n"
-      user: "neo4j"
-      
-    redis:
-      host: "redis"
-      port: 6379
-      
-    qdrant:
-      url: "http://qdrant:6333"
-  
-  # Custom Node Categories
-  custom_nodes:
-    - name: "PLC Memory Operations"
-      path: "/home/node/.n8n/custom/plc-memory"
-      
-    - name: "Industrial Protocols"
-      path: "/home/node/.n8n/custom/industrial"
-      
-    - name: "Safety Interlocks"
-      path: "/home/node/.n8n/custom/safety"
-      
-    - name: "LLM Integration"
-      path: "/home/node/.n8n/custom/llm"
-
-# Workflow Configuration
-workflows:
-  default_path: "/home/node/.n8n/workflows"
-  backup_enabled: true
-  version_control: true
-  
-# Credentials Configuration
-credentials:
-  path: "/home/node/.n8n/credentials"
-  encryption: true
-  vault_integration: true
-
-# Monitoring and Health Checks
-monitoring:
-  health_check:
-    endpoint: "/healthz"
-    interval: 30
-    timeout: 10
-    retries: 5
-    
-  metrics:
-    enabled: true
-    prometheus_compatible: true
+# Health Check Configuration
+health_check:
+  endpoint: "/healthz"
+  interval: 30
+  timeout: 10
+  retries: 5
 
 # Restart Policy
-restart:
-  policy: "unless-stopped"
-  max_retries: 5
-  retry_delay: 30 
+restart_policy: "unless-stopped"
+
+# Phase 26 Specific Configuration
+phase26:
+  custom_nodes_enabled: true
+  workflow_templates_enabled: true
+  natural_language_engine_enabled: true
+  industrial_protocols_enabled: true
+  llm_integration_enabled: true
+  plc_memory_integration_enabled: true 

@@ -1,0 +1,568 @@
+# Phase 31 UI Testing Pipeline
+# Mandatory user agent interaction testing at every development step
+
+name: Phase 31 UI Testing Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'feature/phase31-*' ]
+    paths: [ 'ui/**' ]
+  pull_request:
+    branches: [ main, develop ]
+    paths: [ 'ui/**' ]
+  workflow_dispatch:
+    inputs:
+      sub_phase:
+        description: 'Sub-phase to test (31.1-31.10)'
+        required: true
+        default: '31.1'
+      user_agents:
+        description: 'Comma-separated list of user agent IDs'
+        required: false
+        default: 'ie-001,ct-001,it-001'
+      environment:
+        description: 'Testing environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  NODE_VERSION: '18'
+  THEIA_VERSION: '1.45.0'
+  TESTING_TIMEOUT: '3600' # 1 hour
+  USER_AGENT_TIMEOUT: '7200' # 2 hours
+
+jobs:
+  # ==================== Pre-Testing Validation ====================
+  pre-test-validation:
+    name: Pre-Test Environment Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    outputs:
+      environment-ready: ${{ steps.env-check.outputs.ready }}
+      backend-status: ${{ steps.backend-check.outputs.status }}
+      test-scenarios: ${{ steps.scenario-prep.outputs.scenarios }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'ui/package-lock.json'
+          
+      - name: Install Dependencies
+        working-directory: ./ui
+        run: |
+          npm ci
+          npm install -g @theia/cli playwright
+          
+      - name: Environment Health Check
+        id: env-check
+        working-directory: ./ui
+        run: |
+          echo "Validating test environment..."
+          npm run env:validate
+          echo "ready=true" >> $GITHUB_OUTPUT
+          
+      - name: Backend Connectivity Check
+        id: backend-check
+        working-directory: ./ui
+        run: |
+          echo "Checking backend connectivity..."
+          npm run backend:health-check
+          echo "status=healthy" >> $GITHUB_OUTPUT
+          
+      - name: Prepare Test Scenarios
+        id: scenario-prep
+        working-directory: ./ui
+        run: |
+          echo "Loading test scenarios for sub-phase..."
+          SCENARIOS=$(npm run test:scenarios:list --silent)
+          echo "scenarios=$SCENARIOS" >> $GITHUB_OUTPUT
+
+  # ==================== Automated Testing Phase ====================
+  automated-testing:
+    name: Automated Testing Suite
+    runs-on: ubuntu-latest
+    needs: pre-test-validation
+    timeout-minutes: 30
+    
+    strategy:
+      matrix:
+        test-suite: [unit, integration, e2e, performance, accessibility, security]
+        
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'ui/package-lock.json'
+          
+      - name: Install Dependencies
+        working-directory: ./ui
+        run: npm ci
+        
+      - name: Build Application
+        working-directory: ./ui
+        run: npm run build:test
+        
+      - name: Run ${{ matrix.test-suite }} Tests
+        working-directory: ./ui
+        run: |
+          case "${{ matrix.test-suite }}" in
+            "unit")
+              npm run test:unit -- --coverage --reporter=json --outputFile=test-results/unit-results.json
+              ;;
+            "integration")
+              npm run test:integration -- --reporter=json --outputFile=test-results/integration-results.json
+              ;;
+            "e2e")
+              npm run test:e2e -- --reporter=json --outputFile=test-results/e2e-results.json
+              ;;
+            "performance")
+              npm run test:performance -- --reporter=json --outputFile=test-results/performance-results.json
+              ;;
+            "accessibility")
+              npm run test:accessibility -- --reporter=json --outputFile=test-results/accessibility-results.json
+              ;;
+            "security")
+              npm run test:security -- --reporter=json --outputFile=test-results/security-results.json
+              ;;
+          esac
+          
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.test-suite }}-test-results
+          path: ui/test-results/
+          retention-days: 30
+          
+      - name: Validate Test Thresholds
+        working-directory: ./ui
+        run: |
+          echo "Validating ${{ matrix.test-suite }} test thresholds..."
+          npm run test:validate-thresholds -- --suite=${{ matrix.test-suite }}
+
+  # ==================== Test Results Analysis ====================
+  analyze-automated-results:
+    name: Analyze Automated Test Results
+    runs-on: ubuntu-latest
+    needs: automated-testing
+    timeout-minutes: 10
+    
+    outputs:
+      tests-passed: ${{ steps.analysis.outputs.passed }}
+      coverage-score: ${{ steps.analysis.outputs.coverage }}
+      performance-score: ${{ steps.analysis.outputs.performance }}
+      security-score: ${{ steps.analysis.outputs.security }}
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Download All Test Results
+        uses: actions/download-artifact@v4
+        with:
+          path: test-artifacts/
+          
+      - name: Analyze Test Results
+        id: analysis
+        working-directory: ./ui
+        run: |
+          echo "Analyzing comprehensive test results..."
+          npm run test:analyze-results -- --input=../test-artifacts/
+          
+          # Extract key metrics
+          PASSED=$(jq -r '.overall.passed' test-analysis/summary.json)
+          COVERAGE=$(jq -r '.coverage.overall' test-analysis/summary.json)
+          PERFORMANCE=$(jq -r '.performance.score' test-analysis/summary.json)
+          SECURITY=$(jq -r '.security.score' test-analysis/summary.json)
+          
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "performance=$PERFORMANCE" >> $GITHUB_OUTPUT
+          echo "security=$SECURITY" >> $GITHUB_OUTPUT
+          
+          # Validate against quality gates
+          if [[ "$PASSED" != "true" ]]; then
+            echo "❌ Automated tests failed - blocking user agent testing"
+            exit 1
+          fi
+          
+          if (( $(echo "$COVERAGE < 90" | bc -l) )); then
+            echo "❌ Code coverage below 90% ($COVERAGE%) - blocking user agent testing"
+            exit 1
+          fi
+
+  # ==================== Deploy to Staging for User Testing ====================
+  deploy-staging:
+    name: Deploy to Staging Environment
+    runs-on: ubuntu-latest
+    needs: analyze-automated-results
+    timeout-minutes: 15
+    environment: staging
+    
+    outputs:
+      staging-url: ${{ steps.deploy.outputs.url }}
+      deployment-id: ${{ steps.deploy.outputs.deployment_id }}
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'ui/package-lock.json'
+          
+      - name: Install Dependencies
+        working-directory: ./ui
+        run: npm ci
+        
+      - name: Build for Staging
+        working-directory: ./ui
+        run: npm run build:staging
+        
+      - name: Deploy to Staging
+        id: deploy
+        working-directory: ./ui
+        run: |
+          echo "Deploying to staging environment..."
+          DEPLOYMENT_ID=$(npm run deploy:staging --silent)
+          STAGING_URL="https://staging-phase31.plc-gbt.com"
+          
+          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
+          echo "url=$STAGING_URL" >> $GITHUB_OUTPUT
+          
+      - name: Validate Staging Deployment
+        working-directory: ./ui
+        run: |
+          echo "Validating staging deployment..."
+          npm run validate:staging-deployment
+          
+      - name: Notify User Agents
+        working-directory: ./ui
+        run: |
+          echo "Notifying user agents of staging deployment..."
+          npm run notify:user-agents -- \
+            --url="${{ steps.deploy.outputs.url }}" \
+            --deployment-id="${{ steps.deploy.outputs.deployment_id }}"
+
+  # ==================== CRITICAL: User Agent Testing Phase ====================
+  user-agent-testing:
+    name: 🚨 MANDATORY User Agent Interaction Testing
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, analyze-automated-results]
+    timeout-minutes: 120 # 2 hours for user testing
+    environment: user-agent-testing
+    
+    outputs:
+      user-approval: ${{ steps.user-testing.outputs.approved }}
+      usability-score: ${{ steps.user-testing.outputs.usability_score }}
+      critical-issues: ${{ steps.user-testing.outputs.critical_issues }}
+      blocking-issues: ${{ steps.user-testing.outputs.blocking_issues }}
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Initialize User Agent Testing Framework
+        working-directory: ./ui
+        run: |
+          echo "🚨 CRITICAL: Starting mandatory user agent interaction testing"
+          echo "❌ Development BLOCKED until user approval obtained"
+          npm run test:user-agent:initialize
+          
+      - name: Schedule User Testing Sessions
+        working-directory: ./ui
+        run: |
+          echo "Scheduling user agent testing sessions..."
+          
+          # Get sub-phase from context
+          SUB_PHASE="${{ github.event.inputs.sub_phase || '31.1' }}"
+          USER_AGENTS="${{ github.event.inputs.user_agents || 'ie-001,ct-001,it-001' }}"
+          STAGING_URL="${{ needs.deploy-staging.outputs.staging-url }}"
+          
+          npm run test:user-agent:schedule -- \
+            --sub-phase="$SUB_PHASE" \
+            --user-agents="$USER_AGENTS" \
+            --environment="$STAGING_URL" \
+            --timeout="${{ env.USER_AGENT_TIMEOUT }}"
+            
+      - name: Execute User Agent Testing
+        id: user-testing
+        working-directory: ./ui
+        run: |
+          echo "🎯 Executing user agent interaction testing..."
+          echo "This is a BLOCKING operation - no development may proceed without approval"
+          
+          # Execute user agent testing framework
+          RESULT=$(npm run test:user-agent:execute --silent)
+          
+          # Parse results
+          APPROVED=$(echo "$RESULT" | jq -r '.approved')
+          USABILITY_SCORE=$(echo "$RESULT" | jq -r '.usabilityScore')
+          CRITICAL_ISSUES=$(echo "$RESULT" | jq -r '.criticalIssues')
+          BLOCKING_ISSUES=$(echo "$RESULT" | jq -r '.blockingIssues')
+          
+          echo "approved=$APPROVED" >> $GITHUB_OUTPUT
+          echo "usability_score=$USABILITY_SCORE" >> $GITHUB_OUTPUT
+          echo "critical_issues=$CRITICAL_ISSUES" >> $GITHUB_OUTPUT
+          echo "blocking_issues=$BLOCKING_ISSUES" >> $GITHUB_OUTPUT
+          
+          # Log results
+          echo "📊 User Agent Testing Results:"
+          echo "   ✅ Approved: $APPROVED"
+          echo "   🎯 Usability Score: $USABILITY_SCORE/10"
+          echo "   🚨 Critical Issues: $CRITICAL_ISSUES"
+          echo "   🚫 Blocking Issues: $BLOCKING_ISSUES"
+          
+          # Validate approval
+          if [[ "$APPROVED" != "true" ]]; then
+            echo "❌ USER AGENT TESTING FAILED"
+            echo "❌ Development is BLOCKED - fix issues and re-test"
+            exit 1
+          fi
+          
+          if [[ "$CRITICAL_ISSUES" -gt "0" ]] || [[ "$BLOCKING_ISSUES" -gt "0" ]]; then
+            echo "❌ CRITICAL or BLOCKING issues found"
+            echo "❌ Development is BLOCKED - resolve issues and re-test"
+            exit 1
+          fi
+          
+          echo "✅ USER AGENT TESTING PASSED - Development may proceed"
+          
+      - name: Generate User Testing Report
+        if: always()
+        working-directory: ./ui
+        run: |
+          echo "Generating comprehensive user testing report..."
+          npm run test:user-agent:report -- \
+            --output="user-testing-report.html" \
+            --format="html,json,pdf"
+            
+      - name: Upload User Testing Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: user-agent-testing-results
+          path: |
+            ui/user-testing-report.*
+            ui/test-results/user-agent/
+            ui/recordings/
+            ui/screenshots/
+          retention-days: 90 # Keep user testing results longer
+          
+      - name: Notify Stakeholders
+        if: always()
+        working-directory: ./ui
+        run: |
+          echo "Notifying stakeholders of user testing results..."
+          npm run notify:stakeholders -- \
+            --approved="${{ steps.user-testing.outputs.approved }}" \
+            --score="${{ steps.user-testing.outputs.usability_score }}" \
+            --issues="${{ steps.user-testing.outputs.critical_issues }}"
+
+  # ==================== Quality Gate Validation ====================
+  quality-gate-validation:
+    name: Final Quality Gate Validation
+    runs-on: ubuntu-latest
+    needs: [user-agent-testing, analyze-automated-results]
+    timeout-minutes: 10
+    
+    steps:
+      - name: Validate All Quality Gates
+        run: |
+          echo "🔍 Validating all quality gates before proceeding..."
+          
+          # Automated testing results
+          TESTS_PASSED="${{ needs.analyze-automated-results.outputs.tests-passed }}"
+          COVERAGE="${{ needs.analyze-automated-results.outputs.coverage-score }}"
+          PERFORMANCE="${{ needs.analyze-automated-results.outputs.performance-score }}"
+          SECURITY="${{ needs.analyze-automated-results.outputs.security-score }}"
+          
+          # User agent testing results
+          USER_APPROVED="${{ needs.user-agent-testing.outputs.user-approval }}"
+          USABILITY_SCORE="${{ needs.user-agent-testing.outputs.usability-score }}"
+          CRITICAL_ISSUES="${{ needs.user-agent-testing.outputs.critical-issues }}"
+          BLOCKING_ISSUES="${{ needs.user-agent-testing.outputs.blocking-issues }}"
+          
+          echo "📊 Quality Gate Summary:"
+          echo "   🤖 Automated Tests: $TESTS_PASSED"
+          echo "   📈 Code Coverage: $COVERAGE%"
+          echo "   ⚡ Performance Score: $PERFORMANCE"
+          echo "   🔒 Security Score: $SECURITY"
+          echo "   👥 User Approval: $USER_APPROVED"
+          echo "   🎯 Usability Score: $USABILITY_SCORE/10"
+          echo "   🚨 Critical Issues: $CRITICAL_ISSUES"
+          echo "   🚫 Blocking Issues: $BLOCKING_ISSUES"
+          
+          # Validate all gates
+          GATES_PASSED=true
+          
+          if [[ "$TESTS_PASSED" != "true" ]]; then
+            echo "❌ Automated tests failed"
+            GATES_PASSED=false
+          fi
+          
+          if (( $(echo "$COVERAGE < 90" | bc -l) )); then
+            echo "❌ Code coverage below 90%"
+            GATES_PASSED=false
+          fi
+          
+          if [[ "$USER_APPROVED" != "true" ]]; then
+            echo "❌ User agent testing not approved"
+            GATES_PASSED=false
+          fi
+          
+          if [[ "$CRITICAL_ISSUES" -gt "0" ]] || [[ "$BLOCKING_ISSUES" -gt "0" ]]; then
+            echo "❌ Critical or blocking issues present"
+            GATES_PASSED=false
+          fi
+          
+          if (( $(echo "$USABILITY_SCORE < 8.0" | bc -l) )); then
+            echo "❌ Usability score below 8.0"
+            GATES_PASSED=false
+          fi
+          
+          if [[ "$GATES_PASSED" == "true" ]]; then
+            echo "✅ ALL QUALITY GATES PASSED"
+            echo "✅ Development may proceed to next phase"
+          else
+            echo "❌ QUALITY GATES FAILED"
+            echo "❌ Development BLOCKED - address all issues"
+            exit 1
+          fi
+
+  # ==================== Production Deployment (Conditional) ====================
+  production-deployment:
+    name: Production Deployment
+    runs-on: ubuntu-latest
+    needs: [quality-gate-validation]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 30
+    environment: production
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Production Deployment Preparation
+        working-directory: ./ui
+        run: |
+          echo "🚀 Preparing for production deployment..."
+          echo "✅ All quality gates passed"
+          echo "✅ User agent testing approved"
+          echo "✅ Ready for production deployment"
+          
+      - name: Build for Production
+        working-directory: ./ui
+        run: npm run build:production
+        
+      - name: Deploy to Production
+        working-directory: ./ui
+        run: |
+          echo "🚀 Deploying to production..."
+          npm run deploy:production
+          
+      - name: Post-Deployment Validation
+        working-directory: ./ui
+        run: |
+          echo "Validating production deployment..."
+          npm run validate:production
+          
+      - name: Notify Success
+        working-directory: ./ui
+        run: |
+          echo "🎉 Production deployment successful!"
+          npm run notify:deployment-success
+
+  # ==================== Testing Failure Handling ====================
+  handle-testing-failure:
+    name: Handle Testing Failures
+    runs-on: ubuntu-latest
+    needs: [automated-testing, user-agent-testing]
+    if: failure()
+    
+    steps:
+      - name: Analyze Failure
+        run: |
+          echo "🚨 Testing pipeline failed - analyzing failure points..."
+          
+          # Check which stage failed
+          if [[ "${{ needs.automated-testing.result }}" == "failure" ]]; then
+            echo "❌ Automated testing failed"
+            echo "Action required: Fix automated test failures before user testing"
+          fi
+          
+          if [[ "${{ needs.user-agent-testing.result }}" == "failure" ]]; then
+            echo "❌ User agent testing failed"
+            echo "Action required: Address user feedback and usability issues"
+          fi
+          
+      - name: Create Failure Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `Phase 31 Testing Failure - ${context.ref}`;
+            const body = `
+            ## Testing Pipeline Failure
+            
+            **Branch**: ${context.ref}
+            **Commit**: ${context.sha}
+            **Workflow**: ${context.workflow}
+            **Run ID**: ${context.runId}
+            
+            ### Failure Analysis
+            - Automated Testing: ${{ needs.automated-testing.result }}
+            - User Agent Testing: ${{ needs.user-agent-testing.result }}
+            
+            ### Required Actions
+            1. Review test failure logs
+            2. Address identified issues
+            3. Re-run testing pipeline
+            4. Obtain user agent approval before proceeding
+            
+            ### Links
+            - [Workflow Run](${context.payload.repository.html_url}/actions/runs/${context.runId})
+            - [Testing Artifacts](${context.payload.repository.html_url}/actions/runs/${context.runId}#artifacts)
+            `;
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['testing-failure', 'phase31', 'priority-high']
+            });
+            
+      - name: Notify Development Team
+        run: |
+          echo "📧 Notifying development team of testing failure..."
+          # Integration with notification systems (Slack, Teams, etc.)
+
+# ==================== Pipeline Summary ====================
+# This pipeline ensures:
+# 1. ✅ Comprehensive automated testing (unit, integration, e2e, performance, accessibility, security)
+# 2. 🚨 MANDATORY user agent interaction testing with BLOCKING approval requirement
+# 3. 📊 Quality gate validation with strict thresholds
+# 4. 🚀 Conditional production deployment only after ALL gates pass
+# 5. 🔄 Failure handling and notification systems
+#
+# NO DEVELOPMENT MAY PROCEED WITHOUT USER AGENT APPROVAL
+# This pipeline enforces the critical requirement for user validation at every step 

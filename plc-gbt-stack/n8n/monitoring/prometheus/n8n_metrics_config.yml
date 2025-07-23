@@ -1,0 +1,260 @@
+# N8N Prometheus Metrics Configuration
+# Phase 26.6.1: Production Monitoring & Observability
+# AI Task Orchestrator Implementation
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "n8n_alerting_rules.yml"
+
+scrape_configs:
+  # N8N Application Metrics
+  - job_name: 'n8n'
+    static_configs:
+      - targets: ['n8n:5678']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+    
+    # N8N-specific metric relabeling
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'n8n_.*'
+        target_label: __name__
+        replacement: '${1}'
+      - source_labels: [instance]
+        target_label: n8n_instance
+        replacement: '${1}'
+
+  # N8N Database Metrics (PostgreSQL)
+  - job_name: 'n8n-postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    params:
+      schema: ['n8n']
+    
+  # N8N Queue Metrics (Redis)
+  - job_name: 'n8n-redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    params:
+      db: ['2']
+
+  # N8N Graph Metrics (Neo4j)
+  - job_name: 'n8n-neo4j'
+    static_configs:
+      - targets: ['neo4j:7687']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    params:
+      database: ['n8n']
+
+  # N8N Vector Metrics (Qdrant)
+  - job_name: 'n8n-qdrant'
+    static_configs:
+      - targets: ['qdrant:6333']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    params:
+      collection: ['n8n_memory']
+
+  # Container Metrics
+  - job_name: 'n8n-container'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    metric_relabel_configs:
+      - source_labels: [container_label_com_docker_compose_service]
+        regex: 'n8n'
+        target_label: service
+        replacement: 'n8n'
+
+# Custom N8N Metrics Definitions
+custom_metrics:
+  # Workflow Execution Metrics
+  workflow_metrics:
+    - name: n8n_workflow_executions_total
+      type: counter
+      help: "Total number of workflow executions"
+      labels: ['workflow_name', 'status', 'trigger_mode']
+      
+    - name: n8n_workflow_executions_success_total
+      type: counter
+      help: "Total number of successful workflow executions"
+      labels: ['workflow_name', 'trigger_mode']
+      
+    - name: n8n_workflow_executions_error_total
+      type: counter
+      help: "Total number of failed workflow executions"
+      labels: ['workflow_name', 'error_type', 'trigger_mode']
+      
+    - name: n8n_workflow_execution_duration_seconds
+      type: histogram
+      help: "Workflow execution duration in seconds"
+      labels: ['workflow_name', 'trigger_mode']
+      buckets: [0.1, 0.5, 1, 5, 10, 30, 60, 300, 600, 1800]
+
+  # Node Execution Metrics
+  node_metrics:
+    - name: n8n_node_executions_total
+      type: counter
+      help: "Total number of node executions"
+      labels: ['node_type', 'workflow_name', 'status']
+      
+    - name: n8n_node_execution_duration_seconds
+      type: histogram
+      help: "Node execution duration in seconds"
+      labels: ['node_type', 'workflow_name']
+      buckets: [0.01, 0.1, 0.5, 1, 5, 10, 30]
+
+  # System Metrics
+  system_metrics:
+    - name: n8n_active_workflows
+      type: gauge
+      help: "Number of active workflows"
+      
+    - name: n8n_running_executions
+      type: gauge
+      help: "Number of currently running executions"
+      
+    - name: n8n_waiting_executions
+      type: gauge
+      help: "Number of executions waiting in queue"
+
+  # Database Connection Metrics
+  database_metrics:
+    - name: n8n_db_connections_active
+      type: gauge
+      help: "Number of active database connections"
+      labels: ['database_type']
+      
+    - name: n8n_db_connections_idle
+      type: gauge
+      help: "Number of idle database connections"
+      labels: ['database_type']
+      
+    - name: n8n_db_connections_waiting
+      type: gauge
+      help: "Number of connections waiting for a database connection"
+      labels: ['database_type']
+      
+    - name: n8n_db_query_duration_seconds
+      type: histogram
+      help: "Database query duration in seconds"
+      labels: ['database_type', 'operation']
+      buckets: [0.001, 0.01, 0.1, 0.5, 1, 5, 10]
+
+  # Industrial Protocol Metrics
+  industrial_metrics:
+    - name: n8n_industrial_protocol_operations_total
+      type: counter
+      help: "Total number of industrial protocol operations"
+      labels: ['protocol', 'operation', 'status']
+      
+    - name: n8n_industrial_protocol_errors_total
+      type: counter
+      help: "Total number of industrial protocol errors"
+      labels: ['protocol', 'error_type']
+      
+    - name: n8n_industrial_protocol_response_time_seconds
+      type: histogram
+      help: "Industrial protocol response time in seconds"
+      labels: ['protocol', 'operation']
+      buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5]
+
+  # LLM Integration Metrics
+  llm_metrics:
+    - name: n8n_llm_requests_total
+      type: counter
+      help: "Total number of LLM requests"
+      labels: ['model', 'operation', 'status']
+      
+    - name: n8n_llm_token_usage_total
+      type: counter
+      help: "Total number of LLM tokens used"
+      labels: ['model', 'type']
+      
+    - name: n8n_llm_response_time_seconds
+      type: histogram
+      help: "LLM response time in seconds"
+      labels: ['model', 'operation']
+      buckets: [0.5, 1, 2, 5, 10, 30, 60]
+      
+    - name: n8n_llm_cost_total
+      type: counter
+      help: "Total LLM cost in USD"
+      labels: ['model']
+
+  # Memory System Metrics
+  memory_metrics:
+    - name: n8n_memory_operations_total
+      type: counter
+      help: "Total number of PLC memory operations"
+      labels: ['operation', 'database', 'status']
+      
+    - name: n8n_memory_query_duration_seconds
+      type: histogram
+      help: "PLC memory query duration in seconds"
+      labels: ['operation', 'database']
+      buckets: [0.1, 0.5, 1, 2, 5, 10, 30]
+
+  # Error and Health Metrics
+  health_metrics:
+    - name: n8n_health_check_status
+      type: gauge
+      help: "Health check status (1=healthy, 0=unhealthy)"
+      labels: ['component']
+      
+    - name: n8n_last_heartbeat_timestamp
+      type: gauge
+      help: "Timestamp of last heartbeat"
+      
+    - name: n8n_build_info
+      type: gauge
+      help: "Build information"
+      labels: ['version', 'git_commit', 'build_date']
+
+# Recording Rules for Aggregations
+recording_rules:
+  - name: n8n_workflow_rates
+    rules:
+      - record: n8n:workflow_execution_rate
+        expr: sum(rate(n8n_workflow_executions_total[5m])) by (workflow_name)
+        
+      - record: n8n:workflow_success_rate
+        expr: sum(rate(n8n_workflow_executions_success_total[5m])) by (workflow_name) / sum(rate(n8n_workflow_executions_total[5m])) by (workflow_name)
+        
+      - record: n8n:workflow_error_rate
+        expr: sum(rate(n8n_workflow_executions_error_total[5m])) by (workflow_name)
+
+  - name: n8n_system_aggregates
+    rules:
+      - record: n8n:total_execution_rate
+        expr: sum(rate(n8n_workflow_executions_total[5m]))
+        
+      - record: n8n:total_error_rate
+        expr: sum(rate(n8n_workflow_executions_error_total[5m]))
+        
+      - record: n8n:overall_success_rate
+        expr: sum(rate(n8n_workflow_executions_success_total[5m])) / sum(rate(n8n_workflow_executions_total[5m]))
+
+# Retention and Storage
+storage:
+  retention_time: "15d"
+  retention_size: "10GB"
+  
+  # Remote write configuration for long-term storage
+  remote_write:
+    - url: "http://prometheus-remote-storage:9090/api/v1/write"
+      queue_config:
+        max_samples_per_send: 1000
+        max_shards: 200
+        capacity: 2500 

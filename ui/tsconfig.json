@@ -1,0 +1,101 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "removeComments": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "useDefineForClassFields": false,
+    "importHelpers": true,
+    "downlevelIteration": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false,
+    "baseUrl": ".",
+    "paths": {
+      "@theia/*": ["node_modules/@theia/*/lib"],
+      "@plc-gbt/*": ["theia/extensions/*/src"],
+      "@plc-gbt/common": ["theia/common/*"],
+      "@plc-gbt/config": ["config/*"],
+      "@plc-gbt/assets": ["assets/*"],
+      "@plc-gbt/utils": ["theia/utils/*"],
+      "@plc-gbt/types": ["theia/types/*"],
+      "@plc-gbt/services": ["theia/services/*"],
+      "@plc-gbt/components": ["theia/components/*"]
+    }
+  },
+  "include": [
+    "theia/**/*",
+    "config/**/*",
+    "tests/**/*",
+    "examples/**/*",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "lib",
+    "dist",
+    "build",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.spec.tsx",
+    "**/*.test.tsx"
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  },
+  "references": [
+    {
+      "path": "./theia/extensions/plc-file-explorer"
+    },
+    {
+      "path": "./theia/extensions/plc-language-support"
+    },
+    {
+      "path": "./theia/extensions/conversational-ai"
+    },
+    {
+      "path": "./theia/extensions/workflow-editor"
+    },
+    {
+      "path": "./theia/extensions/control-loop-dashboard"
+    },
+    {
+      "path": "./theia/extensions/analytics-visualization"
+    },
+    {
+      "path": "./theia/extensions/system-administration"
+    }
+  ]
+} 

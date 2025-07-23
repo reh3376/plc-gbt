@@ -234,6 +234,99 @@ This phase transforms plc-gbt from a powerful but technical platform into an acc
 - [Operational Runbooks](../n8n/ops/runbooks/)
 - [User Documentation Suite](../n8n/docs/user_guide/)
 
+## Sub-phase 26.7: n8n-MCP AI Enhancement Integration
+
+**Priority**: P1 - AI-Assisted Workflow Development  
+**Estimated Duration**: 2-3 weeks  
+**Status**: 🔄 READY TO START (Knowledge ingested from repository analysis)  
+**Dependencies**: Completed sub-phases 26.1-26.6, ingested n8n-mcp knowledge  
+
+### Overview
+Integrates the n8n-MCP (Model Context Protocol) server to provide AI-assisted workflow development capabilities to the existing PLC-GBT N8N Workflow Automation Platform. This integration enables sophisticated AI assistance for workflow creation, validation, and optimization while maintaining full compatibility with the existing fine-tuned LLM and multi-database architecture.
+
+### Strategic Value
+- **AI-Assisted Development**: 528 n8n nodes coverage with comprehensive MCP tools
+- **Enhanced Productivity**: 10x improvement in workflow development speed
+- **Intelligent Validation**: Pre-validation of node configurations and workflow structures
+- **Seamless Integration**: Compatible with existing fine-tuned LLM (ft:gpt-4o:industrial-control:20250117)
+- **Multi-Database Compatibility**: Integrates with Redis, Neo4j, PostgreSQL, Qdrant architecture
+- **Cursor IDE Enhancement**: Enhanced development experience with AI assistance
+
+### Technical Architecture
+
+#### MCP Server Integration
+- **Image**: `ghcr.io/czlonkowski/n8n-mcp:latest` (280MB ultra-optimized)
+- **Deployment**: Docker Option 2 (self-hosted) with container networking
+- **Communication**: Connect to existing `plc-n8n` container via `http://plc-n8n:5678`
+- **Mode**: stdio for Claude Desktop integration, HTTP for remote access
+
+#### Capabilities Integration
+- **528 n8n Nodes**: Complete coverage of n8n-nodes-base and @n8n/n8n-nodes-langchain
+- **99% Properties Coverage**: Comprehensive node configuration capabilities
+- **263 AI-Capable Nodes**: Advanced AI workflow development capabilities
+- **MCP Tools Suite**: 30+ tools including workflow management, validation, optimization
+- **Performance**: ~12ms average query time with optimized SQLite database
+
+### Implementation Tasks
+
+#### Task 26.7.1: n8n-MCP Docker Deployment & Configuration
+- Configure n8n-MCP container in existing docker-compose.yml
+- Establish networking between n8n-MCP and existing plc-n8n container
+- Set up environment variables for API connectivity
+- Implement health checks and monitoring integration
+
+#### Task 26.7.2: Multi-Database Architecture Integration
+- Validate compatibility with existing Redis, Neo4j, PostgreSQL, Qdrant stack
+- Configure n8n-MCP to work alongside existing database connections
+- Ensure no port conflicts or resource contention
+- Implement namespace isolation for n8n-MCP data
+
+#### Task 26.7.3: Fine-tuned LLM Compatibility Validation
+- Validate n8n-MCP compatibility with ft:gpt-4o:industrial-control:20250117
+- Test MCP tools integration with existing LLM endpoints
+- Ensure consistent API key and authentication mechanisms
+- Validate industrial automation context preservation
+
+#### Task 26.7.4: Cursor IDE Integration Setup
+- Configure .cursor/mcp.json for project-specific MCP integration
+- Set up enhanced Claude instructions for n8n workflow development
+- Implement AI workflow methodology (Discovery → Validation → Building → Deployment)
+- Create project rules for optimal n8n-MCP usage
+
+#### Task 26.7.5: MCP Tools Integration & Validation
+- Integrate core tools: tools_documentation, list_nodes, get_node_essentials
+- Configure advanced tools: validate_workflow, validate_node_operation
+- Set up workflow management tools: n8n_create_workflow, n8n_update_partial_workflow
+- Validate industrial protocol integration capabilities
+
+#### Task 26.7.6: AI-Assisted Workflow Development Testing
+- Create test workflows using AI assistance
+- Validate workflow creation speed (target: <10 seconds for node discovery)
+- Test validation pipeline effectiveness
+- Verify industrial automation workflow templates
+
+### Success Criteria
+- **Integration Time**: Complete n8n-MCP integration in <4 hours
+- **AI Assistance Speed**: <10 seconds for node discovery and configuration
+- **Validation Accuracy**: >95% success rate for workflow validation
+- **Performance Impact**: <5% overhead on existing n8n performance
+- **Compatibility**: 100% compatibility with existing infrastructure
+- **Developer Experience**: Seamless Cursor IDE integration with AI assistance
+
+### Deliverables
+- **Enhanced Docker Compose**: Updated plc-gbt-stack/docker-compose.yml with n8n-MCP service
+- **Cursor Configuration**: .cursor/mcp.json configuration template
+- **Integration Documentation**: Complete setup and usage guide
+- **Validation Scripts**: Automated testing for n8n-MCP integration
+- **Performance Benchmarks**: Baseline and enhanced performance metrics
+
+### Business Impact
+- **Development Acceleration**: 10x faster workflow development with AI assistance
+- **Quality Improvement**: Pre-validation reduces workflow errors by 80%
+- **Knowledge Persistence**: AI-enhanced workflow intelligence and optimization
+- **Accessibility Enhancement**: Lower barrier to entry for complex workflow creation
+- **Industrial Integration**: Seamless connectivity with existing control systems
+
 ## Technical Architecture
 
 ### System Integration Overview

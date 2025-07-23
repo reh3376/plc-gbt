@@ -1,0 +1,316 @@
+{
+  "backend": {
+    "baseUrl": "https://api.plc-gbt.com",
+    "apiVersion": "v1",
+    "timeout": 30000,
+    "retryAttempts": 3,
+    "retryDelay": 2000
+  },
+  "api": {
+    "endpoints": {
+      "auth": {
+        "login": "/api/auth/login",
+        "logout": "/api/auth/logout",
+        "refresh": "/api/auth/refresh",
+        "check": "/api/auth/check-permission"
+      },
+      "controlLoops": {
+        "list": "/api/control-loops",
+        "create": "/api/control-loops",
+        "get": "/api/control-loops/{id}",
+        "update": "/api/control-loops/{id}",
+        "delete": "/api/control-loops/{id}",
+        "start": "/api/control-loops/{id}/start",
+        "stop": "/api/control-loops/{id}/stop",
+        "validate": "/api/control-loops/{id}/validate"
+      },
+      "files": {
+        "upload": "/api/files/upload",
+        "download": "/api/files/download/{id}",
+        "convert": "/api/files/convert",
+        "list": "/api/files",
+        "delete": "/api/files/{id}",
+        "metadata": "/api/files/{id}/metadata"
+      },
+      "plc": {
+        "validate": "/api/plc/validate-code",
+        "compile": "/api/plc/compile",
+        "analyze": "/api/plc/analyze",
+        "suggestions": "/api/plc/suggestions",
+        "documentation": "/api/plc/documentation/{tag}"
+      },
+      "llm": {
+        "chat": "/api/llm/chat",
+        "suggestions": "/api/llm/suggestions",
+        "validate": "/api/llm/validate",
+        "context": "/api/llm/context",
+        "history": "/api/llm/history"
+      },
+      "workflows": {
+        "list": "/api/workflows",
+        "create": "/api/workflows",
+        "get": "/api/workflows/{id}",
+        "update": "/api/workflows/{id}",
+        "delete": "/api/workflows/{id}",
+        "execute": "/api/workflows/{id}/execute",
+        "stop": "/api/workflows/{id}/stop",
+        "logs": "/api/workflows/{id}/logs"
+      },
+      "analytics": {
+        "dashboard": "/api/analytics/dashboard",
+        "metrics": "/api/analytics/metrics",
+        "trends": "/api/analytics/trends",
+        "reports": "/api/analytics/reports",
+        "export": "/api/analytics/export"
+      },
+      "system": {
+        "health": "/api/system/health",
+        "status": "/api/system/status",
+        "config": "/api/system/config",
+        "backup": "/api/system/backup",
+        "logs": "/api/system/logs"
+      }
+    }
+  },
+  "websocket": {
+    "url": "wss://api.plc-gbt.com/ws",
+    "reconnectInterval": 10000,
+    "maxReconnectAttempts": 5,
+    "heartbeatInterval": 30000,
+    "channels": {
+      "controlLoopUpdates": "control-loop-updates",
+      "fileOperations": "file-operations",
+      "workflowExecution": "workflow-execution",
+      "systemNotifications": "system-notifications",
+      "llmResponses": "llm-responses",
+      "analyticsUpdates": "analytics-updates"
+    }
+  },
+  "languageServer": {
+    "plc": {
+      "host": "langserver.plc-gbt.com",
+      "port": 443,
+      "path": "/plc-language-server",
+      "useSSL": true,
+      "capabilities": {
+        "textDocumentSync": true,
+        "completionProvider": true,
+        "hoverProvider": true,
+        "diagnosticsProvider": true,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": true,
+        "codeLensProvider": true,
+        "documentHighlightProvider": true,
+        "renameProvider": true,
+        "foldingRangeProvider": true,
+        "selectionRangeProvider": true
+      },
+      "languages": [
+        {
+          "id": "ladder-logic",
+          "extensions": [".lad", ".ladder"],
+          "mimeTypes": ["application/x-ladder-logic"]
+        },
+        {
+          "id": "structured-text",
+          "extensions": [".st", ".scl"],
+          "mimeTypes": ["application/x-structured-text"]
+        },
+        {
+          "id": "function-block",
+          "extensions": [".fbd", ".fb"],
+          "mimeTypes": ["application/x-function-block"]
+        },
+        {
+          "id": "logix-xml",
+          "extensions": [".l5x"],
+          "mimeTypes": ["application/xml", "application/x-logix-xml"]
+        }
+      ]
+    }
+  },
+  "authentication": {
+    "tokenStorage": "localStorage",
+    "tokenKey": "plc-gbt-auth-token",
+    "refreshTokenKey": "plc-gbt-refresh-token",
+    "userKey": "plc-gbt-user",
+    "sessionTimeout": 7200000,
+    "refreshThreshold": 600000,
+    "autoLogout": true,
+    "requireHttps": true,
+    "enableMFA": true,
+    "enableSSO": true
+  },
+  "fileHandling": {
+    "maxUploadSize": 104857600,
+    "allowedTypes": [
+      "application/x-acd",
+      "application/xml",
+      "application/json",
+      "text/plain",
+      "application/pdf",
+      "image/png",
+      "image/jpeg",
+      "image/gif"
+    ],
+    "chunkSize": 1048576,
+    "enableCompression": true,
+    "enableEncryption": true,
+    "virusScanEnabled": true,
+    "backupEnabled": true
+  },
+  "caching": {
+    "enabled": true,
+    "strategy": "lru",
+    "maxSize": 5000,
+    "ttl": 1800000,
+    "keys": {
+      "controlLoops": "control-loops",
+      "files": "files",
+      "workflows": "workflows",
+      "analytics": "analytics",
+      "userPreferences": "user-preferences"
+    },
+    "enableRedis": true,
+    "redisCluster": true
+  },
+  "performance": {
+    "requestTimeout": 60000,
+    "batchSize": 50,
+    "debounceDelay": 500,
+    "throttleDelay": 2000,
+    "enableLazyLoading": true,
+    "enableVirtualization": true,
+    "enableServiceWorker": true,
+    "enableCDN": true
+  },
+  "security": {
+    "enableCSRF": true,
+    "enableCORS": true,
+    "allowedOrigins": ["https://ide.plc-gbt.com", "https://app.plc-gbt.com"],
+    "enableRateLimiting": true,
+    "rateLimitRequests": 500,
+    "rateLimitWindow": 900000,
+    "enableAuditLogging": true,
+    "enableIPWhitelisting": true,
+    "enableSOP": true,
+    "enableContentSecurityPolicy": true,
+    "enableHSTS": true,
+    "securityHeaders": {
+      "X-Frame-Options": "DENY",
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "1; mode=block",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    }
+  },
+  "monitoring": {
+    "enableMetrics": true,
+    "enableErrorTracking": true,
+    "enablePerformanceTracking": true,
+    "metricsInterval": 60000,
+    "errorReportingEndpoint": "/api/errors/report",
+    "performanceEndpoint": "/api/performance/track",
+    "enableAPM": true,
+    "enableLogging": true,
+    "logLevel": "info",
+    "enableAlerts": true
+  },
+  "features": {
+    "enableVoiceInterface": true,
+    "enableOfflineMode": true,
+    "enableCollaboration": true,
+    "enableAdvancedAnalytics": true,
+    "enableWorkflowAutomation": true,
+    "enableRealTimeSync": true,
+    "enableBackgroundSync": true,
+    "enableNotifications": true
+  },
+  "extensions": {
+    "plcFileExplorer": {
+      "enabled": true,
+      "autoRefresh": true,
+      "refreshInterval": 30000,
+      "showHiddenFiles": false,
+      "enablePreview": true,
+      "enableVersioning": true,
+      "enableBackup": true
+    },
+    "plcLanguageSupport": {
+      "enabled": true,
+      "enableIntelliSense": true,
+      "enableValidation": true,
+      "enableFormatting": true,
+      "enableSuggestions": true,
+      "enableCodeLens": true,
+      "enableRefactoring": true
+    },
+    "conversationalAI": {
+      "enabled": true,
+      "enableVoice": true,
+      "enableHistory": true,
+      "maxHistoryItems": 500,
+      "enableSuggestions": true,
+      "enableContextAwareness": true,
+      "enablePersonalization": true
+    },
+    "workflowEditor": {
+      "enabled": true,
+      "enableAutoSave": true,
+      "autoSaveInterval": 60000,
+      "enableTemplates": true,
+      "enableSharing": true,
+      "enableVersionControl": true,
+      "enableCollaboration": true
+    },
+    "controlLoopDashboard": {
+      "enabled": true,
+      "refreshInterval": 5000,
+      "enableAlerts": true,
+      "enableTrends": true,
+      "maxDataPoints": 10000,
+      "enableExport": true,
+      "enableReporting": true
+    },
+    "analyticsVisualization": {
+      "enabled": true,
+      "defaultChartType": "line",
+      "enableExport": true,
+      "enableCustomDashboards": true,
+      "maxChartDataPoints": 100000,
+      "enableRealTimeUpdates": true,
+      "enableDrillDown": true
+    },
+    "systemAdministration": {
+      "enabled": true,
+      "enableUserManagement": true,
+      "enableSystemConfig": true,
+      "enableBackup": true,
+      "enableLogs": true,
+      "enableAuditTrail": true,
+      "enableSystemMonitoring": true
+    }
+  },
+  "deployment": {
+    "environment": "production",
+    "region": "us-east-1",
+    "enableCDN": true,
+    "enableLoadBalancer": true,
+    "enableAutoScaling": true,
+    "enableHealthChecks": true,
+    "enableGracefulShutdown": true,
+    "enableRollingDeployments": true
+  },
+  "compliance": {
+    "enableIEC62443": true,
+    "enableSOC2": true,
+    "enableISO27001": true,
+    "enableGDPR": true,
+    "enableHIPAA": false,
+    "enableDataRetention": true,
+    "retentionPeriod": 2592000000,
+    "enableDataMasking": true
+  }
+} 

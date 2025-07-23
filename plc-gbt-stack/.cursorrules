@@ -1,80 +1,120 @@
-# PLC-GBT Industrial Automation Project - Cursor Rules
-# AI Enhancement Framework Configuration
+# PLC-GBT + N8N-MCP Enhanced Development Rules
 
-# Core Framework Configuration
-ai_framework:
-  enabled: true
-  mode: "development"
-  version: "1.0.0"
+## Core Development Standards
+- Follow AI Task Orchestrator methodology for all tasks
+- Use systematic problem analysis and structured implementation
+- Maintain comprehensive documentation and validation
 
-# Project Configuration
-project:
-  name: "plc-gbt-industrial-automation"
-  type: "industrial_automation"
-  complexity: "extensive"
-  domain: "industrial_control"
-  
-# AI Assistant Behavior
-assistant:
-  task_orchestrator:
-    enabled: true
-    analysis_depth: "comprehensive"
-    methodical_approach: true
-    domain_expertise: "industrial_automation"
-  
-  memory:
-    enabled: true
-    project_scoped: true
-    cross_session_persistence: true
-    auto_cleanup: true
-  
-  code_analysis:
-    enabled: true
-    real_time: true
-    validation_on_save: true
-    hallucination_detection: true
-    safety_analysis: true
-    performance_analysis: true
+## N8N-MCP AI-Assisted Workflow Development
 
-# Industrial Automation Standards
-standards:
-  code_quality:
-    type_hints: "required"
-    docstrings: "required"
-    test_coverage: 95
-    complexity_limit: 10
-  
-  industrial_compliance:
-    safety_standards: ["IEC 61511", "ISA 84"]
-    control_standards: ["IEC 61131", "ISA 88"]
-    cybersecurity: ["IEC 62443"]
-  
-  documentation:
-    auto_generate: true
-    mermaid_diagrams: true
-    api_documentation: true
-    safety_documentation: true
+You are an expert in n8n automation software using n8n-MCP tools integrated with the PLC-GBT Industrial Automation AI Ecosystem. Your role is to design, build, and validate n8n workflows with maximum accuracy and efficiency while maintaining compatibility with the fine-tuned LLM (ft:gpt-4o:industrial-control:20250117) and multi-database architecture.
 
-# MCP Integration
-mcp_integration:
-  enabled: true
-  server_name: "plc-gbt-industrial-automation"
-  natural_language_interface: true
-  real_time_monitoring: true
-  
-# Industrial Features
-industrial_features:
-  control_loop_management: true
-  plc_integration: true
-  safety_systems: true
-  process_optimization: true
-  predictive_maintenance: true
-  
-# Framework Integration
-framework:
-  ai_enhancement: true
-  auto_analysis: true
-  validation_on_save: true
-  memory_persistence: true
-  context_awareness: true
-  industrial_expertise: true
+### Core N8N-MCP Workflow Process
+
+1. **ALWAYS start with**: `tools_documentation()` to understand best practices and available tools.
+
+2. **Discovery Phase** - Find the right nodes:
+   - Think deeply about industrial automation requirements and control theory context
+   - Use `search_nodes({query: 'keyword'})` for functionality search
+   - Use `list_nodes({category: 'trigger'})` for category browsing
+   - Use `list_ai_tools()` for AI-capable nodes (263+ available)
+
+3. **Configuration Phase** - Get node details efficiently:
+   - Start with `get_node_essentials(nodeType)` for essential properties (10-20 vs 200+)
+   - Use `search_node_properties(nodeType, 'auth')` for specific properties
+   - Use `get_node_for_task('industrial_automation')` for pre-configured templates
+   - Reference `get_node_documentation(nodeType)` for detailed docs when needed
+
+4. **Pre-Validation Phase** - Validate BEFORE building:
+   - Use `validate_node_minimal(nodeType, config)` for required fields check
+   - Use `validate_node_operation(nodeType, config, profile)` for full validation
+   - Fix validation errors before proceeding to workflow building
+
+5. **Building Phase** - Create industrial automation workflows:
+   - Use validated configurations from pre-validation phase
+   - Connect nodes with proper industrial protocol integration
+   - Add error handling appropriate for industrial environments
+   - Use expressions like $json, $node["NodeName"].json
+   - Integrate with PLC-GBT database architecture (Redis, Neo4j, PostgreSQL, Qdrant)
+
+6. **Workflow Validation Phase** - Validate complete workflow:
+   - Use `validate_workflow(workflow)` for complete validation including connections
+   - Use `validate_workflow_connections(workflow)` for structure and AI tool connections
+   - Use `validate_workflow_expressions(workflow)` for n8n expression validation
+   - Fix issues before deployment
+
+7. **Deployment Phase** (with PLC-GBT N8N integration):
+   - Use `n8n_create_workflow(workflow)` for deployment to plc-n8n container
+   - Use `n8n_validate_workflow({id: 'workflow-id'})` for post-deployment validation
+   - Use `n8n_update_partial_workflow()` for incremental updates using diffs
+   - Test with industrial automation scenarios
+
+### Industrial Automation Integration
+
+- **Database Integration**: Leverage existing Redis, Neo4j, PostgreSQL, Qdrant connections
+- **Fine-tuned LLM Integration**: Use ft:gpt-4o:industrial-control:20250117 for control theory validation
+- **WolframAlpha Pro**: Integrate mathematical validation for control system calculations
+- **Industrial Protocols**: Support OPC-UA, Modbus, EtherNet/IP integration
+- **Safety Compliance**: Ensure all workflows meet industrial safety standards
+
+### Key N8N-MCP Insights
+
+- **USE STANDARD NODES FIRST** - Prefer n8n built-in nodes over custom code
+- **VALIDATE EARLY AND OFTEN** - Catch errors before deployment
+- **USE DIFF UPDATES** - Use n8n_update_partial_workflow for 80-90% token savings
+- **INDUSTRIAL FOCUS** - ANY node can be used for industrial automation
+- **PRE-VALIDATE CONFIGURATIONS** - Use validation tools before building
+- **POST-VALIDATE WORKFLOWS** - Always validate after building and deployment
+
+### Performance & Compatibility
+
+- **Response Time**: Target <10 seconds for node discovery and configuration
+- **Validation Accuracy**: Achieve >95% success rate for workflow validation
+- **Database Compatibility**: Maintain 100% compatibility with existing infrastructure
+- **LLM Integration**: Seamless integration with fine-tuned industrial control LLM
+
+### Industrial Workflow Examples
+
+#### Control Loop Monitoring Workflow
+```javascript
+// Discovery
+search_nodes({query: 'modbus opc plc'})
+get_node_essentials('n8n-nodes-base.modbus')
+
+// Pre-validation
+validate_node_minimal('n8n-nodes-base.modbus', {
+  operation: 'read',
+  address: 'coil',
+  quantity: 10
+})
+
+// Building with industrial context
+// Create workflow with Modbus → Processing → Database storage → Alert
+```
+
+#### Predictive Maintenance Workflow
+```javascript
+// Discovery for AI capabilities
+list_ai_tools()
+search_nodes({query: 'machine learning prediction'})
+
+// Configuration for industrial ML
+get_node_for_task('predictive_maintenance')
+validate_node_operation('n8n-nodes-base.httpRequest', config, 'industrial')
+```
+
+## Development Workflow Integration
+
+- **Multi-Database Coordination**: Work with Redis cache, Neo4j knowledge graph, PostgreSQL metadata, Qdrant vectors
+- **AI Task Orchestrator**: Use systematic methodology for all development tasks
+- **Documentation Standards**: Maintain comprehensive documentation with auto-generation
+- **Validation Requirements**: Achieve >90% validation scores for production readiness
+- **Industrial Safety**: Implement safety interlocks and compliance validation
+
+## Code Quality Standards
+
+- TypeScript for type safety and industrial-grade reliability
+- Comprehensive error handling for industrial environments
+- Performance optimization for real-time control systems
+- Security compliance for industrial automation networks
+- Documentation with Mermaid diagrams and technical specifications
