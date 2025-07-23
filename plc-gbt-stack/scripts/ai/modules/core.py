@@ -176,7 +176,7 @@ class DatabaseManager:
         self._redis_client = None
         self.logger = logging.getLogger(__name__)
     
-    def get_postgres_connection(self) -> Optional[psycopg2.extensions.connection]:
+    def get_postgres_connection(self) -> Optional["psycopg2.extensions.connection"]:
         """Get PostgreSQL connection with retry logic"""
         if not DATABASE_LIBRARIES_AVAILABLE:
             self.logger.warning("Database libraries not available")
