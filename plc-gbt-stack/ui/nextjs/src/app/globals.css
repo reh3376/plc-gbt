@@ -1,0 +1,677 @@
+@import "tailwindcss";
+
+/* Reset browser defaults that could cause layout gaps */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* React Resizable Panels - Ensure explicit sizing and no gaps */
+[data-panel-group] {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+[data-panel] {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Right column specific fixes */
+#right-column {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Smooth panel transitions */
+[data-panel-group] {
+  transition: all 1000ms ease-in-out;
+}
+
+[data-panel] {
+  transition: all 1000ms ease-in-out;
+}
+
+[data-panel-resize-handle] {
+  transition: all 1000ms ease-in-out;
+}
+
+/* AI Assistant smooth appearance/disappearance */
+.ai-assistant-panel {
+  transition: transform 1000ms ease-in-out, opacity 1000ms ease-in-out;
+}
+
+.ai-assistant-panel.entering {
+  animation: slideInFromRight 1000ms ease-in-out;
+}
+
+.ai-assistant-panel.exiting {
+  animation: slideOutToRight 1000ms ease-in-out;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Explicit panel sizing and transitions */
+[data-panel-group] {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transition: all 1000ms ease-in-out !important;
+}
+
+[data-panel] {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transition: all 1000ms ease-in-out !important;
+  transition-property: width, height, transform, opacity !important;
+}
+
+[data-panel-resize-handle] {
+  transition: all 1000ms ease-in-out !important;
+  transition-property: background-color, opacity, transform !important;
+}
+
+/* Force smooth panel resizing */
+[data-panel-group] * {
+  transition: width 1000ms ease-in-out !important;
+}
+
+/* AI Assistant specific animations */
+.ai-assistant-panel {
+  transition: transform 1000ms ease-in-out, opacity 1000ms ease-in-out !important;
+  animation-duration: 1000ms !important;
+  animation-timing-function: ease-in-out !important;
+}
+
+.ai-assistant-panel.entering {
+  animation: slideInFromRight 1000ms ease-in-out !important;
+}
+
+.ai-assistant-panel.exiting {
+  animation: slideOutToRight 1000ms ease-in-out !important;
+}
+
+/* Enhanced keyframe animations */
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(50%);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(50%);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Force disable any conflicting animations */
+* {
+  animation-duration: inherit !important;
+}
+
+/* Explicit panel sizing and transitions with forced timing */
+[data-panel-group] {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transition: all 1000ms ease-in-out !important;
+  animation-duration: 1000ms !important;
+}
+
+[data-panel] {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transition: all 1000ms ease-in-out !important;
+  transition-property: width, height, transform, opacity, flex-basis !important;
+  animation-duration: 1000ms !important;
+}
+
+[data-panel-resize-handle] {
+  transition: all 1000ms ease-in-out !important;
+  transition-property: background-color, opacity, transform, width !important;
+  animation-duration: 1000ms !important;
+}
+
+/* Force smooth panel resizing with explicit timing */
+[data-panel-group] * {
+  transition: width 1000ms ease-in-out, flex-basis 1000ms ease-in-out !important;
+  animation-duration: 1000ms !important;
+}
+
+/* Override any fast animations from react-resizable-panels */
+[data-panel-group-direction="horizontal"] {
+  transition: all 1000ms ease-in-out !important;
+}
+
+[data-panel-group-direction="horizontal"] > [data-panel] {
+  transition: width 1000ms ease-in-out, flex-basis 1000ms ease-in-out !important;
+}
+
+/* AI Assistant specific animations with longer duration */
+.ai-assistant-panel {
+  transition: transform 1000ms ease-in-out, opacity 1000ms ease-in-out !important;
+  animation-duration: 1000ms !important;
+  animation-timing-function: ease-in-out !important;
+}
+
+.ai-assistant-panel.entering {
+  animation: slideInFromRight 1000ms ease-in-out !important;
+}
+
+.ai-assistant-panel.exiting {
+  animation: slideOutToRight 1000ms ease-in-out !important;
+}
+
+/* Enhanced keyframe animations with longer duration */
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  25% {
+    transform: translateX(75%);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translateX(50%);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translateX(25%);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  25% {
+    transform: translateX(25%);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translateX(50%);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translateX(75%);
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Force disable any conflicting fast animations */
+* {
+  animation-duration: inherit !important;
+}
+
+/* Specific targeting for panel animations */
+#left-sidebar,
+#ai-column-2,
+#ai-right-edge,
+#main-content {
+  transition: all 1000ms ease-in-out !important;
+  animation-duration: 1000ms !important;
+}
+
+/* Resize handle specific animations */
+#left-panel-handle,
+#column2-handle,
+#right-edge-handle {
+  transition: all 1000ms ease-in-out !important;
+  animation-duration: 1000ms !important;
+}
+
+/* Enhanced Drag & Drop Visual Feedback - Phase 33.8 Task 33.5.4 */
+
+/* Screen Reader Only Utility Class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Enhanced focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Enhanced drag handles for accessibility */
+.drag-handle {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out, transform 200ms ease-in-out;
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.group:hover .drag-handle,
+.group:focus-within .drag-handle {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ARIA states for drag operations */
+[aria-grabbed="true"] {
+  transform: scale(1.05);
+  z-index: 1000;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+[aria-dropeffect="move"] {
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 2px dashed #3b82f6;
+}
+
+[aria-dropeffect="none"] {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 2px dashed #ef4444;
+}
+
+/* Enhanced drag overlay with accessibility announcements */
+.drag-overlay {
+  @apply shadow-2xl ring-4 ring-blue-500/50 transform rotate-2 scale-105;
+  animation: dragFloat 2s ease-in-out infinite alternate;
+}
+
+@keyframes dragFloat {
+  0% {
+    transform: rotate(2deg) scale(1.05) translateY(0px);
+  }
+  100% {
+    transform: rotate(2deg) scale(1.05) translateY(-4px);
+  }
+}
+
+/* Drop zone indicators */
+.drop-zone {
+  position: relative;
+  transition: all 300ms ease-in-out;
+}
+
+.drop-zone.drop-valid {
+  @apply bg-blue-900/20 ring-2 ring-blue-400/50;
+}
+
+.drop-zone.drop-invalid {
+  @apply bg-red-900/20 ring-2 ring-red-400/50;
+}
+
+.drop-zone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.1) 50%, transparent 70%);
+  animation: dropZoneShimmer 2s ease-in-out infinite;
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+
+.drop-zone.drop-valid::before {
+  opacity: 1;
+}
+
+@keyframes dropZoneShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Icon Strip drag enhancements */
+.icon-strip-item {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-strip-item.dragging {
+  @apply shadow-lg ring-2 ring-blue-400/75 scale-110;
+  z-index: 50;
+}
+
+.icon-strip-item:not(.dragging):hover {
+  transform: translateY(-1px);
+  @apply shadow-md;
+}
+
+/* File Explorer drag enhancements */
+.file-item {
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.file-item.dragging {
+  @apply shadow-xl ring-2 ring-blue-400/75 scale-105 z-50;
+  transform: rotate(2deg) scale(1.05);
+}
+
+.file-item.drop-target {
+  @apply bg-blue-900/25 ring-2 ring-blue-400/50;
+  animation: dropTargetPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes dropTargetPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+.file-item .file-icon {
+  transition: all 200ms ease-in-out;
+}
+
+.file-item:hover .file-icon {
+  transform: scale(1.1);
+}
+
+.file-item.dragging .file-icon {
+  animation: iconBounce 1s ease-in-out infinite;
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Smooth panel transitions */
+.panel-transition {
+  transition: all 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.panel-resize-handle {
+  transition: all 300ms ease-in-out;
+  position: relative;
+}
+
+.panel-resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+
+.panel-resize-handle:hover::before {
+  opacity: 1;
+}
+
+.panel-resize-handle:hover {
+  @apply bg-blue-600;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Enhanced tooltips for drag operations */
+.drag-tooltip {
+  @apply absolute z-50 px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-lg;
+  animation: tooltipFadeIn 200ms ease-out;
+  pointer-events: none;
+}
+
+@keyframes tooltipFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success feedback animations */
+.drop-success {
+  animation: dropSuccess 600ms ease-out;
+}
+
+@keyframes dropSuccess {
+  0% {
+    transform: scale(1);
+    background-color: rgba(34, 197, 94, 0);
+  }
+  50% {
+    transform: scale(1.05);
+    background-color: rgba(34, 197, 94, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    background-color: rgba(34, 197, 94, 0);
+  }
+}
+
+/* Error feedback animations */
+.drop-error {
+  animation: dropError 600ms ease-out;
+}
+
+@keyframes dropError {
+  0% {
+    transform: scale(1);
+    background-color: rgba(239, 68, 68, 0);
+  }
+  25% {
+    transform: scale(1.02);
+    background-color: rgba(239, 68, 68, 0.2);
+  }
+  75% {
+    transform: scale(0.98);
+    background-color: rgba(239, 68, 68, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    background-color: rgba(239, 68, 68, 0);
+  }
+}
+
+/* Enhanced accessibility for drag operations */
+.drag-item[aria-grabbed="true"] {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-800;
+}
+
+.drop-zone[aria-dropeffect="move"] {
+  @apply outline-dashed outline-2 outline-blue-400;
+}
+
+/* Loading states for drag operations */
+.drag-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.drag-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+  animation: dragLoading 1.5s infinite;
+}
+
+@keyframes dragLoading {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Mobile-responsive drag improvements */
+@media (max-width: 768px) {
+  .drag-handle {
+    opacity: 1; /* Always visible on mobile */
+    transform: none;
+  }
+  
+  .file-item, .icon-strip-item {
+    min-height: 44px; /* Better touch targets */
+  }
+  
+  .drag-tooltip {
+    @apply text-base px-4 py-3; /* Larger tooltips on mobile */
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .drop-zone.drop-valid {
+    @apply ring-4 ring-blue-300;
+  }
+  
+  .drop-zone.drop-invalid {
+    @apply ring-4 ring-red-300;
+  }
+  
+  .drag-overlay {
+    @apply ring-4 ring-blue-300;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .drag-handle,
+  .file-item,
+  .icon-strip-item,
+  .panel-transition,
+  .panel-resize-handle {
+    transition: none;
+  }
+  
+  .drag-overlay,
+  .drop-zone::before,
+  .file-item.drop-target,
+  .file-item.dragging .file-icon {
+    animation: none;
+  }
+}
