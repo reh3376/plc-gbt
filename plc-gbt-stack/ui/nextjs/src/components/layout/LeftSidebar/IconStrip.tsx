@@ -6,6 +6,7 @@ import { useLayoutStore, type ToolType, type IconConfig } from '@/lib/stores/lay
 import { 
   Folder,
   Search,
+  BarChart3,
   PlayCircle,
   Settings,
   User,
@@ -43,6 +44,7 @@ const ICON_MAP = {
   'control-loops': Activity,
   settings: Settings,
   user: User,
+  analytics: BarChart3,
 }
 
 const DEFAULT_ICONS: IconConfig[] = [
@@ -75,6 +77,12 @@ const DEFAULT_ICONS: IconConfig[] = [
     name: 'Settings',
     icon: 'settings',
     tooltip: 'Settings and preferences'
+  },
+  {
+    id: 'analytics',
+    name: 'Analytics',
+    icon: 'analytics',
+    tooltip: 'Application analytics'
   }
 ]
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Folder,
   FolderOpen,
@@ -22,7 +22,8 @@ import {
   Clock
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
-import { useFileStore, FileNode } from '@/lib/stores/file-store'
+import { FileNode } from '@/lib/stores/file-store'
+import { fileApiService, FileUpdateEvent } from '@/lib/services/file-api-service'
 import { ContextMenu, ContextMenuItem } from './context-menu'
 
 // File type icons mapping
@@ -113,9 +114,33 @@ interface FileItemProps {
   onSelect: (fileId: string) => void
   isSelected: boolean
   selectedFileId?: string | null
+  onToggleFolder: (folderId: string) => void
+  onDeleteFile: (fileId: string) => void  
+  onRenameFile: (fileId: string, newName: string) => void
+  onCopyFile: (fileId: string) => void
+  onCutFile: (fileId: string) => void
+  onPasteFile: (parentId: string | null) => void
+  onCreateFile: (name: string, parentPath: string) => void
+  onCreateFolder: (name: string, parentPath: string) => void
+  clipboardFile: { id: string, operation: 'copy' | 'cut' } | null
 }
 
-function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileItemProps) {
+function FileItem({ 
+  file, 
+  depth, 
+  onSelect, 
+  isSelected, 
+  selectedFileId,
+  onToggleFolder,
+  onDeleteFile,
+  onRenameFile,
+  onCopyFile,
+  onCutFile,
+  onPasteFile,
+  onCreateFile,
+  onCreateFolder,
+  clipboardFile
+}: FileItemProps) {
   const isExpanded = file.isExpanded
   const [isRenaming, setIsRenaming] = useState(false)
   const [newName, setNewName] = useState(file.name)
@@ -126,18 +151,6 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
     setIsMounted(true)
   }, [])
   
-  const {
-    toggleFolder,
-    deleteFile,
-    renameFile,
-    copyFile,
-    cutFile,
-    pasteFile,
-    clipboardFile,
-    addFile,
-    addFolder,
-  } = useFileStore()
-
   const isFolder = file.type === 'folder'
   const Icon = isFolder 
     ? (isExpanded ? FolderOpen : Folder)
@@ -145,7 +158,7 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
 
   const handleClick = () => {
     if (isFolder) {
-      toggleFolder(file.id)
+      onToggleFolder(file.id)
     } else {
       onSelect(file.id)
     }
@@ -153,7 +166,7 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
 
   const handleRename = () => {
     if (newName.trim() && newName !== file.name) {
-      renameFile(file.id, newName.trim())
+      onRenameFile(file.id, newName.trim())
     }
     setIsRenaming(false)
     setNewName(file.name)
@@ -186,14 +199,7 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
       onClick: () => {
         const parentId = isFolder ? file.id : file.parentId
         if (parentId) {
-          addFile({
-            name: 'Untitled.json',
-            type: 'file',
-            path: `${file.path}/Untitled.json`,
-            parentId,
-            fileType: 'json',
-            size: 0,
-          })
+          onCreateFile('Untitled.json', parentId)
         }
       },
       disabled: !isFolder && !file.parentId,
@@ -205,12 +211,7 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
       onClick: () => {
         const parentId = isFolder ? file.id : file.parentId
         if (parentId) {
-          addFolder({
-            name: 'New Folder',
-            type: 'folder',
-            path: `${file.path}/New Folder`,
-            parentId,
-          })
+          onCreateFolder('New Folder', parentId)
         }
       },
       disabled: !isFolder && !file.parentId,
@@ -221,14 +222,14 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
       label: 'Copy',
       icon: <Copy className="w-4 h-4" />,
       shortcut: 'Ctrl+C',
-      onClick: () => copyFile(file.id),
+      onClick: () => onCopyFile(file.id),
     },
     {
       id: 'cut',
       label: 'Cut',
       icon: <Scissors className="w-4 h-4" />,
       shortcut: 'Ctrl+X',
-      onClick: () => cutFile(file.id),
+      onClick: () => onCutFile(file.id),
       disabled: isFolder,
     },
     {
@@ -236,7 +237,7 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
       label: 'Paste',
       icon: <Copy className="w-4 h-4" />,
       shortcut: 'Ctrl+V',
-      onClick: () => pasteFile(isFolder ? file.id : file.parentId),
+      onClick: () => onPasteFile(isFolder ? file.id : file.parentId ?? null),
       disabled: !clipboardFile || (!isFolder && !file.parentId),
     },
     { id: 'separator3', separator: true },
@@ -252,7 +253,7 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
       label: 'Delete',
       icon: <Trash2 className="w-4 h-4" />,
       shortcut: 'Del',
-      onClick: () => deleteFile(file.id),
+      onClick: () => onDeleteFile(file.id),
       danger: true,
     },
   ]
@@ -341,6 +342,15 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
               onSelect={onSelect}
               isSelected={child.id === selectedFileId}
               selectedFileId={selectedFileId}
+              onToggleFolder={onToggleFolder}
+              onDeleteFile={onDeleteFile}
+              onRenameFile={onRenameFile}
+              onCopyFile={onCopyFile}
+              onCutFile={onCutFile}
+              onPasteFile={onPasteFile}
+              onCreateFile={onCreateFile}
+              onCreateFolder={onCreateFolder}
+              clipboardFile={clipboardFile}
             />
           ))}
         </div>
@@ -350,20 +360,14 @@ function FileItem({ file, depth, onSelect, isSelected, selectedFileId }: FileIte
 }
 
 export function EnhancedFileExplorer() {
-  const {
-    files,
-    selectedFileId,
-    selectFile,
-    searchQuery,
-    setSearchQuery,
-    getFilteredFiles,
-    isLoading,
-    setLoading,
-    addFile,
-    addFolder,
-  } = useFileStore()
+  const [files, setFiles] = useState<FileNode[]>([])
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [clipboardFile, setClipboardFile] = useState<{ id: string, operation: 'copy' | 'cut' } | null>(null)
 
-  const [_showCreateMenu, setShowCreateMenu] = useState(false)
+  const [, setShowCreateMenu] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   
   // Prevent hydration mismatch
@@ -371,47 +375,194 @@ export function EnhancedFileExplorer() {
     setIsMounted(true)
   }, [])
 
-  const displayFiles = searchQuery ? getFilteredFiles() : files
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files) return
-
-    Array.from(files).forEach(file => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const _content = e.target?.result as string
-        addFile({
-          name: file.name,
-          type: 'file',
-          path: `/uploads/${file.name}`,
-          parentId: '1', // Add to PLC Projects folder
-          fileType: file.name.endsWith('.json') ? 'json' : 
-                   file.name.endsWith('.acd') ? 'acd' :
-                   file.name.endsWith('.l5x') ? 'l5x' : 'json',
-          size: file.size,
-        })
+  const getFilteredFiles = useCallback((): FileNode[] => {
+    if (!searchQuery) return files
+    const query = searchQuery.toLowerCase()
+    
+    const filterNode = (node: FileNode): FileNode | null => {
+      const matches = node.name.toLowerCase().includes(query) ||
+                     node.path.toLowerCase().includes(query) ||
+                     node.fileType?.toLowerCase().includes(query)
+      
+      let filteredChildren: FileNode[] = []
+      if (node.children) {
+        filteredChildren = node.children
+          .map(child => filterNode(child))
+          .filter((child): child is FileNode => child !== null)
       }
-      reader.readAsText(file)
-    })
+      
+      if (matches || filteredChildren.length > 0) {
+        return {
+          ...node,
+          children: filteredChildren.length > 0 ? filteredChildren : node.children,
+          isExpanded: filteredChildren.length > 0 ? true : node.isExpanded
+        }
+      }
+      
+      return null
+    }
+    
+    return files
+      .map(file => filterNode(file))
+      .filter((file): file is FileNode => file !== null)
+  }, [files, searchQuery])
+
+  const fetchFiles = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const fetchedFiles = await fileApiService.getFileTree()
+      setFiles(fetchedFiles)
+    } catch (error) {
+      console.error('Failed to fetch files:', error)
+      setError('Failed to load files. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadFiles = event.target.files
+    if (!uploadFiles) return
+
+    setIsLoading(true)
+    try {
+      for (const file of Array.from(uploadFiles)) {
+        await fileApiService.uploadFile(file, '/uploads') // Upload to uploads folder
+      }
+      await fetchFiles() // Refresh file tree
+    } catch (error) {
+      console.error('Failed to upload files:', error)
+      setError('Failed to upload files. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
 
     event.target.value = '' // Reset input
   }
+
+  const handleCreateFile = async (name: string, parentPath: string) => {
+    setIsLoading(true)
+    try {
+      // Create a temporary file object for upload
+      const blob = new Blob([''], { type: 'application/json' })
+      const file = new File([blob], name, { type: 'application/json' })
+      await fileApiService.uploadFile(file, parentPath)
+      await fetchFiles()
+    } catch (error) {
+      console.error('Failed to create file:', error)
+      setError(`Failed to create ${name}. Please try again.`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCreateFolder = async (name: string, parentPath: string) => {
+    setIsLoading(true)
+    try {
+      await fileApiService.createFolder(parentPath, name)
+      await fetchFiles()
+    } catch (error) {
+      console.error('Failed to create folder:', error)
+      setError(`Failed to create folder ${name}. Please try again.`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleToggleFolder = useCallback((folderId: string) => {
+    // Find and toggle the folder in current state without API call (UI only)
+    const toggleInTree = (nodes: FileNode[]): FileNode[] => {
+      return nodes.map(node => {
+        if (node.id === folderId && node.type === 'folder') {
+          return { ...node, isExpanded: !node.isExpanded }
+        }
+        if (node.children) {
+          return { ...node, children: toggleInTree(node.children) }
+        }
+        return node
+      })
+    }
+    setFiles(toggleInTree(files))
+  }, [files])
+
+  const handleDeleteFile = useCallback(async (fileId: string) => {
+    setIsLoading(true)
+    try {
+      await fileApiService.deleteFile(fileId)
+      await fetchFiles()
+    } catch (error) {
+      console.error('Failed to delete file:', error)
+      setError('Failed to delete file. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [fetchFiles])
+
+  const handleRenameFile = useCallback(async (fileId: string, newName: string) => {
+    setIsLoading(true)
+    try {
+      await fileApiService.renameFile(fileId, newName)
+      await fetchFiles()
+    } catch (error) {
+      console.error('Failed to rename file:', error)
+      setError(`Failed to rename to ${newName}. Please try again.`)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [fetchFiles])
+
+  const handleCopyFile = useCallback((fileId: string) => {
+    setClipboardFile({ id: fileId, operation: 'copy' })
+  }, [])
+
+  const handleCutFile = useCallback((fileId: string) => {
+    setClipboardFile({ id: fileId, operation: 'cut' })
+  }, [])
+
+  const handlePasteFile = useCallback(async (parentId: string | null) => {
+    if (!clipboardFile || !parentId) return
+
+    setIsLoading(true)
+    try {
+      if (clipboardFile.operation === 'copy') {
+        await fileApiService.copyFile(clipboardFile.id, parentId)
+      } else {
+        await fileApiService.moveFile(clipboardFile.id, parentId)
+      }
+      setClipboardFile(null)
+      await fetchFiles()
+    } catch (error) {
+      console.error('Failed to paste file:', error)
+      setError('Failed to paste file. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clipboardFile, fetchFiles])
+
+  // Initialize file tree and WebSocket updates
+  useEffect(() => {
+    fetchFiles()
+
+    // Subscribe to real-time file updates
+    const unsubscribe = fileApiService.subscribeToFileUpdates((event: FileUpdateEvent) => {
+      console.log('File update received:', event)
+      // Refresh the file tree when files change
+      fetchFiles()
+    })
+
+    return unsubscribe
+  }, [fetchFiles])
+
+  const displayFiles = getFilteredFiles()
 
   const createMenuItems: ContextMenuItem[] = [
     {
       id: 'newFile',
       label: 'New PLC File',
       icon: <FileText className="w-4 h-4" />,
-      onClick: () => {
-        addFile({
-          name: 'Untitled.json',
-          type: 'file',
-          path: '/projects/Untitled.json',
-          parentId: '1',
-          fileType: 'json',
-          size: 0,
-        })
+      onClick: async () => {
+        await handleCreateFile('Untitled.json', '/projects')
         setShowCreateMenu(false)
       },
     },
@@ -419,13 +570,8 @@ export function EnhancedFileExplorer() {
       id: 'newFolder',
       label: 'New Folder',
       icon: <Folder className="w-4 h-4" />,
-      onClick: () => {
-        addFolder({
-          name: 'New Folder',
-          type: 'folder',
-          path: '/projects/New Folder',
-          parentId: '1',
-        })
+      onClick: async () => {
+        await handleCreateFolder('New Folder', '/projects')
         setShowCreateMenu(false)
       },
     },
@@ -473,8 +619,8 @@ export function EnhancedFileExplorer() {
               className="w-6 h-6 flex items-center justify-center hover:bg-[#3c3c3c] rounded transition-colors"
               title="Refresh"
               onClick={() => {
-                setLoading(true)
-                setTimeout(() => setLoading(false), 500) // Mock refresh
+                setIsLoading(true)
+                setTimeout(() => setIsLoading(false), 500) // Mock refresh
               }}
             >
               <RefreshCw className={cn(
@@ -492,6 +638,8 @@ export function EnhancedFileExplorer() {
           <div className="p-4 text-center text-[#969696] text-sm">
             Loading...
           </div>
+        ) : error ? (
+          <div className="p-4 text-center text-[#969696] text-sm">{error}</div>
         ) : displayFiles.length === 0 ? (
           <div className="p-4 text-center text-[#969696] text-sm">
             {searchQuery ? 'No files match your search' : 'No files in workspace'}
@@ -502,9 +650,18 @@ export function EnhancedFileExplorer() {
               key={file.id}
               file={file}
               depth={0}
-              onSelect={selectFile}
+              onSelect={setSelectedFileId}
               isSelected={file.id === selectedFileId}
               selectedFileId={selectedFileId}
+              onToggleFolder={handleToggleFolder}
+              onDeleteFile={handleDeleteFile}
+              onRenameFile={handleRenameFile}
+              onCopyFile={handleCopyFile}
+              onCutFile={handleCutFile}
+              onPasteFile={handlePasteFile}
+              onCreateFile={handleCreateFile}
+              onCreateFolder={handleCreateFolder}
+              clipboardFile={clipboardFile}
             />
           ))
         )}

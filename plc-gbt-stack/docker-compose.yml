@@ -374,6 +374,38 @@ services:
       - plc-database-network
       - plc-security-network
 
+  # PLC Memory CLI Service - Containerized for Docker Desktop Port Forwarding Issues
+  plc-memory:
+    build:
+      context: ./scripts/ai
+      dockerfile: Dockerfile.plc-memory
+    container_name: plc-memory-cli
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+      - NEO4J_HOST=neo4j
+      - QDRANT_HOST=qdrant
+      - POSTGRES_DB=plc_gbt
+      - POSTGRES_USER=plc_user
+      - POSTGRES_PASSWORD=postgres_password
+      - NEO4J_PASSWORD=password
+    networks:
+      - plc-database-network
+    volumes:
+      - ./scripts/ai:/data  # Mount for input/output files
+    command: ["--help"]  # Default to help command
+    profiles:
+      - tools  # Optional service, start with --profile tools
+
 # Phase 15 Enhanced Network Security
 networks:
   # Internal application network - isolated from external access

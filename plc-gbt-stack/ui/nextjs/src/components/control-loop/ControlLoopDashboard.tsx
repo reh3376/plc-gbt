@@ -10,16 +10,15 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { AlertCircle, RefreshCw, Settings, Plus, Filter, Search, BarChart3 } from 'lucide-react'
+import { AlertCircle, RefreshCw, Settings, Plus, Filter, Search } from 'lucide-react'
 
 // Enhanced types and schemas
 import type { 
   ControlLoopSummary, 
   DashboardFilters, 
-  ControlLoopType,
   ControlLoopUpdate 
 } from '@/lib/types/control-loop.types'
-import { dashboardFiltersSchema, controlLoopSummarySchema } from '@/lib/schemas/control-loop.schemas'
+import { dashboardFiltersSchema } from '@/lib/schemas/control-loop.schemas'
 
 // Component imports (to be implemented)
 import { ControlLoopGrid } from './ControlLoopGrid'

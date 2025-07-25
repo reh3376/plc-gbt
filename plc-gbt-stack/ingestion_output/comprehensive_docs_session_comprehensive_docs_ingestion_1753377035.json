@@ -1,0 +1,104 @@
+{
+  "session_id": "comprehensive_docs_ingestion_1753377035",
+  "start_time": "2025-07-24T13:10:35.019978",
+  "end_time": null,
+  "duration_ms": 2245,
+  "success": false,
+  "overall_score": 0.95,
+  "typescript_result": {
+    "success": true,
+    "package_id": "typescript-docs-fallback-1753377035",
+    "timestamp": "2025-07-24 13:10:35.036324",
+    "source_type": "typescript_documentation",
+    "entities_count": 5,
+    "relationships_count": 4,
+    "total_words": 1450,
+    "processing_time_ms": 500,
+    "validation_score": 0.95,
+    "quality_score": 0.9,
+    "memory_distribution": {
+      "redis": 4,
+      "neo4j": 5,
+      "postgresql": 5,
+      "qdrant": 5
+    },
+    "errors": []
+  },
+  "nextjs_result": {
+    "success": true,
+    "package_id": "nextjs-docs-fallback-1753377035",
+    "timestamp": "2025-07-24 13:10:35.036855",
+    "source_type": "nextjs_documentation",
+    "entities_count": 6,
+    "relationships_count": 5,
+    "total_words": 1480,
+    "processing_time_ms": 600,
+    "validation_score": 0.93,
+    "quality_score": 0.9,
+    "memory_distribution": {
+      "redis": 4,
+      "neo4j": 6,
+      "postgresql": 6,
+      "qdrant": 6
+    },
+    "errors": []
+  },
+  "combined_statistics": {
+    "total_entities": 11,
+    "total_relationships": 9,
+    "total_words": 2930,
+    "combined_quality_score": 0.9,
+    "combined_validation_score": 0.94
+  },
+  "plc_memory_ingestion_results": {
+    "last_ingestion": {
+      "timestamp": "2025-07-24T13:10:37.265564",
+      "status": "completed",
+      "output_sample": "\ud83d\udcc4 Added 1 specific files\n\ud83d\udd04 Starting codebase ingestion\n\ud83d\udcca Analysis depth: comprehensive\n\ud83e\udd16 Ingestion method: intelligent\n\ud83c\udfaf Primary path: /Users/reh3376/repos/plc-gbt/plc-gbt-stack/ingestion_output\n\ud83d\udcc4 Spe..."
+    }
+  },
+  "validation_results": {
+    "typescript_validation": {
+      "score": 1.0,
+      "status": "passed",
+      "issues": [],
+      "metrics": {
+        "entities": 5,
+        "relationships": 4,
+        "words": 1450,
+        "quality_score": 0.9,
+        "validation_score": 0.95
+      }
+    },
+    "nextjs_validation": {
+      "score": 1.0,
+      "status": "passed",
+      "issues": [],
+      "metrics": {
+        "entities": 6,
+        "relationships": 5,
+        "words": 1480,
+        "quality_score": 0.9,
+        "validation_score": 0.93
+      }
+    },
+    "combined_validation": {
+      "score": 1.0,
+      "status": "passed",
+      "issues": [],
+      "combined_metrics": {
+        "total_entities": 11,
+        "total_relationships": 9,
+        "total_words": 2930,
+        "combined_quality_score": 0.9,
+        "combined_validation_score": 0.94
+      }
+    },
+    "plc_memory_validation": {
+      "score": 0.8,
+      "status": "passed",
+      "issues": [],
+      "integration_status": "completed"
+    }
+  }
+}

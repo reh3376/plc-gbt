@@ -3,10 +3,9 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { 
-  Search,
+  Search, 
+  X, 
   FileText,
-  Filter,
-  X,
   ChevronDown,
   ChevronRight
 } from 'lucide-react'

@@ -410,4 +410,7 @@ Start typing to begin...`
       )}
     </div>
   )
-} 
+}
+
+// Default export for React.lazy() compatibility
+export default TabbedEditor 

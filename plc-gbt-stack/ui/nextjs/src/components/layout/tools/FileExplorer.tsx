@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
+import { useLayoutStore } from '@/lib/stores/layout-store'
 import { 
   Folder,
   FolderOpen,
@@ -10,7 +11,8 @@ import {
   ChevronDown,
   Plus,
   RefreshCw,
-  GripVertical
+  GripVertical,
+  BarChart3
 } from 'lucide-react'
 
 // NEW: @dnd-kit imports for Phase 33.8 Task 33.5.2
@@ -387,6 +389,7 @@ function FileExplorer() {
   const [focusedFileId, setFocusedFileId] = useState<string | null>(null)
   // NEW: ARIA live region for screen reader announcements
   const [announcement, setAnnouncement] = useState<string>('')
+  const { setMainContentMode } = useLayoutStore()
 
   // NEW: @dnd-kit sensors configuration for Phase 33.8
   const sensors = useSensors(
@@ -648,6 +651,14 @@ function FileExplorer() {
             aria-label="Refresh file explorer"
           >
             <RefreshCw className="w-4 h-4 text-[#cccccc]" />
+          </button>
+          <button
+            className="w-6 h-6 flex items-center justify-center hover:bg-[#3c3c3c] rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            title="Analytics"
+            aria-label="Switch to analytics view"
+            onClick={() => setMainContentMode('analytics')}
+          >
+            <BarChart3 className="w-4 h-4 text-[#cccccc]" />
           </button>
         </div>
 

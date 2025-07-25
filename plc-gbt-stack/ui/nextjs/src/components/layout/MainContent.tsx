@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react'
 import { cn } from '@/lib/utils/cn'
+import { MainContentRouter } from './MainContentRouter'
 
 interface MainContentProps {
   children?: ReactNode
@@ -17,31 +18,9 @@ export function MainContent({ children, className }: MainContentProps) {
         className
       )}
     >
-      {/* Content area */}
+      {/* Content area - now uses MainContentRouter for dynamic switching */}
       <div className="flex-1 overflow-hidden">
-        {children || (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">P</span>
-              </div>
-              <div>
-                <h2 className="text-[#cccccc] text-xl font-medium mb-2">
-                  Welcome to PLC-GBT
-                </h2>
-                <p className="text-[#969696] text-sm max-w-md">
-                  Industrial Automation IDE for PLC programming, workflow management, and control system design.
-                </p>
-              </div>
-              <div className="flex flex-col space-y-2 text-sm text-[#969696]">
-                <div>📁 Open a project from the file explorer</div>
-                <div>🔍 Search across your PLC files</div>
-                <div>⚙️ Manage workflows and automation</div>
-                <div>🤖 Access AI assistance from the right panel</div>
-              </div>
-            </div>
-          </div>
-        )}
+        {children || <MainContentRouter />}
       </div>
     </main>
   )

@@ -1,0 +1,437 @@
+{
+  "package_id": "typescript_docs_261f5f59",
+  "timestamp": "2025-07-24T16:42:00.687910+00:00",
+  "source_path": "https://www.typescriptlang.org/docs/",
+  "source_type": "typescript_documentation",
+  "entities": [
+    {
+      "id": "ts_basic_types",
+      "type": "documentation",
+      "name": "Basic Types in TypeScript",
+      "description": "Basic Types in TypeScript",
+      "content": "TypeScript builds on JavaScript by adding static type definitions. Types provide a way to describe the shape of an object, providing better documentation, and allowing TypeScript to validate that your code is working correctly. The primitive types in TypeScript are: boolean, number, string, array, tuple, enum, any, void, null, undefined, never, and object.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "basics",
+        "difficulty": "beginner",
+        "importance": "critical",
+        "wordCount": 53,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687574+00:00",
+        "tags": [
+          "types",
+          "primitives",
+          "basics",
+          "fundamentals"
+        ]
+      },
+      "tags": [
+        "types",
+        "primitives",
+        "basics",
+        "fundamentals"
+      ]
+    },
+    {
+      "id": "ts_interfaces",
+      "type": "guide",
+      "name": "Interfaces and Type Definitions",
+      "description": "Interfaces and Type Definitions",
+      "content": "One of TypeScript's core principles is that type checking focuses on the shape that values have. This is sometimes called 'duck typing' or 'structural subtyping'. In TypeScript, interfaces fill the role of naming these types, and are a powerful way of defining contracts within your code as well as contracts with code outside of your project.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "interfaces",
+        "difficulty": "intermediate",
+        "importance": "high",
+        "wordCount": 56,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687750+00:00",
+        "tags": [
+          "interfaces",
+          "contracts",
+          "structure",
+          "types"
+        ]
+      },
+      "tags": [
+        "interfaces",
+        "contracts",
+        "structure",
+        "types"
+      ]
+    },
+    {
+      "id": "ts_generics",
+      "type": "reference",
+      "name": "Generics and Type Parameters",
+      "description": "Generics and Type Parameters",
+      "content": "A major part of software engineering is building components that not only have well-defined and consistent APIs, but are also reusable. Components that are capable of working on the data of today as well as the data of tomorrow will give you the most flexible capabilities for building up large software systems. In languages like C# and Java, one of the main tools in the toolbox for creating reusable components is generics.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "generics",
+        "difficulty": "advanced",
+        "importance": "high",
+        "wordCount": 72,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687757+00:00",
+        "tags": [
+          "generics",
+          "reusability",
+          "type-parameters",
+          "templates"
+        ]
+      },
+      "tags": [
+        "generics",
+        "reusability",
+        "type-parameters",
+        "templates"
+      ]
+    },
+    {
+      "id": "ts_classes",
+      "type": "tutorial",
+      "name": "Classes and Inheritance",
+      "description": "Classes and Inheritance",
+      "content": "Traditional JavaScript uses functions and prototype-based inheritance to build up reusable components, but this may feel a bit awkward to programmers more comfortable with an object-oriented approach, where classes inherit functionality and objects are built from these classes. Starting with ECMAScript 2015, also known as ECMAScript 6, JavaScript programmers can build their applications using this object-oriented class-based approach.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "classes",
+        "difficulty": "intermediate",
+        "importance": "medium",
+        "wordCount": 58,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687761+00:00",
+        "tags": [
+          "classes",
+          "inheritance",
+          "oop",
+          "object-oriented"
+        ]
+      },
+      "tags": [
+        "classes",
+        "inheritance",
+        "oop",
+        "object-oriented"
+      ]
+    },
+    {
+      "id": "ts_modules",
+      "type": "documentation",
+      "name": "Modules and Namespaces",
+      "description": "Modules and Namespaces",
+      "content": "Starting with ECMAScript 2015, JavaScript has a concept of modules. TypeScript shares this concept. Modules are executed within their own scope, not in the global scope; this means that variables, functions, classes, etc. declared in a module are not visible outside the module unless they are explicitly exported using one of the export forms.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "modules",
+        "difficulty": "intermediate",
+        "importance": "high",
+        "wordCount": 54,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687765+00:00",
+        "tags": [
+          "modules",
+          "exports",
+          "imports",
+          "namespaces"
+        ]
+      },
+      "tags": [
+        "modules",
+        "exports",
+        "imports",
+        "namespaces"
+      ]
+    },
+    {
+      "id": "ts_decorators",
+      "type": "example",
+      "name": "Decorators and Metadata",
+      "description": "Decorators and Metadata",
+      "content": "Decorators provide a way to add both annotations and a meta-programming syntax for class declarations and members. Decorators are a stage 2 proposal for JavaScript and are available as an experimental feature of TypeScript. To enable experimental support for decorators, you must enable the experimentalDecorators compiler option either on the command line or in your tsconfig.json.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "decorators",
+        "difficulty": "expert",
+        "importance": "medium",
+        "wordCount": 56,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687768+00:00",
+        "tags": [
+          "decorators",
+          "metadata",
+          "annotations",
+          "experimental"
+        ]
+      },
+      "tags": [
+        "decorators",
+        "metadata",
+        "annotations",
+        "experimental"
+      ]
+    },
+    {
+      "id": "ts_utility_types",
+      "type": "reference",
+      "name": "Utility Types and Type Manipulation",
+      "description": "Utility Types and Type Manipulation",
+      "content": "TypeScript provides several utility types to facilitate common type transformations. These utilities are available globally. Partial<Type>, Required<Type>, Readonly<Type>, Record<Keys,Type>, Pick<Type,Keys>, Omit<Type,Keys>, Exclude<UnionType,ExcludedMembers>, Extract<Type,Union>, NonNullable<Type>, Parameters<Type>, ConstructorParameters<Type>, ReturnType<Type>, InstanceType<Type>.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "utility-types",
+        "difficulty": "advanced",
+        "importance": "high",
+        "wordCount": 28,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687770+00:00",
+        "tags": [
+          "utility-types",
+          "type-manipulation",
+          "advanced",
+          "helpers"
+        ]
+      },
+      "tags": [
+        "utility-types",
+        "type-manipulation",
+        "advanced",
+        "helpers"
+      ]
+    },
+    {
+      "id": "ts_enums",
+      "type": "guide",
+      "name": "Enums and Literal Types",
+      "description": "Enums and Literal Types",
+      "content": "Enums allow a developer to define a set of named constants. Using enums can make it easier to document intent, or create a set of distinct cases. TypeScript provides both numeric and string-based enums. Numeric enums are probably more familiar if you're coming from other languages. An enum can be defined using the enum keyword.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "enums",
+        "difficulty": "beginner",
+        "importance": "medium",
+        "wordCount": 55,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687774+00:00",
+        "tags": [
+          "enums",
+          "constants",
+          "literals",
+          "named-values"
+        ]
+      },
+      "tags": [
+        "enums",
+        "constants",
+        "literals",
+        "named-values"
+      ]
+    },
+    {
+      "id": "ts_type_guards",
+      "type": "tutorial",
+      "name": "Type Guards and Type Narrowing",
+      "description": "Type Guards and Type Narrowing",
+      "content": "Type guards are expressions that perform runtime checks that guarantee the type in some scope. To define a type guard, we simply need to define a function whose return type is a type predicate. A predicate takes the form parameterName is Type, where parameterName must be the name of a parameter from the current function signature.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "type-guards",
+        "difficulty": "advanced",
+        "importance": "high",
+        "wordCount": 56,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687777+00:00",
+        "tags": [
+          "type-guards",
+          "narrowing",
+          "runtime-checks",
+          "predicates"
+        ]
+      },
+      "tags": [
+        "type-guards",
+        "narrowing",
+        "runtime-checks",
+        "predicates"
+      ]
+    },
+    {
+      "id": "ts_configuration",
+      "type": "documentation",
+      "name": "TypeScript Configuration and Compiler Options",
+      "description": "TypeScript Configuration and Compiler Options",
+      "content": "The presence of a tsconfig.json file in a directory indicates that the directory is the root of a TypeScript project. The tsconfig.json file specifies the root files and the compiler options required to compile the project. JavaScript projects can use a jsconfig.json file instead, which acts almost the same but has some JavaScript-related compiler flags enabled by default.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "configuration",
+        "difficulty": "intermediate",
+        "importance": "critical",
+        "wordCount": 58,
+        "estimatedReadTime": 1,
+        "lastUpdated": "2025-07-24T16:42:00.687780+00:00",
+        "tags": [
+          "configuration",
+          "tsconfig",
+          "compiler",
+          "project-setup"
+        ]
+      },
+      "tags": [
+        "configuration",
+        "tsconfig",
+        "compiler",
+        "project-setup"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "source_id": "ts_basic_types",
+      "target_id": "ts_interfaces",
+      "relationship_type": "prerequisite",
+      "strength": 0.8,
+      "metadata": {
+        "generated_by": "python_ingestion_engine",
+        "confidence": 0.9
+      }
+    },
+    {
+      "source_id": "ts_interfaces",
+      "target_id": "ts_generics",
+      "relationship_type": "prerequisite",
+      "strength": 0.8,
+      "metadata": {
+        "generated_by": "python_ingestion_engine",
+        "confidence": 0.9
+      }
+    },
+    {
+      "source_id": "ts_basic_types",
+      "target_id": "ts_classes",
+      "relationship_type": "prerequisite",
+      "strength": 0.8,
+      "metadata": {
+        "generated_by": "python_ingestion_engine",
+        "confidence": 0.9
+      }
+    },
+    {
+      "source_id": "ts_classes",
+      "target_id": "ts_decorators",
+      "relationship_type": "prerequisite",
+      "strength": 0.8,
+      "metadata": {
+        "generated_by": "python_ingestion_engine",
+        "confidence": 0.9
+      }
+    },
+    {
+      "source_id": "ts_basic_types",
+      "target_id": "ts_enums",
+      "relationship_type": "prerequisite",
+      "strength": 0.8,
+      "metadata": {
+        "generated_by": "python_ingestion_engine",
+        "confidence": 0.9
+      }
+    },
+    {
+      "source_id": "ts_interfaces",
+      "target_id": "ts_type_guards",
+      "relationship_type": "prerequisite",
+      "strength": 0.8,
+      "metadata": {
+        "generated_by": "python_ingestion_engine",
+        "confidence": 0.9
+      }
+    },
+    {
+      "source_id": "ts_modules",
+      "target_id": "ts_configuration",
+      "relationship_type": "related",
+      "strength": 0.6,
+      "metadata": {
+        "generated_by": "python_ingestion_engine",
+        "confidence": 0.9
+      }
+    },
+    {
+      "source_id": "ts_generics",
+      "target_id": "ts_utility_types",
+      "relationship_type": "continuation",
+      "strength": 0.6,
+      "metadata": {
+        "generated_by": "python_ingestion_engine",
+        "confidence": 0.9
+      }
+    },
+    {
+      "source_id": "ts_enums",
+      "target_id": "ts_utility_types",
+      "relationship_type": "related",
+      "strength": 0.6,
+      "metadata": {
+        "generated_by": "python_ingestion_engine",
+        "confidence": 0.9
+      }
+    }
+  ],
+  "memory_distribution": {
+    "redis": [
+      "ts_basic_types",
+      "ts_enums",
+      "ts_configuration"
+    ],
+    "neo4j": [
+      "ts_basic_types",
+      "ts_interfaces",
+      "ts_generics",
+      "ts_classes",
+      "ts_modules",
+      "ts_decorators",
+      "ts_utility_types",
+      "ts_enums",
+      "ts_type_guards",
+      "ts_configuration"
+    ],
+    "postgresql": [
+      "ts_basic_types",
+      "ts_interfaces",
+      "ts_generics",
+      "ts_classes",
+      "ts_modules",
+      "ts_decorators",
+      "ts_utility_types",
+      "ts_enums",
+      "ts_type_guards",
+      "ts_configuration"
+    ],
+    "qdrant": [
+      "ts_basic_types",
+      "ts_interfaces",
+      "ts_generics",
+      "ts_classes",
+      "ts_modules",
+      "ts_decorators",
+      "ts_utility_types",
+      "ts_enums",
+      "ts_type_guards",
+      "ts_configuration"
+    ]
+  },
+  "validation_score": 0.97,
+  "confidence_scores": {
+    "content_accuracy": 1.0,
+    "relationship_strength": 0.9,
+    "metadata_completeness": 1.0,
+    "overall_quality": 0.97
+  },
+  "statistics": {
+    "total_entities": 10,
+    "total_relationships": 9,
+    "total_words": 546,
+    "processing_time_ms": 0.38909912109375,
+    "success_rate": 1.0
+  }
+}

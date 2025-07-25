@@ -1,22 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
-  X, 
-  Settings, 
-  Info, 
-  Code, 
-  Link,
-  Trash2,
-  Copy,
-  Edit3,
-  Save,
-  RotateCcw,
-  Eye,
-  EyeOff,
+  Settings,
+  X,
   ChevronDown,
   ChevronRight,
-  Activity,
+  Trash,
+  Copy,
+  Save,
+  Undo,
   AlertCircle,
   CheckCircle,
   Clock
@@ -291,40 +284,51 @@ export function WorkflowPropertiesPanel() {
 
   const renderPropertyField = (field: PropertyField, value: unknown) => {
     const error = errors[field.key]
+    const fieldId = `field-${field.key}-${selectedNode?.id || 'unknown'}`
 
     switch (field.type) {
       case 'text':
         return (
           <input
+            id={fieldId}
+            name={field.key}
             type="text"
             value={String(value) || ''}
             onChange={(e) => handleConfigChange(field.key, e.target.value, field)}
             className={cn(
-              'w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm',
+              'w-full max-w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm',
+              'min-w-0 box-border',
               error ? 'border-red-500' : 'border-[#404040]'
             )}
             placeholder={`Enter ${field.label.toLowerCase()}`}
+            aria-describedby={error ? `${fieldId}-error` : undefined}
           />
         )
 
       case 'number':
         return (
           <input
+            id={fieldId}
+            name={field.key}
             type="number"
             value={String(value) || ''}
             onChange={(e) => handleConfigChange(field.key, parseFloat(e.target.value) || 0, field)}
             className={cn(
-              'w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm',
+              'w-full max-w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm',
+              'min-w-0 box-border',
               error ? 'border-red-500' : 'border-[#404040]'
             )}
             placeholder={`Enter ${field.label.toLowerCase()}`}
+            aria-describedby={error ? `${fieldId}-error` : undefined}
           />
         )
 
       case 'boolean':
         return (
-          <label className="flex items-center space-x-2">
+          <label htmlFor={fieldId} className="flex items-center space-x-2">
             <input
+              id={fieldId}
+              name={field.key}
               type="checkbox"
               checked={Boolean(value) || false}
               onChange={(e) => handleConfigChange(field.key, e.target.checked, field)}
@@ -337,12 +341,16 @@ export function WorkflowPropertiesPanel() {
       case 'select':
         return (
           <select
+            id={fieldId}
+            name={field.key}
             value={String(value) || ''}
             onChange={(e) => handleConfigChange(field.key, e.target.value, field)}
             className={cn(
-              'w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm',
+              'w-full max-w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm',
+              'min-w-0 box-border',
               error ? 'border-red-500' : 'border-[#404040]'
             )}
+            aria-describedby={error ? `${fieldId}-error` : undefined}
           >
             <option value="">Select {field.label.toLowerCase()}</option>
             {field.options?.map((option) => (
@@ -356,14 +364,18 @@ export function WorkflowPropertiesPanel() {
       case 'textarea':
         return (
           <textarea
+            id={fieldId}
+            name={field.key}
             value={String(value) || ''}
             onChange={(e) => handleConfigChange(field.key, e.target.value, field)}
             rows={4}
             className={cn(
-              'w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm font-mono',
+              'w-full max-w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm font-mono',
+              'min-w-0 box-border resize-y',
               error ? 'border-red-500' : 'border-[#404040]'
             )}
             placeholder={`Enter ${field.label.toLowerCase()}`}
+            aria-describedby={error ? `${fieldId}-error` : undefined}
           />
         )
 
@@ -409,9 +421,9 @@ export function WorkflowPropertiesPanel() {
   }
 
   return (
-    <div className="w-80 bg-[#2d2d2d] border-l border-[#404040] flex flex-col">
+    <div className="w-80 bg-[#2d2d2d] border-l border-[#404040] flex flex-col h-full max-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-[#404040]">
+      <div className="flex items-center justify-between p-3 border-b border-[#404040] flex-shrink-0">
         <span className="text-sm font-medium text-white">
           {selectedNode ? 'Node Properties' : 'Edge Properties'}
         </span>
@@ -430,7 +442,7 @@ export function WorkflowPropertiesPanel() {
                 className="p-1 text-gray-400 hover:text-red-400"
                 title="Delete Node"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash className="w-4 h-4" />
               </button>
             </>
           )}
@@ -444,7 +456,7 @@ export function WorkflowPropertiesPanel() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[#404040]">
+      <div className="flex border-b border-[#404040] flex-shrink-0">
         {['properties', 'config', 'status'].map((tab) => (
           <button
             key={tab}
@@ -462,9 +474,9 @@ export function WorkflowPropertiesPanel() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
         {activeTab === 'properties' && selectedNode && (
-          <div className="p-3 space-y-4">
+          <div className="p-3 space-y-4 max-w-full">
             {/* Basic Properties */}
             <div>
               <button
@@ -483,7 +495,7 @@ export function WorkflowPropertiesPanel() {
                 <div className="space-y-3 ml-5">
                   {commonProperties.map((field) => (
                     <div key={field.key}>
-                      <label className="block text-xs text-gray-400 mb-1">
+                      <label htmlFor={`field-${field.key}-${selectedNode?.id || 'unknown'}`} className="block text-xs text-gray-400 mb-1">
                         {field.label}
                       </label>
                       {renderPropertyField(field, selectedNode.data[field.key as keyof typeof selectedNode.data])}
@@ -517,12 +529,12 @@ export function WorkflowPropertiesPanel() {
                   <div className="space-y-3 ml-5">
                     {nodeTypeProperties[selectedNode.type!].map((field) => (
                       <div key={field.key}>
-                        <label className="block text-xs text-gray-400 mb-1">
+                        <label htmlFor={`field-${field.key}-${selectedNode?.id || 'unknown'}`} className="block text-xs text-gray-400 mb-1">
                           {field.label}
                         </label>
                         {renderPropertyField(field, editingConfig[field.key])}
                         {errors[field.key] && (
-                          <p className="text-xs text-red-400 mt-1">{errors[field.key]}</p>
+                          <p id={`${field.key}-error`} className="text-xs text-red-400 mt-1">{errors[field.key]}</p>
                         )}
                         {field.description && !errors[field.key] && (
                           <p className="text-xs text-gray-500 mt-1">{field.description}</p>
@@ -545,7 +557,7 @@ export function WorkflowPropertiesPanel() {
                   onClick={handleResetConfig}
                   className="px-2 py-1 text-xs bg-gray-600 hover:bg-gray-700 text-white rounded"
                 >
-                  <RotateCcw className="w-3 h-3" />
+                  <Undo className="w-3 h-3" />
                 </button>
                 <button
                   onClick={handleSaveConfig}
@@ -558,21 +570,25 @@ export function WorkflowPropertiesPanel() {
             </div>
 
             <textarea
+              id="config-editor"
+              name="config"
               value={JSON.stringify(editingConfig, null, 2)}
               onChange={(e) => {
                 try {
                   const parsed = JSON.parse(e.target.value)
                   setEditingConfig(parsed)
                   setErrors({})
-                } catch (error) {
+                } catch {
                   setErrors({ json: 'Invalid JSON format' })
                 }
               }}
-              className="w-full h-64 px-3 py-2 bg-[#1e1e1e] border border-[#404040] rounded text-white text-xs font-mono"
+              className="w-full max-w-full h-64 px-3 py-2 bg-[#1e1e1e] border border-[#404040] rounded text-white text-xs font-mono min-w-0 box-border resize-y"
+              aria-label="Configuration JSON editor"
+              aria-describedby={errors.json ? "config-error" : undefined}
             />
             
             {errors.json && (
-              <p className="text-xs text-red-400 mt-2">{errors.json}</p>
+              <p id="config-error" className="text-xs text-red-400 mt-2">{errors.json}</p>
             )}
           </div>
         )}

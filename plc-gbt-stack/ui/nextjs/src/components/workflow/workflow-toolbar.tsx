@@ -1,40 +1,25 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { 
-  Save, 
-  FolderOpen, 
-  Download, 
-  Upload,
+import React, { useState } from 'react'
+import {
   Play,
   Pause,
   Square,
-  RotateCcw,
+  Save,
+  Download,
+  RefreshCw,
+  Layout,
+  GitBranch,
+  Code,
+  Cpu,
+  AlertTriangle,
+  Settings,
+  Wrench,
   ZoomIn,
   ZoomOut,
-  Maximize,
-  Grid,
-  Move,
-  Copy,
-  Trash2,
-  Settings,
-  Layers,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  ArrowRightLeft,
-  ArrowUpDown,
-  Network,
-  Cpu,
-  Database,
-  Monitor,
-  AlertTriangle,
-  Wifi,
-  Server,
-  Zap,
-  Activity,
-  RotateCw,
-  Gauge
+  Maximize2,
+  LayoutGrid,
+  Grid
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useWorkflowStore, IndustrialNodeType } from '@/lib/stores/workflow-store'
@@ -52,7 +37,7 @@ const nodePalette: NodePaletteItem[] = [
   {
     type: 'plc-input',
     label: 'PLC Input',
-    icon: Zap,
+    icon: RefreshCw,
     color: '#10B981',
     category: 'I/O',
     description: 'Digital or analog input from PLC'
@@ -60,7 +45,7 @@ const nodePalette: NodePaletteItem[] = [
   {
     type: 'plc-output',
     label: 'PLC Output',
-    icon: Activity,
+    icon: GitBranch,
     color: '#EF4444',
     category: 'I/O',
     description: 'Digital or analog output to PLC'
@@ -68,7 +53,7 @@ const nodePalette: NodePaletteItem[] = [
   {
     type: 'pid-controller',
     label: 'PID Controller',
-    icon: RotateCw,
+    icon: Cpu,
     color: '#8B5CF6',
     category: 'Control',
     description: 'Proportional-Integral-Derivative controller'
@@ -76,7 +61,7 @@ const nodePalette: NodePaletteItem[] = [
   {
     type: 'hmi-display',
     label: 'HMI Display',
-    icon: Monitor,
+    icon: AlertTriangle,
     color: '#8B5CF6',
     category: 'Interface',
     description: 'Human-machine interface display'
@@ -84,7 +69,7 @@ const nodePalette: NodePaletteItem[] = [
   {
     type: 'data-logger',
     label: 'Data Logger',
-    icon: Database,
+    icon: GitBranch,
     color: '#06B6D4',
     category: 'Data',
     description: 'Historical data logging and storage'
@@ -100,7 +85,7 @@ const nodePalette: NodePaletteItem[] = [
   {
     type: 'modbus-client',
     label: 'Modbus Client',
-    icon: Network,
+    icon: Wrench,
     color: '#EC4899',
     category: 'Communication',
     description: 'Modbus TCP/RTU client connection'
@@ -108,7 +93,7 @@ const nodePalette: NodePaletteItem[] = [
   {
     type: 'opc-server',
     label: 'OPC Server',
-    icon: Server,
+    icon: Code,
     color: '#84CC16',
     category: 'Communication',
     description: 'OPC-UA server interface'
@@ -116,7 +101,7 @@ const nodePalette: NodePaletteItem[] = [
   {
     type: 'custom-logic',
     label: 'Custom Logic',
-    icon: Cpu,
+    icon: AlertTriangle,
     color: '#F97316',
     category: 'Logic',
     description: 'Custom logic block with scripting'
@@ -124,7 +109,7 @@ const nodePalette: NodePaletteItem[] = [
   {
     type: 'n8n-workflow',
     label: 'N8N Workflow',
-    icon: Wifi,
+    icon: Layout,
     color: '#8B5CF6',
     category: 'Integration',
     description: 'N8N automation workflow'
@@ -136,24 +121,20 @@ const categories = ['All', 'I/O', 'Control', 'Interface', 'Data', 'Safety', 'Com
 export function WorkflowToolbar() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [showNodePalette, setShowNodePalette] = useState(true)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   const {
     nodes,
     edges,
     selectedNodes,
-    selectedEdges,
     activeWorkflow,
     snapToGrid,
     showMinimap,
-    showControls,
-    showBackground,
     isReadOnly,
     
     saveWorkflow,
     exportWorkflow,
     importWorkflow,
-    clearSelection,
     fitView,
     zoomIn,
     zoomOut,
@@ -163,8 +144,6 @@ export function WorkflowToolbar() {
     distributeNodes,
     setSnapToGrid,
     toggleMinimap,
-    toggleControls,
-    toggleBackground,
   } = useWorkflowStore()
 
   const filteredNodes = selectedCategory === 'All' 
@@ -200,7 +179,12 @@ export function WorkflowToolbar() {
       const reader = new FileReader()
       reader.onload = (e) => {
         const content = e.target?.result as string
-        importWorkflow(content, 'json')
+        try {
+          const data = JSON.parse(content)
+          importWorkflow(data)
+        } catch (error) {
+          console.error('Failed to parse workflow file:', error)
+        }
       }
       reader.readAsText(file)
     }
@@ -227,7 +211,7 @@ export function WorkflowToolbar() {
             title="Import Workflow"
             disabled={isReadOnly}
           >
-            <FolderOpen className="w-4 h-4" />
+            <Settings className="w-4 h-4" />
           </button>
           
           <button
@@ -293,7 +277,7 @@ export function WorkflowToolbar() {
             className="p-2 text-gray-300 hover:text-white hover:bg-[#3d3d3d] rounded transition-colors"
             title="Fit View"
           >
-            <Maximize className="w-4 h-4" />
+            <Maximize2 className="w-4 h-4" />
           </button>
           
           <button
@@ -301,7 +285,7 @@ export function WorkflowToolbar() {
             className="p-2 text-gray-300 hover:text-white hover:bg-[#3d3d3d] rounded transition-colors"
             title="Reset Zoom"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" />
           </button>
           
           <div className="w-px h-6 bg-[#404040] mx-2" />
@@ -315,7 +299,7 @@ export function WorkflowToolbar() {
             title="Auto Layout Horizontal"
             disabled={nodes.length === 0 || isReadOnly}
           >
-            <Move className="w-4 h-4" />
+            <LayoutGrid className="w-4 h-4" />
           </button>
           
           <button
@@ -324,7 +308,7 @@ export function WorkflowToolbar() {
             title="Align Left"
             disabled={selectedNodes.length < 2 || isReadOnly}
           >
-            <AlignLeft className="w-4 h-4" />
+            {/* AlignLeft removed */}
           </button>
           
           <button
@@ -333,7 +317,7 @@ export function WorkflowToolbar() {
             title="Align Center"
             disabled={selectedNodes.length < 2 || isReadOnly}
           >
-            <AlignCenter className="w-4 h-4" />
+            {/* AlignCenter removed */}
           </button>
           
           <button
@@ -342,7 +326,7 @@ export function WorkflowToolbar() {
             title="Distribute Horizontally"
             disabled={selectedNodes.length < 3 || isReadOnly}
           >
-            <ArrowRightLeft className="w-4 h-4" />
+            {/* ArrowRightLeft removed */}
           </button>
           
           <div className="w-px h-6 bg-[#404040] mx-2" />
@@ -373,7 +357,7 @@ export function WorkflowToolbar() {
             )}
             title="Toggle Minimap"
           >
-            <Layers className="w-4 h-4" />
+            <LayoutGrid className="w-4 h-4" />
           </button>
           
           <button

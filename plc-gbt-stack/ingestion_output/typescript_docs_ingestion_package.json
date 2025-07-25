@@ -1,0 +1,196 @@
+{
+  "package_id": "typescript-docs-fallback-1753377035",
+  "timestamp": "2025-07-24T13:10:35.035972",
+  "source_path": "https://www.typescriptlang.org/docs/",
+  "source_type": "typescript_documentation",
+  "entities": [
+    {
+      "id": "typescript-getting-started",
+      "type": "documentation",
+      "name": "TypeScript Getting Started",
+      "description": "Quick introductions based on background for TypeScript development",
+      "content": "TypeScript extends JavaScript by adding type definitions. Provides static type checking at compile time.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/",
+        "section": "get_started",
+        "difficulty": "beginner",
+        "importance": "critical",
+        "word_count": 150,
+        "estimated_read_time": 1,
+        "typescript_specific": true,
+        "tags": [
+          "typescript",
+          "getting-started",
+          "introduction"
+        ]
+      }
+    },
+    {
+      "id": "typescript-handbook",
+      "type": "guide",
+      "name": "TypeScript Handbook",
+      "description": "Great first read for daily TypeScript work including basics and everyday types",
+      "content": "The TypeScript Handbook covers the basics, everyday types, narrowing, functions, object types, and type manipulation.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/handbook/",
+        "section": "handbook",
+        "difficulty": "intermediate",
+        "importance": "high",
+        "word_count": 300,
+        "estimated_read_time": 2,
+        "typescript_specific": true,
+        "tags": [
+          "typescript",
+          "handbook",
+          "fundamentals"
+        ]
+      }
+    },
+    {
+      "id": "typescript-utility-types",
+      "type": "reference",
+      "name": "TypeScript Utility Types",
+      "description": "Deep dive reference for TypeScript utility types and advanced type manipulation",
+      "content": "TypeScript provides several utility types to facilitate common type transformations including Partial, Required, Pick, Omit, and more.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/handbook/utility-types.html",
+        "section": "reference",
+        "difficulty": "advanced",
+        "importance": "high",
+        "word_count": 450,
+        "estimated_read_time": 3,
+        "typescript_specific": true,
+        "tags": [
+          "typescript",
+          "utility-types",
+          "advanced"
+        ]
+      }
+    },
+    {
+      "id": "typescript-modules",
+      "type": "documentation",
+      "name": "TypeScript Modules",
+      "description": "How TypeScript models JavaScript modules including ESM/CJS interoperability",
+      "content": "TypeScript module system provides introduction, theory, guides for choosing compiler options, and appendices for ESM/CJS interoperability.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/handbook/modules.html",
+        "section": "modules_reference",
+        "difficulty": "intermediate",
+        "importance": "high",
+        "word_count": 200,
+        "estimated_read_time": 2,
+        "typescript_specific": true,
+        "tags": [
+          "typescript",
+          "modules",
+          "esm",
+          "cjs"
+        ]
+      }
+    },
+    {
+      "id": "typescript-declaration-files",
+      "type": "tutorial",
+      "name": "TypeScript Declaration Files",
+      "description": "Learn how to write declaration files to describe existing JavaScript for DefinitelyTyped contributions",
+      "content": "Declaration files (.d.ts) provide type information for JavaScript libraries. Includes templates, do's and don'ts, and publishing guidelines.",
+      "metadata": {
+        "source": "https://www.typescriptlang.org/docs/handbook/declaration-files/",
+        "section": "declaration_files",
+        "difficulty": "advanced",
+        "importance": "medium",
+        "word_count": 350,
+        "estimated_read_time": 3,
+        "typescript_specific": true,
+        "tags": [
+          "typescript",
+          "declaration-files",
+          "d.ts",
+          "definitely-typed"
+        ]
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "source_id": "typescript-getting-started",
+      "target_id": "typescript-handbook",
+      "relationship_type": "prerequisite",
+      "strength": 0.9,
+      "metadata": {
+        "relationship_basis": "learning_progression"
+      }
+    },
+    {
+      "source_id": "typescript-handbook",
+      "target_id": "typescript-utility-types",
+      "relationship_type": "continuation",
+      "strength": 0.8,
+      "metadata": {
+        "relationship_basis": "skill_progression"
+      }
+    },
+    {
+      "source_id": "typescript-handbook",
+      "target_id": "typescript-modules",
+      "relationship_type": "related",
+      "strength": 0.7,
+      "metadata": {
+        "relationship_basis": "topic_similarity"
+      }
+    },
+    {
+      "source_id": "typescript-utility-types",
+      "target_id": "typescript-declaration-files",
+      "relationship_type": "related",
+      "strength": 0.6,
+      "metadata": {
+        "relationship_basis": "advanced_topics"
+      }
+    }
+  ],
+  "memory_distribution": {
+    "redis": [
+      "typescript-getting-started",
+      "typescript-handbook",
+      "typescript-utility-types",
+      "typescript-modules"
+    ],
+    "neo4j": [
+      "typescript-getting-started",
+      "typescript-handbook",
+      "typescript-utility-types",
+      "typescript-modules",
+      "typescript-declaration-files"
+    ],
+    "postgresql": [
+      "typescript-getting-started",
+      "typescript-handbook",
+      "typescript-utility-types",
+      "typescript-modules",
+      "typescript-declaration-files"
+    ],
+    "qdrant": [
+      "typescript-getting-started",
+      "typescript-handbook",
+      "typescript-utility-types",
+      "typescript-modules",
+      "typescript-declaration-files"
+    ]
+  },
+  "validation_score": 0.95,
+  "confidence_scores": {
+    "content_accuracy": 0.9,
+    "relationship_strength": 0.85,
+    "metadata_completeness": 0.95,
+    "overall_quality": 0.9
+  },
+  "statistics": {
+    "total_entities": 5,
+    "total_relationships": 4,
+    "total_words": 1450,
+    "processing_time_ms": 500,
+    "success_rate": 1.0
+  }
+}

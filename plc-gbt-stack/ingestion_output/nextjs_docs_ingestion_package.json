@@ -1,0 +1,250 @@
+{
+  "package_id": "nextjs-docs-fallback-1753377035",
+  "timestamp": "2025-07-24T13:10:35.036491",
+  "source_path": "https://nextjs.org/docs/",
+  "source_type": "nextjs_documentation",
+  "entities": [
+    {
+      "id": "nextjs-getting-started",
+      "type": "documentation",
+      "name": "Next.js Getting Started",
+      "description": "Step-by-step tutorials to help create a new Next.js application and learn core features",
+      "content": "Next.js is a React framework for building full-stack web applications. You use React Components to build user interfaces, and Next.js for additional features and optimizations.",
+      "metadata": {
+        "source": "https://nextjs.org/docs/",
+        "section": "getting_started",
+        "router_type": "both",
+        "difficulty": "beginner",
+        "importance": "critical",
+        "word_count": 200,
+        "estimated_read_time": 1,
+        "nextjs_version": "15.4.3",
+        "tags": [
+          "nextjs",
+          "getting-started",
+          "react",
+          "framework"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-app-router",
+      "type": "documentation",
+      "name": "Next.js App Router",
+      "description": "The newer router that supports new React features like Server Components",
+      "content": "App Router is the newer router supporting new React features. File-system based routing with server components and modern data fetching patterns.",
+      "metadata": {
+        "source": "https://nextjs.org/docs/app/",
+        "section": "app_router",
+        "router_type": "app_router",
+        "difficulty": "intermediate",
+        "importance": "high",
+        "word_count": 180,
+        "estimated_read_time": 1,
+        "nextjs_version": "15.4.3",
+        "tags": [
+          "nextjs",
+          "app-router",
+          "server-components",
+          "react-18"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-pages-router",
+      "type": "documentation",
+      "name": "Next.js Pages Router",
+      "description": "The original router, still supported and being improved",
+      "content": "Pages Router is the original Next.js router. Traditional file-system based routing with getStaticProps, getServerSideProps, and client-side fetching.",
+      "metadata": {
+        "source": "https://nextjs.org/docs/pages/",
+        "section": "pages_router",
+        "router_type": "pages_router",
+        "difficulty": "intermediate",
+        "importance": "high",
+        "word_count": 150,
+        "estimated_read_time": 1,
+        "nextjs_version": "15.4.3",
+        "tags": [
+          "nextjs",
+          "pages-router",
+          "getStaticProps",
+          "getServerSideProps"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-api-reference",
+      "type": "api_reference",
+      "name": "Next.js API Reference",
+      "description": "Detailed technical reference for every Next.js feature including components, functions, and configuration",
+      "content": "Complete API reference covering directives, components (Font, Image, Link, Script), file-system conventions, functions, and configuration options.",
+      "metadata": {
+        "source": "https://nextjs.org/docs/app/api-reference/",
+        "section": "api_reference",
+        "router_type": "both",
+        "difficulty": "advanced",
+        "importance": "high",
+        "word_count": 400,
+        "estimated_read_time": 3,
+        "nextjs_version": "15.4.3",
+        "tags": [
+          "nextjs",
+          "api-reference",
+          "components",
+          "functions",
+          "configuration"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-guides",
+      "type": "guide",
+      "name": "Next.js Guides",
+      "description": "Tutorials on specific use cases for Next.js development including authentication, testing, and deployment",
+      "content": "Comprehensive guides covering analytics, authentication, caching, testing (Cypress, Jest, Playwright, Vitest), deployment, and third-party libraries.",
+      "metadata": {
+        "source": "https://nextjs.org/docs/app/guides/",
+        "section": "guides",
+        "router_type": "both",
+        "difficulty": "intermediate",
+        "importance": "medium",
+        "word_count": 300,
+        "estimated_read_time": 2,
+        "nextjs_version": "15.4.3",
+        "tags": [
+          "nextjs",
+          "guides",
+          "authentication",
+          "testing",
+          "deployment"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-architecture",
+      "type": "documentation",
+      "name": "Next.js Architecture",
+      "description": "Deep dive into Next.js architecture including accessibility, fast refresh, compiler, and supported browsers",
+      "content": "Architecture overview covering accessibility features, Fast Refresh development experience, Next.js Compiler for performance, and supported browser compatibility.",
+      "metadata": {
+        "source": "https://nextjs.org/docs/architecture/",
+        "section": "architecture",
+        "router_type": "both",
+        "difficulty": "advanced",
+        "importance": "medium",
+        "word_count": 250,
+        "estimated_read_time": 2,
+        "nextjs_version": "15.4.3",
+        "tags": [
+          "nextjs",
+          "architecture",
+          "accessibility",
+          "compiler",
+          "performance"
+        ]
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "source_id": "nextjs-getting-started",
+      "target_id": "nextjs-app-router",
+      "relationship_type": "continuation",
+      "strength": 0.9,
+      "metadata": {
+        "relationship_basis": "learning_progression",
+        "router_compatibility": true
+      }
+    },
+    {
+      "source_id": "nextjs-getting-started",
+      "target_id": "nextjs-pages-router",
+      "relationship_type": "continuation",
+      "strength": 0.8,
+      "metadata": {
+        "relationship_basis": "learning_progression",
+        "router_compatibility": true
+      }
+    },
+    {
+      "source_id": "nextjs-app-router",
+      "target_id": "nextjs-api-reference",
+      "relationship_type": "api_implementation",
+      "strength": 0.7,
+      "metadata": {
+        "relationship_basis": "api_documentation",
+        "router_specific": true
+      }
+    },
+    {
+      "source_id": "nextjs-pages-router",
+      "target_id": "nextjs-api-reference",
+      "relationship_type": "api_implementation",
+      "strength": 0.7,
+      "metadata": {
+        "relationship_basis": "api_documentation",
+        "router_specific": true
+      }
+    },
+    {
+      "source_id": "nextjs-guides",
+      "target_id": "nextjs-architecture",
+      "relationship_type": "related",
+      "strength": 0.6,
+      "metadata": {
+        "relationship_basis": "advanced_topics"
+      }
+    }
+  ],
+  "memory_distribution": {
+    "redis": [
+      "nextjs-getting-started",
+      "nextjs-app-router",
+      "nextjs-pages-router",
+      "nextjs-api-reference"
+    ],
+    "neo4j": [
+      "nextjs-getting-started",
+      "nextjs-app-router",
+      "nextjs-pages-router",
+      "nextjs-api-reference",
+      "nextjs-guides",
+      "nextjs-architecture"
+    ],
+    "postgresql": [
+      "nextjs-getting-started",
+      "nextjs-app-router",
+      "nextjs-pages-router",
+      "nextjs-api-reference",
+      "nextjs-guides",
+      "nextjs-architecture"
+    ],
+    "qdrant": [
+      "nextjs-getting-started",
+      "nextjs-app-router",
+      "nextjs-pages-router",
+      "nextjs-api-reference",
+      "nextjs-guides",
+      "nextjs-architecture"
+    ]
+  },
+  "validation_score": 0.93,
+  "confidence_scores": {
+    "content_accuracy": 0.88,
+    "relationship_strength": 0.82,
+    "metadata_completeness": 0.95,
+    "router_coverage": 0.95,
+    "overall_quality": 0.9
+  },
+  "statistics": {
+    "total_entities": 6,
+    "total_relationships": 5,
+    "total_words": 1480,
+    "total_code_examples": 0,
+    "app_router_entities": 1,
+    "pages_router_entities": 1,
+    "processing_time_ms": 600,
+    "success_rate": 1.0
+  }
+}

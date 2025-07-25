@@ -1,0 +1,33 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the plc-memory system files
+COPY *.py ./
+COPY modules/ ./modules/
+
+# Set environment variables for Docker internal networking
+ENV REDIS_HOST=redis
+ENV POSTGRES_HOST=postgres
+ENV NEO4J_HOST=neo4j
+ENV QDRANT_HOST=qdrant
+ENV POSTGRES_DB=plc_gbt
+ENV POSTGRES_USER=plc_user
+ENV POSTGRES_PASSWORD=postgres_password
+ENV NEO4J_PASSWORD=password
+
+# Create entrypoint script
+RUN echo '#!/bin/bash\npython3 plc_memory_cli.py "$@"' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["status"] 

@@ -3,16 +3,13 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { 
-  Settings,
-  Monitor,
+  User,
   Palette,
-  Keyboard,
+  Globe,
   Bell,
   Shield,
-  HardDrive,
-  Network,
-  Save,
-  RotateCcw
+  Eye,
+  Database
 } from 'lucide-react'
 
 interface Setting {
@@ -140,15 +137,15 @@ function SettingsPanel() {
       case 'Appearance':
         return <Palette className="w-4 h-4" />
       case 'Editor':
-        return <Monitor className="w-4 h-4" />
+        return <Globe className="w-4 h-4" />
       case 'System':
         return <Bell className="w-4 h-4" />
       case 'Network':
-        return <Network className="w-4 h-4" />
+        return <Database className="w-4 h-4" />
       case 'Security':
         return <Shield className="w-4 h-4" />
       default:
-        return <Settings className="w-4 h-4" />
+        return <User className="w-4 h-4" />
     }
   }
 
@@ -264,7 +261,7 @@ function SettingsPanel() {
               disabled={!hasChanges}
               className="flex items-center space-x-1 px-2 py-1 bg-[#3c3c3c] hover:bg-[#505050] disabled:opacity-50 disabled:cursor-not-allowed text-[#cccccc] text-xs rounded transition-colors"
             >
-              <RotateCcw className="w-3 h-3" />
+              <Eye className="w-3 h-3" />
               <span>Reset</span>
             </button>
             <button
@@ -272,7 +269,7 @@ function SettingsPanel() {
               disabled={!hasChanges}
               className="flex items-center space-x-1 px-2 py-1 bg-[#007acc] hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
             >
-              <Save className="w-3 h-3" />
+              <Database className="w-3 h-3" />
               <span>Save</span>
             </button>
           </div>

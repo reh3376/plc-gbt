@@ -1,9 +1,10 @@
 'use client'
 
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { useLayoutStore } from '@/lib/stores/layout-store'
 import { cn } from '@/lib/utils/cn'
 import { Loader2 } from 'lucide-react'
+import type { ToolType, MainContentMode } from '@/lib/stores/layout-store'
 
 // Lazy load tool components for performance
 const FileExplorer = lazy(() => import('../tools/FileExplorer'))
@@ -24,8 +25,34 @@ function ToolPanelSkeleton() {
   )
 }
 
+// Map tools to their corresponding MainContent modes
+const getMainContentModeForTool = (tool: ToolType): MainContentMode => {
+  switch (tool) {
+    case 'explorer':
+      return 'welcome' // Will switch to 'editor' when a file is opened
+    case 'search':
+      return 'welcome' // Could switch to 'editor' when search results are opened
+    case 'analytics':
+      return 'analytics'
+    case 'workflows':
+      return 'workflow'
+    case 'control-loops':
+      return 'control-loop'
+    case 'settings':
+      return 'settings-config'
+    default:
+      return 'welcome'
+  }
+}
+
 export function ToolPanel({ className }: ToolPanelProps) {
-  const { activeTool } = useLayoutStore()
+  const { activeTool, setMainContentMode } = useLayoutStore()
+
+  // Update MainContent mode when active tool changes
+  useEffect(() => {
+    const newMode = getMainContentModeForTool(activeTool)
+    setMainContentMode(newMode)
+  }, [activeTool, setMainContentMode])
 
   const getTitle = () => {
     switch (activeTool) {

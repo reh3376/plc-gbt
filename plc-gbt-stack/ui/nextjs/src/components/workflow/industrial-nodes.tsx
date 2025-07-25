@@ -1,26 +1,22 @@
 'use client'
 
-import { memo, useState } from 'react'
+import React, { useState, memo } from 'react'
 import { Handle, Position, NodeProps } from '@xyflow/react'
-import { 
-  Cpu, 
-  Database, 
-  Gauge, 
-  Monitor, 
-  AlertTriangle,
-  Wifi,
-  Server,
-  Settings,
-  Play,
-  Pause,
-  Square,
-  Activity,
-  Thermometer,
+import {
   Zap,
-  RotateCw,
+  Activity,
+  Gauge,
+  Monitor,
+  Database,
+  AlertTriangle,
   Network,
-  Eye,
-  User
+  Server,
+  Cpu,
+  Wifi,
+  Play,
+  Square,
+  Settings,
+  RotateCw
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { IndustrialNodeData } from '@/lib/stores/workflow-store'
@@ -456,7 +452,7 @@ CustomLogicNode.displayName = 'CustomLogicNode'
 
 // N8N Workflow Node
 export const N8NWorkflowNode = memo((props: NodeProps & { data: IndustrialNodeData }) => {
-  const [isConnected, setIsConnected] = useState(false)
+  const [isConnected] = useState(false)
 
   return (
     <div 

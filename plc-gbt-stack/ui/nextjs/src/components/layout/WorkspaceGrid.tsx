@@ -119,7 +119,7 @@ export function WorkspaceGrid() {
             localStorage.removeItem('plc-gbt-layout-storage')
             localStorage.setItem('plc-layout-emergency-clear', Date.now().toString())
           }
-        } catch (_e) {
+        } catch {
           console.error('EMERGENCY: Corrupted localStorage detected, clearing')
           localStorage.removeItem('plc-gbt-layout-storage')
         }

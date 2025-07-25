@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { 
   PlayCircle,
@@ -11,8 +11,7 @@ import {
   Trash2,
   Clock,
   CheckCircle,
-  XCircle,
-  AlertTriangle
+  XCircle
 } from 'lucide-react'
 
 interface Workflow {

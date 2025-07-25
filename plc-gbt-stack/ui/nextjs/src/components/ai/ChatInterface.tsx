@@ -48,10 +48,10 @@ export function ChatInterface({
     execute: executeHealthCheck
   } = useHealth()
 
-  // Execute health check on mount
+  // Health check on mount
   useEffect(() => {
-    executeHealthCheck();
-  }, []);
+    executeHealthCheck()
+  }, [executeHealthCheck])
 
   // Handle message sending with real API
   const handleSendMessage = async () => {
@@ -73,16 +73,34 @@ export function ChatInterface({
         // Use streaming for real-time responses
         const streamGenerator = streamMessage(userMessage)
         
-        // Add initial assistant message
+        // Add assistant message placeholder
         addMessage({
           content: '',
           role: 'assistant'
         })
 
-        for await (const chunk of streamGenerator) {
-          // TODO: Update the assistant message with accumulated content
-          // This would require updating the store to handle message updates
-          console.log('Stream chunk:', chunk.content)
+        try {
+          // Properly handle AsyncGenerator from streamMessage
+          for await (const chunk of streamGenerator) {
+            if (chunk.done) {
+              // Stream completed
+              break
+            }
+            
+            // TODO: Update the assistant message with accumulated content
+            // This would require updating the store to handle message updates
+            console.log('Stream chunk:', chunk.content)
+            
+            // For now, just log the content. In Phase 3, we'll implement
+            // proper message updating in the store
+          }
+        } catch (streamError) {
+          console.error('Streaming error:', streamError)
+          // Add error message for stream failures
+          addMessage({
+            content: `Streaming error: ${streamError instanceof Error ? streamError.message : 'Unknown streaming error'}`,
+            role: 'assistant'
+          })
         }
       } else {
         // Use standard message sending

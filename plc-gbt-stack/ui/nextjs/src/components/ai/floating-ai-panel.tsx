@@ -118,7 +118,7 @@ export function FloatingAIPanel({ className }: FloatingAIPanelProps) {
     }
 
     // Auto-docking logic with enhanced zones
-    const handleMouseUp = (_e: MouseEvent) => {
+    const handleMouseUp = () => {
       if (isDragging) {
         // Enhanced docking zones for better UX
         const dockThreshold = 80  // Increased threshold
@@ -171,6 +171,7 @@ export function FloatingAIPanel({ className }: FloatingAIPanelProps) {
   // Execute health check on mount - Remove dependency to prevent infinite loop
   useEffect(() => {
     executeHealthCheck();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);  // Empty dependency array - only run on mount
 
   // Enhanced dock-to-sidebar function
@@ -207,10 +208,28 @@ export function FloatingAIPanel({ className }: FloatingAIPanelProps) {
           role: 'assistant'
         })
 
-        for await (const chunk of streamGenerator) {
-          // TODO: Update the assistant message with accumulated content
-          // This would require updating the store to handle message updates
-          console.log('Stream chunk:', chunk.content)
+        try {
+          // Properly handle AsyncGenerator from streamMessage
+          for await (const chunk of streamGenerator) {
+            if (chunk.done) {
+              // Stream completed
+              break
+            }
+            
+            // TODO: Update the assistant message with accumulated content
+            // This would require updating the store to handle message updates
+            console.log('Stream chunk:', chunk.content)
+            
+            // For now, just log the content. In Phase 3, we'll implement
+            // proper message updating in the store
+          }
+        } catch (streamError) {
+          console.error('Streaming error:', streamError)
+          // Add error message for stream failures
+          addMessage({
+            content: `Streaming error: ${streamError instanceof Error ? streamError.message : 'Unknown streaming error'}`,
+            role: 'assistant'
+          })
         }
       } else {
         // Use standard message sending

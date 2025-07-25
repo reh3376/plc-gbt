@@ -75,7 +75,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
           setDockPosition(settings.dockPosition)
         }
         alert('Settings imported successfully!')
-      } catch (_error) {
+      } catch {
         alert('Invalid settings file format!')
       }
     }
