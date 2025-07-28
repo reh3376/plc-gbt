@@ -10,6 +10,7 @@
 The fine-tuned OpenAI LLM (ft:gpt-4o:industrial-control:20250117) cannot directly access the local n8n-MCP server because it runs on OpenAI's remote servers. We solve this with a **HTTP REST proxy pattern** through the existing PLC-GBT Gateway API.
 
 ### **Integration Flow**
+
 ```
 Fine-tuned LLM (OpenAI Servers)
        ↓ HTTP REST Calls
@@ -27,22 +28,26 @@ n8n Instance (localhost:5678)
 The fine-tuned LLM accesses n8n-MCP functionality through these Gateway API endpoints:
 
 #### **Core n8n-MCP Access**
+
 - `GET /api/v1/n8n-mcp/health` - Check n8n-MCP service health
 - `GET /api/v1/n8n-mcp/tools` - Get available MCP tools
 - `GET /api/v1/n8n-mcp/database/stats` - Get node database statistics
 
 #### **Node Discovery & Configuration**
+
 - `GET /api/v1/n8n-mcp/nodes/search?query={query}` - Search n8n nodes
 - `GET /api/v1/n8n-mcp/nodes/{node_type}/essentials` - Get node configuration
 - `GET /api/v1/n8n-mcp/ai-tools` - Get AI-capable nodes
 
 #### **Workflow Management**
+
 - `POST /api/v1/n8n-mcp/workflow/validate` - Validate workflow structure
 - `POST /api/v1/n8n-mcp/workflow/create` - Create new workflow
 - `POST /api/v1/n8n-mcp/workflow/optimize` - AI-optimize workflow
 - `GET /api/v1/n8n-mcp/workflow/{id}/validate` - Validate existing workflow
 
 #### **Industrial Automation**
+
 - `GET /api/v1/n8n-mcp/templates/industrial` - Get industrial templates
 - `GET /api/v1/n8n-mcp/integration/status` - Check integration status
 
@@ -65,6 +70,7 @@ Content-Type: application/json
 ### **3. Error Handling & Retry Logic**
 
 The Gateway API proxy includes:
+
 - **Automatic Retry**: 3 attempts with exponential backoff
 - **Timeout Management**: 30-second timeout for n8n-MCP requests
 - **Connection Pooling**: Efficient HTTP connection management
@@ -75,12 +81,14 @@ The Gateway API proxy includes:
 ### **Example 1: Node Discovery**
 
 **LLM Request:**
+
 ```http
 GET http://127.0.0.1:8000/api/v1/n8n-mcp/nodes/search?query=webhook&limit=5
 Authorization: Bearer {gateway_token}
 ```
 
 **Response:**
+
 ```json
 {
   "nodes": [
@@ -99,6 +107,7 @@ Authorization: Bearer {gateway_token}
 ### **Example 2: Workflow Validation**
 
 **LLM Request:**
+
 ```http
 POST http://127.0.0.1:8000/api/v1/n8n-mcp/workflow/validate
 Authorization: Bearer {gateway_token}
@@ -121,6 +130,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "valid": true,
@@ -134,12 +144,14 @@ Content-Type: application/json
 ### **Example 3: AI-Assisted Workflow Creation**
 
 **LLM Request:**
+
 ```http
 GET http://127.0.0.1:8000/api/v1/n8n-mcp/ai-tools
 Authorization: Bearer {gateway_token}
 ```
 
 **Response:**
+
 ```json
 {
   "ai_tools": [
@@ -224,6 +236,7 @@ curl -H "Authorization: Bearer {token}" \
 ### **Performance Metrics**
 
 Expected performance:
+
 - **Response Time**: <500ms for most operations
 - **Availability**: 99.9% uptime
 - **Throughput**: 100+ requests/minute per LLM session
@@ -232,6 +245,7 @@ Expected performance:
 ## 🚀 **DEPLOYMENT CHECKLIST**
 
 ### **Prerequisites**
+
 - ✅ PLC-GBT Gateway API running on port 8000
 - ✅ n8n-MCP server running on port 3000  
 - ✅ n8n instance running on port 5678
@@ -239,6 +253,7 @@ Expected performance:
 - ✅ Authentication tokens set
 
 ### **Environment Variables**
+
 ```bash
 # Gateway API
 GATEWAY_BEARER_TOKEN=your_gateway_token
@@ -251,6 +266,7 @@ N8N_MCP_MAX_RETRIES=3
 ```
 
 ### **Testing Commands**
+
 ```bash
 # Deploy and validate the integration
 cd plc-gbt-stack
@@ -268,6 +284,7 @@ python scripts/validation/phase26_7_n8n_mcp_integration_validation.py
 ## 📈 **BENEFITS ACHIEVED**
 
 ### **For the Fine-tuned LLM**
+
 - ✅ **Direct Access**: HTTP REST interface to n8n-MCP capabilities
 - ✅ **No Connectivity Issues**: Reliable proxy architecture
 - ✅ **Comprehensive Coverage**: 528 n8n nodes, 99% properties
@@ -275,12 +292,14 @@ python scripts/validation/phase26_7_n8n_mcp_integration_validation.py
 - ✅ **Industrial Focus**: Pre-configured templates and validation
 
 ### **For Industrial Automation**
+
 - ✅ **10x Faster Development**: AI-assisted node discovery and configuration
 - ✅ **Reduced Errors**: Pre-validation prevents deployment issues
 - ✅ **Quality Improvement**: AI optimization suggestions
 - ✅ **Knowledge Persistence**: Integration with PLC-GBT memory system
 
 ### **For System Architecture**
+
 - ✅ **Production Ready**: Enterprise-grade proxy with retry logic
 - ✅ **Scalable Design**: Connection pooling and efficient resource usage
 - ✅ **Security Compliant**: Token-based authentication and validation
@@ -303,4 +322,4 @@ The fine-tuned OpenAI LLM (ft:gpt-4o:industrial-control:20250117) now has comple
 
 *Integration completed: July 23, 2025*  
 *Phase 26.7: n8n-MCP AI Enhancement Integration*  
-*Status: Production Ready* 
+*Status: Production Ready*

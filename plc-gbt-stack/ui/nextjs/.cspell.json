@@ -1,0 +1,35 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "chartjs",
+    "clsx",
+    "hmi",
+    "HMI",
+    "hookform",
+    "lucide",
+    "modbus",
+    "Modbus",
+    "n8n",
+    "opc",
+    "OPC",
+    "pid",
+    "PID",
+    "plc",
+    "PLC",
+    "reactflow",
+    "tailwindcss",
+    "xyflow",
+    "zod",
+    "zustand"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    ".git",
+    "build",
+    "dist",
+    ".next",
+    "*.min.js",
+    "*.min.css"
+  ]
+}

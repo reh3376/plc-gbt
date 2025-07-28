@@ -165,16 +165,16 @@ class CacheManager:
             result = await self.db_manager.execute_query(
                 DatabaseType.REDIS,
                 "set",
-                {"key": key, "value": serialized_data}
+                {"key": key, "value": serialized_data, "expiration": ttl}
             )
             return result.success
         except Exception as e:
             logger.error(f"Cache set error: {str(e)}")
             return False
     
-    async def warm_cache(self, frequently_accessed_data: List[str]):
+    def warm_cache(self, frequently_accessed_data: List[str]):
         """Pre-load frequently accessed data into cache"""
-        for data_key in frequently_accessed_data:
+        for _ in frequently_accessed_data:
             # Logic to pre-load from slower tiers to cache
             self.cache_stats['warming_operations'] += 1
         
@@ -191,7 +191,7 @@ class DataMigrationManager:
             'age_threshold_days': 30       # Age threshold for archiving
         }
     
-    async def analyze_migration_candidates(self) -> Dict[DataFlow, List[str]]:
+    def analyze_migration_candidates(self) -> Dict[DataFlow, List[str]]:
         """Analyze data for migration opportunities"""
         candidates = {
             DataFlow.PROMOTE: [],    # Move to faster tier
@@ -340,11 +340,11 @@ class MemoryCoordinator:
                 'methodology': 'Legacy Sequential Processing',
                 'total_files_analyzed': len(analysis_results),
                 'successfully_processed': len(processed_files),
-                'failed_files': len(failed_files),
+                'failed_files_count': len(failed_files),
                 'ingestion_time_ms': ingestion_time,
                 'files_per_second': len(processed_files) / (ingestion_time / 1000) if ingestion_time > 0 else 0,
-                'processed_files': processed_files[:10],  # Sample of processed files
-                'failed_files': failed_files[:10]        # Sample of failed files
+                'processed_files_sample': processed_files[:10],  # Sample of processed files
+                'failed_files_sample': failed_files[:10]        # Sample of failed files
             }
             
             logger.info(f"✅ Codebase ingestion complete: {len(processed_files)} files processed")

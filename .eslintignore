@@ -1,0 +1,35 @@
+# ESLint ignore file
+# Exclude markdown documentation files
+*.md
+*.mdx
+*.MD
+*.MDX
+
+# Exclude non-JavaScript/TypeScript files
+*.txt
+*.log
+*.csv
+*.xml
+*.yml
+*.yaml
+*.json.bak
+
+# Exclude build outputs and generated files
+dist/
+build/
+.next/
+coverage/
+*.d.ts.map
+*.js.map
+
+# Exclude dependency directories
+node_modules/
+.venv/
+__pycache__/
+
+# Exclude configuration files that shouldn't be linted
+*.config.js
+*.config.ts
+next.config.js
+tailwind.config.js
+postcss.config.js 

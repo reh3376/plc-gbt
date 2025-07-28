@@ -1,0 +1,29 @@
+services:
+  # Development container with full database access
+  plc-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: plc-dev-env
+    networks:
+      - plc-gbt-stack_plc-database-network
+    volumes:
+      # Mount the entire project for development
+      - ../../:/workspace
+      # Mount Docker socket for container management
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      # Override with actual database credentials if needed
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-password}
+      # Development environment settings
+      - PYTHONPATH=/workspace/plc-gbt-stack
+      - NODE_ENV=development
+    stdin_open: true
+    tty: true
+    command: ['/bin/bash']
+
+networks:
+  # Connect to the existing database network
+  plc-gbt-stack_plc-database-network:
+    external: true

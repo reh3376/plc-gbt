@@ -6,7 +6,8 @@ Phase 3 Days 6-7: Enterprise Features
 
 import os
 from typing import Dict, Any, List
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 from datetime import timedelta
 
 
@@ -22,6 +23,14 @@ class EnterpriseSettings(BaseSettings):
     - Enhanced Monitoring
     - Security Configuration
     """
+    
+    model_config = {
+        "extra": "allow",
+        "env_prefix": "",
+        "case_sensitive": False,
+        "env_file": ".env",
+        "env_file_encoding": "utf-8"
+    }
     
     # ========================================
     # JWT Authentication Configuration
@@ -194,12 +203,7 @@ class EnterpriseSettings(BaseSettings):
         default=8,
         description="Number of async workers"
     )
-    
-    class Config:
-        env_prefix = ""  # No prefix for environment variables
-        case_sensitive = False
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+
         
     def get_redis_url(self) -> str:
         """Get Redis connection URL."""

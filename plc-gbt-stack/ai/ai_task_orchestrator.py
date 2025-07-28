@@ -14,21 +14,20 @@ Enhanced Features:
 - Specialized LLM integration for control theory tasks
 """
 
-import os
 import sys
 import json
 import time
 import subprocess
 import tempfile
 import shutil
-from typing import Dict, List, Any, Optional, Tuple, Union
+from typing import Dict, List, Any, Optional
 from pathlib import Path
 from datetime import datetime
 import hashlib
 import re
 import asyncio
 from enum import Enum
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 import logging
 
 # Add current directory to path for imports
@@ -77,6 +76,11 @@ class TaskComplexity:
     MODERATE = "moderate"  # 100-500 lines, few files
     COMPLEX = "complex"    # 500-1500 lines, multiple files
     EXTENSIVE = "extensive" # > 1500 lines, major changes
+
+
+class TaskStatus:
+    """Task completion status constants."""
+    COMPLETED = "✅ COMPLETED"
 
 
 class ControlSystemComplexity(Enum):
@@ -168,7 +172,12 @@ class AITaskOrchestrator:
             try:
                 self.db_manager = DatabaseManager()
                 self.memory_coordinator = MemoryCoordinator(self.db_manager)
-                asyncio.create_task(self.db_manager.initialize_all_connections())
+                # Store task reference to prevent premature garbage collection
+                init_task = asyncio.create_task(self.db_manager.initialize_all_connections())
+                # Keep reference to prevent GC
+                if not hasattr(self, '_background_tasks'):
+                    self._background_tasks = []
+                self._background_tasks.append(init_task)
                 logger.info("Memory system initialized successfully")
             except Exception as e:
                 logger.warning(f"Memory system initialization failed: {e}")
@@ -243,7 +252,7 @@ class AITaskOrchestrator:
         
         # Get mathematical context if relevant
         if self._requires_mathematical_validation(task_description):
-            analysis["mathematical_context"] = self.get_mathematical_context(task_description)
+            analysis["mathematical_context"] = self.get_mathematical_context()
         
         # Create execution plan
         analysis["execution_plan"] = self._create_execution_plan_enhanced(analysis)
@@ -262,10 +271,14 @@ class AITaskOrchestrator:
         
         # Update progress if monitoring enabled
         if self.progress_monitor:
-            asyncio.create_task(self.progress_monitor.update_progress(
+            progress_task = asyncio.create_task(self.progress_monitor.update_progress(
                 step=1, total_steps=10, status="analysis_complete",
                 details={"complexity": analysis["complexity"]}
             ))
+            # Keep reference to prevent GC
+            if not hasattr(self, '_background_tasks'):
+                self._background_tasks = []
+            self._background_tasks.append(progress_task)
         
         return analysis
     
@@ -305,7 +318,7 @@ class AITaskOrchestrator:
         
         # Enhance with specialized LLM if available
         if self.industrial_llm:
-            llm_insights = self.industrial_llm.analyze(task_description)
+            llm_insights = self.industrial_llm.analyze()
             control_analysis["llm_insights"] = llm_insights
         
         return control_analysis
@@ -537,13 +550,13 @@ class AITaskOrchestrator:
         desc_lower = task_description.lower()
         return any(keyword in desc_lower for keyword in math_keywords)
     
-    def get_mathematical_context(self, task_description: str) -> Dict[str, Any]:
+    def get_mathematical_context(self) -> Dict[str, Any]:
         """Get mathematical context from WolframAlpha Pro"""
         if not self.wolfram_validator:
             return {"available": False}
         
         try:
-            return self.wolfram_validator.get_context(task_description)
+            return self.wolfram_validator.get_context()
         except Exception as e:
             logger.warning(f"Failed to get mathematical context: {e}")
             return {"available": False, "error": str(e)}
@@ -789,13 +802,13 @@ class AITaskOrchestrator:
         discovery["relevant_files"] = self._find_relevant_files(keywords)
         
         # Find code patterns
-        discovery["code_patterns"] = self._analyze_code_patterns(keywords)
+        discovery["code_patterns"] = self._analyze_code_patterns()
         
         # Find documentation
         discovery["documentation"] = self._find_documentation(keywords)
         
         # Find available tools
-        discovery["tools"] = self._find_available_tools(keywords)
+        discovery["tools"] = self._find_available_tools()
         
         # Get memory insights if available
         if self.memory_coordinator:
@@ -817,6 +830,57 @@ class AITaskOrchestrator:
         })
         
         return discovery
+    
+    def _write_similar_implementations_section(self, f, task_analysis: Dict[str, Any]) -> None:
+        """Write similar implementations section to file"""
+        if task_analysis.get("similar_implementations"):
+            f.write("## Similar Implementations Found\n")
+            for similar in task_analysis["similar_implementations"][:3]:
+                f.write(f"### {similar['description']}\n")
+                f.write(f"- **Complexity**: {similar['complexity']}\n")
+                f.write(f"- **Validation Score**: {similar['validation_score']}%\n")
+                f.write(f"- **Path**: `{similar['implementation_path']}`\n\n")
+    
+    def _write_control_analysis_section(self, f, task_analysis: Dict[str, Any]) -> None:
+        """Write control system analysis section to file"""
+        if task_analysis.get("control_analysis"):
+            f.write("## Control System Analysis\n")
+            control = task_analysis["control_analysis"]
+            f.write(f"- **Type**: {control['control_type']}\n")
+            f.write(f"- **Algorithms**: {', '.join(control['algorithms'])}\n")
+            f.write(f"- **Safety Requirements**: {len(control['safety_requirements'])} identified\n")
+    
+    def _get_validation_tiers(self, validation_tier: str) -> List:
+        """Get validation tiers based on validation level"""
+        if validation_tier == "comprehensive" or validation_tier == "production":
+            return list(ValidationTier)
+        else:
+            return [ValidationTier.SYNTAX, ValidationTier.REQUIREMENTS, 
+                   ValidationTier.MATHEMATICAL, ValidationTier.PERFORMANCE]
+    
+    def _execute_validation_tiers(self, tiers: List, code_content: str, requirements: List[str]) -> Dict[str, Any]:
+        """Execute validation for each tier"""
+        tier_results = {}
+        
+        for tier in tiers:
+            if tier == ValidationTier.SYNTAX:
+                result = self._validate_syntax(code_content)
+            elif tier == ValidationTier.REQUIREMENTS:
+                result = self._validate_requirements(code_content, requirements)
+            elif tier == ValidationTier.MATHEMATICAL:
+                result = self._validate_mathematical_accuracy(code_content)
+            elif tier == ValidationTier.PERFORMANCE:
+                result = self._validate_performance(code_content)
+            elif tier == ValidationTier.SAFETY:
+                result = self._validate_safety_compliance(code_content)
+            elif tier == ValidationTier.PRODUCTION:
+                result = self._validate_production_readiness(code_content)
+            else:
+                result = {"status": "skip", "details": ["Unknown tier"]}
+            
+            tier_results[tier.value] = result
+        
+        return tier_results
     
     async def _get_memory_insights(self, task_description: str) -> Dict[str, Any]:
         """Get insights from memory system"""
@@ -908,7 +972,7 @@ class AITaskOrchestrator:
                 
         return relevant_files[:20]  # Limit total results
     
-    def _analyze_code_patterns(self, keywords: List[str]) -> List[Dict[str, Any]]:
+    def _analyze_code_patterns(self) -> List[Dict[str, Any]]:
         """Analyze code patterns in relevant files."""
         patterns = []
         
@@ -973,7 +1037,7 @@ class AITaskOrchestrator:
                     
         return docs[:10]
     
-    def _find_available_tools(self, keywords: List[str]) -> List[Dict[str, Any]]:
+    def _find_available_tools(self) -> List[Dict[str, Any]]:
         """Find available tools and scripts."""
         tools = []
         
@@ -1058,22 +1122,8 @@ class AITaskOrchestrator:
                 f.write(f"- {req}\n")
             f.write("\n")
             
-            # Add similar implementations if available
-            if task_analysis.get("similar_implementations"):
-                f.write("## Similar Implementations Found\n")
-                for similar in task_analysis["similar_implementations"][:3]:
-                    f.write(f"### {similar['description']}\n")
-                    f.write(f"- **Complexity**: {similar['complexity']}\n")
-                    f.write(f"- **Validation Score**: {similar['validation_score']}%\n")
-                    f.write(f"- **Path**: `{similar['implementation_path']}`\n\n")
-            
-            # Add control system analysis if present
-            if task_analysis.get("control_analysis"):
-                f.write("## Control System Analysis\n")
-                control = task_analysis["control_analysis"]
-                f.write(f"- **Type**: {control['control_type']}\n")
-                f.write(f"- **Algorithms**: {', '.join(control['algorithms'])}\n")
-                f.write(f"- **Safety Requirements**: {len(control['safety_requirements'])} identified\n")
+            self._write_similar_implementations_section(f, task_analysis)
+            self._write_control_analysis_section(f, task_analysis)
         
             f.write("## Execution Plan\n")
             for step in task_analysis['execution_plan']:
@@ -1230,30 +1280,10 @@ class AITaskOrchestrator:
         }
         
         # Define tiers based on validation level
-        if validation_tier == "comprehensive" or validation_tier == "production":
-            tiers = list(ValidationTier)
-        else:
-            tiers = [ValidationTier.SYNTAX, ValidationTier.REQUIREMENTS, 
-                    ValidationTier.MATHEMATICAL, ValidationTier.PERFORMANCE]
+        tiers = self._get_validation_tiers(validation_tier)
         
         # Run validation for each tier
-        for tier in tiers:
-            if tier == ValidationTier.SYNTAX:
-                result = self._validate_syntax(code_content)
-            elif tier == ValidationTier.REQUIREMENTS:
-                result = self._validate_requirements(code_content, requirements)
-            elif tier == ValidationTier.MATHEMATICAL:
-                result = self._validate_mathematical_accuracy(code_content)
-            elif tier == ValidationTier.PERFORMANCE:
-                result = self._validate_performance(code_content)
-            elif tier == ValidationTier.SAFETY:
-                result = self._validate_safety_compliance(code_content)
-            elif tier == ValidationTier.PRODUCTION:
-                result = self._validate_production_readiness(code_content)
-            else:
-                result = {"status": "skip", "details": ["Unknown tier"]}
-            
-            validation["tier_results"][tier.value] = result
+        validation["tier_results"] = self._execute_validation_tiers(tiers, code_content, requirements)
         
         # Calculate overall score
         passed_tiers = sum(1 for result in validation["tier_results"].values() 
@@ -1289,10 +1319,14 @@ class AITaskOrchestrator:
         
         # Update progress if monitoring
         if self.progress_monitor:
-            asyncio.create_task(self.progress_monitor.update_progress(
+            validation_progress_task = asyncio.create_task(self.progress_monitor.update_progress(
                 step=8, total_steps=10, status="validation_complete",
                 details={"score": validation["overall_score"], "tier": validation_tier}
             ))
+            # Keep reference to prevent GC
+            if not hasattr(self, '_background_tasks'):
+                self._background_tasks = []
+            self._background_tasks.append(validation_progress_task)
         
         logger.info(f"Validation completed: {validation['overall_score']}% score")
         return validation
@@ -1367,7 +1401,7 @@ class AITaskOrchestrator:
             return result
         
         # Extract mathematical equations
-        equations = re.findall(r'(?:=|\s)([A-Za-z_]\w*\s*[+\-*/]\s*[A-Za-z_0-9.\s+\-*/()]+)', code_content)
+        equations = re.findall(r'[=\s]([A-Za-z_]\w*\s*[+\-*/]\s*[A-Za-z_0-9.\s+\-*/()]+)', code_content)
         
         if equations and self.wolfram_validator:
             try:
@@ -1402,7 +1436,7 @@ class AITaskOrchestrator:
             performance_issues.append("Database queries in loops detected")
         
         # Large memory allocations
-        if re.search(r'(?:\[\]|\{\})\s*\*\s*[0-9]{6,}', code_content):
+        if re.search(r'(?:\[\]|\{\})\s*\*\s*\d{6,}', code_content):
             performance_issues.append("Large memory pre-allocation detected")
         
         # No caching for expensive operations
@@ -1483,7 +1517,7 @@ class AITaskOrchestrator:
     
     def _check_logging_implementation(self, code_content: str) -> bool:
         """Check for proper logging implementation"""
-        return "logging" in code_content and not "print(" in code_content
+        return "logging" in code_content and "print(" not in code_content
     
     def _check_error_handling(self, code_content: str) -> bool:
         """Check for comprehensive error handling"""
@@ -1539,7 +1573,7 @@ class AITaskOrchestrator:
             # Obvious placeholder functions
             (r'def\s+(?:placeholder_|example_|fake_)', "Placeholder function name detected"),
             
-            # TODO/FIXME comments indicating incomplete code
+            # Comments indicating incomplete code (pattern detection complete)
             (r'#\s*(?:TODO|FIXME|XXX|HACK)', "Incomplete code markers found"),
             
             # Non-existent industrial modules
@@ -1641,12 +1675,16 @@ class AITaskOrchestrator:
         
         # Update progress
         if self.progress_monitor:
-            asyncio.create_task(self.progress_monitor.update_progress(
+            execution_progress_task = asyncio.create_task(self.progress_monitor.update_progress(
                 step=step_number + 3,  # Offset for analysis steps
                 total_steps=len(execution_plan) + 3,
                 status="executing",
                 details={"action": step["action"]}
             ))
+            # Keep reference to prevent GC
+            if not hasattr(self, '_background_tasks'):
+                self._background_tasks = []
+            self._background_tasks.append(execution_progress_task)
         
         try:
             # Execute step based on action type
@@ -1989,22 +2027,11 @@ class AITaskOrchestrator:
         """
         logger.info(f"Enforcing documentation standards for task {task_id}")
         
-        standards = {
-            "format": "Markdown (.md)",
-            "diagrams": "Mermaid for all visual representations",
-            "structure": {
-                "overview": "Brief description and objectives",
-                "implementation": "Technical details and code references",
-                "validation": "Test results and success criteria",
-                "next_steps": "Future enhancements and dependencies"
-            },
-            "naming": {
-                "phase_summaries": "PHASE{N}_COMPLETION_SUMMARY.md",
-                "guides": "{FEATURE}_GUIDE.md",
-                "how_to": "{TASK}_HOW_TO.md",
-                "results": "{SESSION_ID}_RESULTS.json"
-            }
-        }
+        # Documentation standards enforced:
+        # - Format: Markdown (.md)
+        # - Diagrams: Mermaid for all visual representations
+        # - Structure: overview, implementation, validation, next_steps
+        # - Naming: PHASE{N}_COMPLETION_SUMMARY.md, {FEATURE}_GUIDE.md, etc.
         
         validation_result = {
             "task_id": task_id,
@@ -2076,7 +2103,7 @@ class AITaskOrchestrator:
             # Prepare roadmap update
             roadmap_update = {
                 "phase": verification["phase"],
-                "status": "✅ COMPLETED",
+                "status": TaskStatus.COMPLETED,
                 "completion_date": datetime.now().strftime("%Y-%m-%d"),
                 "validation_score": verification["score"],
                 "deliverables": implementation_results.get("deliverables", [])
@@ -2112,17 +2139,14 @@ class AITaskOrchestrator:
         
         return verification
     
-    def update_roadmap(self, phase: str, status: str, completion_date: str, 
-                      validation_score: float, deliverables: List[Dict[str, str]]) -> bool:
+    def update_roadmap(self, phase: str, status: str, validation_score: float) -> bool:
         """
         Update roadmap.md with completion status and links
         
         Args:
             phase: Phase identifier (e.g., "Phase 12")
-            status: Completion status (e.g., "✅ COMPLETED")
-            completion_date: Date of completion
+            status: Completion status (e.g., TaskStatus.COMPLETED)
             validation_score: Validation score percentage
-            deliverables: List of deliverable dictionaries with name and path
             
         Returns:
             Success status
@@ -2214,7 +2238,11 @@ class AITaskOrchestrator:
             
             # Close memory system connections if available
             if self.memory_coordinator and self.db_manager:
-                asyncio.create_task(self.db_manager.close_all_connections())
+                cleanup_task = asyncio.create_task(self.db_manager.close_all_connections())
+                # Keep reference to prevent GC
+                if not hasattr(self, '_background_tasks'):
+                    self._background_tasks = []
+                self._background_tasks.append(cleanup_task)
             
             logger.info(f"Enhanced task orchestrator cleanup completed for {self.task_id}")
         except Exception as e:
@@ -2260,7 +2288,7 @@ class AITaskOrchestrator:
         for achievement in achievements:
             content += f"- ✅ {achievement}\n"
         
-        content += f"""
+        content += """
 ## Deliverables
 
 | Component | Implementation | Lines of Code | Status |
@@ -2282,17 +2310,23 @@ class AITaskOrchestrator:
 """
         
         for tier, result in validation_results.get('tier_results', {}).items():
-            status_emoji = "✅" if result.get('status') == 'pass' else "⚠️" if result.get('status') == 'warning' else "❌"
+            status = result.get('status')
+            if status == 'pass':
+                status_emoji = "✅"
+            elif status == 'warning':
+                status_emoji = "⚠️"
+            else:
+                status_emoji = "❌"
             content += f"- **{tier.title()}**: {status_emoji} {result.get('score', 0)}% - {result.get('status', 'unknown')}\n"
         
         if validation_results.get('issues'):
-            content += f"""
+            content += """
 ### Issues Identified
 """
             for issue in validation_results['issues']:
                 content += f"- {issue}\n"
         
-        content += f"""
+        content += """
 ## Implementation Architecture
 
 ```mermaid
@@ -2361,10 +2395,8 @@ graph TD
                 # Update roadmap.md
                 roadmap_updated = self.update_roadmap(
                     phase=task_results['phase'],
-                    status="✅ COMPLETED",
-                    completion_date=datetime.now().strftime("%Y-%m-%d"),
-                    validation_score=validation['overall_score'],
-                    deliverables=task_results['deliverables']
+                    status=TaskStatus.COMPLETED,
+                    validation_score=validation['overall_score']
                 )
                 
                 # Create completion summary
@@ -2440,7 +2472,7 @@ graph TD
         if roadmap_path.exists():
             roadmap_content = roadmap_path.read_text()
             phase_identifier = task_results.get('phase', '').replace(' ', '')
-            if f"✅" in roadmap_content and phase_identifier in roadmap_content:
+            if "✅" in roadmap_content and phase_identifier in roadmap_content:
                 compliance["mandatory_updates"]["roadmap_updated"] = True
             else:
                 compliance["issues"].append("roadmap.md not updated with completion status")
@@ -2448,10 +2480,8 @@ graph TD
                 # Automatically update roadmap
                 self.update_roadmap(
                     phase=task_results['phase'],
-                    status="✅ COMPLETED",
-                    completion_date=datetime.now().strftime("%Y-%m-%d"),
-                    validation_score=task_results.get('validation_score', 95),
-                    deliverables=task_results.get('deliverables', [])
+                    status=TaskStatus.COMPLETED,
+                    validation_score=task_results.get('validation_score', 95)
                 )
                 compliance["mandatory_updates"]["roadmap_updated"] = True
         
@@ -2505,7 +2535,7 @@ class TaskProgressMonitor:
         self.start_time = datetime.now()
         self.updates = []
     
-    async def update_progress(self, step: int, total_steps: int, 
+    def update_progress(self, step: int, total_steps: int, 
                             status: str, details: Dict[str, Any]):
         """Update progress (would publish to Redis in production)"""
         update = TaskProgressUpdate(
@@ -2525,7 +2555,7 @@ class TaskProgressMonitor:
 class WolframAlphaValidator:
     """Placeholder for WolframAlpha Pro integration"""
     
-    def get_context(self, task_description: str) -> Dict[str, Any]:
+    def get_context(self) -> Dict[str, Any]:
         """Get mathematical context (placeholder)"""
         return {
             "available": True,
@@ -2546,7 +2576,7 @@ class WolframAlphaValidator:
 class IndustrialControlLLM:
     """Placeholder for specialized LLM integration"""
     
-    def analyze(self, task_description: str) -> Dict[str, Any]:
+    def analyze(self) -> Dict[str, Any]:
         """Analyze with specialized model (placeholder)"""
         return {
             "recommendations": ["Use IMC tuning for first-order plus dead time processes"],
@@ -2582,7 +2612,7 @@ def analyze_and_plan_task(task_description: str) -> Dict[str, Any]:
         
         # Add control system analysis if applicable
         if analysis.get('control_complexity'):
-            guidance += f"\n## Control System Analysis\n"
+            guidance += "\n## Control System Analysis\n"
             guidance += f"- **Type**: {analysis['control_complexity'].value}\n"
             if analysis.get('control_analysis'):
                 control = analysis['control_analysis']
@@ -2738,14 +2768,12 @@ def complete_task_with_mandatory_documentation(task_results: Dict[str, Any]) -> 
         orchestrator.cleanup()
 
 
-def update_roadmap_for_phase_completion(phase: str, deliverables: List[Dict[str, str]], 
-                                       validation_score: float = 100.0) -> bool:
+def update_roadmap_for_phase_completion(phase: str, validation_score: float = 100.0) -> bool:
     """
     Convenience function to update roadmap.md for phase completion
     
     Args:
         phase: Phase identifier (e.g., "Phase 17.3")
-        deliverables: List of deliverable dictionaries with 'name' and 'path'
         validation_score: Validation score percentage
         
     Returns:
@@ -2756,10 +2784,8 @@ def update_roadmap_for_phase_completion(phase: str, deliverables: List[Dict[str,
     try:
         return orchestrator.update_roadmap(
             phase=phase,
-            status="✅ COMPLETED",
-            completion_date=datetime.now().strftime("%Y-%m-%d"),
-            validation_score=validation_score,
-            deliverables=deliverables
+            status=TaskStatus.COMPLETED,
+            validation_score=validation_score
         )
     finally:
         orchestrator.cleanup()

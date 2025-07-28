@@ -118,12 +118,21 @@ extend-exclude = '''
   | \.venv
   | build
   | dist
+  # markdown files
+  | .*\.md$
+  | .*\.mdx$
 )/
 '''
 
 [tool.ruff]
 target-version = "py38"
 line-length = 100
+exclude = [
+    "*.md",
+    "*.mdx",
+    "**/*.md",
+    "**/*.mdx",
+]
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings

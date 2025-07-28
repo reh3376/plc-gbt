@@ -40,7 +40,7 @@ from .vault_secrets_manager import (
 # Configuration validation
 try:
     from pydantic import BaseModel, Field, validator
-    from pydantic.env_settings import BaseSettings
+    from pydantic_settings import BaseSettings
     PYDANTIC_AVAILABLE = True
 except ImportError:
     PYDANTIC_AVAILABLE = False

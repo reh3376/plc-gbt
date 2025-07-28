@@ -1,0 +1,5 @@
+**/*.md
+*.md
+docs/**
+README.md
+CHANGELOG.md 

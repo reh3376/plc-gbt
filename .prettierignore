@@ -1,0 +1,34 @@
+# Prettier ignore file
+# Exclude markdown documentation files
+*.md
+*.mdx
+*.MD
+*.MDX
+
+# Exclude common non-code files
+*.log
+*.txt
+*.csv
+*.json.bak
+*.xml
+*.yml.bak
+
+# Exclude build outputs
+dist/
+build/
+.next/
+coverage/
+
+# Exclude dependency directories
+node_modules/
+.venv/
+__pycache__/
+
+# Exclude generated files
+*.d.ts.map
+*.js.map
+
+# Exclude configuration backups
+*.bak
+*.bak2
+*.orig 

@@ -1,0 +1,42 @@
+{
+  "name": "@plc-gbt/graphql-server",
+  "version": "1.0.0",
+  "description": "GraphQL server for PLC-GBT Phase 32.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node server.ts",
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "graphql": "^16.8.1",
+    "graphql-scalars": "^1.22.4",
+    "apollo-server": "^3.13.0",
+    "graphql-subscriptions": "^2.0.0",
+    "graphql-redis-subscriptions": "^2.6.0",
+    "dataloader": "^2.2.2",
+    "redis": "^4.6.12",
+    "neo4j-driver": "^5.15.0",
+    "pg": "^8.11.3",
+    "@qdrant/js-client-rest": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/pg": "^8.10.9",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "@typescript-eslint/parser": "^6.16.0",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "ts-jest": "^29.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 
