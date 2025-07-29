@@ -1,60 +1,60 @@
-'use client'
+'use client';
 
-import { useLayoutStore } from '@/lib/stores/layout-store'
-import { EnhancedFileExplorer } from '../common/enhanced-file-explorer'
-import { SearchPanel } from '../common/search-panel'
-import { WorkflowPanel } from '../common/workflow-panel'
-import { ChatPanel } from '../chat/chat-panel'
-import { SettingsPanel } from '../common/settings-panel'
+import { useLayoutStore } from '@/lib/stores/layout-store';
+import { ChatPanel } from '../chat/chat-panel';
+import { SearchPanel } from '../common/search-panel';
+import { SettingsPanel } from '../common/settings-panel';
+import { WorkflowPanel } from '../common/workflow-panel';
+import EnhancedFileExplorer from '../file-explorer/EnhancedFileExplorer';
 
 interface SidebarProps {
-  isOpen: boolean
-  width?: number
+  isOpen: boolean;
+  width?: number;
 }
 
 export function Sidebar({ isOpen, width = 300 }: SidebarProps) {
-  const { activityBar } = useLayoutStore()
+  const { activityBar } = useLayoutStore();
 
   const renderContent = () => {
     switch (activityBar.activeView) {
       case 'explorer':
-        return <EnhancedFileExplorer />
+        return <EnhancedFileExplorer />;
       case 'search':
-        return <SearchPanel />
+        return <SearchPanel />;
       case 'workflows':
-        return <WorkflowPanel />
+        return <WorkflowPanel />;
       case 'chat':
-        return <ChatPanel />
+        return <ChatPanel />;
       case 'settings':
-        return <SettingsPanel />
+        return <SettingsPanel />;
       default:
-        return <EnhancedFileExplorer />
+        return <EnhancedFileExplorer />;
     }
-  }
+  };
 
   const getTitle = () => {
     switch (activityBar.activeView) {
       case 'explorer':
-        return 'Explorer'
+        return 'Explorer';
       case 'search':
-        return 'Search'
+        return 'Search';
       case 'workflows':
-        return 'Workflows'
+        return 'Workflows';
       case 'chat':
-        return 'AI Assistant'
+        return 'AI Assistant';
       case 'settings':
-        return 'Settings'
+        return 'Settings';
       default:
-        return 'Explorer'
+        return 'Explorer';
     }
-  }
+  };
 
   if (!isOpen) {
-    return null
+    return null;
   }
 
   return (
-    <div 
+    <div
       className="bg-[#252526] border-r border-[#3c3c3c] flex flex-col overflow-hidden"
       style={{ width }}
     >
@@ -66,9 +66,7 @@ export function Sidebar({ isOpen, width = 300 }: SidebarProps) {
       </div>
 
       {/* Sidebar Content */}
-      <div className="flex-1 overflow-hidden">
-        {renderContent()}
-      </div>
+      <div className="flex-1 overflow-hidden">{renderContent()}</div>
     </div>
-  )
-} 
+  );
+}
