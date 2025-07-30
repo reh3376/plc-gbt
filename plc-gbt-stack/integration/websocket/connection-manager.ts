@@ -38,7 +38,7 @@ export interface ConnectionManagerConfig {
 
 export class WebSocketConnectionManager extends EventEmitter {
   private connections: Map<string, ClientConnection> = new Map();
-  private heartbeatTimer?: NodeJS.Timer;
+  private heartbeatTimer?: NodeJS.Timeout;
   private config: ConnectionManagerConfig;
 
   constructor(config: Partial<ConnectionManagerConfig> = {}) {
@@ -121,10 +121,7 @@ export class WebSocketConnectionManager extends EventEmitter {
   /**
    * Send message to specific client
    */
-  public async sendMessage<T>(
-    connectionId: string,
-    message: WebSocketMessage<T>
-  ): Promise<void> {
+  public async sendMessage<T>(connectionId: string, message: WebSocketMessage<T>): Promise<void> {
     const connection = this.connections.get(connectionId);
     if (!connection) {
       throw new Error(`Connection ${connectionId} not found`);
@@ -138,13 +135,11 @@ export class WebSocketConnectionManager extends EventEmitter {
 
     // Check message size
     if (data.length > this.config.maxMessageSize) {
-      throw new Error(
-        `Message size ${data.length} exceeds limit ${this.config.maxMessageSize}`
-      );
+      throw new Error(`Message size ${data.length} exceeds limit ${this.config.maxMessageSize}`);
     }
 
     return new Promise((resolve, reject) => {
-      connection.websocket.send(data, (error) => {
+      connection.websocket.send(data, error => {
         if (error) {
           reject(error);
         } else {
@@ -157,16 +152,13 @@ export class WebSocketConnectionManager extends EventEmitter {
   /**
    * Broadcast message to all connections with specific subscription
    */
-  public async broadcast<T>(
-    topic: string,
-    message: WebSocketMessage<T>
-  ): Promise<void> {
+  public async broadcast<T>(topic: string, message: WebSocketMessage<T>): Promise<void> {
     const promises: Promise<void>[] = [];
 
     for (const [connectionId, connection] of this.connections) {
       if (connection.subscriptions.has(topic)) {
         promises.push(
-          this.sendMessage(connectionId, message).catch((error) => {
+          this.sendMessage(connectionId, message).catch(error => {
             console.error(`Failed to send to ${connectionId}:`, error);
           })
         );
@@ -179,16 +171,13 @@ export class WebSocketConnectionManager extends EventEmitter {
   /**
    * Add subscription for a connection
    */
-  public addSubscription(
-    connectionId: string,
-    request: SubscriptionRequest
-  ): void {
+  public addSubscription(connectionId: string, request: SubscriptionRequest): void {
     const connection = this.connections.get(connectionId);
     if (!connection) {
       throw new Error(`Connection ${connectionId} not found`);
     }
 
-    request.topics.forEach((topic) => {
+    request.topics.forEach(topic => {
       connection.subscriptions.add(topic);
     });
 
@@ -204,7 +193,7 @@ export class WebSocketConnectionManager extends EventEmitter {
       throw new Error(`Connection ${connectionId} not found`);
     }
 
-    topics.forEach((topic) => {
+    topics.forEach(topic => {
       connection.subscriptions.delete(topic);
     });
 
@@ -240,7 +229,7 @@ export class WebSocketConnectionManager extends EventEmitter {
 
     for (const connectionId of this.connections.keys()) {
       promises.push(
-        this.sendMessage(connectionId, message).catch((error) => {
+        this.sendMessage(connectionId, message).catch(error => {
           console.error(`Failed to send alert to ${connectionId}:`, error);
         })
       );
@@ -296,7 +285,7 @@ export class WebSocketConnectionManager extends EventEmitter {
       this.removeConnection(connection.id);
     });
 
-    websocket.on('error', (error) => {
+    websocket.on('error', error => {
       console.error(`WebSocket error for ${connection.id}:`, error);
       this.emit('connection:error', { connectionId: connection.id, error });
     });

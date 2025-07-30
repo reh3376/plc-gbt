@@ -7,24 +7,22 @@
 
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { EventEmitter } from 'events';
-import { createServer } from 'http';
+import { createServer, IncomingMessage } from 'http';
 import neo4j from 'neo4j-driver';
 import { Client as PgClient } from 'pg';
 import { createClient } from 'redis';
 import { v4 as uuidv4 } from 'uuid';
-import { WebSocketServer } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 
-import { WebSocketConnectionManager } from './connection-manager';
+import { ClientConnection, WebSocketConnectionManager } from './connection-manager';
 import { PLCDataSimulator } from './plc-data-simulator';
 import {
-  AlertSeverity,
   CommandRequest,
   CommandResult,
   ConnectionConfig,
   ControlLoopData,
   PLCDataPoint,
   SubscriptionRequest,
-  SystemAlert,
   SystemEventType,
   WebSocketMessage,
   WebSocketMessageType,
@@ -55,10 +53,10 @@ export interface ServerConfig {
 }
 
 export class PLCWebSocketServer extends EventEmitter {
-  private server: WebSocketServer;
-  private httpServer: ReturnType<typeof createServer>;
-  private connectionManager: WebSocketConnectionManager;
-  private dataSimulator: PLCDataSimulator;
+  private readonly server: WebSocketServer;
+  private readonly httpServer: ReturnType<typeof createServer>;
+  private readonly connectionManager: WebSocketConnectionManager;
+  private readonly dataSimulator: PLCDataSimulator;
 
   // Database clients
   private redisClient?: ReturnType<typeof createClient>;
@@ -66,7 +64,7 @@ export class PLCWebSocketServer extends EventEmitter {
   private neo4jDriver?: ReturnType<typeof neo4j.driver>;
   private qdrantClient?: QdrantClient;
 
-  private config: ServerConfig;
+  private readonly config: ServerConfig;
   private isRunning: boolean = false;
 
   constructor(config: ServerConfig) {
@@ -120,7 +118,7 @@ export class PLCWebSocketServer extends EventEmitter {
       await this.connectDatabases();
 
       // Set up WebSocket connection handler
-      this.server.on('connection', async (ws, req) => {
+      this.server.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
         console.log('New WebSocket connection from:', req.socket.remoteAddress);
 
         // Parse connection config from headers or query params
@@ -133,13 +131,10 @@ export class PLCWebSocketServer extends EventEmitter {
 
         try {
           // Add connection to manager
-          const connection = await this.connectionManager.addConnection(
-            ws,
-            config
-          );
+          const connection = await this.connectionManager.addConnection(ws, config);
 
           // Set up message handler
-          ws.on('message', async (data) => {
+          ws.on('message', async (data: Buffer) => {
             await this.handleMessage(connection.id, data.toString());
           });
         } catch (error) {
@@ -178,12 +173,12 @@ export class PLCWebSocketServer extends EventEmitter {
     await this.connectionManager.shutdown();
 
     // Close WebSocket server
-    await new Promise<void>((resolve) => {
+    await new Promise<void>(resolve => {
       this.server.close(() => resolve());
     });
 
     // Close HTTP server
-    await new Promise<void>((resolve) => {
+    await new Promise<void>(resolve => {
       this.httpServer.close(() => resolve());
     });
 
@@ -197,26 +192,17 @@ export class PLCWebSocketServer extends EventEmitter {
   /**
    * Handle incoming WebSocket messages
    */
-  private async handleMessage(
-    connectionId: string,
-    data: string
-  ): Promise<void> {
+  private async handleMessage(connectionId: string, data: string): Promise<void> {
     try {
       const message = JSON.parse(data) as WebSocketMessage;
 
       switch (message.type) {
         case WebSocketMessageType.PLC_DATA_SUBSCRIBE:
-          await this.handleSubscribe(
-            connectionId,
-            message.payload as SubscriptionRequest
-          );
+          await this.handleSubscribe(connectionId, message.payload as SubscriptionRequest);
           break;
 
         case WebSocketMessageType.PLC_DATA_UNSUBSCRIBE:
-          await this.handleUnsubscribe(
-            connectionId,
-            message.payload as string[]
-          );
+          await this.handleUnsubscribe(connectionId, message.payload as string[]);
           break;
 
         case WebSocketMessageType.CONTROL_LOOP_SUBSCRIBE:
@@ -227,10 +213,7 @@ export class PLCWebSocketServer extends EventEmitter {
           break;
 
         case WebSocketMessageType.EXECUTE_COMMAND:
-          await this.handleCommand(
-            connectionId,
-            message.payload as CommandRequest
-          );
+          await this.handleCommand(connectionId, message.payload as CommandRequest);
           break;
 
         default:
@@ -255,17 +238,14 @@ export class PLCWebSocketServer extends EventEmitter {
   /**
    * Handle PLC data subscription
    */
-  private async handleSubscribe(
-    connectionId: string,
-    request: SubscriptionRequest
-  ): Promise<void> {
+  private async handleSubscribe(connectionId: string, request: SubscriptionRequest): Promise<void> {
     // Add subscriptions
     this.connectionManager.addSubscription(connectionId, request);
 
     // Store subscription in Redis for persistence
     if (this.redisClient) {
       const key = `subscription:${connectionId}`;
-      await this.redisClient.sAdd(key, ...request.topics);
+      await this.redisClient.sAdd(key, request.topics);
       await this.redisClient.expire(key, 86400); // 24 hours
     }
 
@@ -275,17 +255,14 @@ export class PLCWebSocketServer extends EventEmitter {
   /**
    * Handle PLC data unsubscription
    */
-  private async handleUnsubscribe(
-    connectionId: string,
-    topics: string[]
-  ): Promise<void> {
+  private async handleUnsubscribe(connectionId: string, topics: string[]): Promise<void> {
     // Remove subscriptions
     this.connectionManager.removeSubscription(connectionId, topics);
 
     // Remove from Redis
     if (this.redisClient) {
       const key = `subscription:${connectionId}`;
-      await this.redisClient.sRem(key, ...topics);
+      await this.redisClient.sRem(key, topics);
     }
 
     console.log(`Client ${connectionId} unsubscribed from:`, topics);
@@ -299,28 +276,20 @@ export class PLCWebSocketServer extends EventEmitter {
     request: SubscriptionRequest
   ): Promise<void> {
     // Add control loop specific subscriptions
-    const controlLoopTopics = request.topics.map(
-      (topic) => `control-loop:${topic}`
-    );
+    const controlLoopTopics = request.topics.map(topic => `control-loop:${topic}`);
 
     this.connectionManager.addSubscription(connectionId, {
       ...request,
       topics: controlLoopTopics,
     });
 
-    console.log(
-      `Client ${connectionId} subscribed to control loops:`,
-      request.topics
-    );
+    console.log(`Client ${connectionId} subscribed to control loops:`, request.topics);
   }
 
   /**
    * Handle command execution
    */
-  private async handleCommand(
-    connectionId: string,
-    request: CommandRequest
-  ): Promise<void> {
+  private async handleCommand(connectionId: string, request: CommandRequest): Promise<void> {
     const startTime = Date.now();
 
     try {
@@ -363,8 +332,7 @@ export class PLCWebSocketServer extends EventEmitter {
         timestamp: Date.now(),
         payload: {
           success: false,
-          error:
-            error instanceof Error ? error.message : 'Command execution failed',
+          error: error instanceof Error ? error.message : 'Command execution failed',
           executionTime: Date.now() - startTime,
         } as CommandResult,
       });
@@ -482,7 +450,7 @@ export class PLCWebSocketServer extends EventEmitter {
    */
   private setupEventHandlers(): void {
     // Handle connection events
-    this.connectionManager.on('connection:added', (connection) => {
+    this.connectionManager.on('connection:added', (connection: ClientConnection) => {
       console.log(`Client connected: ${connection.id}`);
 
       // Send system event
@@ -498,15 +466,13 @@ export class PLCWebSocketServer extends EventEmitter {
       });
     });
 
-    this.connectionManager.on('connection:removed', (connection) => {
+    this.connectionManager.on('connection:removed', (connection: ClientConnection) => {
       console.log(`Client disconnected: ${connection.id}`);
     });
   }
 
   // Command implementations
-  private async getPLCStatus(
-    params: Record<string, unknown>
-  ): Promise<unknown> {
+  private async getPLCStatus(params: Record<string, unknown>): Promise<unknown> {
     // Implementation would query actual PLC status
     return {
       plcId: params.plcId,
@@ -517,9 +483,7 @@ export class PLCWebSocketServer extends EventEmitter {
     };
   }
 
-  private async setControlLoopMode(
-    params: Record<string, unknown>
-  ): Promise<unknown> {
+  private async setControlLoopMode(params: Record<string, unknown>): Promise<unknown> {
     // Implementation would set actual control loop mode
     return {
       loopId: params.loopId,
@@ -529,9 +493,7 @@ export class PLCWebSocketServer extends EventEmitter {
     };
   }
 
-  private async queryHistoricalData(
-    params: Record<string, unknown>
-  ): Promise<unknown> {
+  private async queryHistoricalData(params: Record<string, unknown>): Promise<unknown> {
     // Implementation would query PostgreSQL for historical data
     return {
       tagName: params.tagName,
