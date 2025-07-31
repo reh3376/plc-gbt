@@ -8,7 +8,9 @@
     "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -23,11 +25,21 @@
     "declarationMap": true,
     "sourceMap": true,
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "types": ["node"],
-    "typeRoots": ["node_modules/@types"],
-    "skipLibCheck": true
+    "baseUrl": ".",
+    "paths": {
+      "*": ["./node_modules/@types/*", "./node_modules/*"]
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "../node_modules/@types",
+      "../../node_modules/@types"
+    ],
+    "types": ["node"]
   },
-  "include": ["./**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["./**/*.ts", "./node-types.d.ts"],
+  "files": ["./node-types.d.ts"],
+  "exclude": ["node_modules", "dist"],
+  "ts-node": {
+    "esm": false
+  }
 }
