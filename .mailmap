@@ -1,0 +1,9 @@
+# Git mailmap file to standardize author names and emails
+# This helps resolve author identity mapping issues in GitHub
+
+# Map all author variations to consistent GitHub identity
+reh3376 <reh3376@users.noreply.github.com> Roger Henley <rogerhenley345@gmail.com>
+reh3376 <reh3376@users.noreply.github.com> <rogerhenley345@gmail.com>
+
+# Ensure GitHub recognizes the canonical author
+reh3376 <reh3376@users.noreply.github.com>
