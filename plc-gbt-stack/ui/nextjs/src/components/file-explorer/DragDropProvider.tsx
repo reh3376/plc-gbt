@@ -30,18 +30,6 @@ import {
 } from '@dnd-kit/sortable';
 import React, { useCallback, useState } from 'react';
 
-// Drag data interface
-interface DragData {
-  file: FileItem;
-  type: 'file' | 'folder';
-}
-
-// Drop zone data interface
-interface DropZoneData {
-  targetFolder: FileItem;
-  accept: ('file' | 'folder')[];
-}
-
 // Drag and drop provider props
 interface DragDropProviderProps {
   children: React.ReactNode;
@@ -83,7 +71,7 @@ export function DragDropProvider({
   onExternalFileDrop,
   enabled = true,
 }: DragDropProviderProps): React.ReactElement {
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [, setActiveId] = useState<string | null>(null);
   const [draggedFile, setDraggedFile] = useState<FileItem | null>(null);
 
   // Configure sensors for drag operations

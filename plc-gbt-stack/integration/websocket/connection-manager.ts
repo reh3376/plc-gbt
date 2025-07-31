@@ -10,7 +10,6 @@ import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocket } from 'ws';
 import {
-  AlertSeverity,
   ConnectionConfig,
   SubscriptionRequest,
   SystemAlert,
@@ -37,9 +36,9 @@ export interface ConnectionManagerConfig {
 }
 
 export class WebSocketConnectionManager extends EventEmitter {
-  private connections: Map<string, ClientConnection> = new Map();
+  private readonly connections: Map<string, ClientConnection> = new Map();
   private heartbeatTimer?: NodeJS.Timeout;
-  private config: ConnectionManagerConfig;
+  private readonly config: ConnectionManagerConfig;
 
   constructor(config: Partial<ConnectionManagerConfig> = {}) {
     super();

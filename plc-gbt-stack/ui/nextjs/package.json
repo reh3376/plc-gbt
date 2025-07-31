@@ -14,6 +14,8 @@
     "@hookform/resolvers": "^5.1.1",
     "@monaco-editor/react": "^4.7.0",
     "@tanstack/react-query": "^5.83.0",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.18.1",
     "@xyflow/react": "^12.8.2",
     "@xyflow/system": "^0.0.66",
     "chart.js": "^4.5.0",
@@ -29,6 +31,8 @@
     "react-resizable-panels": "^3.0.3",
     "reactflow": "^11.11.4",
     "tailwind-merge": "^3.3.1",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.3",
     "zod": "^4.0.5",
     "zustand": "^4.5.2"
   },

@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-The AI Task Orchestrator TypeScript Guide provides a **structured framework** for AI agents and LLMs to complete frontend coding tasks systematically using Next.js, TypeScript, and React. It ensures thorough analysis, proper planning, build validation, comprehensive testing with >99% success rate, and mandatory documentation updates.
+The AI Task Orchestrator TypeScript Guide provides a **structured framework** for AI agents and LLMs to complete frontend coding tasks systematically using Next.js, TypeScript, and React. It ensures thorough analysis, proper planning, build validation, **two-phase testing (automated Playwright MCP + user validation)** with >95% success rate, and mandatory documentation updates.
 
 ## 🚨 CRITICAL: Strict TypeScript Rules Enforcement
 
@@ -254,6 +254,594 @@ if (!isValid) {
 - ✅ **Mock Generation** - Use MCP_Docker mock endpoints for development
 
 **Remember: OpenAPI schema MCP from MCP_Docker server is the ONLY acceptable source for API definitions and JSON schemas. This eliminates schema drift and ensures robust, validated API integrations.**
+
+## 🚨 CRITICAL: Comprehensive UI Testing Framework
+
+**MANDATORY RULE**: All UI functionality MUST pass automated testing validation AND user interactive testing before being declared "complete", "fixed", or "successful".
+
+### 🤖 Phase 1: Automated Testing with Playwright MCP Integration
+
+**REQUIRED BEFORE USER TESTING**: All UI implementations must pass comprehensive automated testing using Playwright VS Code extension and MCP_Docker Playwright server.
+
+#### **🔧 Automated Testing Requirements**
+
+**BEFORE any user interactive testing, AI agents MUST:**
+
+1. **Unit & Component Tests**: Jest + React Testing Library (>99% coverage)
+2. **E2E Automated Tests**: Playwright MCP server integration
+3. **Accessibility Tests**: Automated WCAG compliance validation
+4. **Performance Tests**: Core Web Vitals and rendering performance
+5. **Cross-browser Tests**: Chrome, Firefox, Safari compatibility
+
+#### **🚀 Playwright MCP Server Integration**
+
+```typescript
+// ✅ MANDATORY: Use MCP_Docker Playwright server for automated testing
+import { useMCPPlaywrightServer } from '@/lib/mcp-docker-client'
+
+interface AutomatedUITestSuite {
+  componentTests: PlaywrightComponentTest[]
+  e2eTests: PlaywrightE2ETest[]
+  accessibilityTests: PlaywrightA11yTest[]
+  performanceTests: PlaywrightPerfTest[]
+  crossBrowserTests: PlaywrightCrossBrowserTest[]
+}
+
+async function executeAutomatedUITestSuite(
+  implementation: UIImplementation
+): Promise<AutomatedTestResults> {
+  
+  const mcpPlaywright = await useMCPPlaywrightServer()
+  
+  // 1. Initialize test environment
+  await mcpPlaywright.browser_navigate(implementation.testUrl)
+  
+  // 2. Execute component interaction tests
+  const componentResults = await runComponentTests(mcpPlaywright, implementation)
+  
+  // 3. Execute E2E workflow tests
+  const e2eResults = await runE2ETests(mcpPlaywright, implementation)
+  
+  // 4. Execute accessibility tests
+  const a11yResults = await runAccessibilityTests(mcpPlaywright, implementation)
+  
+  // 5. Execute performance tests
+  const perfResults = await runPerformanceTests(mcpPlaywright, implementation)
+  
+  // 6. Execute cross-browser tests
+  const crossBrowserResults = await runCrossBrowserTests(mcpPlaywright, implementation)
+  
+  return {
+    overallScore: calculateOverallScore([componentResults, e2eResults, a11yResults, perfResults, crossBrowserResults]),
+    componentTests: componentResults,
+    e2eTests: e2eResults,
+    accessibilityTests: a11yResults,
+    performanceTests: perfResults,
+    crossBrowserTests: crossBrowserResults,
+    automatedTestsPassed: allTestsPassed([componentResults, e2eResults, a11yResults, perfResults, crossBrowserResults])
+  }
+}
+```
+
+#### **🧪 Comprehensive Automated Test Categories**
+
+**1. Component Interaction Tests**
+```typescript
+async function runComponentTests(
+  mcpPlaywright: MCPPlaywrightClient, 
+  implementation: UIImplementation
+): Promise<ComponentTestResults> {
+  
+  const tests = [
+    {
+      name: 'File Explorer - Open File',
+      action: async () => {
+        await mcpPlaywright.browser_click('file-item', '[data-testid="file-item-readme"]')
+        await mcpPlaywright.browser_wait_for({ text: 'File opened successfully' })
+      }
+    },
+    {
+      name: 'Modal Dialog - Open/Close',
+      action: async () => {
+        await mcpPlaywright.browser_click('modal-trigger', '[data-testid="open-modal"]')
+        await mcpPlaywright.browser_wait_for({ text: 'Modal content' })
+        await mcpPlaywright.browser_press_key('Escape')
+        await mcpPlaywright.browser_wait_for({ textGone: 'Modal content' })
+      }
+    },
+    {
+      name: 'Form Submission',
+      action: async () => {
+        await mcpPlaywright.browser_type('input-field', '[data-testid="form-input"]', 'test data')
+        await mcpPlaywright.browser_click('submit-button', '[data-testid="submit-btn"]')
+        await mcpPlaywright.browser_wait_for({ text: 'Form submitted successfully' })
+      }
+    }
+  ]
+  
+  const results = await Promise.all(tests.map(test => executeTest(test)))
+  return {
+    totalTests: tests.length,
+    passedTests: results.filter(r => r.passed).length,
+    failedTests: results.filter(r => !r.passed),
+    successRate: (results.filter(r => r.passed).length / tests.length) * 100
+  }
+}
+```
+
+**2. E2E Workflow Tests**
+```typescript
+async function runE2ETests(
+  mcpPlaywright: MCPPlaywrightClient,
+  implementation: UIImplementation
+): Promise<E2ETestResults> {
+  
+  const workflows = [
+    {
+      name: 'Complete File Management Workflow',
+      steps: [
+        () => mcpPlaywright.browser_click('create-file', '[data-testid="create-file-btn"]'),
+        () => mcpPlaywright.browser_type('file-name', '[data-testid="file-name-input"]', 'test-file.tsx'),
+        () => mcpPlaywright.browser_click('confirm-create', '[data-testid="confirm-create"]'),
+        () => mcpPlaywright.browser_wait_for({ text: 'File created successfully' }),
+        () => mcpPlaywright.browser_click('file-item', '[data-testid="file-test-file.tsx"]'),
+        () => mcpPlaywright.browser_type('editor', '[data-testid="monaco-editor"]', 'export const Test = () => <div>Hello</div>'),
+        () => mcpPlaywright.browser_press_key('Control+s'),
+        () => mcpPlaywright.browser_wait_for({ text: 'File saved successfully' })
+      ]
+    },
+    {
+      name: 'Navigation and Routing Workflow',
+      steps: [
+        () => mcpPlaywright.browser_click('nav-link', '[data-testid="nav-dashboard"]'),
+        () => mcpPlaywright.browser_wait_for({ text: 'Dashboard' }),
+        () => mcpPlaywright.browser_click('nav-link', '[data-testid="nav-settings"]'),
+        () => mcpPlaywright.browser_wait_for({ text: 'Settings' }),
+        () => mcpPlaywright.browser_navigate_back(),
+        () => mcpPlaywright.browser_wait_for({ text: 'Dashboard' })
+      ]
+    }
+  ]
+  
+  const workflowResults = await Promise.all(workflows.map(workflow => executeWorkflow(workflow)))
+  return {
+    totalWorkflows: workflows.length,
+    passedWorkflows: workflowResults.filter(r => r.passed).length,
+    failedWorkflows: workflowResults.filter(r => !r.passed),
+    successRate: (workflowResults.filter(r => r.passed).length / workflows.length) * 100
+  }
+}
+```
+
+**3. Accessibility Tests**
+```typescript
+async function runAccessibilityTests(
+  mcpPlaywright: MCPPlaywrightClient,
+  implementation: UIImplementation
+): Promise<AccessibilityTestResults> {
+  
+  const a11yTests = [
+    {
+      name: 'Keyboard Navigation',
+      action: async () => {
+        await mcpPlaywright.browser_press_key('Tab')
+        await mcpPlaywright.browser_press_key('Tab')
+        await mcpPlaywright.browser_press_key('Enter')
+        // Verify focus management and keyboard interaction
+      }
+    },
+    {
+      name: 'Screen Reader Compatibility',
+      action: async () => {
+        const snapshot = await mcpPlaywright.browser_snapshot('')
+        // Verify ARIA attributes and semantic structure
+        return verifyScreenReaderCompatibility(snapshot)
+      }
+    },
+    {
+      name: 'Color Contrast Compliance',
+      action: async () => {
+        const screenshot = await mcpPlaywright.browser_take_screenshot({})
+        return verifyColorContrast(screenshot)
+      }
+    }
+  ]
+  
+  const results = await Promise.all(a11yTests.map(test => executeA11yTest(test)))
+  return {
+    wcagComplianceLevel: calculateWCAGCompliance(results),
+    passedTests: results.filter(r => r.passed).length,
+    totalTests: a11yTests.length,
+    successRate: (results.filter(r => r.passed).length / a11yTests.length) * 100
+  }
+}
+```
+
+#### **📊 Automated Testing Success Criteria**
+
+**MANDATORY**: All automated tests must achieve >95% success rate before proceeding to user interactive testing:
+
+```typescript
+interface AutomatedTestingRequirements {
+  componentTests: { minSuccessRate: 95 }
+  e2eTests: { minSuccessRate: 95 }
+  accessibilityTests: { minSuccessRate: 95, wcagLevel: 'AA' }
+  performanceTests: { 
+    coreWebVitals: 'green',
+    renderTime: '<100ms',
+    bundleSize: '<500KB'
+  }
+  crossBrowserTests: { minSuccessRate: 90 }
+}
+
+async function validateAutomatedTestingRequirements(
+  results: AutomatedTestResults
+): Promise<AutomatedValidationResult> {
+  
+  const requirements = {
+    componentTestsPassed: results.componentTests.successRate >= 95,
+    e2eTestsPassed: results.e2eTests.successRate >= 95,
+    accessibilityTestsPassed: results.accessibilityTests.successRate >= 95,
+    performanceTestsPassed: results.performanceTests.coreWebVitals === 'green',
+    crossBrowserTestsPassed: results.crossBrowserTests.successRate >= 90
+  }
+  
+  const allRequirementsMet = Object.values(requirements).every(req => req === true)
+  
+  if (!allRequirementsMet) {
+    throw new Error(
+      `Automated testing requirements not met: ${JSON.stringify(requirements)}`
+    )
+  }
+  
+  return {
+    automatedTestingPassed: true,
+    overallScore: results.overallScore,
+    readyForUserTesting: true,
+    requirements
+  }
+}
+```
+
+### 🧑‍💻 Phase 2: Mandatory User Interactive Testing
+
+**CRITICAL RULE**: Even after automated tests pass, NO UI functionality can be declared "complete" without user interactive testing validation.
+
+### **⚠️ NEVER Assume UI Effectiveness After Automated Tests**
+
+**CRITICAL ERROR PATTERN TO AVOID:**
+```typescript
+// ❌ WRONG - Declaring UI success with only automated validation
+const automatedResults = await executeAutomatedUITestSuite(implementation);
+if (automatedResults.overallScore >= 95) {
+  console.log("✅ File explorer functionality successfully implemented");
+  await completeFrontendTaskWithMandatoryDocumentation(taskResults);
+  // This assumes the UI works based only on automated tests
+}
+```
+
+**✅ CORRECT APPROACH:**
+```typescript
+// ✅ RIGHT - Both automated AND user validation required
+const automatedResults = await executeAutomatedUITestSuite(implementation);
+if (automatedResults.overallScore >= 95) {
+  console.log("🤖 Automated tests passed (95%+ success rate)");
+  console.log("🔧 File explorer changes implemented, awaiting user testing");
+  console.log("📋 AUTOMATED VALIDATION COMPLETE - now requiring USER VALIDATION:");
+  console.log("📋 Please test: file opening, navigation, save functionality");
+  console.log("⏳ Task completion pending user interactive validation");
+  // Only proceed after BOTH automated AND user confirmation
+}
+```
+
+### **🔍 Enhanced User Interactive Testing Protocol**
+
+**BEFORE marking any UI task complete, AI agents MUST:**
+
+1. **Execute Automated Testing**: Run comprehensive Playwright MCP automated test suite (>95% success rate required)
+2. **Implement Changes**: Complete the technical implementation with automated validation
+3. **Present Test Results**: Show user both automated test results and implementation details
+4. **Request User Testing**: Explicitly ask user to test specific functionality with guided test scenarios
+5. **Provide Testing Checklist**: Give user structured testing checklist based on automated test coverage
+6. **Await Confirmation**: Wait for user to confirm UI works as expected in real-world usage
+7. **Address Issues**: Fix any problems reported by user testing (may require re-running automated tests)
+8. **Repeat Process**: Continue cycle until BOTH automated tests pass AND user confirms success
+9. **Document Completion**: Only then proceed with final documentation
+
+#### **🎯 Enhanced Testing Protocol Implementation**
+
+```typescript
+async function executeEnhancedUITestingProtocol(
+  implementation: UIImplementation
+): Promise<UITestingProtocolResult> {
+  
+  // Phase 1: Automated Testing (MANDATORY FIRST STEP)
+  console.log("🚀 PHASE 1: Executing automated testing with Playwright MCP...");
+  const automatedResults = await executeAutomatedUITestSuite(implementation);
+  
+  if (automatedResults.overallScore < 95) {
+    throw new Error(
+      `Automated testing failed: ${automatedResults.overallScore}% < 95% required. ` +
+      `Fix automated test failures before user testing.`
+    );
+  }
+  
+  // Phase 2: User Interactive Testing (MANDATORY SECOND STEP)
+  console.log("🤖 AUTOMATED TESTS PASSED (95%+ success rate)");
+  console.log("🧑‍💻 PHASE 2: User interactive testing required...");
+  
+  const userTestingChecklist = generateUserTestingChecklist(
+    implementation, 
+    automatedResults
+  );
+  
+  // Present comprehensive testing results to user
+  console.log("📊 AUTOMATED TEST RESULTS:");
+  console.log(`   ✅ Component Tests: ${automatedResults.componentTests.successRate}%`);
+  console.log(`   ✅ E2E Tests: ${automatedResults.e2eTests.successRate}%`);
+  console.log(`   ✅ Accessibility Tests: ${automatedResults.accessibilityTests.successRate}%`);
+  console.log(`   ✅ Performance Tests: ${automatedResults.performanceTests.coreWebVitals}`);
+  console.log(`   ✅ Cross-browser Tests: ${automatedResults.crossBrowserTests.successRate}%`);
+  
+  console.log("\\n🧪 USER INTERACTIVE TESTING REQUIRED:");
+  console.log("📋 Automated tests passed, but user validation is MANDATORY:");
+  console.log("📋 Please test the following functionality in your browser:");
+  
+  userTestingChecklist.forEach((item, index) => {
+    console.log(`   ${index + 1}. ${item.description}`);
+    console.log(`      🤖 Automated: ${item.automatedStatus}`);
+    console.log(`      👤 User Test: ${item.userTestRequired}`);
+  });
+  
+  console.log("\\n⚠️  CRITICAL: Even though automated tests passed, real user interaction");
+  console.log("   may reveal issues that automation cannot detect:");
+  console.log("   - Intuitive UX and user flow");
+  console.log("   - Visual design and aesthetic issues");
+  console.log("   - Real-world usage patterns");
+  console.log("   - Subjective user experience quality");
+  
+  // Wait for user confirmation (DO NOT PROCEED WITHOUT THIS)
+  const userConfirmation = await waitForUserTestingConfirmation();
+  
+  if (!userConfirmation.success) {
+    console.log("🔧 User reported issues - addressing and re-testing...");
+    // May need to re-run automated tests after fixes
+    return await fixIssuesAndRetryBothTestingPhases(userConfirmation.issues);
+  }
+  
+  // Both phases successful
+  console.log("✅ BOTH automated tests AND user validation completed successfully");
+  return {
+    automatedTestResults: automatedResults,
+    userTestingResults: userConfirmation,
+    overallSuccess: true,
+    readyForDocumentation: true
+  };
+}
+```
+
+### **🎯 Enhanced Enforcement Guidelines**
+
+**Language Requirements:**
+- ❌ "Successfully fixed" → ✅ "Automated tests passed, awaiting user testing"
+- ❌ "Task complete" → ✅ "Implementation ready for user validation after automated testing"
+- ❌ "UI functionality verified" → ✅ "Automated validation complete, please test UI functionality"
+- ❌ "Tests passed" → ✅ "Automated tests passed (95%+), user testing required"
+
+**Two-Phase Testing Categories:**
+
+**🤖 Phase 1 - Automated Testing (Playwright MCP):**
+- **Component Interaction Tests**: Automated click, type, navigation testing
+- **E2E Workflow Tests**: Complete user journey automation
+- **Accessibility Tests**: WCAG compliance and keyboard navigation
+- **Performance Tests**: Core Web Vitals and rendering benchmarks
+- **Cross-browser Tests**: Chrome, Firefox, Safari compatibility
+
+**👤 Phase 2 - User Interactive Testing (MANDATORY):**
+- **Functional Validation**: Does the feature work intuitively for real users?
+- **UX Quality**: Is the user experience smooth and logical?
+- **Visual Design**: Are there aesthetic or layout issues?
+- **Real-world Usage**: Does it handle edge cases and user behavior patterns?
+- **Subjective Experience**: Does it feel responsive and polished?
+
+**Critical UI Areas Requiring BOTH Automated + User Validation:**
+- File operations (open, save, rename, delete) - Automated workflow + user UX validation
+- Navigation and routing - Automated flow testing + user intuitive navigation
+- Form submissions and data entry - Automated validation + user input experience
+- Modal dialogs and popups - Automated interaction + user accessibility experience
+- Drag and drop functionality - Automated event testing + user gesture validation
+- Keyboard shortcuts and accessibility - Automated a11y testing + user screen reader validation
+- Theme and styling consistency - Automated visual regression + user aesthetic validation
+- Responsive design behavior - Automated viewport testing + user device validation
+
+#### **📋 Structured User Testing Checklist Generation**
+
+```typescript
+function generateUserTestingChecklist(
+  implementation: UIImplementation,
+  automatedResults: AutomatedTestResults
+): UserTestingChecklistItem[] {
+  
+  const baseChecklist: UserTestingChecklistItem[] = [
+    {
+      category: 'Functional Testing',
+      description: 'Open file by clicking on file name in explorer',
+      automatedStatus: `✅ Automated (${automatedResults.componentTests.fileExplorer?.successRate}%)`,
+      userTestRequired: 'Verify file opens intuitively and quickly',
+      priority: 'high'
+    },
+    {
+      category: 'Navigation Testing',
+      description: 'Navigate between different sections using main navigation',
+      automatedStatus: `✅ Automated (${automatedResults.e2eTests.navigation?.successRate}%)`,
+      userTestRequired: 'Confirm navigation feels natural and responsive',
+      priority: 'high'
+    },
+    {
+      category: 'Accessibility Testing',
+      description: 'Navigate entire interface using only keyboard',
+      automatedStatus: `✅ Automated (${automatedResults.accessibilityTests.keyboard?.successRate}%)`,
+      userTestRequired: 'Verify keyboard navigation is intuitive for real users',
+      priority: 'high'
+    },
+    {
+      category: 'Performance Testing',
+      description: 'Interact rapidly with multiple UI elements',
+      automatedStatus: `✅ Automated (${automatedResults.performanceTests.renderTime})`,
+      userTestRequired: 'Confirm UI feels responsive under normal usage',
+      priority: 'medium'
+    },
+    {
+      category: 'Visual Design Testing',
+      description: 'Review overall visual consistency and aesthetics',
+      automatedStatus: '🤖 Not automated (subjective)',
+      userTestRequired: 'Verify UI looks polished and professional',
+      priority: 'medium'
+    },
+    {
+      category: 'Mobile/Responsive Testing',
+      description: 'Test on mobile device or narrow browser window',
+      automatedStatus: `✅ Automated (${automatedResults.crossBrowserTests.mobile?.successRate}%)`,
+      userTestRequired: 'Confirm mobile experience is usable and intuitive',
+      priority: 'high'
+    }
+  ];
+  
+  // Add implementation-specific tests based on features
+  if (implementation.features.includes('fileOperations')) {
+    baseChecklist.push({
+      category: 'File Operations',
+      description: 'Create, rename, delete files using UI controls',
+      automatedStatus: `✅ Automated (${automatedResults.e2eTests.fileOperations?.successRate}%)`,
+      userTestRequired: 'Verify file operations feel natural and provide clear feedback',
+      priority: 'high'
+    });
+  }
+  
+  if (implementation.features.includes('modalDialogs')) {
+    baseChecklist.push({
+      category: 'Modal Interactions',
+      description: 'Open and close modal dialogs using various methods',
+      automatedStatus: `✅ Automated (${automatedResults.componentTests.modals?.successRate}%)`,
+      userTestRequired: 'Confirm modals behave intuitively (ESC key, outside click, etc.)',
+      priority: 'medium'
+    });
+  }
+  
+  return baseChecklist.sort((a, b) => {
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    return priorityOrder[b.priority] - priorityOrder[a.priority];
+  });
+}
+```
+
+### **🚀 Enhanced Implementation Example**
+
+```typescript
+async function completeUITaskWithTwoPhaseValidation(taskResults: UITaskResults) {
+    // 1. Implement technical changes
+    const implementation = await implementUIChanges(taskResults);
+    
+    // 2. PHASE 1: Execute automated testing with Playwright MCP (MANDATORY FIRST)
+    console.log("🚀 PHASE 1: Executing automated testing with Playwright MCP...");
+    const automatedResults = await executeAutomatedUITestSuite(implementation);
+    
+    if (automatedResults.overallScore < 95) {
+        console.log("❌ Automated testing failed. Fixing issues before user testing...");
+        await fixAutomatedTestingIssues(automatedResults.failures);
+        return await completeUITaskWithTwoPhaseValidation(taskResults); // Retry
+    }
+    
+    console.log("🤖 AUTOMATED TESTS PASSED:");
+    console.log(`   ✅ Component Tests: ${automatedResults.componentTests.successRate}%`);
+    console.log(`   ✅ E2E Tests: ${automatedResults.e2eTests.successRate}%`);
+    console.log(`   ✅ Accessibility Tests: ${automatedResults.accessibilityTests.successRate}%`);
+    console.log(`   ✅ Performance Tests: ${automatedResults.performanceTests.coreWebVitals}`);
+    
+    // 3. PHASE 2: User interactive testing (MANDATORY SECOND)
+    const userTestingChecklist = generateUserTestingChecklist(implementation, automatedResults);
+    
+    console.log("\\n🧑‍💻 PHASE 2: USER INTERACTIVE TESTING REQUIRED:");
+    console.log("📋 Automated validation complete - now requiring user validation:");
+    console.log("📋 Please test the following functionality in your browser:");
+    
+    userTestingChecklist.forEach((item, index) => {
+        console.log(`\\n   ${index + 1}. ${item.category}: ${item.description}`);
+        console.log(`      🤖 ${item.automatedStatus}`);
+        console.log(`      👤 ${item.userTestRequired}`);
+    });
+    
+    console.log("\\n⚠️  IMPORTANT: Automated tests validate technical functionality,");
+    console.log("   but only YOU can validate the user experience quality.");
+    
+    // 4. Wait for user confirmation (DO NOT PROCEED WITHOUT THIS)
+    const userConfirmation = await waitForUserTestingConfirmation();
+    
+    if (!userConfirmation.success) {
+        // 5. Address issues and may need to re-run both phases
+        console.log("🔧 User reported issues - addressing and re-testing...");
+        const fixedImplementation = await fixUserReportedIssues(userConfirmation.issues);
+        
+        // Re-run automated tests if code changes were made
+        if (fixedImplementation.codeChanged) {
+            console.log("🔄 Code changed - re-running automated tests...");
+            return await completeUITaskWithTwoPhaseValidation(taskResults); // Full retry
+        } else {
+            // Only re-run user testing if no code changes
+            return await retryUserTestingPhase(fixedImplementation);
+        }
+    }
+    
+    // 6. Both phases successful - proceed with documentation
+    console.log("✅ BOTH automated tests AND user validation completed successfully");
+    console.log("📊 Final Results:");
+    console.log(`   🤖 Automated Test Score: ${automatedResults.overallScore}%`);
+    console.log(`   👤 User Validation: ${userConfirmation.status}`);
+    
+    return await completeFrontendTaskWithMandatoryDocumentation({
+        ...taskResults,
+        automatedTestResults: automatedResults,
+        userTestingResults: userConfirmation,
+        twoPhaseValidationCompleted: true
+    });
+}
+```
+
+#### **🎯 Playwright VS Code Extension Integration**
+
+For AI agents working in VS Code environments:
+
+```typescript
+async function integratePlaywrightVSCodeExtension(implementation: UIImplementation) {
+  // Leverage VS Code Playwright extension for enhanced testing
+  const vscodePlaywright = {
+    // Generate test files using VS Code extension
+    generateTestFiles: async () => {
+      console.log("🎯 Generating Playwright test files using VS Code extension...");
+      // VS Code extension can auto-generate test files from user interactions
+      return await generatePlaywrightTestFiles(implementation);
+    },
+    
+    // Run tests using VS Code extension UI
+    runTestsInVSCode: async () => {
+      console.log("🧪 Running Playwright tests in VS Code extension...");
+      // This allows visual test running and debugging
+      return await runPlaywrightTestsInVSCode(implementation);
+    },
+    
+    // Debug failed tests using VS Code extension
+    debugFailedTests: async (failures: TestFailure[]) => {
+      console.log("🐛 Debugging failed tests in VS Code extension...");
+      // VS Code extension provides step-by-step debugging
+      return await debugTestsInVSCode(failures);
+    }
+  };
+  
+  return vscodePlaywright;
+}
+```
+
+**Remember: Backend API success ≠ UI functionality. Only users can validate that the interface works as intended.**
 
 ## 🎯 Key Features
 
@@ -528,73 +1116,136 @@ console.log(`Numerical Stability: ${mathValidation.numericalStability}`)
 console.log(`WolframAlpha Verified: ${mathValidation.wolframVerified}`)
 ```
 
-## 🚨 CRITICAL REQUIREMENT: Comprehensive Testing Before Documentation
+## 🚨 CRITICAL REQUIREMENT: Two-Phase Testing Before Documentation
 
-**MANDATORY**: Every frontend task must achieve >99% success rate across all validation tiers before proceeding to documentation updates:
+**MANDATORY**: Every frontend task must achieve >95% automated testing success rate AND user validation approval before proceeding to documentation updates:
 
-### Testing Validation Pipeline
+### Enhanced Two-Phase Testing Validation Pipeline
 
 ```typescript
-async function validateComprehensiveTestingRequirement(
+async function validateTwoPhaseTestingRequirement(
     implementation: FrontendImplementation
-): Promise<TestingValidationResult> {
+): Promise<TwoPhaseTestingValidationResult> {
     
-    const validations = await Promise.all([
+    // Phase 1: Automated Testing Validation (Playwright MCP + Unit Tests)
+    console.log("🚀 Validating Phase 1: Automated Testing...");
+    const automatedValidations = await Promise.all([
         orchestrator.validateUnitTests(implementation.tests.unit, { minCoverage: 99 }),
-        orchestrator.validateIntegrationTests(implementation.tests.integration),
-        orchestrator.validateE2ETests(implementation.tests.e2e),
-        orchestrator.validateAccessibilityTests(implementation.tests.accessibility),
-        orchestrator.validatePerformanceTests(implementation.tests.performance),
+        orchestrator.validatePlaywrightComponentTests(implementation.tests.playwright.component),
+        orchestrator.validatePlaywrightE2ETests(implementation.tests.playwright.e2e),
+        orchestrator.validatePlaywrightAccessibilityTests(implementation.tests.playwright.accessibility),
+        orchestrator.validatePlaywrightPerformanceTests(implementation.tests.playwright.performance),
+        orchestrator.validatePlaywrightCrossBrowserTests(implementation.tests.playwright.crossBrowser),
         orchestrator.validateBuildSuccess(implementation.code),
         orchestrator.validateTypeScriptCompliance(implementation.code)
-    ])
+    ]);
     
-    const successRates = validations.map(v => v.successRate)
-    const overallSuccessRate = successRates.reduce((a, b) => a + b) / successRates.length
+    const automatedSuccessRates = automatedValidations.map(v => v.successRate);
+    const automatedOverallSuccessRate = automatedSuccessRates.reduce((a, b) => a + b) / automatedSuccessRates.length;
+    
+    const automatedResults = {
+        overallSuccessRate: automatedOverallSuccessRate,
+        individualRates: {
+            unitTests: automatedValidations[0].successRate,
+            playwrightComponentTests: automatedValidations[1].successRate,
+            playwrightE2ETests: automatedValidations[2].successRate,
+            playwrightAccessibilityTests: automatedValidations[3].successRate,
+            playwrightPerformanceTests: automatedValidations[4].successRate,
+            playwrightCrossBrowserTests: automatedValidations[5].successRate,
+            buildSuccess: automatedValidations[6].successRate,
+            typeScriptCompliance: automatedValidations[7].successRate
+        },
+        requirementMet: automatedOverallSuccessRate >= 95,
+        phase1Passed: automatedOverallSuccessRate >= 95,
+        recommendations: automatedValidations.flatMap(v => v.recommendations)
+    };
+    
+    // Only proceed to Phase 2 if Phase 1 passes
+    if (!automatedResults.phase1Passed) {
+        throw new Error(
+            `Phase 1 (Automated Testing) failed: ${automatedResults.overallSuccessRate}% < 95% required. ` +
+            `Fix automated test failures before user testing. Issues: ${automatedResults.recommendations.join(', ')}`
+        );
+    }
+    
+    // Phase 2: User Interactive Testing Validation
+    console.log("🧑‍💻 Phase 1 passed - initiating Phase 2: User Interactive Testing...");
+    const userTestingChecklist = generateUserTestingChecklist(implementation, automatedResults);
+    
+    console.log("📋 User Testing Required:");
+    userTestingChecklist.forEach((item, index) => {
+        console.log(`   ${index + 1}. ${item.category}: ${item.description}`);
+        console.log(`      🤖 ${item.automatedStatus}`);
+        console.log(`      👤 ${item.userTestRequired}`);
+    });
+    
+    // MANDATORY: Wait for user validation
+    const userValidationResult = await waitForUserTestingConfirmation();
+    
+    if (!userValidationResult.success) {
+        throw new Error(
+            `Phase 2 (User Interactive Testing) failed: ${userValidationResult.issues.join(', ')}`
+        );
+    }
     
     return {
-        overallSuccessRate,
-        individualRates: {
-            unitTests: validations[0].successRate,
-            integrationTests: validations[1].successRate,
-            e2eTests: validations[2].successRate,
-            accessibilityTests: validations[3].successRate,
-            performanceTests: validations[4].successRate,
-            buildSuccess: validations[5].successRate,
-            typeScriptCompliance: validations[6].successRate
-        },
-        requirementMet: overallSuccessRate >= 99,
-        recommendations: validations.flatMap(v => v.recommendations)
-    }
+        phase1Results: automatedResults,
+        phase2Results: userValidationResult,
+        twoPhaseTestingPassed: automatedResults.phase1Passed && userValidationResult.success,
+        overallScore: (automatedResults.overallSuccessRate + (userValidationResult.success ? 100 : 0)) / 2,
+        readyForDocumentation: true,
+        testingMethodology: 'two-phase-playwright-mcp-user-validation'
+    };
 }
 
-// MANDATORY: Only proceed to documentation if testing requirement met
-async function completeFrontendTaskWithTestingValidation(taskResults: FrontendTaskResults) {
-    // 1. Comprehensive testing validation
-    const testingResult = await validateComprehensiveTestingRequirement(taskResults.implementation)
+// MANDATORY: Only proceed to documentation if two-phase testing requirement met
+async function completeFrontendTaskWithTwoPhaseTestingValidation(taskResults: FrontendTaskResults) {
+    // 1. Two-phase testing validation (Automated + User Interactive)
+    const twoPhaseTestingResult = await validateTwoPhaseTestingRequirement(taskResults.implementation)
     
-    if (!testingResult.requirementMet) {
+    if (!twoPhaseTestingResult.twoPhaseTestingPassed) {
         throw new Error(
-            `Testing requirement not met: ${testingResult.overallSuccessRate}% < 99% required. ` +
-            `Improvements needed: ${testingResult.recommendations.join(', ')}`
+            `Two-phase testing requirement not met. ` +
+            `Phase 1 (Automated): ${twoPhaseTestingResult.phase1Results.overallSuccessRate}%, ` +
+            `Phase 2 (User): ${twoPhaseTestingResult.phase2Results.success}. ` +
+            `Requirements: >95% automated + user approval.`
         )
     }
     
-    // 2. Multi-tier validation
+    // 2. Multi-tier validation (enhanced with testing results)
     const validation = await orchestrator.validateOutput(
         taskResults.code,
         taskResults.requirements,
         "comprehensive"
     )
     
-    if (validation.overall_score < 99) {
+    // 3. Combine testing and validation scores
+    const combinedScore = (
+        twoPhaseTestingResult.overallScore * 0.6 + // 60% weight on testing
+        validation.overall_score * 0.4              // 40% weight on validation
+    )
+    
+    if (combinedScore < 95) {
         throw new Error(
-            `Validation score ${validation.overall_score}% below 99% requirement`
+            `Combined validation score ${combinedScore}% below 95% requirement. ` +
+            `Testing: ${twoPhaseTestingResult.overallScore}%, ` +
+            `Validation: ${validation.overall_score}%`
         )
     }
     
-    // 3. MANDATORY: Update documentation as final step
-    return await orchestrator.completeFrontendTaskWithMandatoryDocumentation(taskResults)
+    console.log("✅ ALL VALIDATION PHASES COMPLETED:");
+    console.log(`   🤖 Phase 1 (Automated): ${twoPhaseTestingResult.phase1Results.overallSuccessRate}%`);
+    console.log(`   👤 Phase 2 (User Testing): ${twoPhaseTestingResult.phase2Results.success ? 'PASSED' : 'FAILED'}`);
+    console.log(`   📊 Combined Score: ${combinedScore}%`);
+    console.log(`   🎯 Testing Methodology: ${twoPhaseTestingResult.testingMethodology}`);
+    
+    // 4. MANDATORY: Update documentation as final step
+    return await orchestrator.completeFrontendTaskWithMandatoryDocumentation({
+        ...taskResults,
+        twoPhaseTestingResults: twoPhaseTestingResult,
+        combinedValidationScore: combinedScore,
+        testingMethodologyUsed: 'two-phase-playwright-mcp-user-validation'
+    })
 }
 ```
 
@@ -764,8 +1415,12 @@ The Enhanced AI Task Orchestrator TypeScript Guide provides frontend AI agents w
 
 - **Frontend-Focused Approach**: React, Next.js, and TypeScript specialization with memory system integration
 - **Build Error Resolution**: Systematic 2-3 iteration maximum error fixing with memory-guided solutions
+- **Two-Phase Testing Framework**: Automated Playwright MCP testing + mandatory user interactive validation
+- **Playwright MCP Integration**: Comprehensive automated testing using MCP_Docker Playwright server
+- **VS Code Extension Support**: Leverages Playwright VS Code extension for enhanced test development
 - **Multi-Tier Validation**: Comprehensive validation across syntax, requirements, performance, accessibility, security, mathematical accuracy, and production readiness
-- **Comprehensive Testing**: >99% success rate requirement across all validation tiers before documentation updates
+- **Automated Testing Suite**: >95% success rate requirement for component, E2E, accessibility, performance, and cross-browser tests
+- **Mandatory User Validation**: Final user interactive testing required even after automated tests pass
 - **Memory System Integration**: Redis, Neo4j, PostgreSQL, Qdrant for intelligent resource discovery and pattern matching
 - **Mathematical Validation**: WolframAlpha Pro integration for mathematical accuracy verification
 - **Component Validation**: React patterns, hooks, lifecycle compliance, and performance optimization
@@ -778,9 +1433,9 @@ The Enhanced AI Task Orchestrator TypeScript Guide provides frontend AI agents w
 - **Documentation Excellence**: Component API docs, architecture guides with memory insights
 - **Mandatory Final Step**: Automatic roadmap.md updates, completion summaries, and comprehensive documentation linking
 
-**CRITICAL ENFORCEMENT**: All tasks must achieve >99% success rate across all validation tiers before proceeding to the mandatory final step of documentation updates. No task is considered complete without comprehensive testing validation and documentation updates.
+**CRITICAL ENFORCEMENT**: All tasks must achieve >95% automated testing success rate AND user validation approval before proceeding to the mandatory final step of documentation updates. The two-phase testing approach ensures both technical functionality and real-world user experience quality.
 
-**Use this enhanced frontend-specific framework to ensure consistent, high-quality, performant, secure, accessible, and thoroughly tested React/Next.js application development with systematic build error resolution and mandatory documentation completion.**
+**Use this enhanced frontend-specific framework with two-phase testing (Playwright MCP automation + user validation) to ensure consistent, high-quality, performant, secure, accessible, and thoroughly tested React/Next.js application development with systematic build error resolution and mandatory documentation completion.**
 
 ## 🔗 Related Frontend Resources
 

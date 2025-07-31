@@ -89,7 +89,7 @@ class PLCTagMonitor:
         
         # Safety enforcement
         self.read_only_enforced = True
-        print(f"🔒 Read-only mode enforced for safety")
+        print("🔒 Read-only mode enforced for safety")
         
     def connect(self) -> bool:
         """Connect to PLC with safety validation"""
@@ -107,9 +107,9 @@ class PLCTagMonitor:
             
             if test_result.Status == "Success":
                 self.connected = True
-                print(f"✅ Connected to CLX PLC successfully!")
+                print("✅ Connected to CLX PLC successfully!")
                 print(f"📅 PLC Time: {test_result.Value}")
-                print(f"🔒 Connection Mode: READ-ONLY (Safety Enforced)")
+                print("🔒 Connection Mode: READ-ONLY (Safety Enforced)")
                 return True
             else:
                 print(f"❌ PLC connection failed: {test_result.Status}")
@@ -188,11 +188,11 @@ class PLCTagMonitor:
                     sample_interval: float = 1.0) -> MonitoringSession:
         """Monitor multiple tags for specified duration"""
         
-        print(f"\n🎯 Starting tag monitoring session")
+        print("\n🎯 Starting tag monitoring session")
         print(f"📊 Tags: {', '.join(tags)}")
         print(f"⏱️  Duration: {duration_seconds} seconds")
         print(f"📈 Sample interval: {sample_interval} seconds")
-        print(f"🔒 Mode: READ-ONLY")
+        print("🔒 Mode: READ-ONLY")
         
         # Initialize session
         start_time = datetime.now()
@@ -300,18 +300,18 @@ def main():
     
     try:
         # Step 1: Connect to PLC
-        print(f"\n🔌 STEP 1: Connecting to PLC")
+        print("\n🔌 STEP 1: Connecting to PLC")
         if not monitor.connect():
             print(f"❌ Failed to connect to PLC {PLC_HOST}:{PLC_SLOT}")
-            print(f"💡 Check:")
-            print(f"   - PLC is powered and responding")
+            print("💡 Check:")
+            print("   - PLC is powered and responding")
             print(f"   - Network connectivity to {PLC_HOST}")
             print(f"   - PLC slot {PLC_SLOT} is correct")
-            print(f"   - Firewall allows communication")
+            print("   - Firewall allows communication")
             sys.exit(1)
         
         # Step 2: Monitor tags
-        print(f"\n📊 STEP 2: Monitoring Tags")
+        print("\n📊 STEP 2: Monitoring Tags")
         session = monitor.monitor_tags(
             tags=TAGS_TO_MONITOR,
             duration_seconds=MONITORING_DURATION,
@@ -319,11 +319,11 @@ def main():
         )
         
         # Step 3: Disconnect
-        print(f"\n🔌 STEP 3: Disconnecting from PLC")
+        print("\n🔌 STEP 3: Disconnecting from PLC")
         monitor.disconnect()
         
         # Step 4: Output results
-        print(f"\n📈 STEP 4: Results Summary")
+        print("\n📈 STEP 4: Results Summary")
         print("=" * 50)
         
         # Summary statistics
@@ -339,7 +339,7 @@ def main():
         print(f"Success rate: {success_rate:.1f}%")
         
         # Tag value summary
-        print(f"\n📊 Tag Value Summary:")
+        print("\n📊 Tag Value Summary:")
         for tag in TAGS_TO_MONITOR:
             tag_readings = [r for r in session.readings if r.tag_name == tag and r.success]
             if tag_readings:
@@ -356,12 +356,12 @@ def main():
         
         # Error summary
         if session.errors:
-            print(f"\n⚠️  Errors encountered:")
+            print("\n⚠️  Errors encountered:")
             for error in session.errors:
                 print(f"  - {error}")
         
         # Detailed readings (JSON output)
-        print(f"\n🔍 Detailed Readings (JSON):")
+        print("\n🔍 Detailed Readings (JSON):")
         print("=" * 50)
         
         # Convert session to JSON-serializable format
@@ -383,14 +383,14 @@ def main():
         
     except Exception as e:
         print(f"\n❌ Fatal error: {e}")
-        print(f"Stack trace:")
+        print("Stack trace:")
         traceback.print_exc()
         return 1
         
     finally:
         # Ensure disconnection
         if monitor.connected:
-            print(f"\n🔧 Ensuring PLC disconnection...")
+            print("\n🔧 Ensuring PLC disconnection...")
             monitor.disconnect()
 
 if __name__ == "__main__":

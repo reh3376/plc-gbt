@@ -266,6 +266,13 @@ const validateStateManagement = async (store: StateStore): Promise<StateValidati
 - **Enforcement**: Automated blocking of task completion below threshold
 - **Coverage**: Unit, integration, E2E, accessibility, performance tests
 
+### **🚨 CRITICAL: UI Interactive Testing Requirement**
+- **MANDATORY**: NO UI functionality can be declared "complete", "fixed", or "successful" without user interactive testing validation
+- **ZERO ASSUMPTIONS**: Backend API tests ≠ UI functionality confirmation
+- **USER VALIDATION**: Only the user can confirm UI components work as expected through hands-on testing
+- **ENFORCEMENT**: AI agents must explicitly request user testing and await confirmation before marking UI tasks complete
+- **LANGUAGE**: Use "changes implemented, awaiting user testing" instead of "successfully fixed"
+
 ### **2. Build Error Resolution Efficiency**
 - **Target**: 2-3 iteration maximum for error resolution
 - **Method**: Systematic pattern matching and proactive error prevention

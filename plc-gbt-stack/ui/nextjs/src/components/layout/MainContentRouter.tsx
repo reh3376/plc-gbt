@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
-import { Suspense, lazy } from 'react'
-import { useLayoutStore } from '@/lib/stores/layout-store'
-import { cn } from '@/lib/utils/cn'
-import { Loader2 } from 'lucide-react'
-import type { MainContentMode } from '@/lib/stores/layout-store'
+import type { MainContentMode } from '@/lib/stores/layout-store';
+import { useLayoutStore } from '@/lib/stores/layout-store';
+import { cn } from '@/lib/utils/cn';
+import { Loader2 } from 'lucide-react';
+import { Suspense, lazy } from 'react';
 
 // Lazy load content components for performance optimization
-const TabbedEditor = lazy(() => import('@/components/editor/tabbed-editor'))
-const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'))
-const WorkflowCanvas = lazy(() => import('@/components/workflow/workflow-canvas'))
-const ControlLoopDashboard = lazy(() => import('@/components/control-loop/ControlLoopDashboard'))
-const SettingsConfiguration = lazy(() => import('./SettingsConfiguration'))
+const TabbedEditor = lazy(() => import('@/components/editor/tabbed-editor'));
+const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
+const WorkflowCanvas = lazy(() => import('@/components/workflow/workflow-canvas'));
+const ControlLoopDashboard = lazy(() => import('@/components/control-loop/ControlLoopDashboard'));
+const SettingsConfiguration = lazy(() => import('./SettingsConfiguration'));
 
 interface MainContentRouterProps {
-  className?: string
+  className?: string;
 }
 
 function LoadingSkeleton() {
@@ -25,7 +25,7 @@ function LoadingSkeleton() {
         <span className="text-[#cccccc] text-sm">Loading...</span>
       </div>
     </div>
-  )
+  );
 }
 
 function WelcomeScreen() {
@@ -36,11 +36,10 @@ function WelcomeScreen() {
           <span className="text-white text-2xl font-bold">P</span>
         </div>
         <div>
-          <h2 className="text-[#cccccc] text-xl font-medium mb-2">
-            Welcome to PLC-GBT
-          </h2>
+          <h2 className="text-[#cccccc] text-xl font-medium mb-2">Welcome to PLC-GBT</h2>
           <p className="text-[#969696] text-sm max-w-md">
-            Industrial Automation IDE for PLC programming, workflow management, and control system design.
+            Industrial Automation IDE for PLC programming, workflow management, and control system
+            design.
           </p>
         </div>
         <div className="flex flex-col space-y-2 text-sm text-[#969696]">
@@ -51,83 +50,78 @@ function WelcomeScreen() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function MainContentRouter({ className }: MainContentRouterProps) {
-  const { mainContentMode } = useLayoutStore()
+  const { mainContentMode } = useLayoutStore();
 
   const getContentTitle = (mode: MainContentMode): string => {
     switch (mode) {
       case 'welcome':
-        return 'Welcome'
+        return 'Welcome';
       case 'editor':
-        return 'Code Editor'
+        return 'Code Editor';
       case 'analytics':
-        return 'Analytics Dashboard'
+        return 'Analytics Dashboard';
       case 'workflow':
-        return 'Workflow Designer'
+        return 'Workflow Designer';
       case 'control-loop':
-        return 'Control Loop Manager'
+        return 'Control Loop Manager';
       case 'settings-config':
-        return 'Settings & Configuration'
+        return 'Settings & Configuration';
       default:
-        return 'PLC-GBT IDE'
+        return 'PLC-GBT IDE';
     }
-  }
+  };
 
   const renderContent = () => {
     switch (mainContentMode) {
       case 'welcome':
-        return <WelcomeScreen />
+        return <WelcomeScreen />;
       case 'editor':
-        return <TabbedEditor />
+        return <TabbedEditor />;
       case 'analytics':
-        return <AnalyticsDashboard />
+        return <AnalyticsDashboard />;
       case 'workflow':
-        return <WorkflowCanvas />
+        return <WorkflowCanvas />;
       case 'control-loop':
-        return <ControlLoopDashboard />
+        return <ControlLoopDashboard />;
       case 'settings-config':
-        return <SettingsConfiguration />
+        return <SettingsConfiguration />;
       default:
-        return <WelcomeScreen />
+        return <WelcomeScreen />;
     }
-  }
+  };
 
   return (
-    <main 
+    <main
       id="main-content-router"
       role="main"
       aria-label={getContentTitle(mainContentMode)}
-      className={cn(
-        "flex-1 flex flex-col overflow-hidden bg-[#1e1e1e]",
-        className
-      )}
+      className={cn('h-full w-full flex flex-col overflow-hidden bg-[#1e1e1e]', className)}
     >
       {/* Content area with proper error boundaries */}
-      <div className="flex-1 overflow-hidden">
-        <Suspense fallback={<LoadingSkeleton />}>
-          {renderContent()}
-        </Suspense>
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <Suspense fallback={<LoadingSkeleton />}>{renderContent()}</Suspense>
       </div>
     </main>
-  )
+  );
 }
 
 /**
  * MainContentRouter Component
- * 
+ *
  * @description Central content router for the main IDE workspace area
  * @specification Implements AI Task Orchestrator production integration methodology
- * 
+ *
  * @features
  * - Dynamic content switching based on layout store state
  * - Lazy loading for performance optimization
  * - Proper loading states and error boundaries
  * - TypeScript strict typing with MainContentMode enum
  * - Accessibility compliance with ARIA labels
- * 
+ *
  * @content_modes
  * - welcome: Default welcome screen with navigation hints
  * - editor: Monaco-based code editor with file tabs
@@ -135,21 +129,21 @@ export function MainContentRouter({ className }: MainContentRouterProps) {
  * - workflow: Visual workflow designer with industrial nodes
  * - control-loop: Control loop configuration and management
  * - settings-config: Application settings and configuration
- * 
+ *
  * @integration_strategy
  * - Leverages existing analytics-demo page (522 lines)
  * - Integrates existing workflow-canvas component
  * - Utilizes existing tabbed-editor component
  * - Maintains backward compatibility with existing components
- * 
+ *
  * @performance
  * - Code splitting with React lazy loading
  * - Suspense boundaries for smooth loading states
  * - Optimized re-renders with proper state management
- * 
+ *
  * @accessibility
  * - Semantic main element with role and aria-label
  * - Clear content hierarchy
  * - Keyboard navigation support
  * - Screen reader friendly content descriptions
- */ 
+ */
