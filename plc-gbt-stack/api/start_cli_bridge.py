@@ -32,7 +32,7 @@ class CLIBridgeStartup:
     def __init__(self):
         self.project_root = Path(__file__).parent.parent
         self.bridge_host = "127.0.0.1"
-        self.bridge_port = 8080
+        self.bridge_port = 8000
         self.startup_timeout = 30
         
     def validate_environment(self) -> bool:
@@ -102,10 +102,13 @@ class CLIBridgeStartup:
         """Start the CLI bridge server"""
         logger.info("🚀 Starting CLI-to-API Bridge server...")
         
-        # Prepare command
-        bridge_file = self.project_root / "api" / "cli_api_bridge.py"
+        # Prepare uvicorn command for FastAPI app
         cmd = [
-            sys.executable, str(bridge_file)
+            sys.executable, "-m", "uvicorn", 
+            "api.cli_api_bridge:app", 
+            "--reload", 
+            "--host", self.bridge_host,
+            "--port", str(self.bridge_port)
         ]
         
         # Set environment
@@ -255,13 +258,13 @@ class CLIBridgeStartup:
         
         for example in examples:
             logger.info(f"📌 {example['description']}:")
-            logger.info(f"   {example['method']} http://127.0.0.1:8080{example['endpoint']}")
+            logger.info(f"   {example['method']} http://127.0.0.1:8000{example['endpoint']}")
             if example.get('payload'):
                 logger.info(f"   Payload: {example['payload']}")
             logger.info("")
         
         logger.info("🔗 For complete API documentation:")
-        logger.info(f"   http://127.0.0.1:8080/docs")
+        logger.info(f"   http://127.0.0.1:8000/docs")
         logger.info("")
         
         logger.info("🤖 Integration with fine-tuned LLM:")
