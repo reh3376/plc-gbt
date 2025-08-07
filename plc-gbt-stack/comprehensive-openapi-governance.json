@@ -1,0 +1,1004 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PLC GBT Comprehensive System API",
+    "version": "1.0.0",
+    "description": "Complete OpenAPI specification governing ALL project objects, schemas, and data structures following AI Task Orchestrator methodology"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/api/v1/control-loops": {
+      "get": {
+        "summary": "Get all control loops",
+        "operationId": "getControlLoops",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ControlLoopStatus"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ControlLoopType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Control loops retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ControlLoopSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create new control loop",
+        "operationId": "createControlLoop",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateControlLoopRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Control loop created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnhancedControlLoop"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tuning-queue": {
+      "get": {
+        "summary": "Get tuning queue state",
+        "operationId": "getTuningQueue",
+        "responses": {
+          "200": {
+            "description": "Tuning queue state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TuningQueueState"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add loop to tuning queue",
+        "operationId": "addToTuningQueue",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddToTuningQueueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Loop added to queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TuningQueueEntry"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tuning-queue/{loopId}/parameters": {
+      "get": {
+        "summary": "Get focus loop parameters",
+        "operationId": "getFocusLoopParameters",
+        "parameters": [
+          {
+            "name": "loopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Focus loop parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FocusLoopEditableParameters"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update focus loop parameters",
+        "operationId": "updateFocusLoopParameters",
+        "parameters": [
+          {
+            "name": "loopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateParametersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parameters updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FocusLoopEditableParameters"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/websocket/events": {
+      "post": {
+        "summary": "Send WebSocket event",
+        "operationId": "sendWebSocketEvent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebSocketEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebSocketEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ui-state": {
+      "get": {
+        "summary": "Get UI state",
+        "operationId": "getUIState",
+        "responses": {
+          "200": {
+            "description": "Current UI state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UIState"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update UI state",
+        "operationId": "updateUIState",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UIStateUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "UI state updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UIState"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ControlLoopType": {
+        "type": "string",
+        "enum": [
+          "ladder_logic_standard_pid",
+          "ladder_logic_advanced_pid",
+          "function_block_standard_pide",
+          "function_block_advanced_pide"
+        ],
+        "description": "Types of control loops supported by the system"
+      },
+      "ControlLoopStatus": {
+        "type": "string",
+        "enum": ["running", "stopped", "error", "tuning", "manual", "cascade"],
+        "description": "Current operational status of a control loop"
+      },
+      "ControlMode": {
+        "type": "string",
+        "enum": ["Manual", "Automatic", "Cascade", "Override", "Program", "Ratio"],
+        "description": "Control mode for loop operation"
+      },
+      "EngineeringUnits": {
+        "type": "string",
+        "enum": [
+          "Percent",
+          "PSI",
+          "Bar",
+          "Celsius",
+          "Fahrenheit",
+          "Kelvin",
+          "GPM",
+          "M3/H",
+          "LBS/H",
+          "KG/H",
+          "Volts",
+          "mA"
+        ],
+        "description": "Engineering units for process variables"
+      },
+      "ProcessVariable": {
+        "type": "object",
+        "required": ["tag_name", "engineering_units", "range_min", "range_max"],
+        "properties": {
+          "tag_name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+            "minLength": 1,
+            "maxLength": 40,
+            "description": "PLC tag name for the process variable"
+          },
+          "engineering_units": {
+            "$ref": "#/components/schemas/EngineeringUnits"
+          },
+          "range_min": {
+            "type": "number",
+            "description": "Minimum value for the process variable"
+          },
+          "range_max": {
+            "type": "number",
+            "description": "Maximum value for the process variable"
+          },
+          "current_value": {
+            "type": "number",
+            "description": "Current value of the process variable"
+          },
+          "quality": {
+            "type": "string",
+            "enum": ["good", "bad", "uncertain"],
+            "default": "good",
+            "description": "Data quality indicator"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of last value update"
+          }
+        }
+      },
+      "PIDParameters": {
+        "type": "object",
+        "required": ["proportional_gain", "integral_time", "derivative_time"],
+        "properties": {
+          "proportional_gain": {
+            "type": "number",
+            "minimum": 0.001,
+            "maximum": 999.9,
+            "description": "Kp - Proportional gain"
+          },
+          "integral_time": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999.0,
+            "description": "Ti - Integral time in minutes"
+          },
+          "derivative_time": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 99.99,
+            "description": "Td - Derivative time in minutes"
+          },
+          "integral_hold": {
+            "type": "boolean",
+            "default": false,
+            "description": "Integral hold enable"
+          },
+          "derivative_hold": {
+            "type": "boolean",
+            "default": false,
+            "description": "Derivative hold enable"
+          },
+          "feedforward_gain": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 10.0,
+            "description": "Feedforward gain value"
+          }
+        }
+      },
+      "ControlLoopSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type",
+          "status",
+          "setpoint",
+          "process_value",
+          "control_output",
+          "mode",
+          "performance_score",
+          "alarms_active",
+          "last_updated"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Unique identifier for the control loop"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Human-readable name for the control loop"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ControlLoopType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ControlLoopStatus"
+          },
+          "setpoint": {
+            "type": "number",
+            "description": "Current setpoint value"
+          },
+          "process_value": {
+            "type": "number",
+            "description": "Current process variable value"
+          },
+          "control_output": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Current control output percentage"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/ControlMode"
+          },
+          "performance_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Performance score from 0 to 100"
+          },
+          "alarms_active": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of active alarms"
+          },
+          "last_updated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of last update"
+          }
+        }
+      },
+      "EnhancedControlLoop": {
+        "type": "object",
+        "required": [
+          "id",
+          "tag_name",
+          "name",
+          "type",
+          "control_mode",
+          "process_variable",
+          "pid_parameters",
+          "enabled",
+          "status",
+          "scan_time",
+          "created_at",
+          "updated_at",
+          "version",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "tag_name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "type": {
+            "$ref": "#/components/schemas/ControlLoopType"
+          },
+          "control_mode": {
+            "$ref": "#/components/schemas/ControlMode"
+          },
+          "process_variable": {
+            "$ref": "#/components/schemas/ProcessVariable"
+          },
+          "pid_parameters": {
+            "$ref": "#/components/schemas/PIDParameters"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ControlLoopStatus"
+          },
+          "scan_time": {
+            "type": "number",
+            "minimum": 0.001,
+            "maximum": 60.0,
+            "description": "Scan time in seconds"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "schema_version": {
+            "type": "string",
+            "pattern": "^\\d{2}\\.\\d{2}\\.\\d{3}$"
+          }
+        }
+      },
+      "TuningQueueEntry": {
+        "type": "object",
+        "required": [
+          "loopId",
+          "loopName",
+          "queID",
+          "isFocus",
+          "analysisOngoing",
+          "autotuneEnable",
+          "queuedAt",
+          "lastModified",
+          "originalLoopData"
+        ],
+        "properties": {
+          "loopId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Unique identifier for the control loop"
+          },
+          "loopName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Display name for the loop"
+          },
+          "queID": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Position in tuning queue (unique within queue)"
+          },
+          "isFocus": {
+            "type": "boolean",
+            "description": "Whether this loop is currently in focus"
+          },
+          "analysisOngoing": {
+            "type": "boolean",
+            "description": "Whether AI analysis is currently running"
+          },
+          "analysisTime": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 3600,
+            "description": "Duration of analysis in seconds"
+          },
+          "autotuneEnable": {
+            "type": "boolean",
+            "description": "Whether auto-tune functionality is enabled"
+          },
+          "queuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the loop was added to the queue"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last time queue entry was modified"
+          },
+          "originalLoopData": {
+            "$ref": "#/components/schemas/ControlLoopSummary"
+          }
+        }
+      },
+      "FocusLoopEditableParameters": {
+        "type": "object",
+        "required": [
+          "setpoint",
+          "controlOutput",
+          "proportionalGain",
+          "integralGain",
+          "derivativeGain",
+          "lastUpdated",
+          "modifiedBy"
+        ],
+        "properties": {
+          "setpoint": {
+            "type": "number",
+            "minimum": -9999,
+            "maximum": 9999,
+            "description": "SP - Target process value"
+          },
+          "controlOutput": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "CV - Control variable/output value"
+          },
+          "proportionalGain": {
+            "type": "number",
+            "minimum": 0.001,
+            "maximum": 999.9,
+            "description": "Kp or Kc - Proportional gain"
+          },
+          "integralGain": {
+            "type": "number",
+            "minimum": 0.001,
+            "maximum": 999.9,
+            "description": "Ki or Ti - Integral gain/time"
+          },
+          "derivativeGain": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 999.9,
+            "description": "Kd or Td - Derivative gain/time"
+          },
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When parameters were last modified"
+          },
+          "modifiedBy": {
+            "type": "string",
+            "enum": ["user", "ai", "auto"],
+            "description": "Source of last modification"
+          }
+        }
+      },
+      "TuningQueueState": {
+        "type": "object",
+        "required": ["entries", "focusLoopId", "maxQueueSize", "nextAvailableQueID", "lastUpdated"],
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TuningQueueEntry"
+            },
+            "description": "All entries in the tuning queue"
+          },
+          "focusLoopId": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID of currently focused loop"
+          },
+          "maxQueueSize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Maximum allowed queue size"
+          },
+          "nextAvailableQueID": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Next available queue ID"
+          },
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When queue was last modified"
+          }
+        }
+      },
+      "TuningQueueContextAction": {
+        "type": "string",
+        "enum": [
+          "change_queue_id",
+          "set_to_active",
+          "remove_from_queue",
+          "start_loop_analysis",
+          "stop_loop_analysis"
+        ],
+        "description": "Available actions in context popup"
+      },
+      "ControlLoopOperatingMode": {
+        "type": "string",
+        "enum": ["Auto", "Manual", "Software Manual", "Off"],
+        "description": "Control loop operating modes for Quick Actions"
+      },
+      "WebSocketEventType": {
+        "type": "string",
+        "enum": [
+          "control_loop_update",
+          "tuning_queue_update",
+          "parameter_change",
+          "analysis_start",
+          "analysis_complete",
+          "mode_change",
+          "error_occurred",
+          "connection_status"
+        ],
+        "description": "Types of WebSocket events"
+      },
+      "WebSocketEvent": {
+        "type": "object",
+        "required": ["type", "timestamp", "data"],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/WebSocketEventType"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Event timestamp"
+          },
+          "loopId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Associated loop ID (if applicable)"
+          },
+          "data": {
+            "type": "object",
+            "description": "Event-specific data payload",
+            "additionalProperties": true
+          },
+          "source": {
+            "type": "string",
+            "enum": ["user", "ai", "websocket", "system"],
+            "description": "Source of the event"
+          }
+        }
+      },
+      "WebSocketEventResponse": {
+        "type": "object",
+        "required": ["success", "eventId", "timestamp"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether event was processed successfully"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "Unique identifier for the event"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if success is false"
+          }
+        }
+      },
+      "UIState": {
+        "type": "object",
+        "required": ["currentView", "tuningQueueState", "navigationState", "lastUpdated"],
+        "properties": {
+          "currentView": {
+            "type": "string",
+            "enum": ["dashboard", "tuning_interface", "settings", "analytics"],
+            "description": "Currently active view"
+          },
+          "tuningQueueState": {
+            "$ref": "#/components/schemas/TuningQueueState"
+          },
+          "navigationState": {
+            "$ref": "#/components/schemas/KeyboardNavigationState"
+          },
+          "sidebarExpanded": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether sidebar is expanded"
+          },
+          "selectedFilters": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ControlLoopStatus"
+                }
+              },
+              "type": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ControlLoopType"
+                }
+              }
+            }
+          },
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "KeyboardNavigationState": {
+        "type": "object",
+        "required": ["isNavigationActive", "currentIndex", "totalEntries", "navigationMode"],
+        "properties": {
+          "isNavigationActive": {
+            "type": "boolean",
+            "description": "Whether keyboard navigation is enabled"
+          },
+          "currentIndex": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current navigation index"
+          },
+          "totalEntries": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total number of navigable entries"
+          },
+          "navigationMode": {
+            "type": "string",
+            "enum": ["queue", "parameters"],
+            "description": "Current navigation context"
+          }
+        }
+      },
+      "CreateControlLoopRequest": {
+        "type": "object",
+        "required": ["name", "type", "tag_name", "process_variable", "pid_parameters"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "type": {
+            "$ref": "#/components/schemas/ControlLoopType"
+          },
+          "tag_name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "process_variable": {
+            "$ref": "#/components/schemas/ProcessVariable"
+          },
+          "pid_parameters": {
+            "$ref": "#/components/schemas/PIDParameters"
+          }
+        }
+      },
+      "AddToTuningQueueRequest": {
+        "type": "object",
+        "required": ["loopId", "autotuneEnable"],
+        "properties": {
+          "loopId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "queID": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Requested queue position (optional)"
+          },
+          "autotuneEnable": {
+            "type": "boolean"
+          },
+          "analysisTime": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 3600,
+            "default": 300
+          }
+        }
+      },
+      "UpdateParametersRequest": {
+        "type": "object",
+        "properties": {
+          "setpoint": {
+            "type": "number",
+            "minimum": -9999,
+            "maximum": 9999
+          },
+          "controlOutput": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "proportionalGain": {
+            "type": "number",
+            "minimum": 0.001,
+            "maximum": 999.9
+          },
+          "integralGain": {
+            "type": "number",
+            "minimum": 0.001,
+            "maximum": 999.9
+          },
+          "derivativeGain": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 999.9
+          }
+        },
+        "minProperties": 1,
+        "description": "At least one parameter must be provided for update"
+      },
+      "UIStateUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "currentView": {
+            "type": "string",
+            "enum": ["dashboard", "tuning_interface", "settings", "analytics"]
+          },
+          "sidebarExpanded": {
+            "type": "boolean"
+          },
+          "navigationState": {
+            "$ref": "#/components/schemas/KeyboardNavigationState"
+          },
+          "selectedFilters": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ControlLoopStatus"
+                }
+              },
+              "type": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ControlLoopType"
+                }
+              }
+            }
+          }
+        },
+        "minProperties": 1
+      },
+      "APIResponse": {
+        "type": "object",
+        "required": ["success", "timestamp"],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "description": "Response data (varies by endpoint)"
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "hasNext": {
+                "type": "boolean"
+              },
+              "hasPrev": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

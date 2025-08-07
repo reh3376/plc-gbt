@@ -78,7 +78,8 @@ async function testDevServerAccess() {
       console.log(`📄 Page content loaded: ${hasTitle ? 'Yes' : 'No'}`);
 
       if (hasTitle) {
-        const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/);
+        const titleRegex = /<title[^>]*>([^<]+)<\/title>/;
+        const titleMatch = titleRegex.exec(content);
         const title = titleMatch ? titleMatch[1] : 'Unknown';
         console.log(`📝 Page title: "${title}"`);
       }

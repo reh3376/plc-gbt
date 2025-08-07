@@ -1,7 +1,7 @@
 /**
  * Control Loop Grid Component - Phase 31.7
  * AI Task Orchestrator Generated - Grid Layout for Control Loops
- * 
+ *
  * Displays control loops in an organized grid layout with:
  * - Responsive design (1-4 columns based on screen size)
  * - Individual control loop cards
@@ -9,35 +9,45 @@
  * - Quick action buttons
  */
 
-'use client'
+'use client';
 
-import React from 'react'
-import { RefreshCw, Loader2 } from 'lucide-react'
+import { Loader2, RefreshCw } from 'lucide-react';
+import React from 'react';
 
-import type { ControlLoopSummary } from '@/lib/types/control-loop.types'
-import { ControlLoopCard } from './ControlLoopCard'
+import type { ControlLoopSummary } from '@/lib/types/control-loop.types';
+import { ControlLoopCard } from './ControlLoopCard';
 
 interface ControlLoopGridProps {
-  controlLoops: ControlLoopSummary[]
-  isLoading: boolean
-  onRefresh: () => void
-  className?: string
+  readonly controlLoops: ControlLoopSummary[];
+  readonly isLoading: boolean;
+  readonly onRefresh: () => void;
+  readonly className?: string;
+  readonly onStart?: (loopId: string) => void;
+  readonly onStop?: (loopId: string) => void;
+  readonly onEdit?: (loopId: string) => void;
+  readonly onTune?: (loopId: string) => void;
+  readonly onSetpointChange?: (loopId: string, value: number) => void;
 }
 
 /**
  * Grid Layout Component for Control Loops
- * 
+ *
  * Features:
  * - Responsive grid (1-4 columns)
  * - Loading and empty states
  * - Individual control loop cards
  * - Refresh functionality
  */
-export function ControlLoopGrid({ 
-  controlLoops, 
-  isLoading, 
-  onRefresh, 
-  className = "" 
+export function ControlLoopGrid({
+  controlLoops,
+  isLoading,
+  onRefresh,
+  className = '',
+  onStart,
+  onStop,
+  onEdit,
+  onTune,
+  onSetpointChange,
 }: ControlLoopGridProps) {
   // Show loading state
   if (isLoading && controlLoops.length === 0) {
@@ -48,7 +58,7 @@ export function ControlLoopGrid({
           <p className="text-gray-400">Loading control loops...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // Show empty state
@@ -61,7 +71,8 @@ export function ControlLoopGrid({
           </div>
           <h3 className="text-lg font-medium text-white mb-2">No Control Loops Found</h3>
           <p className="text-gray-400 mb-6">
-            No control loops match your current filters. Try adjusting your search criteria or refresh the data.
+            No control loops match your current filters. Try adjusting your search criteria or
+            refresh the data.
           </p>
           <button
             onClick={onRefresh}
@@ -72,7 +83,7 @@ export function ControlLoopGrid({
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -80,11 +91,16 @@ export function ControlLoopGrid({
       {/* Grid Container */}
       <div className="h-full overflow-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-1">
-          {controlLoops.map((loop) => (
+          {controlLoops.map(loop => (
             <ControlLoopCard
               key={loop.id}
               loop={loop}
               className="h-fit"
+              onStart={onStart}
+              onStop={onStop}
+              onEdit={onEdit}
+              onTune={onTune}
+              onSetpointChange={onSetpointChange}
             />
           ))}
         </div>
@@ -107,12 +123,8 @@ export function ControlLoopGrid({
             Showing {controlLoops.length} control loop{controlLoops.length !== 1 ? 's' : ''}
           </span>
           <div className="flex items-center space-x-4">
-            <span>
-              Running: {controlLoops.filter(loop => loop.status === 'running').length}
-            </span>
-            <span>
-              Errors: {controlLoops.filter(loop => loop.status === 'error').length}
-            </span>
+            <span>Running: {controlLoops.filter(loop => loop.status === 'running').length}</span>
+            <span>Errors: {controlLoops.filter(loop => loop.status === 'error').length}</span>
             <span>
               Alarms: {controlLoops.reduce((total, loop) => total + loop.alarms_active, 0)}
             </span>
@@ -120,7 +132,7 @@ export function ControlLoopGrid({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default ControlLoopGrid 
+export default ControlLoopGrid;

@@ -19,6 +19,57 @@ The AI Task Orchestrator provides a **structured framework** for AI agents and L
 - **Documentation Standards**: Enforces standardized .md formatting, Mermaid diagrams for visual representations, and consistent naming conventions (Summary, Guide, How-To)
 - **Success Verification & Documentation Updates**: Automated verification of implementation success with roadmap.md updates, task completion marking, and comprehensive linking to supporting documents
 
+## 🔗 CRITICAL: OpenAPI Schema MCP Enforcement
+
+**MANDATORY RULE**: All API integration, JSON schema work, and UI schema definitions MUST use the OpenAPI schema MCP from the MCP_Docker server. NO MANUAL API DEFINITIONS OR UI SCHEMAS ALLOWED.
+
+### Schema Governance Requirements
+
+**BEFORE implementing any schemas or API integration, AI agents MUST:**
+
+1. **Connect to MCP_Docker Server**
+   ```python
+   # Verify MCP_Docker server connection
+   from mcp_docker_client import connect_to_mcp_docker
+   mcp_client = await connect_to_mcp_docker()
+   schemas = await mcp_client.get_openapi_schemas()
+   ui_schemas = await mcp_client.get_ui_schemas()
+   ```
+
+2. **Use OpenAPI Schema MCP for ALL Schemas**
+   - ✅ All API endpoints MUST have OpenAPI definitions in MCP_Docker
+   - ✅ All UI schemas MUST be defined in MCP_Docker OpenAPI specs
+   - ✅ All JSON schemas MUST be validated through MCP
+   - ✅ No manual type definitions for API contracts
+   - ✅ No manual Zod schemas for UI validation
+   - ✅ Runtime validation for all API calls and UI data
+
+3. **Schema-First Development Enforcement**
+   - ✅ Backend APIs must be registered in OpenAPI MCP before frontend implementation
+   - ✅ UI component schemas must derive from OpenAPI MCP definitions
+   - ✅ State management schemas must use OpenAPI MCP types
+   - ✅ Form validation must use OpenAPI MCP schemas
+
+**Example Implementation:**
+```python
+# ✅ CORRECT - Using OpenAPI Schema MCP
+from ai_task_orchestrator import AITaskOrchestrator
+
+orchestrator = AITaskOrchestrator()
+mcp_schemas = orchestrator.get_mcp_schemas()
+
+# Generate type-safe implementations from MCP schemas
+api_client = mcp_schemas.generate_api_client('ControlLoopAPI')
+ui_types = mcp_schemas.generate_ui_types('TuningInterface')
+
+# ❌ WRONG - Manual schema definitions
+manual_schema = {
+    "type": "object", 
+    "properties": {"id": {"type": "string"}}
+    # Manual schemas bypass governance
+}
+```
+
 ## 🚀 Quick Start for AI Agents
 
 ### Basic Usage Pattern

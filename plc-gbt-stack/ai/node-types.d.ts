@@ -7,14 +7,22 @@ declare global {
   var __dirname: string;
   var __filename: string;
   var console: Console;
-  
-  function setTimeout(callback: (...args: any[]) => void, ms?: number, ...args: any[]): NodeJS.Timeout;
+
+  function setTimeout(
+    callback: (...args: any[]) => void,
+    ms?: number,
+    ...args: any[]
+  ): NodeJS.Timeout;
   function clearTimeout(timeoutId: NodeJS.Timeout): void;
-  function setInterval(callback: (...args: any[]) => void, ms?: number, ...args: any[]): NodeJS.Timeout;
+  function setInterval(
+    callback: (...args: any[]) => void,
+    ms?: number,
+    ...args: any[]
+  ): NodeJS.Timeout;
   function clearInterval(intervalId: NodeJS.Timeout): void;
   function setImmediate(callback: (...args: any[]) => void, ...args: any[]): NodeJS.Immediate;
   function clearImmediate(immediateId: NodeJS.Immediate): void;
-  
+
   var require: NodeRequire;
   var module: NodeModule;
   var exports: any;

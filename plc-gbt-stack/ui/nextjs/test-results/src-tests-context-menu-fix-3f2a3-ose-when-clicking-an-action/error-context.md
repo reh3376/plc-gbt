@@ -1,0 +1,159 @@
+# Page snapshot
+
+```yaml
+- banner:
+  - text: P PLC-GBT Industrial Automation IDE Industrial Control Workspace
+  - button "Settings"
+  - button "Help"
+- status: Control Loops tool activated
+- tablist "Tool navigation":
+  - text: Use arrow keys to navigate between tools. Press Enter to activate a tool. Use Space and arrow keys to reorder tools when drag mode is active.
+  - group "Main tools":
+    - text: Explorer tool. Press Enter to activate. Press Space then arrow keys to reorder.
+    - tab "File Explorer":
+      - button "Drag to reorder Explorer"
+      - text: Drag handle for Explorer. Use mouse or keyboard to reorder this tool.
+    - text: Search tool. Press Enter to activate. Press Space then arrow keys to reorder.
+    - tab "Search across files":
+      - button "Drag to reorder Search"
+      - text: Drag handle for Search. Use mouse or keyboard to reorder this tool.
+    - text: Workflows tool. Press Enter to activate. Press Space then arrow keys to reorder.
+    - tab "Workflow management":
+      - button "Drag to reorder Workflows"
+      - text: Drag handle for Workflows. Use mouse or keyboard to reorder this tool.
+    - text: Control Loops tool. Press Enter to activate. Press Space then arrow keys to reorder.
+    - tab "Industrial control loop management (active)" [selected]:
+      - button "Drag to reorder Control Loops"
+      - text: Drag handle for Control Loops. Use mouse or keyboard to reorder this tool.
+    - text: Settings tool. Press Enter to activate. Press Space then arrow keys to reorder.
+    - tab "Settings and preferences":
+      - button "Drag to reorder Settings"
+      - text: Drag handle for Settings. Use mouse or keyboard to reorder this tool.
+  - group "User tools":
+    - text: User tool. Press Enter to activate. Press Space then arrow keys to reorder.
+    - tab "User profile and authentication":
+      - button "Drag to reorder User"
+      - text: Drag handle for User. Use mouse or keyboard to reorder this tool.
+- status
+- tabpanel:
+  - text: Control Loops
+  - heading "Control Loop Tuning" [level=2]
+  - text: 2 loops active
+  - paragraph: Tuning Queue
+  - combobox:
+    - 'option "Temperature Control Loop 1 (queID: 1) - Focus" [selected]'
+    - 'option "Pressure Control Loop 1 (queID: 2) - Analyzing"'
+  - button
+  - text: "Actions: Temperature Control Loop 1"
+  - button "✕"
+  - button "Change queID Modify queue position"
+  - button "Set to Active Move to focus position" [disabled]
+  - button "Remove Remove from tuning queue"
+  - button "Loop Analysis Start AI-driven parameter analysis"
+  - text: "Loop Type LL Standard PID Loop ID: loop-001 | Queue ID: 1"
+  - 'heading "Focus Loop: Temperature Control Loop 1" [level=3]'
+  - heading "Current Values" [level=4]
+  - text: Process Value 148.5 MSE (Mean Absolute Error) 0.023
+  - heading "Editable Parameters" [level=4]
+  - text: Setpoint (SP)
+  - spinbutton "Setpoint (SP)": "150"
+  - text: Output (CV) %
+  - spinbutton "Output (CV) %": "65.2"
+  - text: Proportional (Kp)
+  - spinbutton "Proportional (Kp)": "2.5"
+  - text: Integral (Ki)
+  - spinbutton "Integral (Ki)": "1.2"
+  - text: Derivative (Kd)
+  - spinbutton "Derivative (Kd)": "0.1"
+  - button "Update Parameters"
+  - heading "Quick Actions" [level=4]
+  - text: Control Loop Mode
+  - combobox "Control Loop Mode":
+    - option "Auto" [selected]
+    - option "Manual"
+    - option "Software Manual"
+    - option "Off"
+  - button "Auto Tune"
+  - button "Advanced Settings"
+- separator
+- main:
+  - main "Control Loop Manager":
+    - heading "Control Loop Dashboard" [level=1]
+    - text: "Disconnected Last updated: 11:37:00 AM"
+    - textbox "Search..."
+    - button "Toggle Filters"
+    - button "Refresh Data"
+    - button "Dashboard Settings"
+    - button "Create Loop"
+    - text: Backend offline - using demo data
+    - button "×"
+    - paragraph: Total Loops
+    - paragraph: "4"
+    - text: Industrial control points
+    - paragraph: Running
+    - paragraph: "2"
+    - text: 50% system health
+    - paragraph: Errors
+    - paragraph: "1"
+    - text: 1 stopped loops
+    - paragraph: Active Alarms
+    - paragraph: "4"
+    - text: Requires attention
+    - paragraph: Avg Performance
+    - paragraph: 63.5%
+    - text: Overall system efficiency
+    - paragraph: Manual Mode
+    - paragraph: "1"
+    - paragraph: Cascade Loops
+    - paragraph: "0"
+    - paragraph: Tuning Sessions
+    - paragraph: "0"
+    - paragraph: Last Update
+    - text: Live
+    - heading "Reactor Temperature Control" [level=3]
+    - text: RUNNING LL Advanced PID SP
+    - button "Edit setpoint value": "150.0"
+    - text: "PV 149.8 CV 67.5% Error: +0.2 87.3% Mode: Automatic 5:30:00 AM"
+    - button "View Details"
+    - button "Edit Settings"
+    - button "Tune Parameters"
+    - button "Stop Loop"
+    - button "Reset Loop"
+    - text: "ID: loop-001"
+    - heading "Flow Rate Controller" [level=3]
+    - text: RUNNING FB Standard PIDE SP
+    - button "Edit setpoint value": "250.0"
+    - text: "PV 252.1 CV 42.8% Error: -2.1 94.1% Mode: Automatic 5:29:45 AM"
+    - button "View Details"
+    - button "Edit Settings"
+    - button "Tune Parameters"
+    - button "Stop Loop"
+    - button "Reset Loop"
+    - text: "ID: loop-002"
+    - heading "Pressure Relief System" [level=3]
+    - text: MANUAL LL Standard PID 1 SP
+    - button "Edit setpoint value": "85.0"
+    - text: "PV 83.2 CV 38.5% Error: +1.8 72.6% Mode: Manual 5:28:12 AM"
+    - button "View Details"
+    - button "Edit Settings"
+    - button "Tune Parameters"
+    - button "Start Loop"
+    - button "Reset Loop"
+    - text: "ID: loop_003 1 ALARM"
+    - heading "Level Control Tank A" [level=3]
+    - text: ERROR FB Advanced PIDE 3 SP
+    - button "Edit setpoint value": "75.0"
+    - text: "PV 0.0 CV 0.0% Error: +75.0 0.0% Mode: Override 5:25:33 AM"
+    - button "View Details"
+    - button "Edit Settings"
+    - button "Tune Parameters"
+    - button "Start Loop"
+    - button "Reset Loop"
+    - text: "ID: loop_004 ACTION REQUIRED 3 ALARMS Showing 4 control loops Running: 2 Errors: 1 Alarms: 4"
+- button "Open AI Assistant (Ctrl+Shift+A)"
+- contentinfo:
+  - text: "Connected 3 active CPU: 15% RAM: 45%"
+  - button "Terminal"
+  - text: "Uptime: 2h 15m PLC-GBT v1.0.0"
+- alert
+```

@@ -1,0 +1,25 @@
+{
+  "instance_id": "a01aefc1-7e80-4167-ab25-6b2665f2ddab",
+  "name": "Loop Test",
+  "description": "",
+  "instance_type": "InstanceType.BASIC_PID",
+  "schema_id": "default_schema",
+  "schema_version": "1.0.0",
+  "status": "InstanceStatus.CONFIGURED",
+  "created_at": "2025-07-31 12:29:11.342400",
+  "updated_at": "2025-07-31 12:29:11.342400",
+  "created_by": "",
+  "tags": [],
+  "metadata": {},
+  "parameters": {
+    "kp": 1.0,
+    "ki": 0.1,
+    "kd": 0.05,
+    "setpoint": 0.0,
+    "output_min": 0.0,
+    "output_max": 100.0,
+    "sample_time": 1.0
+  },
+  "plc_connection": null,
+  "validation_results": null
+}

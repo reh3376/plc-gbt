@@ -129,9 +129,9 @@ const chartRef = useRef<unknown>(null) // For dynamic components
 
 ## 🔗 CRITICAL: OpenAPI Schema MCP Enforcement
 
-**MANDATORY RULE**: All API integration and JSON schema work MUST use the OpenAPI schema MCP from the MCP_Docker server. NO MANUAL API DEFINITIONS ALLOWED.
+**MANDATORY RULE**: All API integration, JSON schema work, and UI schema definitions MUST use the OpenAPI schema MCP from the MCP_Docker server. NO MANUAL API DEFINITIONS OR UI SCHEMAS ALLOWED.
 
-### ⚠️ **NEVER Manually Define API Schemas**
+### ⚠️ **NEVER Manually Define API Schemas or UI Schemas**
 
 **CRITICAL ERROR PATTERN TO AVOID:**
 ```typescript
@@ -147,15 +147,28 @@ const api = {
     // Manual implementation without schema validation
   }
 }
+
+// ❌ WRONG - Manual UI schema definitions bypass OpenAPI governance
+const tuningQueueEntrySchema = z.object({
+  loopId: z.string(),
+  loopName: z.string(),
+  // Manual Zod schemas create schema drift from backend
+})
+
+interface TuningQueueEntry {
+  loopId: string
+  loopName: string
+  // Manual UI types get out of sync with OpenAPI definitions
+}
 ```
 
 **✅ CORRECT APPROACH:**
 ```typescript
-// ✅ RIGHT - Use OpenAPI schema MCP from MCP_Docker server
+// ✅ RIGHT - Use OpenAPI schema MCP from MCP_Docker server for ALL schemas
 import { useOpenAPISchemaMCP } from '@/lib/mcp-docker-client'
 
 // Get schema definitions from MCP_Docker server
-const { apiSchemas, validateRequest, validateResponse } = useOpenAPISchemaMCP()
+const { apiSchemas, uiSchemas, validateRequest, validateResponse, validateUIData } = useOpenAPISchemaMCP()
 
 // Type-safe API integration with MCP validation
 const api = {
@@ -165,30 +178,50 @@ const api = {
     return await validateResponse('getUserById', response)
   }
 }
+
+// ✅ RIGHT - UI schemas from OpenAPI MCP for form validation
+const TuningQueueEntrySchema = uiSchemas.getTuningQueueEntry()
+type TuningQueueEntry = typeof TuningQueueEntrySchema._type
+
+// UI form validation using OpenAPI-sourced schemas
+const validateTuningQueueEntry = (data: unknown): TuningQueueEntry => {
+  return validateUIData('TuningQueueEntry', data)
+}
 ```
 
-### 🔍 **Pre-API Implementation Requirements**
+### 🔍 **Pre-Implementation Requirements**
 
-**BEFORE implementing any API integration, AI agents MUST:**
+**BEFORE implementing any API integration OR UI schemas, AI agents MUST:**
 
 1. **Connect to MCP_Docker Server**
    ```typescript
    // Verify MCP_Docker server connection
    const mcpClient = await connectToMCPDocker()
    const schemas = await mcpClient.getOpenAPISchemas()
+   const uiSchemas = await mcpClient.getUISchemas()
    ```
 
-2. **Retrieve OpenAPI Schemas**
+2. **Retrieve OpenAPI Schemas and UI Schemas**
    - ✅ Use MCP_Docker server's OpenAPI schema endpoints
+   - ✅ Use MCP_Docker server's UI schema endpoints
    - ✅ Validate all request/response schemas through MCP
+   - ✅ Validate all UI form data through MCP schemas
    - ✅ Generate TypeScript types from MCP schemas
    - ✅ Implement runtime validation using MCP validators
 
 3. **Enforce Schema-First Development**
    - ✅ All API endpoints MUST have OpenAPI definitions in MCP_Docker
+   - ✅ All UI schemas MUST be defined in MCP_Docker OpenAPI specs
    - ✅ All JSON schemas MUST be validated through MCP
    - ✅ No manual type definitions for API contracts
-   - ✅ Runtime validation for all API calls
+   - ✅ No manual Zod schemas for UI validation
+   - ✅ Runtime validation for all API calls and UI data
+
+4. **UI Schema Governance**
+   - ✅ All form validation schemas MUST come from OpenAPI MCP
+   - ✅ All component prop types MUST derive from OpenAPI schemas
+   - ✅ All state management schemas MUST use OpenAPI MCP types
+   - ✅ No manual interface definitions for data structures
 
 ### 🎯 **OpenAPI Schema MCP Integration Examples**
 

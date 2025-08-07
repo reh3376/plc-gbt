@@ -574,9 +574,15 @@ export function useFileOperations(config: UseFileOperationsConfig = {}): UseFile
       setState(prev => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        console.log('🔄 LOADING FILES - Fetching from API...');
+        // Reduce console spam - only log occasionally
+        const shouldLog = Math.random() < 0.1; // Only log 10% of the time
+        if (shouldLog) {
+          console.log('🔄 LOADING FILES - Fetching from API...');
+        }
         const files = await fileOperationsAPI.getFiles();
-        console.log('✅ LOADING FILES - API response:', { count: files.length, files });
+        if (shouldLog) {
+          console.log('✅ LOADING FILES - API response:', { count: files.length, files });
+        }
 
         setState(prev => ({
           ...prev,
@@ -617,7 +623,7 @@ export function useFileOperations(config: UseFileOperationsConfig = {}): UseFile
         clearInterval(refreshIntervalRef.current);
       }
     };
-  }, []); // Empty dependency array - this should only run once on mount
+  }, [onError]); // Include onError in dependency array
 
   useEffect(() => {
     // Auto refresh setup

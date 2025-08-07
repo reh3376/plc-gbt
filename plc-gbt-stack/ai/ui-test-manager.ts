@@ -120,7 +120,7 @@ export interface DeviceCompatibility {
 }
 
 export class UITestManager {
-  constructor(private playwrightClient: PlaywrightMCPClient) {}
+  constructor(private readonly playwrightClient: PlaywrightMCPClient) {}
 
   // ==================== COMPONENT TESTING ====================
 
@@ -223,38 +223,73 @@ export class UITestManager {
     test: PlaywrightComponentTest,
     implementation: UIImplementation
   ): Promise<void> {
-    await this.playwrightClient.browserNavigate(implementation.testUrl);
-    await this.playwrightClient.waitForNetworkIdle();
+    await this.setupTestEnvironment(implementation.testUrl);
+    await this.executeTestActions(test);
+  }
 
+  private async setupTestEnvironment(testUrl: string): Promise<void> {
+    await this.playwrightClient.browserNavigate(testUrl);
+    await this.playwrightClient.waitForNetworkIdle();
+  }
+
+  private async executeTestActions(test: PlaywrightComponentTest): Promise<void> {
     for (const action of test.actions) {
-      switch (action.type) {
-        case 'click':
-          if (action.selector) {
-            await this.playwrightClient.browserClick(test.name, action.selector);
-          }
-          break;
-        case 'type':
-          if (action.selector && action.text) {
-            await this.playwrightClient.browserType(test.name, action.selector, action.text);
-          }
-          break;
-        case 'hover':
-          if (action.selector) {
-            await this.playwrightClient.browserHover(test.name, action.selector);
-          }
-          break;
-        case 'wait':
-          await this.playwrightClient.browserWaitFor({ timeout: action.timeout || 1000 });
-          break;
-        case 'screenshot':
-          await this.playwrightClient.browserTakeScreenshot();
-          break;
-        case 'evaluate':
-          if (action.expectedResult) {
-            await this.playwrightClient.browserEvaluate(action.expectedResult);
-          }
-          break;
-      }
+      await this.executeTestAction(action, test.name);
+    }
+  }
+
+  private async executeTestAction(action: any, testName: string): Promise<void> {
+    switch (action.type) {
+      case 'click':
+        await this.handleClickAction(action, testName);
+        break;
+      case 'type':
+        await this.handleTypeAction(action, testName);
+        break;
+      case 'hover':
+        await this.handleHoverAction(action, testName);
+        break;
+      case 'wait':
+        await this.handleWaitAction(action);
+        break;
+      case 'screenshot':
+        await this.handleScreenshotAction();
+        break;
+      case 'evaluate':
+        await this.handleEvaluateAction(action);
+        break;
+    }
+  }
+
+  private async handleClickAction(action: any, testName: string): Promise<void> {
+    if (action.selector) {
+      await this.playwrightClient.browserClick(testName, action.selector);
+    }
+  }
+
+  private async handleTypeAction(action: any, testName: string): Promise<void> {
+    if (action.selector && action.text) {
+      await this.playwrightClient.browserType(testName, action.selector, action.text);
+    }
+  }
+
+  private async handleHoverAction(action: any, testName: string): Promise<void> {
+    if (action.selector) {
+      await this.playwrightClient.browserHover(testName, action.selector);
+    }
+  }
+
+  private async handleWaitAction(action: any): Promise<void> {
+    await this.playwrightClient.browserWaitFor({ timeout: action.timeout || 1000 });
+  }
+
+  private async handleScreenshotAction(): Promise<void> {
+    await this.playwrightClient.browserTakeScreenshot();
+  }
+
+  private async handleEvaluateAction(action: any): Promise<void> {
+    if (action.expectedResult) {
+      await this.playwrightClient.browserEvaluate(action.expectedResult);
     }
   }
 

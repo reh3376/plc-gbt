@@ -42,7 +42,7 @@ export interface AutomatedTestResults {
 }
 
 export class UserValidationManager {
-  private validationTimeout: number = 300000; // 5 minutes default
+  private readonly validationTimeout: number; // 5 minutes default
 
   constructor(options: { validationTimeout?: number } = {}) {
     this.validationTimeout = options.validationTimeout || 300000;
@@ -90,13 +90,18 @@ export class UserValidationManager {
     });
   }
 
+  private getPriorityIcon(priority: string): string {
+    if (priority === 'high') return '🔴';
+    if (priority === 'medium') return '🟡';
+    return '🟢';
+  }
+
   private displayTestingChecklist(checklist: UserTestingChecklistItem[]): void {
     console.log('📋 USER TESTING CHECKLIST:');
     console.log('='.repeat(60));
 
     checklist.forEach((item, index) => {
-      const priorityIcon =
-        item.priority === 'high' ? '🔴' : item.priority === 'medium' ? '🟡' : '🟢';
+      const priorityIcon = this.getPriorityIcon(item.priority);
 
       console.log(`\n${index + 1}. ${priorityIcon} ${item.category}`);
       console.log(`   📝 Task: ${item.description}`);

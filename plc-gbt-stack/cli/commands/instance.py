@@ -942,12 +942,33 @@ def list_instances(filter_type, filter_status, output):
             table.add_column("Updated", style="dim")
             
             for instance in instances:
-                updated_str = instance.updated_at.strftime("%Y-%m-%d %H:%M") if instance.updated_at else "Unknown"
+                # Defensive datetime handling - fix for 'str' object has no attribute 'strftime'
+                if instance.updated_at:
+                    if isinstance(instance.updated_at, str):
+                        # Parse string datetime back to datetime object
+                        try:
+                            if 'T' in instance.updated_at:
+                                dt_obj = datetime.fromisoformat(instance.updated_at.replace('Z', '+00:00'))
+                            else:
+                                dt_obj = datetime.strptime(instance.updated_at, "%Y-%m-%d %H:%M:%S")
+                            updated_str = dt_obj.strftime("%Y-%m-%d %H:%M")
+                        except (ValueError, AttributeError):
+                            updated_str = str(instance.updated_at)[:16]  # Fallback truncation
+                    elif hasattr(instance.updated_at, 'strftime'):
+                        updated_str = instance.updated_at.strftime("%Y-%m-%d %H:%M")
+                    else:
+                        updated_str = str(instance.updated_at)[:16]
+                else:
+                    updated_str = "Unknown"
+                # Defensive enum handling - fix for 'str' object has no attribute 'value'
+                instance_type_str = instance.instance_type.value if hasattr(instance.instance_type, 'value') else str(instance.instance_type)
+                status_str = instance.status.value if hasattr(instance.status, 'value') else str(instance.status)
+                
                 table.add_row(
                     instance.instance_id[:8] + "...",
                     instance.name,
-                    instance.instance_type.value,
-                    instance.status.value,
+                    instance_type_str,
+                    status_str,
                     instance.schema_id,
                     updated_str
                 )
@@ -960,8 +981,9 @@ def list_instances(filter_type, filter_status, output):
             type_counts = {}
             
             for instance in instances:
-                status = instance.status.value
-                inst_type = instance.instance_type.value
+                # Defensive enum handling
+                status = instance.status.value if hasattr(instance.status, 'value') else str(instance.status)
+                inst_type = instance.instance_type.value if hasattr(instance.instance_type, 'value') else str(instance.instance_type)
                 
                 status_counts[status] = status_counts.get(status, 0) + 1
                 type_counts[inst_type] = type_counts.get(inst_type, 0) + 1
@@ -1031,8 +1053,44 @@ def show_instance_info(instance_id, output):
             basic_table.add_row("Status", instance.status.value)
             basic_table.add_row("Schema ID", instance.schema_id)
             basic_table.add_row("Schema Version", instance.schema_version)
-            basic_table.add_row("Created", instance.created_at.strftime("%Y-%m-%d %H:%M:%S") if instance.created_at else "Unknown")
-            basic_table.add_row("Updated", instance.updated_at.strftime("%Y-%m-%d %H:%M:%S") if instance.updated_at else "Unknown")
+            # Defensive datetime handling for created_at
+            if instance.created_at:
+                if isinstance(instance.created_at, str):
+                    try:
+                        if 'T' in instance.created_at:
+                            created_dt = datetime.fromisoformat(instance.created_at.replace('Z', '+00:00'))
+                        else:
+                            created_dt = datetime.strptime(instance.created_at, "%Y-%m-%d %H:%M:%S")
+                        created_str = created_dt.strftime("%Y-%m-%d %H:%M:%S")
+                    except (ValueError, AttributeError):
+                        created_str = str(instance.created_at)[:19]
+                elif hasattr(instance.created_at, 'strftime'):
+                    created_str = instance.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    created_str = str(instance.created_at)[:19]
+            else:
+                created_str = "Unknown"
+            
+            # Defensive datetime handling for updated_at
+            if instance.updated_at:
+                if isinstance(instance.updated_at, str):
+                    try:
+                        if 'T' in instance.updated_at:
+                            updated_dt = datetime.fromisoformat(instance.updated_at.replace('Z', '+00:00'))
+                        else:
+                            updated_dt = datetime.strptime(instance.updated_at, "%Y-%m-%d %H:%M:%S")
+                        updated_str = updated_dt.strftime("%Y-%m-%d %H:%M:%S")
+                    except (ValueError, AttributeError):
+                        updated_str = str(instance.updated_at)[:19]
+                elif hasattr(instance.updated_at, 'strftime'):
+                    updated_str = instance.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    updated_str = str(instance.updated_at)[:19]
+            else:
+                updated_str = "Unknown"
+                
+            basic_table.add_row("Created", created_str)
+            basic_table.add_row("Updated", updated_str)
             basic_table.add_row("Created By", instance.created_by or "Unknown")
             
             console.print(basic_table)

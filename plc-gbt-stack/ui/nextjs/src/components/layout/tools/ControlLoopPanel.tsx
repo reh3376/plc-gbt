@@ -40,6 +40,7 @@ import {
   KeyboardNavigationStateSchema,
   TuningQueueContextActionSchema,
   TuningQueueStateSchema,
+  type AdvancedTuningSettings,
   type ControlLoopOperatingMode,
   type FocusLoopEditableParameters,
   type KeyboardNavigationState,
@@ -131,7 +132,12 @@ interface AdvancedSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   focusEntry: TuningQueueEntry | undefined;
-  onSettingsUpdate: (settings: { autotuneEnable: boolean; analysisTime: number }) => void;
+  onSettingsUpdate: (
+    settings: {
+      autotuneEnable: boolean;
+      analysisTime: number;
+    } & AdvancedTuningSettings
+  ) => void;
 }
 
 const AdvancedSettingsModal: React.FC<AdvancedSettingsModalProps> = ({
@@ -140,8 +146,39 @@ const AdvancedSettingsModal: React.FC<AdvancedSettingsModalProps> = ({
   focusEntry,
   onSettingsUpdate,
 }) => {
+  // Core settings
   const [autotuneEnable, setAutotuneEnable] = useState(focusEntry?.autotuneEnable ?? false);
   const [analysisTime, setAnalysisTime] = useState(focusEntry?.analysisTime ?? 30);
+
+  // Advanced tuning algorithm selection
+  const [tuningAlgorithm, setTuningAlgorithm] =
+    useState<AdvancedTuningSettings['tuningAlgorithm']>('ziegler-nichols');
+
+  // Safety limits configuration
+  const [safetyLimits, setSafetyLimits] = useState({
+    maxKp: 100,
+    maxKi: 50,
+    maxKd: 25,
+    outputMin: 0,
+    outputMax: 100,
+  });
+
+  // Data retention settings
+  const [dataRetention, setDataRetention] = useState({
+    enabled: true,
+    retentionDays: 30,
+    maxDataPoints: 10000,
+  });
+
+  // Available tuning algorithms
+  const tuningAlgorithms = [
+    { value: 'ziegler-nichols', label: 'Ziegler-Nichols' },
+    { value: 'cohen-coon', label: 'Cohen-Coon' },
+    { value: 'lambda-tuning', label: 'Lambda Tuning' },
+    { value: 'imc', label: 'Internal Model Control (IMC)' },
+    { value: 'relay-feedback', label: 'Relay Feedback' },
+    { value: 'genetic-algorithm', label: 'Genetic Algorithm' },
+  ];
 
   // Sync modal state when focusEntry changes
   useEffect(() => {
@@ -155,55 +192,273 @@ const AdvancedSettingsModal: React.FC<AdvancedSettingsModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSettingsUpdate({ autotuneEnable, analysisTime });
+    onSettingsUpdate({
+      autotuneEnable,
+      analysisTime,
+      tuningAlgorithm,
+      safetyLimits,
+      dataRetention,
+    });
     onClose();
   };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-[#2d2d30] border border-[#3c3c3c] rounded-lg p-6 w-full max-w-md">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-[#2d2d30] border border-[#3c3c3c] rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white">Advanced Settings</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             ✕
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Loop Information */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-[#cccccc]">
               Loop: {focusEntry.loopName}
             </label>
+            <div className="text-xs text-[#969696]">
+              Queue ID: {focusEntry.queID} | Loop ID: {focusEntry.loopId}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm text-[#cccccc]">
-              <input
-                type="checkbox"
-                checked={autotuneEnable}
-                onChange={e => setAutotuneEnable(e.target.checked)}
-                className="rounded border-[#5c5c5c] bg-[#3c3c3c] text-[#007acc] focus:ring-[#007acc]"
-              />
-              <span>Enable Auto Tune</span>
-            </label>
+          {/* Basic Settings */}
+          <div className="space-y-4">
+            <h4 className="text-md font-medium text-white border-b border-[#3c3c3c] pb-2">
+              Basic Settings
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 text-sm text-[#cccccc]">
+                  <input
+                    type="checkbox"
+                    checked={autotuneEnable}
+                    onChange={e => setAutotuneEnable(e.target.checked)}
+                    className="rounded border-[#5c5c5c] bg-[#3c3c3c] text-[#007acc] focus:ring-[#007acc]"
+                  />
+                  <span>Enable Auto Tune</span>
+                </label>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="analysis-time" className="block text-sm font-medium text-[#cccccc]">
+                  Analysis Time (seconds)
+                </label>
+                <input
+                  id="analysis-time"
+                  type="number"
+                  min="5"
+                  max="300"
+                  value={analysisTime}
+                  onChange={e => setAnalysisTime(parseInt(e.target.value))}
+                  className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="analysis-time" className="block text-sm font-medium text-[#cccccc]">
-              Analysis Time (seconds)
-            </label>
-            <input
-              id="analysis-time"
-              type="number"
-              min="0"
-              max="300"
-              value={analysisTime}
-              onChange={e => setAnalysisTime(parseInt(e.target.value))}
-              className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
-            />
+          {/* Advanced Tuning Algorithm Selection */}
+          <div className="space-y-4">
+            <h4 className="text-md font-medium text-white border-b border-[#3c3c3c] pb-2">
+              Tuning Algorithm
+            </h4>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="tuning-algorithm"
+                className="block text-sm font-medium text-[#cccccc]"
+              >
+                Algorithm Selection
+              </label>
+              <select
+                id="tuning-algorithm"
+                value={tuningAlgorithm}
+                onChange={e =>
+                  setTuningAlgorithm(e.target.value as AdvancedTuningSettings['tuningAlgorithm'])
+                }
+                className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
+              >
+                {tuningAlgorithms.map(algo => (
+                  <option key={algo.value} value={algo.value}>
+                    {algo.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="flex space-x-3 pt-4">
+          {/* Safety Limits Configuration */}
+          <div className="space-y-4">
+            <h4 className="text-md font-medium text-white border-b border-[#3c3c3c] pb-2">
+              Safety Limits
+            </h4>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="max-kp" className="block text-sm font-medium text-[#cccccc]">
+                  Max Kp
+                </label>
+                <input
+                  id="max-kp"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={safetyLimits.maxKp}
+                  onChange={e =>
+                    setSafetyLimits(prev => ({ ...prev, maxKp: parseFloat(e.target.value) }))
+                  }
+                  className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="max-ki" className="block text-sm font-medium text-[#cccccc]">
+                  Max Ki
+                </label>
+                <input
+                  id="max-ki"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={safetyLimits.maxKi}
+                  onChange={e =>
+                    setSafetyLimits(prev => ({ ...prev, maxKi: parseFloat(e.target.value) }))
+                  }
+                  className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="max-kd" className="block text-sm font-medium text-[#cccccc]">
+                  Max Kd
+                </label>
+                <input
+                  id="max-kd"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={safetyLimits.maxKd}
+                  onChange={e =>
+                    setSafetyLimits(prev => ({ ...prev, maxKd: parseFloat(e.target.value) }))
+                  }
+                  className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="output-min" className="block text-sm font-medium text-[#cccccc]">
+                  Output Min (%)
+                </label>
+                <input
+                  id="output-min"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={safetyLimits.outputMin}
+                  onChange={e =>
+                    setSafetyLimits(prev => ({ ...prev, outputMin: parseFloat(e.target.value) }))
+                  }
+                  className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="output-max" className="block text-sm font-medium text-[#cccccc]">
+                  Output Max (%)
+                </label>
+                <input
+                  id="output-max"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={safetyLimits.outputMax}
+                  onChange={e =>
+                    setSafetyLimits(prev => ({ ...prev, outputMax: parseFloat(e.target.value) }))
+                  }
+                  className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Historical Data Retention Settings */}
+          <div className="space-y-4">
+            <h4 className="text-md font-medium text-white border-b border-[#3c3c3c] pb-2">
+              Data Retention
+            </h4>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 text-sm text-[#cccccc]">
+                  <input
+                    type="checkbox"
+                    checked={dataRetention.enabled}
+                    onChange={e =>
+                      setDataRetention(prev => ({ ...prev, enabled: e.target.checked }))
+                    }
+                    className="rounded border-[#5c5c5c] bg-[#3c3c3c] text-[#007acc] focus:ring-[#007acc]"
+                  />
+                  <span>Enable Historical Data Retention</span>
+                </label>
+              </div>
+
+              {dataRetention.enabled && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="retention-days"
+                      className="block text-sm font-medium text-[#cccccc]"
+                    >
+                      Retention Days
+                    </label>
+                    <input
+                      id="retention-days"
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={dataRetention.retentionDays}
+                      onChange={e =>
+                        setDataRetention(prev => ({
+                          ...prev,
+                          retentionDays: parseInt(e.target.value),
+                        }))
+                      }
+                      className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="max-data-points"
+                      className="block text-sm font-medium text-[#cccccc]"
+                    >
+                      Max Data Points
+                    </label>
+                    <input
+                      id="max-data-points"
+                      type="number"
+                      min="1000"
+                      max="100000"
+                      step="1000"
+                      value={dataRetention.maxDataPoints}
+                      onChange={e =>
+                        setDataRetention(prev => ({
+                          ...prev,
+                          maxDataPoints: parseInt(e.target.value),
+                        }))
+                      }
+                      className="w-full px-3 py-2 bg-[#3c3c3c] border border-[#5c5c5c] rounded text-[#cccccc] focus:ring-1 focus:ring-[#007acc] focus:border-[#007acc]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-3 pt-6 border-t border-[#3c3c3c]">
             <button
               type="button"
               onClick={onClose}
@@ -345,6 +600,7 @@ const TuningQueueContextPopup: React.FC<ContextPopupProps> = ({ entry, onAction,
         transform: 'translateZ(0)', // Force hardware acceleration
       }}
       onMouseDown={handleDragStart}
+      data-testid="context-popup"
     >
       {/* Drag handle */}
       <div className="flex items-center justify-between p-2 border-b border-[#3c3c3c] bg-[#383838] rounded-t">
@@ -518,7 +774,7 @@ export function ControlLoopPanel() {
       // Don't close if clicking on the trigger button or the popup itself
       if (
         target.closest('[data-testid="context-menu-trigger"]') ||
-        target.closest('.fixed.bg-\\[\\#2d2d30\\]')
+        target.closest('[data-testid="context-popup"]')
       ) {
         return;
       }
@@ -709,7 +965,12 @@ export function ControlLoopPanel() {
 
   // ===== ADVANCED SETTINGS UPDATE =====
   const handleAdvancedSettingsUpdate = useCallback(
-    (settings: { autotuneEnable: boolean; analysisTime: number }) => {
+    (
+      settings: {
+        autotuneEnable: boolean;
+        analysisTime: number;
+      } & AdvancedTuningSettings
+    ) => {
       if (focusEntry) {
         setTuningQueueState(prev => ({
           ...prev,
@@ -719,10 +980,22 @@ export function ControlLoopPanel() {
                   ...entry,
                   autotuneEnable: settings.autotuneEnable,
                   analysisTime: settings.analysisTime,
+                  // Store advanced settings using the proper schema structure
+                  advancedSettings: {
+                    tuningAlgorithm: settings.tuningAlgorithm,
+                    safetyLimits: settings.safetyLimits,
+                    dataRetention: settings.dataRetention,
+                  } as AdvancedTuningSettings,
                 }
               : entry
           ),
         }));
+
+        // Log advanced settings for debugging
+        console.log('Advanced Settings Updated:', {
+          loop: focusEntry.loopName,
+          settings: settings,
+        });
       }
     },
     [focusEntry]

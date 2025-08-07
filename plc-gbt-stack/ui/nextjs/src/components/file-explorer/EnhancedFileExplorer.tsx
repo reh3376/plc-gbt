@@ -162,17 +162,20 @@ export default function EnhancedFileExplorer({
     }, []),
   });
 
-  // Debug: Only log when files change, not on every render
+  // Debug: Only log when files change, not on every render (throttled)
   React.useEffect(() => {
-    console.log('🔍 FILE EXPLORER - Files updated:', {
-      count: files.length,
-      files: files.map(f => ({
-        id: f.id,
-        name: f.name,
-        type: f.type,
-        children: f.children?.length,
-      })),
-    });
+    // Only log occasionally to prevent console spam
+    if (Math.random() < 0.2) {
+      console.log('🔍 FILE EXPLORER - Files updated:', {
+        count: files.length,
+        files: files.slice(0, 3).map(f => ({
+          // Only show first 3 files
+          id: f.id,
+          name: f.name,
+          type: f.type,
+        })),
+      });
+    }
   }, [files]);
 
   // Handle file selection

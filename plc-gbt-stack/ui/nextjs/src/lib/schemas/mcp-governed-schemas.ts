@@ -171,6 +171,35 @@ export const EnhancedControlLoopSchema = z
   .strict();
 
 /**
+ * Advanced Tuning Settings schema from OpenAPI MCP
+ * @source #/components/schemas/AdvancedTuningSettings
+ */
+export const AdvancedTuningSettingsSchema = z
+  .object({
+    tuningAlgorithm: z.enum([
+      'ziegler-nichols',
+      'cohen-coon',
+      'lambda-tuning',
+      'imc',
+      'relay-feedback',
+      'genetic-algorithm',
+    ]),
+    safetyLimits: z.object({
+      maxKp: z.number().min(0).max(1000),
+      maxKi: z.number().min(0).max(1000),
+      maxKd: z.number().min(0).max(1000),
+      outputMin: z.number().min(0).max(100),
+      outputMax: z.number().min(0).max(100),
+    }),
+    dataRetention: z.object({
+      enabled: z.boolean(),
+      retentionDays: z.number().int().min(1).max(365),
+      maxDataPoints: z.number().int().min(1000).max(100000),
+    }),
+  })
+  .strict();
+
+/**
  * Tuning Queue Entry schema from OpenAPI MCP
  * @source #/components/schemas/TuningQueueEntry
  */
@@ -199,6 +228,7 @@ export const TuningQueueEntrySchema = z
     queuedAt: z.string().datetime(),
     lastModified: z.string().datetime(),
     originalLoopData: ControlLoopSummarySchema,
+    advancedSettings: AdvancedTuningSettingsSchema.optional(),
   })
   .strict();
 
@@ -369,6 +399,7 @@ export type ProcessVariable = z.infer<typeof ProcessVariableSchema>;
 export type PIDParameters = z.infer<typeof PIDParametersSchema>;
 export type ControlLoopSummary = z.infer<typeof ControlLoopSummarySchema>;
 export type EnhancedControlLoop = z.infer<typeof EnhancedControlLoopSchema>;
+export type AdvancedTuningSettings = z.infer<typeof AdvancedTuningSettingsSchema>;
 export type TuningQueueEntry = z.infer<typeof TuningQueueEntrySchema>;
 export type FocusLoopEditableParameters = z.infer<typeof FocusLoopEditableParametersSchema>;
 export type TuningQueueState = z.infer<typeof TuningQueueStateSchema>;
@@ -394,6 +425,7 @@ export const MCPControlLoopSchemas = {
 } as const;
 
 export const MCPTuningInterfaceSchemas = {
+  AdvancedTuningSettingsSchema,
   TuningQueueEntrySchema,
   TuningQueueStateSchema,
   FocusLoopEditableParametersSchema,
