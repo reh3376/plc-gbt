@@ -12,9 +12,10 @@ const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
 const WorkflowCanvas = lazy(() => import('@/components/workflow/workflow-canvas'));
 const ControlLoopDashboard = lazy(() => import('@/components/control-loop/ControlLoopDashboard'));
 const SettingsConfiguration = lazy(() => import('./SettingsConfiguration'));
+const GitMainIntegration = lazy(() => import('./git-integration/GitMainIntegrationEnhanced'));
 
 interface MainContentRouterProps {
-  className?: string;
+  readonly className?: string;
 }
 
 function LoadingSkeleton() {
@@ -66,6 +67,8 @@ export function MainContentRouter({ className }: MainContentRouterProps) {
         return 'Analytics Dashboard';
       case 'workflow':
         return 'Workflow Designer';
+      case 'plc-git':
+        return 'Git Integration & Version Control';
       case 'control-loop':
         return 'Control Loop Manager';
       case 'settings-config':
@@ -85,6 +88,8 @@ export function MainContentRouter({ className }: MainContentRouterProps) {
         return <AnalyticsDashboard />;
       case 'workflow':
         return <WorkflowCanvas />;
+      case 'plc-git':
+        return <GitMainIntegration initialOperation="git-management" />;
       case 'control-loop':
         return <ControlLoopDashboard />;
       case 'settings-config':

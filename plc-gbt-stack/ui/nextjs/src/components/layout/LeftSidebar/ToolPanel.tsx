@@ -12,6 +12,7 @@ const SearchPanel = lazy(() => import('../tools/SearchPanel'));
 const WorkflowPanel = lazy(() => import('../tools/WorkflowPanel'));
 const ControlLoopPanel = lazy(() => import('../tools/ControlLoopPanel'));
 const SettingsPanel = lazy(() => import('../tools/SettingsPanel'));
+const PLCGitPanelEnhanced = lazy(() => import('../tools/PLCGitPanelEnhanced'));
 
 interface ToolPanelProps {
   className?: string;
@@ -40,6 +41,8 @@ const getMainContentModeForTool = (tool: ToolType): MainContentMode => {
       return 'control-loop';
     case 'settings':
       return 'settings-config';
+    case 'plc-git':
+      return 'plc-git';
     default:
       return 'welcome';
   }
@@ -66,6 +69,8 @@ export function ToolPanel({ className }: ToolPanelProps) {
         return 'Control Loops';
       case 'settings':
         return 'Settings';
+      case 'plc-git':
+        return 'PLC Git';
       default:
         return 'Explorer';
     }
@@ -83,6 +88,8 @@ export function ToolPanel({ className }: ToolPanelProps) {
         return <ControlLoopPanel />;
       case 'settings':
         return <SettingsPanel />;
+      case 'plc-git':
+        return <PLCGitPanelEnhanced />;
       default:
         return <EnhancedFileExplorer />;
     }
