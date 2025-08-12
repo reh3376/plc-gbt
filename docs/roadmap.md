@@ -2625,4 +2625,902 @@ Implementation of Plain MQTT 5.0 with Redis cache integration for high-frequency
 
 **Strategic Value**: Establishes the foundation for industrial-grade real-time data processing with optimal performance for control systems, enabling advanced analytics, predictive maintenance, and autonomous control capabilities.
 
-**Next Phase**: Phase 35 - Advanced Analytics & Machine Learning Pipeline
+**Next Phase**: Phase 35 - PLC ACD/L5X Git Integration & Version Control
+
+---
+
+### **Phase 35: PLC ACD/L5X Git Integration & Version Control** 🚀 **PLANNED**
+
+#### **Strategic Overview**
+
+Transform PLC program management by integrating ACD to L5X conversion capabilities with enterprise Git workflows. This phase bridges the gap between traditional OT programming practices and modern IT version control methodologies, enabling collaborative development, change tracking, and CI/CD for industrial control systems.
+
+**Core Value Proposition**:
+- **Version Control for PLCs**: Full Git integration for PLC programs (branch, merge, diff, review)
+- **ACD to L5X Conversion**: Seamless conversion for text-based version control
+- **Collaborative Development**: Multi-engineer PLC development with conflict resolution
+- **Audit Trail**: Complete change history for regulatory compliance
+- **CI/CD Ready**: Enable automated testing and deployment of PLC programs
+
+#### **Sub-phase 35.1: Backend ACD/L5X Conversion Service** (2 weeks)
+
+**AI Task Orchestrator Methodology**: Following TypeScript strict typing and OpenAPI schema MCP
+
+- **Task 35.1.1**: Core Conversion Service Implementation
+  ```typescript
+  // Backend service for ACD to L5X conversion
+  interface ACDConversionService {
+    // Convert single ACD file to L5X format
+    convertFile(acdFile: Buffer, options: ConversionOptions): Promise<L5XOutput>
+    
+    // Batch conversion with progress tracking
+    convertBatch(files: ACDFile[], options: BatchOptions): AsyncIterableIterator<ConversionProgress>
+    
+    // Validate ACD file format
+    validateACDFile(file: Buffer): Promise<ValidationResult>
+    
+    // Compare two L5X files for differences
+    compareL5XFiles(original: string, modified: string): Promise<DiffResult>
+  }
+  
+  interface ConversionOptions {
+    preserveComments: boolean
+    expandDataTypes: boolean
+    includeDocumentation: boolean
+    targetVersion?: string
+    optimizationLevel: 'none' | 'basic' | 'full'
+  }
+  ```
+
+- **Task 35.1.2**: OpenAPI Schema Definition (via MCP_Docker)
+  ```yaml
+  # Retrieved from MCP_Docker OpenAPI server
+  /api/v1/plc/acd/convert:
+    post:
+      operationId: convertACDToL5X
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                options:
+                  $ref: '#/components/schemas/ConversionOptions'
+      responses:
+        '200':
+          content:
+            application/xml:
+              schema:
+                type: string
+                description: L5X XML content
+  ```
+
+- **Task 35.1.3**: Integration with plc-gbt-git Library
+  ```typescript
+  import { EnhancedSDKConverter } from '@plc-gbt-git/enhanced-converter'
+  import { NormalizedValidationFramework } from '@plc-gbt-git/validation'
+  
+  class PLCConversionAdapter {
+    private converter: EnhancedSDKConverter
+    private validator: NormalizedValidationFramework
+    
+    async convertWithValidation(acdBuffer: Buffer): Promise<ConversionResult> {
+      // Pre-conversion validation
+      const preValidation = await this.validator.validateACDStructure(acdBuffer)
+      
+      // Perform conversion
+      const l5xContent = await this.converter.convert(acdBuffer)
+      
+      // Post-conversion validation
+      const postValidation = await this.validator.validateL5XOutput(l5xContent)
+      
+      return {
+        l5xContent,
+        validationReport: {
+          pre: preValidation,
+          post: postValidation,
+          functionallyIdentical: postValidation.score > 0.95
+        }
+      }
+    }
+  }
+  ```
+
+- **Task 35.1.4**: Redis Caching for Conversion Results
+  ```typescript
+  class ConversionCacheService {
+    private redis: Redis
+    private ttl = 3600 // 1 hour cache
+    
+    async getCachedConversion(acdHash: string): Promise<L5XContent | null> {
+      return await this.redis.get(`conversion:${acdHash}`)
+    }
+    
+    async cacheConversion(acdHash: string, l5xContent: string): Promise<void> {
+      await this.redis.setex(`conversion:${acdHash}`, this.ttl, l5xContent)
+    }
+  }
+  ```
+
+- **Deliverable**: [PLC Conversion Service](../plc-gbt-stack/api/plc-conversion)
+
+#### **Sub-phase 35.2: Git Integration Layer** (2 weeks)
+
+**Focus**: Deep Git integration for PLC file management
+
+- **Task 35.2.1**: Git Operations Service
+  ```typescript
+  interface PLCGitService {
+    // Initialize Git repo for PLC project
+    initializePLCRepo(projectPath: string): Promise<Repository>
+    
+    // Commit L5X files with metadata
+    commitPLCChanges(files: L5XFile[], message: string, metadata: PLCMetadata): Promise<Commit>
+    
+    // Create feature branch for PLC modifications
+    createPLCBranch(branchName: string, fromBranch?: string): Promise<Branch>
+    
+    // Three-way merge for L5X files
+    mergePLCBranches(source: string, target: string): Promise<MergeResult>
+    
+    // Generate PLC-aware diffs
+    diffPLCFiles(fileA: string, fileB: string): Promise<PLCDiff>
+  }
+  
+  interface PLCDiff {
+    routines: RoutineDiff[]
+    tags: TagDiff[]
+    dataTypes: DataTypeDiff[]
+    programs: ProgramDiff[]
+    summary: DiffSummary
+  }
+  ```
+
+- **Task 35.2.2**: PLC-Aware Diff Algorithm
+  ```typescript
+  class PLCDiffEngine {
+    // Parse L5X structure for intelligent diffing
+    async generateSemanticDiff(original: L5X, modified: L5X): Promise<SemanticDiff> {
+      const diffs: SemanticDiff = {
+        addedRoutines: this.findAddedRoutines(original, modified),
+        modifiedRoutines: this.findModifiedRoutines(original, modified),
+        deletedRoutines: this.findDeletedRoutines(original, modified),
+        tagChanges: this.compareTagDatabases(original, modified),
+        structuralChanges: this.compareControllerStructure(original, modified)
+      }
+      
+      return diffs
+    }
+    
+    // Generate human-readable diff summary
+    formatDiffForReview(diff: SemanticDiff): string {
+      return `
+        PLC Program Changes:
+        - Added ${diff.addedRoutines.length} routines
+        - Modified ${diff.modifiedRoutines.length} routines
+        - Tag changes: ${diff.tagChanges.added} added, ${diff.tagChanges.modified} modified
+        - Structural changes: ${diff.structuralChanges.length}
+      `
+    }
+  }
+  ```
+
+- **Task 35.2.3**: Conflict Resolution for PLC Files
+  ```typescript
+  class PLCMergeHandler {
+    async resolveConflicts(base: L5X, ours: L5X, theirs: L5X): Promise<MergeResolution> {
+      // Automatic resolution for non-conflicting changes
+      const autoResolved = await this.autoResolveNonConflicting(base, ours, theirs)
+      
+      // Identify true conflicts requiring manual resolution
+      const conflicts = await this.identifyConflicts(base, ours, theirs)
+      
+      return {
+        autoResolved,
+        conflicts,
+        requiresManualReview: conflicts.length > 0
+      }
+    }
+  }
+  ```
+
+- **Deliverable**: [PLC Git Integration Service](../plc-gbt-stack/services/plc-git)
+
+#### **Sub-phase 35.3: Frontend UI Implementation** (2.5 weeks)
+
+**AI Task Orchestrator Methodology**: Two-phase testing with Playwright MCP + user validation
+
+- **Task 35.3.1**: Left Sidebar Icon Implementation
+  ```typescript
+  // Add to IconStrip.tsx ICON_MAP
+  import { FileCode2 } from 'lucide-react' // Icon for PLC files
+  
+  const ICON_MAP = {
+    // ... existing icons
+    'plc-git': FileCode2, // NEW: PLC Git Integration icon
+  }
+  
+  // Add to DEFAULT_ICONS array
+  {
+    id: 'plc-git',
+    name: 'PLC Git',
+    icon: 'plc-git',
+    tooltip: 'PLC program version control and Git integration'
+  }
+  ```
+
+- **Task 35.3.2**: PLC Git Management Panel
+  ```typescript
+  // New component: PLCGitPanel.tsx
+  export function PLCGitPanel() {
+    const [activeTab, setActiveTab] = useState<'files' | 'branches' | 'history'>('files')
+    const { currentProject, acdFiles } = usePLCProject()
+    
+    return (
+      <div className="flex flex-col h-full bg-[#1e1e1e]">
+        {/* Header with project selector */}
+        <PLCProjectHeader 
+          project={currentProject}
+          onProjectChange={handleProjectChange}
+        />
+        
+        {/* Tab navigation */}
+        <TabNavigation 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          tabs={['files', 'branches', 'history']}
+        />
+        
+        {/* Content area */}
+        <div className="flex-1 overflow-hidden">
+          {activeTab === 'files' && <PLCFileExplorer files={acdFiles} />}
+          {activeTab === 'branches' && <PLCBranchManager />}
+          {activeTab === 'history' && <PLCCommitHistory />}
+        </div>
+        
+        {/* Action bar */}
+        <PLCActionBar 
+          onConvert={handleConversion}
+          onCommit={handleCommit}
+          onPush={handlePush}
+        />
+      </div>
+    )
+  }
+  ```
+
+- **Task 35.3.3**: ACD File Upload & Conversion UI
+  ```typescript
+  function ACDUploadZone() {
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+      accept: {
+        'application/octet-stream': ['.acd', '.ACD']
+      },
+      onDrop: handleACDUpload
+    })
+    
+    return (
+      <div 
+        {...getRootProps()} 
+        className={cn(
+          "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer",
+          isDragActive ? "border-blue-500 bg-blue-500/10" : "border-gray-600"
+        )}
+      >
+        <input {...getInputProps()} />
+        <FileCode2 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+        <p className="text-sm text-gray-300">
+          {isDragActive 
+            ? "Drop ACD files here..." 
+            : "Drag & drop ACD files or click to browse"}
+        </p>
+      </div>
+    )
+  }
+  ```
+
+- **Task 35.3.4**: Visual Diff Viewer for L5X Files
+  ```typescript
+  function PLCDiffViewer({ original, modified }: PLCDiffViewerProps) {
+    const diff = usePLCDiff(original, modified)
+    
+    return (
+      <div className="flex h-full">
+        {/* Split view with synchronized scrolling */}
+        <div className="flex-1 overflow-auto" ref={leftPaneRef}>
+          <DiffPane 
+            content={original}
+            changes={diff.leftChanges}
+            side="left"
+          />
+        </div>
+        
+        <div className="w-px bg-gray-700" />
+        
+        <div className="flex-1 overflow-auto" ref={rightPaneRef}>
+          <DiffPane 
+            content={modified}
+            changes={diff.rightChanges}
+            side="right"
+          />
+        </div>
+        
+        {/* Inline comments for code review */}
+        <CommentThread diffId={diff.id} />
+      </div>
+    )
+  }
+  ```
+
+- **Deliverable**: [PLC Git UI Components](../plc-gbt-stack/ui/nextjs/src/components/plc-git)
+
+#### **Sub-phase 35.4: Workflow Integration** (1.5 weeks)
+
+**Focus**: Complete Git workflow implementation for PLC development
+
+- **Task 35.4.1**: Branch Protection Rules
+  ```typescript
+  interface PLCBranchProtection {
+    requireCodeReview: boolean
+    requireFunctionalValidation: boolean
+    requireSafetyCheck: boolean
+    allowedReviewers: string[]
+    minimumApprovals: number
+  }
+  ```
+
+- **Task 35.4.2**: Pull Request Integration
+  ```typescript
+  class PLCPullRequestService {
+    async createPLCPullRequest(params: {
+      sourceBranch: string
+      targetBranch: string
+      title: string
+      description: string
+      acdFiles: ACDFile[]
+    }): Promise<PullRequest> {
+      // Convert ACD files to L5X for review
+      const l5xFiles = await this.convertForReview(params.acdFiles)
+      
+      // Generate comprehensive diff
+      const diff = await this.generatePLCDiff(params.targetBranch, l5xFiles)
+      
+      // Create PR with PLC-specific metadata
+      return await this.gitService.createPullRequest({
+        ...params,
+        diff,
+        metadata: {
+          plcProject: true,
+          routineCount: diff.routines.length,
+          tagCount: diff.tags.length,
+          safetyImpact: await this.assessSafetyImpact(diff)
+        }
+      })
+    }
+  }
+  ```
+
+- **Task 35.4.3**: CI/CD Pipeline Integration
+  ```yaml
+  # GitHub Actions workflow for PLC programs
+  name: PLC Program Validation
+  on:
+    pull_request:
+      paths:
+        - '**.acd'
+        - '**.l5x'
+  
+  jobs:
+    validate:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+        
+        - name: Setup PLC Tools
+          uses: plc-gbt/setup-plc-tools@v1
+        
+        - name: Convert ACD to L5X
+          run: plc-gbt convert --batch ./plc-programs
+        
+        - name: Validate PLC Logic
+          run: plc-gbt validate --safety-check --style-check
+        
+        - name: Run Simulation Tests
+          run: plc-gbt simulate --test-scenarios ./tests
+        
+        - name: Generate Diff Report
+          run: plc-gbt diff --base main --format markdown > diff-report.md
+        
+        - name: Comment PR
+          uses: actions/github-script@v6
+          with:
+            script: |
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: require('fs').readFileSync('diff-report.md', 'utf8')
+              })
+  ```
+
+- **Deliverable**: [PLC Git Workflows](../plc-gbt-stack/workflows/plc-git)
+
+#### **Sub-phase 35.5: Testing & Validation** (1.5 weeks)
+
+**AI Task Orchestrator Methodology**: Comprehensive two-phase testing
+
+- **Task 35.5.1**: Automated Testing Suite (Phase 1)
+  ```typescript
+  // Playwright MCP tests for UI components
+  describe('PLC Git Integration', () => {
+    test('ACD file upload and conversion', async ({ page, mcp }) => {
+      await mcp.browser_navigate('/plc-git')
+      
+      // Test file upload
+      await mcp.browser_file_upload(['test-files/TestProject.ACD'])
+      await mcp.browser_wait_for({ text: 'Conversion successful' })
+      
+      // Verify L5X output
+      await mcp.browser_click('view-l5x', '[data-testid="view-l5x-btn"]')
+      await mcp.browser_wait_for({ text: '<RSLogix5000Content' })
+    })
+    
+    test('Git branch operations', async ({ page, mcp }) => {
+      await mcp.browser_click('create-branch', '[data-testid="create-branch-btn"]')
+      await mcp.browser_type('branch-name', '[data-testid="branch-name-input"]', 'feature/update-pid-loop')
+      await mcp.browser_click('confirm', '[data-testid="confirm-create-branch"]')
+      await mcp.browser_wait_for({ text: 'Branch created successfully' })
+    })
+    
+    test('Visual diff comparison', async ({ page, mcp }) => {
+      await mcp.browser_click('compare-btn', '[data-testid="compare-branches"]')
+      await mcp.browser_wait_for({ text: 'PLC Program Changes' })
+      
+      // Verify diff highlights
+      const snapshot = await mcp.browser_snapshot()
+      expect(snapshot).toContain('diff-added')
+      expect(snapshot).toContain('diff-removed')
+    })
+  })
+  ```
+
+- **Task 35.5.2**: User Interactive Testing Checklist (Phase 2)
+  ```typescript
+  const userTestingChecklist: UserTestingItem[] = [
+    {
+      category: 'File Operations',
+      description: 'Upload multiple ACD files and verify conversion',
+      automatedStatus: '✅ Automated (95%)',
+      userTestRequired: 'Verify conversion accuracy and file organization'
+    },
+    {
+      category: 'Git Workflow',
+      description: 'Create branch, make changes, create pull request',
+      automatedStatus: '✅ Automated (92%)',
+      userTestRequired: 'Confirm workflow feels natural for PLC developers'
+    },
+    {
+      category: 'Diff Visualization',
+      description: 'Compare two versions of PLC program',
+      automatedStatus: '✅ Automated (88%)',
+      userTestRequired: 'Verify diff clarity and usefulness for code review'
+    },
+    {
+      category: 'Performance',
+      description: 'Convert large ACD file (>10MB)',
+      automatedStatus: '✅ Automated (load time < 5s)',
+      userTestRequired: 'Confirm UI remains responsive during conversion'
+    }
+  ]
+  ```
+
+- **Task 35.5.3**: Integration Testing
+  ```typescript
+  test('End-to-end PLC development workflow', async () => {
+    // 1. Upload ACD file
+    const acdFile = await uploadACDFile('TestProject.ACD')
+    
+    // 2. Convert to L5X
+    const l5xContent = await convertToL5X(acdFile)
+    expect(l5xContent).toContain('<Controller')
+    
+    // 3. Create feature branch
+    await createBranch('feature/safety-interlock')
+    
+    // 4. Modify PLC logic
+    const modified = await modifyPLCLogic(l5xContent, {
+      addRoutine: 'SafetyInterlock',
+      modifyTag: { name: 'E_Stop', value: 'BOOL' }
+    })
+    
+    // 5. Commit changes
+    await commitChanges(modified, 'Add safety interlock routine')
+    
+    // 6. Create pull request
+    const pr = await createPullRequest({
+      source: 'feature/safety-interlock',
+      target: 'main',
+      reviewers: ['lead-engineer', 'safety-officer']
+    })
+    
+    // 7. Verify diff generation
+    expect(pr.diff.addedRoutines).toContain('SafetyInterlock')
+    expect(pr.diff.modifiedTags).toContain('E_Stop')
+  })
+  ```
+
+- **Deliverable**: [Test Results & Validation Report](../plc-gbt-stack/tests/plc-git)
+
+#### **Sub-phase 35.6: Documentation & Training** (1 week)
+
+**AI Task Orchestrator Methodology**: Comprehensive documentation completion
+
+- **Task 35.6.1**: User Documentation
+  - PLC Git workflow guide
+  - ACD to L5X conversion best practices
+  - Branch strategy for PLC development
+  - Code review guidelines for ladder logic
+
+- **Task 35.6.2**: Technical Documentation
+  - API reference for conversion service
+  - Git integration architecture
+  - Performance optimization guide
+  - Troubleshooting common issues
+
+- **Task 35.6.3**: Video Tutorials
+  - "Getting Started with PLC Version Control"
+  - "Collaborative PLC Development Workflow"
+  - "Code Review for Ladder Logic"
+  - "CI/CD for Industrial Control Systems"
+
+- **Deliverable**: [Phase 35 Completion Summary](../plc-gbt-stack/docs/PHASE35_PLC_GIT_COMPLETION_SUMMARY.md)
+
+#### **Dependencies & Prerequisites**
+
+- ✅ **Phase 31**: UI Foundation and component architecture
+- ✅ **Phase 33**: Left sidebar implementation
+- ✅ **Phase 34**: Redis caching infrastructure
+- ⚠️ **External**: plc-gbt-git library (GitHub: reh3376/plc-gbt-git)
+- ✅ **TypeScript**: Strict typing configuration
+- ✅ **OpenAPI**: Schema definitions via MCP_Docker
+
+#### **Success Criteria**
+
+- **Conversion Accuracy**: >95% functional equivalence between ACD and L5X
+- **Performance**: <5 seconds for typical PLC program conversion
+- **Git Integration**: Full branch/merge/diff support for L5X files
+- **User Experience**: >95% satisfaction from PLC developers
+- **Testing**: >95% automated test coverage + user validation
+- **Type Safety**: Zero `any` types, full OpenAPI compliance
+
+#### **Risk Mitigation**
+
+- **Conversion Reliability**: Current standalone conversion ~15-25% reliable
+  - Mitigation: Use SDK-based conversion as primary, standalone as fallback
+  - Long-term: Contribute improvements to open-source converter
+  
+- **Large File Handling**: Some PLC programs exceed 100MB
+  - Mitigation: Implement streaming conversion and chunked uploads
+  - Use Redis for caching intermediate results
+
+- **Merge Conflicts**: Complex PLC logic difficult to merge automatically
+  - Mitigation: Semantic diff algorithm understanding PLC structure
+  - Manual review required for safety-critical changes
+
+#### **Estimated Timeline: 9 weeks**
+
+**Strategic Value**: Revolutionizes PLC program management by bringing modern software development practices to industrial automation. Enables version control, collaborative development, code review, and CI/CD for control systems - dramatically improving quality, traceability, and development velocity.
+
+**Next Phase**: Phase 36 - Enhanced Git Integration & Visual Diff System
+
+---
+
+### **Phase 36: Enhanced Git Integration & Visual Diff System** 🎯 **NEXT STEPS**
+
+#### **Strategic Overview**
+
+Integrate the main UI area with the existing Git integration UI to create a comprehensive version control management system. Transform the workflow management approach by providing dedicated tools for PRs, merges, merge conflicts, diff reviews, and issues directly in the main content area. Implement specialized visual diff viewing for ladder logic with side-by-side comparisons.
+
+#### **Core Objectives**
+
+1. **Main UI Git Integration**
+   - Integrate git functionality into main content area from left sidebar
+   - Create seamless workflow between sidebar tools and main workspace
+   - Implement tabbed interface for multiple project management
+
+2. **Workflow Creation Tool**
+   - Design workflow creation interface triggered by workflow icon
+   - Implement visual workflow designer in main UI area
+   - Support for CI/CD pipeline creation and management
+
+3. **Advanced Git Operations**
+   - Pull Request management and review interface
+   - Merge conflict resolution with visual tools
+   - Diff review system with approval workflows
+   - Issue tracking and management integration
+
+4. **Visual Diff System**
+   - Stylized ladder logic visualization for diffs
+   - Side-by-side comparison interface
+   - Conflict highlighting and resolution tools
+   - Syntax-aware PLC code comparison
+
+5. **Project Tab Management**
+   - Multi-project support with dedicated tabs
+   - Project-specific Git repositories
+   - Cross-project workflow coordination
+
+#### **Technical Implementation Strategy**
+
+##### **36.1: Main UI Git Integration Architecture**
+- **Duration**: 2 weeks
+- **Scope**: Core integration between sidebar and main content area
+
+**Implementation Requirements:**
+```typescript
+// Enhanced MainContentRouter with Git integration
+type MainContentMode = 
+  | 'welcome'
+  | 'editor' 
+  | 'analytics'
+  | 'workflow'
+  | 'git-management'      // NEW: Git operations center
+  | 'diff-viewer'         // NEW: Visual diff interface
+  | 'pr-review'           // NEW: Pull request management
+  | 'conflict-resolution' // NEW: Merge conflict tools
+  | 'control-loop'
+  | 'settings-config'
+
+interface GitIntegrationState {
+  activeProject: PLCProject
+  openTabs: ProjectTab[]
+  currentOperation: 'diff' | 'merge' | 'pr-review' | 'conflict-resolution'
+  selectedFiles: string[]
+  compareMode: 'side-by-side' | 'unified' | 'ladder-logic'
+}
+```
+
+**Integration Points:**
+- Extend `MainContentRouter.tsx` with new Git-focused modes
+- Connect `PLCGitPanel` actions to main content state
+- Implement state synchronization between sidebar and main area
+
+##### **36.2: Workflow Creation Tool**
+- **Duration**: 2 weeks  
+- **Scope**: Visual workflow designer with CI/CD integration
+
+**Core Features:**
+- Drag-and-drop workflow builder interface
+- Pre-built templates for common PLC workflows
+- Git hooks and automation rule configuration
+- Integration with existing `WorkflowCanvas` component
+
+**UI Components:**
+```typescript
+interface WorkflowCreationTool {
+  templates: WorkflowTemplate[]
+  nodeLibrary: WorkflowNode[]
+  gitHooks: GitHookConfiguration[]
+  cicdPipelines: PipelineDefinition[]
+}
+
+// Enhanced workflow nodes for Git operations
+type GitWorkflowNode = 
+  | 'commit-validation'
+  | 'automated-testing' 
+  | 'diff-generation'
+  | 'pr-creation'
+  | 'merge-approval'
+  | 'deployment-trigger'
+```
+
+##### **36.3: Advanced Git Operations Interface**
+- **Duration**: 3 weeks
+- **Scope**: Comprehensive Git workflow management
+
+**Pull Request Management:**
+- PR creation and editing interface
+- Code review assignment and tracking
+- Approval workflow management
+- Merge strategy selection and execution
+
+**Merge Conflict Resolution:**
+- Interactive conflict resolution interface
+- PLC-specific merge strategies
+- Safety validation for control logic merges
+- Automated conflict detection and suggestion
+
+**Diff Review System:**
+- Line-by-line diff analysis
+- Comment and annotation system
+- Approval and rejection workflows
+- Integration with ladder logic visualization
+
+##### **36.4: Visual Ladder Logic Diff System**
+- **Duration**: 3 weeks
+- **Scope**: Specialized diff viewer for PLC programs
+
+**Core Features:**
+```typescript
+interface LadderLogicDiffViewer {
+  diffMode: 'side-by-side' | 'overlay' | 'animated'
+  highlightChanges: boolean
+  showConnections: boolean
+  semanticDiff: boolean // Understand PLC logic semantics
+  conflictMarkers: ConflictIndicator[]
+}
+
+interface ConflictIndicator {
+  type: 'logical' | 'syntax' | 'safety-critical'
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  suggestion: string
+  autoResolvable: boolean
+}
+```
+
+**Visualization Components:**
+- SVG-based ladder logic rendering
+- Real-time change highlighting
+- Interactive conflict resolution
+- Safety validation indicators
+
+##### **36.5: Multi-Project Tab Management**
+- **Duration**: 2 weeks
+- **Scope**: Enhanced project organization and workflow
+
+**Tab System Features:**
+```typescript
+interface ProjectTab {
+  id: string
+  projectName: string
+  repository: GitRepository
+  isDirty: boolean
+  activeFile?: string
+  gitStatus: GitStatus
+  notifications: Notification[]
+}
+
+interface ProjectTabManager {
+  openTabs: ProjectTab[]
+  activeTab: string
+  maxTabs: number
+  persistState: boolean
+  crossProjectOperations: boolean
+}
+```
+
+#### **Enhanced Testing Requirements**
+
+Following AI Task Orchestrator TypeScript methodology with comprehensive two-phase testing:
+
+##### **Phase 1: Automated Testing (>95% Success Rate Required)**
+
+**Playwright MCP Integration Tests:**
+```typescript
+// Git Integration UI Tests
+async function testGitMainUIIntegration(mcpPlaywright: MCPPlaywrightClient) {
+  const tests = [
+    {
+      name: 'Workflow Icon Triggers Main UI',
+      action: async () => {
+        await mcpPlaywright.browser_click('workflow-icon', '[data-testid="workflow-trigger"]')
+        await mcpPlaywright.browser_wait_for({ text: 'Workflow Creation Tool' })
+      }
+    },
+    {
+      name: 'Project Tab Management',
+      action: async () => {
+        await mcpPlaywright.browser_click('add-project-tab', '[data-testid="add-project"]')
+        await mcpPlaywright.browser_wait_for({ text: 'New Project Tab' })
+        await mcpPlaywright.browser_click('close-tab', '[data-testid="close-tab-0"]')
+      }
+    },
+    {
+      name: 'Diff Viewer Side-by-Side',
+      action: async () => {
+        await mcpPlaywright.browser_click('diff-mode', '[data-testid="side-by-side-diff"]')
+        await mcpPlaywright.browser_wait_for({ text: 'Side-by-Side Comparison' })
+      }
+    },
+    {
+      name: 'PR Management Interface',
+      action: async () => {
+        await mcpPlaywright.browser_click('pr-button', '[data-testid="create-pr"]')
+        await mcpPlaywright.browser_wait_for({ text: 'Pull Request Created' })
+      }
+    }
+  ]
+  
+  const results = await Promise.all(tests.map(test => executeTest(test)))
+  return {
+    totalTests: tests.length,
+    passedTests: results.filter(r => r.passed).length,
+    successRate: (results.filter(r => r.passed).length / tests.length) * 100
+  }
+}
+```
+
+**Component Integration Tests:**
+- Git panel to main UI state synchronization
+- Tab management and persistence
+- Workflow creation tool functionality
+- Diff viewer performance and accuracy
+- Merge conflict resolution interface
+
+**E2E Workflow Tests:**
+- Complete PR creation and review workflow
+- Merge conflict detection and resolution
+- Cross-project operations
+- Ladder logic diff visualization
+
+##### **Phase 2: User Interactive Testing (Mandatory)**
+
+**User Testing Checklist:**
+1. **Workflow Integration Testing**
+   - Click workflow icon → verify main UI opens workflow tool
+   - Test intuitive navigation between sidebar and main area
+   - Verify workflow creation feels natural and responsive
+
+2. **Git Operations Testing**
+   - Create and manage PRs through main interface
+   - Test merge conflict resolution usability
+   - Verify diff viewer clarity and accuracy
+
+3. **Multi-Project Management**
+   - Open multiple project tabs
+   - Switch between projects smoothly
+   - Test cross-project operation workflows
+
+4. **Visual Design Validation**
+   - Verify ladder logic diff visualization quality
+   - Confirm side-by-side comparisons are clear
+   - Test responsive design on different screen sizes
+
+#### **Success Metrics & Validation**
+
+**Automated Testing Requirements:**
+- Component Tests: >95% success rate
+- E2E Tests: >95% success rate  
+- Accessibility Tests: >95% success rate
+- Performance Tests: Core Web Vitals 'green'
+- Cross-browser Tests: >90% success rate
+
+**User Experience Validation:**
+- Git workflow feels natural and intuitive
+- Visual diff system is clear and actionable
+- Multi-project management is efficient
+- No learning curve for basic operations
+
+#### **Deliverables**
+
+1. **Enhanced MainContentRouter** with Git integration modes
+2. **Workflow Creation Tool** with visual designer interface
+3. **Advanced Git Operations Center** for PR/merge/conflict management
+4. **Visual Ladder Logic Diff Viewer** with side-by-side comparisons
+5. **Multi-Project Tab Management System** with state persistence
+6. **Comprehensive Test Suite** with >95% automated coverage
+7. **User Documentation** and interaction guides
+
+#### **Integration Dependencies**
+
+- ✅ **Phase 35**: Git Integration UI foundation in sidebar
+- ✅ **Phase 33**: Left sidebar implementation  
+- ✅ **Phase 31**: UI foundation and component architecture
+- ✅ **MainContentRouter**: Existing routing infrastructure
+- ✅ **WorkflowCanvas**: Existing workflow visualization
+
+#### **Risk Mitigation**
+
+- **UI Complexity**: Implement progressive disclosure for advanced features
+- **Performance**: Use virtualization for large diff views  
+- **State Synchronization**: Implement robust state management patterns
+- **Learning Curve**: Provide contextual help and guided workflows
+
+#### **Estimated Timeline: 12 weeks**
+
+**Strategic Value**: Transforms the Git integration from a sidebar tool into a comprehensive version control management center. Enables sophisticated workflows, visual diff analysis, and multi-project coordination essential for enterprise PLC development environments.
+
+**Next Phase**: Phase 37 - Advanced Analytics & Machine Learning Pipeline

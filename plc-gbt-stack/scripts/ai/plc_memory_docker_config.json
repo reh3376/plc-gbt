@@ -1,0 +1,34 @@
+{
+  "databases": {
+    "redis": {
+      "host": "172.21.0.3",
+      "port": 6379,
+      "connection_method": "docker_network"
+    },
+    "postgresql": {
+      "host": "172.21.0.5",
+      "port": 5432,
+      "database": "plc_gbt",
+      "user": "plc_user",
+      "password": "postgres_password",
+      "connection_method": "docker_network"
+    },
+    "neo4j": {
+      "host": "172.21.0.4",
+      "port": 7687,
+      "user": "neo4j",
+      "password": "",
+      "bolt_url": "bolt://172.21.0.4:7687",
+      "connection_method": "docker_network"
+    },
+    "qdrant": {
+      "host": "172.21.0.2",
+      "port": 6333,
+      "url": "http://172.21.0.2:6333",
+      "connection_method": "docker_network"
+    }
+  },
+  "connection_strategy": "docker_internal",
+  "fallback_enabled": true,
+  "docker_network": "plc-gbt-stack_plc-database-network"
+}

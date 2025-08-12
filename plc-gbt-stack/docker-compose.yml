@@ -67,7 +67,7 @@ services:
       - '7687:7687' # Bolt
     environment:
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
-      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
       - NEO4J_server_memory_heap_initial__size=2G
       - NEO4J_server_memory_heap_max__size=4G
       - NEO4J_server_memory_pagecache_size=2G
@@ -99,11 +99,9 @@ services:
       - qdrant_data:/qdrant/storage
     networks:
       - plc-database-network
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:6333/health']
-      interval: 30s
-      timeout: 10s
-      retries: 5
+    # Note: The official qdrant image may not include curl/wget, causing false negatives.
+    # Remove the HTTP-based healthcheck and rely on service_started + external checks.
+    # (Health is verified via sidecar curl on the internal network.)
 
   # PostgreSQL for metadata
   postgres:
@@ -309,7 +307,7 @@ services:
       neo4j:
         condition: service_healthy
       qdrant:
-        condition: service_healthy
+        condition: service_started
       postgres:
         condition: service_healthy
       vault:
@@ -346,7 +344,7 @@ services:
       neo4j:
         condition: service_healthy
       qdrant:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_healthy
       vault:
@@ -397,7 +395,7 @@ services:
       redis:
         condition: service_healthy
       qdrant:
-        condition: service_healthy
+        condition: service_started
     environment:
       - REDIS_HOST=redis
       - POSTGRES_HOST=postgres
@@ -406,7 +404,7 @@ services:
       - POSTGRES_DB=plc_gbt
       - POSTGRES_USER=plc_user
       - POSTGRES_PASSWORD=postgres_password
-      - NEO4J_PASSWORD=password
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
     networks:
       - plc-database-network
     volumes:

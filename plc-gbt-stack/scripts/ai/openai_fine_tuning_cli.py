@@ -49,6 +49,11 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 # Initialize Rich console for beautiful output
 console = Console()
 
+# Constants
+JOB_ID_LABEL = "Job ID"
+MODEL_ID_LABEL = "Model ID"
+STATUS_LABEL = "Status"
+
 # =============================================================================
 # Data Models
 # =============================================================================
@@ -352,7 +357,7 @@ class OpenAIFineTuningCLI:
             "safety": "Safety Systems",
             "plc": "PLC Programming"
         }
-        domain_counts = {domain: 0 for domain in domain_keywords.values()}
+        domain_counts = dict.fromkeys(domain_keywords.values(), 0)
         
         for example in examples:
             messages = example.get("messages", [])
@@ -470,7 +475,7 @@ class OpenAIFineTuningCLI:
                 return
         
         # Show monitoring command
-        console.print(f"\n[bold]Monitor progress:[/bold]")
+        console.print("\n[bold]Monitor progress:[/bold]")
         console.print(f"  python openai_fine_tuning_cli.py status --job-id {job.id} --watch")
     
     # =============================================================================
@@ -489,7 +494,7 @@ class OpenAIFineTuningCLI:
                 return
             
             table = Table(title="Fine-Tuning Jobs")
-            table.add_column("Job ID", style="cyan")
+            table.add_column(JOB_ID_LABEL, style="cyan")
             table.add_column("Model", style="magenta")
             table.add_column("Status", style="green")
             table.add_column("Created", style="white")
@@ -519,7 +524,7 @@ class OpenAIFineTuningCLI:
                 job_id = self.history[-1]["job_id"]
                 console.print(f"Using latest job: {job_id}")
             else:
-                job_id = Prompt.ask("Job ID")
+                job_id = Prompt.ask(JOB_ID_LABEL)
         
         # Monitor job
         if watch:
@@ -545,7 +550,7 @@ class OpenAIFineTuningCLI:
             
             # Training details
             if hasattr(job, 'trained_tokens') and job.trained_tokens:
-                console.print(f"\n[bold]Training Metrics:[/bold]")
+                console.print("\n[bold]Training Metrics:[/bold]")
                 console.print(f"  Trained tokens: {job.trained_tokens:,}")
                 
                 # Calculate cost
@@ -605,7 +610,7 @@ class OpenAIFineTuningCLI:
     # Command: Validate
     # =============================================================================
     
-    def cmd_validate(self, model_id: Optional[str] = None, test_file: Optional[str] = None):
+    def cmd_validate(self, model_id: Optional[str] = None):
         """Validate a fine-tuned model"""
         console.print("\n[bold cyan]🔍 Model Validation[/bold cyan]\n")
         
@@ -783,7 +788,7 @@ class OpenAIFineTuningCLI:
         # Verify model exists
         try:
             # Test the model
-            test_response = self.client.chat.completions.create(
+            self.client.chat.completions.create(
                 model=model_id,
                 messages=[{"role": "user", "content": "test"}],
                 max_tokens=10
@@ -943,7 +948,7 @@ echo "Model ID: {model_id}"
         if detailed and job_costs:
             console.print("\n[bold]Training Job Costs:[/bold]")
             job_table = Table()
-            job_table.add_column("Job ID", style="cyan")
+            job_table.add_column(JOB_ID_LABEL, style="cyan")
             job_table.add_column("Model", style="magenta")
             job_table.add_column("Tokens", style="white")
             job_table.add_column("Cost", style="green")
@@ -971,7 +976,7 @@ echo "Model ID: {model_id}"
     # Command: Generate Documentation
     # =============================================================================
     
-    def cmd_docs(self, format: str = "markdown"):
+    def cmd_docs(self):
         """Generate documentation for fine-tuning workflow"""
         console.print("\n[bold cyan]📚 Documentation Generation[/bold cyan]\n")
         
@@ -1187,7 +1192,7 @@ def status(cli_obj, job_id, watch, all_jobs):
 @click.pass_obj
 def validate(cli_obj, model_id, test_file):
     """Validate a fine-tuned model"""
-    cli_obj.cmd_validate(model_id, test_file)
+    cli_obj.cmd_validate(model_id)
 
 @cli.command()
 @click.option('--model', 'model_id', help='Model ID to deploy')

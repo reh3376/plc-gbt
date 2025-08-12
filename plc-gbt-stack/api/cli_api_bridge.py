@@ -138,7 +138,7 @@ class CLIExecutor:
         self.max_history = 1000
         
     async def execute_command(self, command: str, args: List[str], 
-                            timeout: float = 30.0, working_dir: Optional[str] = None) -> CLICommandResult:
+                            command_timeout: float = 30.0, working_dir: Optional[str] = None) -> CLICommandResult:
         """Execute CLI command with validation and security controls"""
         start_time = time.time()
         
@@ -169,11 +169,9 @@ class CLIExecutor:
                 cwd=working_dir
             )
             
-            # Wait with timeout
-            stdout, stderr = await asyncio.wait_for(
-                process.communicate(),
-                timeout=timeout
-            )
+            # Wait with timeout using context manager
+            async with asyncio.timeout(command_timeout):
+                stdout, stderr = await process.communicate()
             
             execution_time = time.time() - start_time
             
@@ -232,6 +230,13 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# Include PLC Conversion Router - Phase 35
+try:
+    from plc_conversion import router as plc_conversion_router
+    app.include_router(plc_conversion_router)
+except ImportError:
+    logger.warning("PLC Conversion module not found, skipping router inclusion")
 
 # Configure CORS
 app.add_middleware(
