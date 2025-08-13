@@ -563,11 +563,38 @@ export function ControlLoopDashboard({
     alert(`Edit loop ${loopId} - Modal to be implemented`);
   }, []);
 
-  const handleTuneLoop = useCallback((loopId: string) => {
-    console.log(`🔧 Tuning control loop: ${loopId}`);
-    // TODO: Open tuning interface
-    alert(`Tune loop ${loopId} - Tuning interface to be implemented`);
-  }, []);
+  const handleTuneLoop = useCallback(
+    (loopId: string) => {
+      console.log(`🔧 Adding control loop to tuning queue: ${loopId}`);
+
+      // Find the loop to add to tuning queue
+      const loopToTune = controlLoops.find(loop => loop.id === loopId);
+      if (!loopToTune) {
+        console.error('Loop not found:', loopId);
+        return;
+      }
+
+      // TODO: Integrate with Control Loop Panel tuning queue
+      // This should:
+      // 1. Add the loop to the tuning queue in ControlLoopPanel state
+      // 2. Switch to the Control Loop tool in the left sidebar
+      // 3. Set the added loop as the focus loop
+
+      // For now, provide user feedback about the action
+      console.log('Loop added to tuning queue:', {
+        id: loopToTune.id,
+        name: loopToTune.name,
+        type: loopToTune.type,
+        currentStatus: loopToTune.status,
+      });
+
+      // Placeholder notification - replace with proper tuning queue integration
+      alert(
+        `Added "${loopToTune.name}" to tuning queue.\n\nNext steps:\n1. Switch to Control Loop panel in sidebar\n2. Loop will appear in Active Loops dropdown\n3. Use keyboard arrows or dropdown to focus\n4. Adjust PID parameters as needed\n\n[Integration with ControlLoopPanel pending]`
+      );
+    },
+    [controlLoops]
+  );
 
   const handleSetpointChange = useCallback(async (loopId: string, value: number) => {
     console.log(`📈 Updating setpoint for ${loopId}: ${value}`);

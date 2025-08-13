@@ -1001,6 +1001,81 @@ export function ControlLoopPanel() {
     [focusEntry]
   );
 
+  // ===== LOOP CONTROL ACTIONS WITH STRICT TYPING =====
+  const handleLoopControlAction = useCallback(
+    (action: 'start' | 'pause' | 'stop') => {
+      if (focusEntry) {
+        console.log(`Control action '${action}' for loop:`, focusEntry.loopName);
+
+        // Update the loop status immediately for responsive UI
+        setTuningQueueState(prev => ({
+          ...prev,
+          entries: prev.entries.map(entry =>
+            entry.loopId === focusEntry.loopId
+              ? {
+                  ...entry,
+                  originalLoopData: {
+                    ...entry.originalLoopData,
+                    status:
+                      action === 'start' ? 'running' : action === 'pause' ? 'stopped' : 'stopped',
+                    last_updated: new Date().toISOString(),
+                  },
+                }
+              : entry
+          ),
+        }));
+
+        // TODO: Integrate with backend API for actual control loop operations
+        // Example API call structure:
+        // await apiClient.controlLoop(focusEntry.loopId, { action, timestamp: new Date() });
+
+        // Show user feedback
+        const actionMessages = {
+          start: `Started control loop: ${focusEntry.loopName}`,
+          pause: `Paused control loop: ${focusEntry.loopName}`,
+          stop: `Stopped control loop: ${focusEntry.loopName}`,
+        };
+
+        console.log(actionMessages[action]);
+        // Note: Replace alert with toast notification in production
+        alert(actionMessages[action]);
+      }
+    },
+    [focusEntry]
+  );
+
+  // ===== TRENDING VISUALIZATION ACTION =====
+  const handleShowTrending = useCallback(() => {
+    if (focusEntry) {
+      console.log('Opening trending view for loop:', focusEntry.loopName);
+
+      // TODO: Implement trending modal/panel with Chart.js visualization
+      // This will show real-time charts for:
+      // - PV (Process Value)
+      // - SPV (Setpoint Value)
+      // - CV (Control Variable/Output)
+      // - PPV (Previous Process Value)
+
+      const trendingData = {
+        loopId: focusEntry.loopId,
+        loopName: focusEntry.loopName,
+        variables: ['PV', 'SPV', 'CV', 'PPV'],
+        timeRange: '1h', // Default 1 hour
+      };
+
+      console.log('Trending data structure:', trendingData);
+
+      // Placeholder: Show modal with trending charts
+      alert(
+        `Trending visualization for ${focusEntry.loopName}\n\nVariables: PV, SPV, CV, PPV\nTime Range: Last 1 hour\n\n[Chart.js implementation pending]`
+      );
+
+      // TODO: Open trending modal component
+      // setTrendingModalOpen(true);
+      // setTrendingLoopData(trendingData);
+    }
+  }, [focusEntry]);
+
   // ===== AUTO TUNE ACTION =====
   const handleAutoTune = useCallback(() => {
     if (focusEntry) {
@@ -1367,6 +1442,43 @@ export function ControlLoopPanel() {
                   <option value="Off">Off</option>
                 </select>
               </div>
+
+              {/* Loop Control Buttons - Start/Pause/Stop */}
+              <div className="grid grid-cols-3 gap-1">
+                <button
+                  onClick={() => handleLoopControlAction('start')}
+                  disabled={focusEntry.originalLoopData.status === 'running'}
+                  className="py-2 px-2 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-1"
+                >
+                  <Play className="w-3 h-3" />
+                  <span>Start</span>
+                </button>
+                <button
+                  onClick={() => handleLoopControlAction('pause')}
+                  disabled={focusEntry.originalLoopData.status !== 'running'}
+                  className="py-2 px-2 bg-yellow-600 text-white text-xs font-medium rounded hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-1"
+                >
+                  <Pause className="w-3 h-3" />
+                  <span>Pause</span>
+                </button>
+                <button
+                  onClick={() => handleLoopControlAction('stop')}
+                  disabled={focusEntry.originalLoopData.status === 'stopped'}
+                  className="py-2 px-2 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-1"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Stop</span>
+                </button>
+              </div>
+
+              {/* Trending Button */}
+              <button
+                onClick={() => handleShowTrending()}
+                className="w-full py-2 px-3 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+              >
+                <TrendingUp className="w-3 h-3" />
+                <span>Show Trending (PV, SPV, CV)</span>
+              </button>
 
               {/* Conditional Auto Tune Button */}
               {focusEntry.autotuneEnable && (

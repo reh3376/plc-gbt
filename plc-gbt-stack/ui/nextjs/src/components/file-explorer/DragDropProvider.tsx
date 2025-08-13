@@ -18,7 +18,7 @@ import {
   DropAnimation,
   KeyboardSensor,
   PointerSensor,
-  closestCenter,
+  closestCorners,
   defaultDropAnimationSideEffects,
   useSensor,
   useSensors,
@@ -71,14 +71,16 @@ export function DragDropProvider({
   onExternalFileDrop,
   enabled = true,
 }: DragDropProviderProps): React.ReactElement {
-  const [, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [draggedFile, setDraggedFile] = useState<FileItem | null>(null);
 
   // Configure sensors for drag operations
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Require 8px movement to start drag
+        distance: 5, // Require 5px movement to start drag (reduced for better responsiveness)
+        delay: 100, // Add a small delay to differentiate from clicks
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -121,16 +123,18 @@ export function DragDropProvider({
   // Handle drag over
   const handleDragOver = useCallback(
     (event: DragOverEvent) => {
-      // We can add visual feedback here for valid drop zones
-      const { over } = event;
+      const { over, active } = event;
 
-      if (over) {
+      if (over && active) {
         const overId = over.id as string;
+        const activeId = active.id as string;
         const overFile = findFileById(overId);
+        const activeFile = findFileById(activeId);
 
-        // Add visual feedback for valid drop targets
-        if (overFile && overFile.type === 'folder') {
-          // Could add CSS class for drop zone highlighting
+        // Only allow dropping on folders and prevent dropping on self
+        if (overFile && overFile.type === 'folder' && activeFile && overFile.id !== activeFile.id) {
+          console.log(`🎯 VALID DROP TARGET - ${activeFile.name} → ${overFile.name}`);
+          // Visual feedback is handled by SortableFileItem's isDropTarget state
         }
       }
     },
@@ -142,20 +146,36 @@ export function DragDropProvider({
     async (event: DragEndEvent) => {
       const { active, over } = event;
 
+      console.log(`🏁 DRAG END - Active: ${active.id}, Over: ${over?.id || 'none'}`);
+
+      // Reset drag state
       setActiveId(null);
       setDraggedFile(null);
 
-      if (!over || !draggedFile) return;
+      if (!over || !draggedFile) {
+        console.log(`🏁 DRAG END - No valid drop target or dragged file`);
+        return;
+      }
 
       const overId = over.id as string;
       const overFile = findFileById(overId);
 
+      console.log(
+        `🏁 DRAG END - Dragged: ${draggedFile.name}, Target: ${overFile?.name || 'unknown'}`
+      );
+
       // Handle drop on folder
       if (overFile && overFile.type === 'folder' && overFile.id !== draggedFile.id) {
+        console.log(`🏁 EXECUTING DROP - ${draggedFile.name} → ${overFile.name}`);
         try {
           await onFileDrop(draggedFile, overFile);
+          console.log(`✅ DROP SUCCESS - ${draggedFile.name} moved to ${overFile.name}`);
         } catch (error) {
-          console.error('Drop operation failed:', error);
+          console.error('❌ DROP FAILED:', error);
+          
+          // Show user-friendly error message
+          const errorMessage = error instanceof Error ? error.message : 'Failed to move file';
+          alert(`Failed to move "${draggedFile.name}" to "${overFile.name}"\n\nError: ${errorMessage}`);
         }
         return;
       }
@@ -165,11 +185,14 @@ export function DragDropProvider({
         const activeIndex = files.findIndex(file => file.id === active.id);
         const overIndex = files.findIndex(file => file.id === over.id);
 
+        console.log(`🏁 REORDER ATTEMPT - Active index: ${activeIndex}, Over index: ${overIndex}`);
+
         if (activeIndex !== -1 && overIndex !== -1) {
           try {
             await onFileReorder(draggedFile, overIndex);
+            console.log(`✅ REORDER SUCCESS - ${draggedFile.name} moved to index ${overIndex}`);
           } catch (error) {
-            console.error('Reorder operation failed:', error);
+            console.error('❌ REORDER FAILED:', error);
           }
         }
       }
@@ -266,7 +289,7 @@ export function DragDropProvider({
     <div onDrop={handleExternalDrop} onDragOver={handleExternalDragOver} className="h-full w-full">
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={closestCorners}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
@@ -276,7 +299,7 @@ export function DragDropProvider({
         </SortableContext>
 
         <DragOverlay dropAnimation={dropAnimation}>
-          <DragOverlayContent draggedFile={draggedFile} />
+          {activeId ? <DragOverlayContent draggedFile={draggedFile} /> : null}
         </DragOverlay>
       </DndContext>
     </div>

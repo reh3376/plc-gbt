@@ -105,6 +105,17 @@ export async function PUT(request: NextRequest, context: RouteContext): Promise<
     const fileName = basename(sourcePath);
     const targetPath = join(targetParentPath, fileName);
 
+    // Debug logging for path resolution
+    console.log('🔧 MOVE FILE DEBUG:', {
+      sourceId: id,
+      targetParentId: body.targetParentId,
+      sourcePath,
+      targetParentPath,
+      fileName,
+      targetPath,
+      projectRoot: PROJECT_ROOT
+    });
+
     try {
       // Check if source file exists
       if (!existsSync(sourcePath)) {
@@ -195,27 +206,17 @@ export async function PUT(request: NextRequest, context: RouteContext): Promise<
 
       return NextResponse.json(response);
     } catch (fsError) {
-      console.warn('Filesystem move failed, returning mock success:', fsError);
+      console.error('Filesystem move operation failed:', fsError);
 
-      // Mock move success for development
-      const mockFile: FileItem = {
-        id: `mock-moved-${Date.now()}`,
-        name: basename(sourcePath),
-        type: 'file',
-        path: `/mock/moved/${basename(sourcePath)}`,
-        size: 1024,
-        extension: extname(basename(sourcePath)),
-        mimeType: getMimeType(extname(basename(sourcePath))),
-        lastModified: new Date(),
-      };
-
-      const response: FileOperationResult = {
-        success: true,
-        message: `File moved successfully (mock mode)`,
-        data: mockFile,
-      };
-
-      return NextResponse.json(response);
+      // Return proper error instead of mock success
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Failed to move file or folder: ${fsError instanceof Error ? fsError.message : 'Unknown filesystem error'}`,
+          error: 'Filesystem operation failed',
+        },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error(`PUT /api/v1/files/${id}/move error:`, error);

@@ -9,6 +9,7 @@ import { Suspense, lazy, useEffect } from 'react';
 // Lazy load tool components for performance
 const EnhancedFileExplorer = lazy(() => import('../../file-explorer/EnhancedFileExplorer'));
 const SearchPanel = lazy(() => import('../tools/SearchPanel'));
+const AnalyticsPanel = lazy(() => import('../tools/AnalyticsPanel'));
 const WorkflowPanel = lazy(() => import('../tools/WorkflowPanel'));
 const ControlLoopPanel = lazy(() => import('../tools/ControlLoopPanel'));
 const SettingsPanel = lazy(() => import('../tools/SettingsPanel'));
@@ -48,7 +49,7 @@ const getMainContentModeForTool = (tool: ToolType): MainContentMode => {
   }
 };
 
-export function ToolPanel({ className }: ToolPanelProps) {
+export function ToolPanel({ className }: Readonly<ToolPanelProps>) {
   const { activeTool, setMainContentMode } = useLayoutStore();
 
   // Update MainContent mode when active tool changes
@@ -63,8 +64,10 @@ export function ToolPanel({ className }: ToolPanelProps) {
         return 'Explorer';
       case 'search':
         return 'Search';
+      case 'analytics':
+        return 'Analytics';
       case 'workflows':
-        return 'Workflows';
+        return 'Workflow Monitor';
       case 'control-loops':
         return 'Control Loops';
       case 'settings':
@@ -82,6 +85,8 @@ export function ToolPanel({ className }: ToolPanelProps) {
         return <EnhancedFileExplorer />;
       case 'search':
         return <SearchPanel />;
+      case 'analytics':
+        return <AnalyticsPanel />;
       case 'workflows':
         return <WorkflowPanel />;
       case 'control-loops':

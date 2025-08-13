@@ -100,6 +100,11 @@ export function FileItemWrapper({
 
   // Handle click events (need to differentiate between select and drag)
   const handleClick = (event: React.MouseEvent) => {
+    // Don't handle clicks during drag operations
+    if (isDragging) {
+      return;
+    }
+
     console.log(`🖱️ MOUSE CLICK - File: ${file.name}, Type: ${file.type}`);
     event.stopPropagation();
 

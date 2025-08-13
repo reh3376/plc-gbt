@@ -10,6 +10,7 @@
 
 // FileOperationAPIError import removed - not used
 import { useFileOperations } from '@/lib/hooks/useFileOperations';
+import { useFileSorting } from '@/lib/hooks/useFileSorting';
 import { useFileStore } from '@/lib/stores/file-store';
 import { useLayoutStore } from '@/lib/stores/layout-store';
 import type {
@@ -21,7 +22,6 @@ import type {
 import { cn } from '@/lib/utils/cn';
 import {
   AlertCircle,
-  BarChart3,
   ChevronDown,
   ChevronRight,
   FileText,
@@ -37,6 +37,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { ContextMenu, useContextMenu } from './ContextMenu';
 import { DragDropProvider } from './DragDropProvider';
 import { FileItemWrapper } from './SortableFileItem';
+import { SortDropdown } from './SortDropdown';
 
 // File creation modal state
 interface CreateFileModalState {
@@ -69,10 +70,10 @@ interface ClipboardState {
 
 // Props interface
 interface EnhancedFileExplorerProps {
-  className?: string;
-  enableFileUpload?: boolean;
-  enableFileCreation?: boolean;
-  onFileSelect?: (fileId: string) => void;
+  readonly className?: string;
+  readonly enableFileUpload?: boolean;
+  readonly enableFileCreation?: boolean;
+  readonly onFileSelect?: (fileId: string) => void;
 }
 
 /**
@@ -160,6 +161,13 @@ export default function EnhancedFileExplorer({
     onError: React.useCallback((error: Error) => {
       console.warn(`File operation failed:`, error);
     }, []),
+  });
+
+  // File sorting hook - provides sorted files and sorting controls
+  const { sortedFiles, sortState, setSortOption } = useFileSorting({
+    files,
+    defaultOrganization: 'files-first',
+    defaultSortMethod: 'a-z',
   });
 
   // Debug: Only log when files change, not on every render (throttled)
@@ -869,6 +877,9 @@ export default function EnhancedFileExplorer({
             </button>
           )}
 
+          {/* Sort Arrangement Dropdown */}
+          <SortDropdown sortState={sortState} onSortChange={setSortOption} disabled={isLoading} />
+
           {/* Refresh Button */}
           <button
             onClick={handleRefreshClick}
@@ -882,16 +893,6 @@ export default function EnhancedFileExplorer({
             ) : (
               <RefreshCw className="w-4 h-4" />
             )}
-          </button>
-
-          {/* Analytics Button */}
-          <button
-            className="w-6 h-6 flex items-center justify-center hover:bg-[#3c3c3c] rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-            title="Analytics"
-            aria-label="Switch to analytics view"
-            onClick={() => setMainContentMode('analytics')}
-          >
-            <BarChart3 className="w-4 h-4 text-[#cccccc]" />
           </button>
         </div>
       </div>
@@ -916,16 +917,16 @@ export default function EnhancedFileExplorer({
             <Loader2 className="w-8 h-8 animate-spin text-[#007acc] mx-auto mb-2" />
             <div className="text-sm text-[#969696]">Loading files...</div>
           </div>
-        ) : files.length === 0 ? (
+        ) : sortedFiles.length === 0 ? (
           <div className="p-4 text-center text-[#969696] text-sm">No files in workspace</div>
         ) : (
           <DragDropProvider
-            files={files}
+            files={sortedFiles}
             onFileDrop={handleFileDrop}
             onFileReorder={handleFileReorder}
             onExternalFileDrop={handleExternalFileDrop}
           >
-            {files.map(file => renderFileItem(file, 0))}
+            {sortedFiles.map(file => renderFileItem(file, 0))}
           </DragDropProvider>
         )}
       </div>
@@ -936,7 +937,7 @@ export default function EnhancedFileExplorer({
         role="status"
         aria-live="polite"
       >
-        {files.length} items{isLoading && ' (refreshing...)'}
+        {sortedFiles.length} items{isLoading && ' (refreshing...)'}
       </div>
 
       {/* Create File/Folder Modal */}

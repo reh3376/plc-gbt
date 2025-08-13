@@ -13,21 +13,12 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import {
-  IndustrialNodeType,
-  useWorkflowStore,
-} from '@/lib/stores/workflow-store';
+import { IndustrialNodeType, useWorkflowStore } from '@/lib/stores/workflow-store';
 import { cn } from '@/lib/utils/cn';
+import { EnhancedPropertiesPanel } from './EnhancedPropertiesPanel';
 import { industrialNodeTypes } from './industrial-nodes';
-import { WorkflowPropertiesPanel } from './workflow-properties-panel';
 import { WorkflowToolbar } from './workflow-toolbar';
 
 interface WorkflowCanvasProps {
@@ -35,10 +26,7 @@ interface WorkflowCanvasProps {
   isReadOnly?: boolean;
 }
 
-function WorkflowCanvasInner({
-  className,
-  isReadOnly = false,
-}: WorkflowCanvasProps) {
+function WorkflowCanvasInner({ className, isReadOnly = false }: WorkflowCanvasProps) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const { screenToFlowPosition, fitView, zoomIn, zoomOut } = useReactFlow();
@@ -73,7 +61,7 @@ function WorkflowCanvasInner({
 
   // Track container dimensions for React Flow
   useLayoutEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
         setDimensions({ width, height });
@@ -128,8 +116,8 @@ function WorkflowCanvasInner({
       nodes: Array<{ id: string }>;
       edges: Array<{ id: string }>;
     }) => {
-      setSelectedNodes(selectedNodes.map((node) => node.id));
-      setSelectedEdges(selectedEdges.map((edge) => edge.id));
+      setSelectedNodes(selectedNodes.map(node => node.id));
+      setSelectedEdges(selectedEdges.map(edge => edge.id));
     },
     [setSelectedNodes, setSelectedEdges]
   );
@@ -195,13 +183,10 @@ function WorkflowCanvasInner({
   }, [zoomIn, zoomOut, fitView]);
 
   return (
-    <div
-      className={cn('flex h-full w-full min-h-0', className)}
-      style={{ minHeight: '600px' }}
-    >
+    <div className={cn('flex h-full w-full min-h-0', className)} style={{ minHeight: '600px' }}>
       {/* Main Canvas */}
       <div
-        className='flex-1 relative h-full min-h-0'
+        className="flex-1 relative h-full min-h-0"
         ref={reactFlowWrapper}
         style={{ minHeight: '600px' }}
       >
@@ -229,7 +214,7 @@ function WorkflowCanvasInner({
           edgesFocusable={!storeReadOnly}
           nodesFocusable={!storeReadOnly}
           proOptions={{ hideAttribution: true }}
-          className='bg-[#1e1e1e]'
+          className="bg-[#1e1e1e]"
           style={{
             width: dimensions.width,
             height: dimensions.height,
@@ -252,18 +237,13 @@ function WorkflowCanvasInner({
         >
           {/* Background Pattern */}
           {showBackground && (
-            <Background
-              color='#404040'
-              gap={gridSize}
-              size={2}
-              variant={BackgroundVariant.Lines}
-            />
+            <Background color="#404040" gap={gridSize} size={2} variant={BackgroundVariant.Lines} />
           )}
 
           {/* Minimap */}
           {showMinimap && (
             <MiniMap
-              nodeColor={(node) => {
+              nodeColor={node => {
                 switch (node.type) {
                   case 'plc-input':
                     return '#10B981';
@@ -289,11 +269,11 @@ function WorkflowCanvasInner({
                     return '#6B7280';
                 }
               }}
-              nodeStrokeColor='#fff'
+              nodeStrokeColor="#fff"
               nodeStrokeWidth={2}
-              maskColor='rgba(0, 0, 0, 0.8)'
-              position='bottom-right'
-              className='!bg-[#2d2d2d] !border-[#404040]'
+              maskColor="rgba(0, 0, 0, 0.8)"
+              position="bottom-right"
+              className="!bg-[#2d2d2d] !border-[#404040]"
               style={{
                 backgroundColor: '#2d2d2d',
                 border: '1px solid #404040',
@@ -304,32 +284,29 @@ function WorkflowCanvasInner({
           {/* Controls */}
           {showControls && (
             <Controls
-              position='bottom-left'
-              className='!bg-[#2d2d2d] !border-[#404040] [&_button]:bg-[#2d2d2d] [&_button]:text-white [&_button]:border-[#404040]'
+              position="bottom-left"
+              className="!bg-[#2d2d2d] !border-[#404040] [&_button]:bg-[#2d2d2d] [&_button]:text-white [&_button]:border-[#404040]"
             />
           )}
 
           {/* Top Panel - Workflow Info */}
-          <Panel position='top-left' className='m-2'>
-            <div className='bg-[#2d2d2d] border border-[#404040] rounded-lg p-3 shadow-lg'>
-              <div className='flex items-center space-x-3'>
-                <div className='text-sm font-medium text-white'>
-                  Industrial Workflow Canvas
-                </div>
+          <Panel position="top-left" className="m-2">
+            <div className="bg-[#2d2d2d] border border-[#404040] rounded-lg p-3 shadow-lg">
+              <div className="flex items-center space-x-3">
+                <div className="text-sm font-medium text-white">Industrial Workflow Canvas</div>
 
-                <div className='text-xs text-gray-400'>
+                <div className="text-xs text-gray-400">
                   Nodes: {nodes.length} | Edges: {edges.length}
                 </div>
 
                 {selectedNodes.length > 0 && (
-                  <div className='text-xs text-blue-400'>
-                    Selected: {selectedNodes.length} nodes,{' '}
-                    {selectedEdges.length} edges
+                  <div className="text-xs text-blue-400">
+                    Selected: {selectedNodes.length} nodes, {selectedEdges.length} edges
                   </div>
                 )}
 
                 {storeReadOnly && (
-                  <div className='px-2 py-1 bg-yellow-600/20 text-yellow-400 text-xs rounded'>
+                  <div className="px-2 py-1 bg-yellow-600/20 text-yellow-400 text-xs rounded">
                     Read Only
                   </div>
                 )}
@@ -338,22 +315,20 @@ function WorkflowCanvasInner({
           </Panel>
 
           {/* Quick Actions Panel */}
-          <Panel position='top-right' className='m-2'>
-            <div className='bg-[#2d2d2d] border border-[#404040] rounded-lg p-2 shadow-lg'>
-              <div className='flex items-center space-x-2'>
+          <Panel position="top-right" className="m-2">
+            <div className="bg-[#2d2d2d] border border-[#404040] rounded-lg p-2 shadow-lg">
+              <div className="flex items-center space-x-2">
                 <button
                   onClick={() => fitView()}
-                  className='px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors'
+                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors"
                 >
                   Fit View
                 </button>
 
                 <button
                   onClick={() => clearSelection()}
-                  className='px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors'
-                  disabled={
-                    selectedNodes.length === 0 && selectedEdges.length === 0
-                  }
+                  className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
+                  disabled={selectedNodes.length === 0 && selectedEdges.length === 0}
                 >
                   Clear Selection
                 </button>
@@ -362,7 +337,7 @@ function WorkflowCanvasInner({
                   onClick={() => {
                     /* TODO: Auto layout */
                   }}
-                  className='px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors'
+                  className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors"
                 >
                   Auto Layout
                 </button>
@@ -372,8 +347,14 @@ function WorkflowCanvasInner({
         </ReactFlow>
       </div>
 
-      {/* Properties Panel */}
-      <WorkflowPropertiesPanel />
+      {/* Enhanced Properties Panel */}
+      <EnhancedPropertiesPanel
+        className="min-w-0"
+        width={320}
+        resizable={true}
+        collapsible={true}
+        defaultTab="properties"
+      />
     </div>
   );
 }
@@ -381,15 +362,12 @@ function WorkflowCanvasInner({
 // Main Workflow Canvas with Provider
 export function WorkflowCanvas(props: WorkflowCanvasProps) {
   return (
-    <div
-      className='h-full w-full flex flex-col min-h-0'
-      style={{ minHeight: '700px' }}
-    >
+    <div className="h-full w-full flex flex-col min-h-0" style={{ minHeight: '700px' }}>
       {/* Toolbar */}
       <WorkflowToolbar />
 
       {/* Canvas with React Flow Provider */}
-      <div className='flex-1 min-h-0' style={{ minHeight: '650px' }}>
+      <div className="flex-1 min-h-0" style={{ minHeight: '650px' }}>
         <ReactFlowProvider>
           <WorkflowCanvasInner {...props} />
         </ReactFlowProvider>
