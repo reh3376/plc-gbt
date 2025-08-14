@@ -302,87 +302,95 @@ export default function PLCGitPanelEnhanced() {
   const [showProjectModal, setShowProjectModal] = useState(false);
 
   // File upload handling with react-dropzone
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const acdFiles = acceptedFiles.filter(file => file.name.toLowerCase().endsWith('.acd'));
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const acdFiles = acceptedFiles.filter(file => file.name.toLowerCase().endsWith('.acd'));
 
-    const newFiles: ACDFile[] = acdFiles.map(file => ({
-      id: `file-${Date.now()}-${Math.random()}`,
-      name: file.name,
-      path: `${state.activeWorkspace?.name}/${state.selectedProject?.name}/acd-current/${state.selectedBranch}/${file.name}`,
-      size: file.size,
-      lastModified: new Date(file.lastModified).toISOString(),
-      projectId: state.selectedProject?.id || '',
-      branch: state.selectedBranch,
-      type: 'acd',
-      version: 'v32', // Default Studio 5000 version
-      status: 'unconverted',
-      checksum: '', // Would be calculated server-side
-    }));
+      const newFiles: ACDFile[] = acdFiles.map(file => ({
+        id: `file-${Date.now()}-${Math.random()}`,
+        name: file.name,
+        path: `${state.activeWorkspace?.name}/${state.selectedProject?.name}/acd-current/${state.selectedBranch}/${file.name}`,
+        size: file.size,
+        lastModified: new Date(file.lastModified).toISOString(),
+        projectId: state.selectedProject?.id || '',
+        branch: state.selectedBranch,
+        type: 'acd',
+        version: 'v32', // Default Studio 5000 version
+        status: 'unconverted',
+        checksum: '', // Would be calculated server-side
+      }));
 
-    setUploadedFiles(prev => [...prev, ...newFiles]);
+      setUploadedFiles(prev => [...prev, ...newFiles]);
 
-    // Simulate conversion process
-    newFiles.forEach(file => {
-      setTimeout(() => {
-        setUploadedFiles(prev =>
-          prev.map(f =>
-            f.id === file.id
-              ? ({ ...f, status: 'converting' as const, conversionProgress: 0 } as PLCFileUnion)
-              : f
-          )
-        );
-
-        // Simulate progress
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 10;
+      // Simulate conversion process
+      newFiles.forEach(file => {
+        setTimeout(() => {
           setUploadedFiles(prev =>
             prev.map(f =>
-              f.id === file.id ? ({ ...f, conversionProgress: progress } as PLCFileUnion) : f
+              f.id === file.id
+                ? ({ ...f, status: 'converting' as const, conversionProgress: 0 } as PLCFileUnion)
+                : f
             )
           );
 
-          if (progress >= 100) {
-            clearInterval(interval);
-            setUploadedFiles(prev => {
-              const converted = prev.map(f => {
-                if (f.id === file.id) {
-                  // Mark ACD as converted
-                  return {
-                    ...f,
-                    status: 'converted' as const,
-                    l5xPath: f.path.replace('acd-current', 'l5x-current').replace('.acd', '.l5x'),
-                  } as PLCFileUnion;
-                }
-                return f;
-              });
+          // Simulate progress
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 10;
+            setUploadedFiles(prev =>
+              prev.map(f =>
+                f.id === file.id ? ({ ...f, conversionProgress: progress } as PLCFileUnion) : f
+              )
+            );
 
-              // Add the L5X file to the tree
-              const acdFile = converted.find(f => f.id === file.id);
-              if (acdFile && 'l5xPath' in acdFile && acdFile.l5xPath) {
-                const l5xFile: PLCFileUnion = {
-                  id: `l5x-${Date.now()}-${Math.random()}`,
-                  name: acdFile.name.replace('.acd', '.l5x').replace('.ACD', '.L5X'),
-                  path: acdFile.l5xPath,
-                  size: acdFile.size,
-                  lastModified: new Date().toISOString(),
-                  projectId: acdFile.projectId,
-                  branch: acdFile.branch,
-                  type: 'l5x' as const,
-                  version: 'version' in acdFile ? acdFile.version : '1.0.0',
-                  status: 'committed' as const,
-                  checksum: '',
-                  conversionProgress: undefined,
-                };
-                return [...converted, l5xFile];
-              }
-              return converted;
-            });
-          }
-        }, 500);
-      }, 1000);
-    });
-  }, []);
+            if (progress >= 100) {
+              clearInterval(interval);
+              setUploadedFiles(prev => {
+                const converted = prev.map(f => {
+                  if (f.id === file.id) {
+                    // Mark ACD as converted
+                    return {
+                      ...f,
+                      status: 'converted' as const,
+                      l5xPath: f.path.replace('acd-current', 'l5x-current').replace('.acd', '.l5x'),
+                    } as PLCFileUnion;
+                  }
+                  return f;
+                });
+
+                // Add the L5X file to the tree
+                const acdFile = converted.find(f => f.id === file.id);
+                if (acdFile && 'l5xPath' in acdFile && acdFile.l5xPath) {
+                  const l5xFile: PLCFileUnion = {
+                    id: `l5x-${Date.now()}-${Math.random()}`,
+                    name: acdFile.name.replace('.acd', '.l5x').replace('.ACD', '.L5X'),
+                    path: acdFile.l5xPath,
+                    size: acdFile.size,
+                    lastModified: new Date().toISOString(),
+                    projectId: acdFile.projectId,
+                    branch: acdFile.branch,
+                    type: 'l5x' as const,
+                    version: 'version' in acdFile ? acdFile.version : '1.0.0',
+                    status: 'committed' as const,
+                    checksum: '',
+                    conversionProgress: undefined,
+                  };
+                  return [...converted, l5xFile];
+                }
+                return converted;
+              });
+            }
+          }, 500);
+        }, 1000);
+      });
+    },
+    [
+      state.activeWorkspace?.name,
+      state.selectedProject?.id,
+      state.selectedProject?.name,
+      state.selectedBranch,
+    ]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

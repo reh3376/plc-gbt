@@ -10,10 +10,9 @@
 
 'use client';
 
-import { cn } from '@/lib/utils/cn';
+import type { GitBranch as GitBranchType, PLCProject } from '@/lib/types/plc-git';
 import { GitBranch, GitMerge, Lock, Plus } from 'lucide-react';
 import React from 'react';
-import type { PLCProject, GitBranch as GitBranchType } from '@/lib/types/plc-git';
 
 interface BranchManagerProps {
   project: PLCProject;
@@ -25,7 +24,7 @@ interface BranchManagerProps {
 }
 
 export function BranchManager({
-  project,
+  project: _project,
   branches,
   currentBranch,
   onBranchChange,
@@ -85,7 +84,7 @@ export function BranchManager({
                 )}
                 {!branch.isCurrent && !branch.protected && (
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       onMergeBranch(branch.name, currentBranch);
                     }}

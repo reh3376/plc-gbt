@@ -1,5 +1,6 @@
 'use client';
 
+import { useWorkflowStore } from '@/lib/stores/workflow-store';
 import { cn } from '@/lib/utils/cn';
 import {
   CheckCircle,
@@ -300,7 +301,14 @@ function WorkflowPanel() {
     setMonitorState(prev => ({ ...prev, filter: newFilter }));
   };
 
-  const handleWorkflowSelect = (workflowId: string | null) => {
+  const { openWorkflowInNewTab } = useWorkflowStore();
+
+  const handleWorkflowSelect = async (workflowId: string | null) => {
+    if (workflowId) {
+      // Open the workflow in the canvas
+      await openWorkflowInNewTab(workflowId);
+    }
+    
     setMonitorState(prev => ({
       ...prev,
       selectedWorkflow: prev.selectedWorkflow === workflowId ? null : workflowId,

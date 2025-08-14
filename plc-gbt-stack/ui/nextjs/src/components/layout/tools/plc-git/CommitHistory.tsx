@@ -10,10 +10,9 @@
 
 'use client';
 
-import { cn } from '@/lib/utils/cn';
-import { GitCommit, FileText, Eye } from 'lucide-react';
+import type { CommitEntry, PLCProject } from '@/lib/types/plc-git';
+import { Eye, FileText, GitCommit } from 'lucide-react';
 import React from 'react';
-import type { PLCProject, CommitEntry } from '@/lib/types/plc-git';
 
 interface CommitHistoryProps {
   project: PLCProject;
@@ -23,7 +22,7 @@ interface CommitHistoryProps {
 }
 
 export function CommitHistory({
-  project,
+  project: _project,
   branch,
   commits,
   onViewDiff,
@@ -47,18 +46,13 @@ export function CommitHistory({
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="p-3 border-b border-[#3c3c3c]">
-        <h4 className="text-sm font-medium text-[#cccccc]">
-          Commit History - {branch}
-        </h4>
+        <h4 className="text-sm font-medium text-[#cccccc]">Commit History - {branch}</h4>
       </div>
 
       {/* Commit list */}
       <div className="flex-1 overflow-auto">
         {commits.map(commit => (
-          <div
-            key={commit.id}
-            className="p-4 border-b border-[#3c3c3c] hover:bg-[#2d2d30] group"
-          >
+          <div key={commit.id} className="p-4 border-b border-[#3c3c3c] hover:bg-[#2d2d30] group">
             <div className="flex items-start gap-3">
               <GitCommit className="w-4 h-4 text-[#cccccc]/70 mt-0.5" />
               <div className="flex-1">

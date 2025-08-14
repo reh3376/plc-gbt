@@ -12,9 +12,12 @@
 import {
   AlertCircle,
   CheckCircle,
+  ChevronDown,
   ChevronRight,
+  ChevronUp,
   Copy,
   Database,
+  Info,
   Loader,
   RotateCcw,
   Save,
@@ -31,6 +34,7 @@ import {
   EnhancedPropertiesPanelProps,
   NodePropertySchema,
   PropertiesTab,
+  PropertyField,
   PropertyFieldChangeEvent,
   ValidationResult,
 } from '@/lib/types/enhanced-properties-panel.types';
@@ -89,7 +93,7 @@ const PANEL_TABS: ReadonlyArray<{
 export function EnhancedPropertiesPanel({
   className,
   width = 320,
-  resizable = true,
+
   collapsible = true,
   defaultTab = 'properties',
   onConfigChange,
@@ -168,7 +172,7 @@ export function EnhancedPropertiesPanel({
     setValidationResults(results);
     onValidationChange?.(results);
     return results;
-  }, [nodeSchema, selectedNode, editingConfig, nodes, onValidationChange]);
+  }, [nodeSchema, selectedNode, editingConfig, onValidationChange]);
 
   // Handle configuration field changes
   const handleFieldChange = useCallback(
@@ -487,8 +491,7 @@ export function EnhancedPropertiesPanel({
   );
 }
 
-// Temporary placeholder components for tab content
-// These will be implemented in the next step
+// Enhanced Properties Tab with Dynamic Form Generation
 function PropertiesTabContent({
   schema,
   config,
@@ -504,11 +507,283 @@ function PropertiesTabContent({
   onFieldChange: (event: PropertyFieldChangeEvent) => void;
   onGroupToggle: (groupId: string) => void;
 }>): React.JSX.Element {
+  // Get validation results by field key for efficient lookup
+  const validationByField = useMemo(() => {
+    const map = new Map<string, ValidationResult>();
+    validationResults.forEach(result => {
+      if (result.field) {
+        map.set(result.field, result);
+      }
+    });
+    return map;
+  }, [validationResults]);
+
+  // Render individual property field based on type
+  const renderPropertyField = useCallback(
+    (field: PropertyField) => {
+      const fieldValue = config[field.key] ?? field.defaultValue;
+      const validation = validationByField.get(field.key);
+      const hasError = validation?.severity === 'error';
+      const hasWarning = validation?.severity === 'warning';
+
+      const handleFieldChange = (value: unknown) => {
+        const oldValue = config[field.key] ?? field.defaultValue;
+        onFieldChange({
+          field,
+          oldValue,
+          newValue: value,
+          isValid: true, // TODO: Run validation
+          validationResult: validation,
+        });
+      };
+
+      const renderFieldInput = () => {
+        switch (field.type) {
+          case 'text':
+          case 'email':
+          case 'url':
+            return (
+              <input
+                type={field.type}
+                value={(fieldValue as string) || ''}
+                onChange={e => handleFieldChange(e.target.value)}
+                className={cn(
+                  'w-full px-3 py-2 bg-[#3d3d3d] border rounded-md text-white text-sm',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                  hasError && 'border-red-500',
+                  hasWarning && 'border-yellow-500',
+                  !hasError && !hasWarning && 'border-[#505050]'
+                )}
+                placeholder={field.description}
+                disabled={field.required === false}
+              />
+            );
+
+          case 'number':
+            return (
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={(fieldValue as number) || ''}
+                  onChange={e => handleFieldChange(parseFloat(e.target.value) || 0)}
+                  min={field.constraints?.min}
+                  max={field.constraints?.max}
+                  step={field.constraints?.step}
+                  className={cn(
+                    'flex-1 px-3 py-2 bg-[#3d3d3d] border rounded-md text-white text-sm',
+                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                    hasError && 'border-red-500',
+                    hasWarning && 'border-yellow-500',
+                    !hasError && !hasWarning && 'border-[#505050]'
+                  )}
+                  placeholder={field.description}
+                />
+                {field.ui?.units && (
+                  <span className="text-xs text-[#969696] whitespace-nowrap">{field.ui.units}</span>
+                )}
+              </div>
+            );
+
+          case 'boolean':
+            return (
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(fieldValue as boolean) || false}
+                  onChange={e => handleFieldChange(e.target.checked)}
+                  className="w-4 h-4 rounded border-[#505050] bg-[#3d3d3d] text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-white">{fieldValue ? 'Enabled' : 'Disabled'}</span>
+              </label>
+            );
+
+          case 'select':
+            return (
+              <select
+                value={(fieldValue as string) || ''}
+                onChange={e => handleFieldChange(e.target.value)}
+                className={cn(
+                  'w-full px-3 py-2 bg-[#3d3d3d] border rounded-md text-white text-sm',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                  hasError && 'border-red-500',
+                  hasWarning && 'border-yellow-500',
+                  !hasError && !hasWarning && 'border-[#505050]'
+                )}
+              >
+                <option value="">Select {field.label}</option>
+                {field.options?.map(option => (
+                  <option key={String(option.value)} value={String(option.value)}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            );
+
+          case 'textarea':
+            return (
+              <textarea
+                value={(fieldValue as string) || ''}
+                onChange={e => handleFieldChange(e.target.value)}
+                rows={3}
+                className={cn(
+                  'w-full px-3 py-2 bg-[#3d3d3d] border rounded-md text-white text-sm resize-none',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                  hasError && 'border-red-500',
+                  hasWarning && 'border-yellow-500',
+                  !hasError && !hasWarning && 'border-[#505050]'
+                )}
+                placeholder={field.description}
+              />
+            );
+
+          case 'slider':
+            return (
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  value={(fieldValue as number) || field.constraints?.min || 0}
+                  onChange={e => handleFieldChange(parseFloat(e.target.value))}
+                  min={field.constraints?.min || 0}
+                  max={field.constraints?.max || 100}
+                  step={field.constraints?.step || 1}
+                  className="w-full h-2 bg-[#3d3d3d] rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-[#969696]">
+                  <span>{field.constraints?.min || 0}</span>
+                  <span className="font-medium text-white">{String(fieldValue)}</span>
+                  <span>{field.constraints?.max || 100}</span>
+                </div>
+              </div>
+            );
+
+          case 'color':
+            return (
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={(fieldValue as string) || '#000000'}
+                  onChange={e => handleFieldChange(e.target.value)}
+                  className="w-10 h-8 border border-[#505050] rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={(fieldValue as string) || ''}
+                  onChange={e => handleFieldChange(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-[#3d3d3d] border border-[#505050] rounded-md text-white text-sm"
+                  placeholder="#000000"
+                />
+              </div>
+            );
+
+          default:
+            return (
+              <input
+                type="text"
+                value={(fieldValue as string) || ''}
+                onChange={e => handleFieldChange(e.target.value)}
+                className="w-full px-3 py-2 bg-[#3d3d3d] border border-[#505050] rounded-md text-white text-sm"
+              />
+            );
+        }
+      };
+
+      return (
+        <div key={field.key} className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2 text-sm font-medium text-white">
+              {field.label}
+              {field.required && <span className="text-red-400">*</span>}
+              {field.description && (
+                <div className="relative group">
+                  <Info className="w-3 h-3 text-[#969696] cursor-help" />
+                  <div className="absolute left-0 top-4 hidden group-hover:block z-10 w-64 p-2 bg-[#1e1e1e] border border-[#404040] rounded-md text-xs text-[#969696] shadow-lg">
+                    {field.description}
+                  </div>
+                </div>
+              )}
+            </label>
+          </div>
+          {renderFieldInput()}
+          {validation && (
+            <div
+              className={cn(
+                'flex items-center gap-1 text-xs',
+                validation.severity === 'error' && 'text-red-400',
+                validation.severity === 'warning' && 'text-yellow-400',
+                validation.severity === 'info' && 'text-blue-400'
+              )}
+            >
+              <AlertCircle className="w-3 h-3" />
+              {validation.message}
+            </div>
+          )}
+        </div>
+      );
+    },
+    [config, validationByField, onFieldChange]
+  );
+
   return (
-    <div className="p-4">
-      <div className="text-sm text-[#969696]">Properties form will be implemented next</div>
-      <div className="text-xs text-[#969696] mt-2">
-        Schema: {schema.title} v{schema.version}
+    <div className="h-full overflow-auto">
+      <div className="p-4 space-y-4">
+        {/* Schema Header */}
+        <div className="border-b border-[#404040] pb-3">
+          <h3 className="text-sm font-semibold text-white">{schema.title}</h3>
+          <p className="text-xs text-[#969696] mt-1">{schema.description}</p>
+          <div className="text-xs text-[#969696] mt-1">Version {schema.version}</div>
+        </div>
+
+        {/* Property Groups */}
+        {schema.groups.map(group => {
+          const isExpanded = expandedGroups.has(group.id);
+
+          return (
+            <div key={group.id} className="border border-[#404040] rounded-lg">
+              {/* Group Header */}
+              <button
+                onClick={() => onGroupToggle(group.id)}
+                className="w-full flex items-center justify-between p-3 hover:bg-[#3d3d3d] transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-white">{group.label}</span>
+                  {group.description && (
+                    <span className="text-xs text-[#969696]">({group.description})</span>
+                  )}
+                </div>
+                {isExpanded ? (
+                  <ChevronUp className="w-4 h-4 text-[#969696]" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-[#969696]" />
+                )}
+              </button>
+
+              {/* Group Content */}
+              {isExpanded && (
+                <div className="p-3 pt-0 space-y-4">
+                  {group.fields.map(field => renderPropertyField(field))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Global Validation Messages */}
+        {validationResults
+          .filter(result => !result.field)
+          .map((result, index) => (
+            <div
+              key={index}
+              className={cn(
+                'flex items-center gap-2 p-3 rounded-lg',
+                result.severity === 'error' && 'bg-red-900/20 border border-red-500/30',
+                result.severity === 'warning' && 'bg-yellow-900/20 border border-yellow-500/30',
+                result.severity === 'info' && 'bg-blue-900/20 border border-blue-500/30'
+              )}
+            >
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-sm">{result.message}</span>
+            </div>
+          ))}
       </div>
     </div>
   );
@@ -553,9 +828,9 @@ function ValidationTabContent({
 }
 
 function TemplatesTabContent({
-  schema,
-  config,
-  onApplyTemplate,
+  schema: _schema,
+  config: _config,
+  onApplyTemplate: _onApplyTemplate,
 }: Readonly<{
   schema: NodePropertySchema;
   config: Record<string, unknown>;
@@ -571,9 +846,9 @@ function TemplatesTabContent({
 }
 
 function AdvancedTabContent({
-  config,
-  onConfigChange,
-  onExport,
+  config: _config,
+  onConfigChange: _onConfigChange,
+  onExport: _onExport,
 }: Readonly<{
   config: Record<string, unknown>;
   onConfigChange: (config: Record<string, unknown>) => void;

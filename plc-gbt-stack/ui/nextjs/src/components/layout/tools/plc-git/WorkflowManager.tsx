@@ -10,10 +10,10 @@
 
 'use client';
 
-import { cn } from '@/lib/utils/cn';
-import { GitPullRequest, PlayCircle, CheckCircle, XCircle, Clock } from 'lucide-react';
-import React from 'react';
 import type { PLCProject } from '@/lib/types/plc-git';
+import { cn } from '@/lib/utils/cn';
+import { CheckCircle, Clock, GitPullRequest, PlayCircle, XCircle } from 'lucide-react';
+import React from 'react';
 
 interface WorkflowManagerProps {
   project: PLCProject;
@@ -60,7 +60,7 @@ const mockWorkflows: Workflow[] = [
   },
 ];
 
-export function WorkflowManager({ project, onRunWorkflow }: WorkflowManagerProps) {
+export function WorkflowManager({ project: _project, onRunWorkflow }: WorkflowManagerProps) {
   const getStatusIcon = (status: Workflow['status']) => {
     switch (status) {
       case 'running':

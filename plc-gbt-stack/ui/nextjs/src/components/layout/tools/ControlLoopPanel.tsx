@@ -186,7 +186,7 @@ const AdvancedSettingsModal: React.FC<AdvancedSettingsModalProps> = ({
       setAutotuneEnable(focusEntry.autotuneEnable ?? false);
       setAnalysisTime(focusEntry.analysisTime ?? 30);
     }
-  }, [focusEntry?.loopId, focusEntry?.autotuneEnable, focusEntry?.analysisTime]);
+  }, [focusEntry]);
 
   if (!isOpen || !focusEntry) return null;
 
@@ -762,7 +762,7 @@ export function ControlLoopPanel() {
       const loopParams = loopParameters[focusEntry.loopId] || mockFocusParameters;
       parameterForm.reset(loopParams);
     }
-  }, [focusEntry?.loopId, loopParameters, parameterForm]);
+  }, [focusEntry, loopParameters, parameterForm]);
 
   // ===== CONTEXT POPUP CLICK-OUTSIDE HANDLING =====
   useEffect(() => {

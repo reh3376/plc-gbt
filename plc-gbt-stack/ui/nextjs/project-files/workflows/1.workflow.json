@@ -1,0 +1,108 @@
+{
+  "id": "1",
+  "name": "Startup Sequence",
+  "description": "Automated startup sequence for distillation column",
+  "version": "1.0.0",
+  "author": "PLC-GBT",
+  "created": "2025-08-13T22:25:03.635Z",
+  "modified": "2025-08-13T22:25:03.635Z",
+  "tags": [
+    "automation",
+    "startup",
+    "distillation"
+  ],
+  "category": "automation",
+  "priority": "medium",
+  "isPublic": true,
+  "permissions": [
+    "read",
+    "write",
+    "execute"
+  ],
+  "nodes": [
+    {
+      "id": "init-1",
+      "type": "plc-input",
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "data": {
+        "label": "System Ready",
+        "description": "Check system ready status",
+        "status": "online",
+        "value": true,
+        "isDigital": true,
+        "address": "I0.0"
+      },
+      "measured": {
+        "width": 957,
+        "height": 139
+      }
+    },
+    {
+      "id": "pump-1",
+      "type": "plc-output",
+      "position": {
+        "x": 400,
+        "y": 100
+      },
+      "data": {
+        "label": "Feed Pump Start",
+        "description": "Start feed pump",
+        "status": "online",
+        "value": false,
+        "isDigital": true,
+        "address": "Q0.0"
+      },
+      "measured": {
+        "width": 957,
+        "height": 139
+      }
+    },
+    {
+      "id": "temp-1",
+      "type": "pid-controller",
+      "position": {
+        "x": 250,
+        "y": 250
+      },
+      "data": {
+        "label": "Column Temperature",
+        "description": "Control column temperature",
+        "status": "active",
+        "kp": 2.5,
+        "ki": 0.5,
+        "kd": 0.1,
+        "setpoint": 85,
+        "processValue": 82
+      },
+      "measured": {
+        "width": 957,
+        "height": 139
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "init-1",
+      "target": "pump-1",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "id": "e2",
+      "source": "pump-1",
+      "target": "temp-1",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    }
+  ],
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "variables": {}
+}

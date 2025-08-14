@@ -1,68 +1,78 @@
-'use client'
+'use client';
 
-import React, { useState, memo } from 'react'
-import { Handle, Position, NodeProps } from '@xyflow/react'
+import { IndustrialNodeData } from '@/lib/stores/workflow-store';
+import { cn } from '@/lib/utils/cn';
+import { Handle, NodeProps, Position } from '@xyflow/react';
 import {
-  Zap,
   Activity,
+  AlertTriangle,
+  Cpu,
+  Database,
   Gauge,
   Monitor,
-  Database,
-  AlertTriangle,
   Network,
-  Server,
-  Cpu,
-  Wifi,
   Play,
-  Square,
+  RotateCw,
+  Server,
   Settings,
-  RotateCw
-} from 'lucide-react'
-import { cn } from '@/lib/utils/cn'
-import { IndustrialNodeData } from '@/lib/stores/workflow-store'
+  Square,
+  Wifi,
+  Zap,
+} from 'lucide-react';
+import React, { memo, useState } from 'react';
 
 // Base Industrial Node Component
 interface BaseNodeProps extends NodeProps {
-  data: IndustrialNodeData
-  icon: React.ComponentType<{ className?: string }>
-  color: string
-  handles?: {
-    inputs?: number
-    outputs?: number
-  }
+  readonly data: IndustrialNodeData;
+  readonly icon: React.ComponentType<{ className?: string }>;
+  readonly color: string;
+  readonly handles?: {
+    inputs?: number;
+    outputs?: number;
+  };
 }
 
-function BaseIndustrialNode({ 
-  data, 
-  selected, 
+function BaseIndustrialNode({
+  data,
+  selected,
   icon: Icon,
   color,
-  handles = { inputs: 1, outputs: 1 }
+  handles = { inputs: 1, outputs: 1 },
 }: BaseNodeProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const getStatusColor = (status: IndustrialNodeData['status']) => {
     switch (status) {
-      case 'online': return 'bg-green-500'
-      case 'offline': return 'bg-gray-500'
-      case 'error': return 'bg-red-500'
-      case 'configuring': return 'bg-yellow-500'
-      default: return 'bg-gray-500'
+      case 'online':
+        return 'bg-green-500';
+      case 'offline':
+        return 'bg-gray-500';
+      case 'error':
+        return 'bg-red-500';
+      case 'configuring':
+        return 'bg-yellow-500';
+      default:
+        return 'bg-gray-500';
     }
-  }
+  };
 
   const getStatusText = (status: IndustrialNodeData['status']) => {
     switch (status) {
-      case 'online': return 'Online'
-      case 'offline': return 'Offline'
-      case 'error': return 'Error'
-      case 'configuring': return 'Config'
-      default: return 'Unknown'
+      case 'online':
+        return 'Online';
+      case 'offline':
+        return 'Offline';
+      case 'error':
+        return 'Error';
+      case 'configuring':
+        return 'Config';
+      default:
+        return 'Unknown';
     }
-  }
+  };
 
   return (
-    <div 
+    <div
       className={cn(
         'bg-[#2d2d2d] border rounded-lg shadow-lg min-w-[160px]',
         selected ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-[#404040]',
@@ -76,17 +86,17 @@ function BaseIndustrialNode({
           type="target"
           position={Position.Left}
           id={`input-${i}`}
-          style={{ 
+          style={{
             top: `${((i + 1) * 100) / (handles.inputs! + 1)}%`,
             background: color,
-            border: '2px solid #fff'
+            border: '2px solid #fff',
           }}
           className="w-3 h-3"
         />
       ))}
 
       {/* Node Header */}
-      <div 
+      <div
         className={cn(
           'drag-handle flex items-center justify-between p-3 cursor-move',
           'border-b border-[#404040]'
@@ -95,17 +105,12 @@ function BaseIndustrialNode({
       >
         <div className="flex items-center space-x-2">
           <Icon className="w-5 h-5 text-white" />
-          <span className="text-sm font-medium text-white truncate">
-            {data.label}
-          </span>
+          <span className="text-sm font-medium text-white truncate">{data.label}</span>
         </div>
-        
+
         <div className="flex items-center space-x-2">
-          <div 
-            className={cn(
-              'w-2 h-2 rounded-full',
-              getStatusColor(data.status)
-            )}
+          <div
+            className={cn('w-2 h-2 rounded-full', getStatusColor(data.status))}
             title={getStatusText(data.status)}
           />
           <button
@@ -122,11 +127,9 @@ function BaseIndustrialNode({
         <div className="text-xs text-gray-400 mb-1">
           Status: <span className="text-white">{getStatusText(data.status)}</span>
         </div>
-        
+
         {data.description && (
-          <div className="text-xs text-gray-400 mb-2 line-clamp-2">
-            {data.description}
-          </div>
+          <div className="text-xs text-gray-400 mb-2 line-clamp-2">{data.description}</div>
         )}
 
         {/* Expanded Configuration */}
@@ -137,22 +140,18 @@ function BaseIndustrialNode({
                 <span className="text-gray-400">Tags: </span>
                 <span className="text-white">{data.tags.join(', ')}</span>
               </div>
-              
+
               {data.lastUpdate && (
                 <div className="text-xs">
                   <span className="text-gray-400">Updated: </span>
-                  <span className="text-white">
-                    {data.lastUpdate.toLocaleTimeString()}
-                  </span>
+                  <span className="text-white">{data.lastUpdate.toLocaleTimeString()}</span>
                 </div>
               )}
 
               {Object.keys(data.config).length > 0 && (
                 <div className="text-xs">
                   <span className="text-gray-400">Config: </span>
-                  <span className="text-white">
-                    {Object.keys(data.config).length} parameters
-                  </span>
+                  <span className="text-white">{Object.keys(data.config).length} parameters</span>
                 </div>
               )}
             </div>
@@ -167,28 +166,23 @@ function BaseIndustrialNode({
           type="source"
           position={Position.Right}
           id={`output-${i}`}
-          style={{ 
+          style={{
             top: `${((i + 1) * 100) / (handles.outputs! + 1)}%`,
             background: color,
-            border: '2px solid #fff'
+            border: '2px solid #fff',
           }}
           className="w-3 h-3"
         />
       ))}
     </div>
-  )
+  );
 }
 
 // PLC Input Node
 export const PLCInputNode = memo((props: NodeProps & { data: IndustrialNodeData }) => (
-  <BaseIndustrialNode
-    {...props}
-    icon={Zap}
-    color="#10B981"
-    handles={{ inputs: 0, outputs: 2 }}
-  />
-))
-PLCInputNode.displayName = 'PLCInputNode'
+  <BaseIndustrialNode {...props} icon={Zap} color="#10B981" handles={{ inputs: 0, outputs: 2 }} />
+));
+PLCInputNode.displayName = 'PLCInputNode';
 
 // PLC Output Node
 export const PLCOutputNode = memo((props: NodeProps & { data: IndustrialNodeData }) => (
@@ -198,15 +192,15 @@ export const PLCOutputNode = memo((props: NodeProps & { data: IndustrialNodeData
     color="#EF4444"
     handles={{ inputs: 2, outputs: 0 }}
   />
-))
-PLCOutputNode.displayName = 'PLCOutputNode'
+));
+PLCOutputNode.displayName = 'PLCOutputNode';
 
 // PID Controller Node
 export const PIDControllerNode = memo((props: NodeProps & { data: IndustrialNodeData }) => {
-  const [showTuning, setShowTuning] = useState(false)
+  const [showTuning, setShowTuning] = useState(false);
 
   return (
-    <div 
+    <div
       className={cn(
         'bg-[#2d2d2d] border rounded-lg shadow-lg min-w-[180px]',
         props.selected ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-[#404040]'
@@ -232,9 +226,7 @@ export const PIDControllerNode = memo((props: NodeProps & { data: IndustrialNode
       <div className="drag-handle flex items-center justify-between p-3 border-b border-[#404040] bg-gradient-to-r from-purple-900/20 to-blue-900/20">
         <div className="flex items-center space-x-2">
           <RotateCw className="w-5 h-5 text-purple-400" />
-          <span className="text-sm font-medium text-white">
-            {props.data.label}
-          </span>
+          <span className="text-sm font-medium text-white">{props.data.label}</span>
         </div>
         <button
           onClick={() => setShowTuning(!showTuning)}
@@ -250,19 +242,19 @@ export const PIDControllerNode = memo((props: NodeProps & { data: IndustrialNode
           <div className="text-center">
             <div className="text-gray-400">P</div>
             <div className="text-white font-mono">
-              {String(props.data.config.kp) || '1.0'}
+              {props.data.config?.kp?.toString() ?? props.data.kp?.toString() ?? '1.0'}
             </div>
           </div>
           <div className="text-center">
             <div className="text-gray-400">I</div>
             <div className="text-white font-mono">
-              {String(props.data.config.ki) || '0.1'}
+              {props.data.config?.ki?.toString() ?? props.data.ki?.toString() ?? '0.1'}
             </div>
           </div>
           <div className="text-center">
             <div className="text-gray-400">D</div>
             <div className="text-white font-mono">
-              {String(props.data.config.kd) || '0.01'}
+              {props.data.config?.kd?.toString() ?? props.data.kd?.toString() ?? '0.01'}
             </div>
           </div>
         </div>
@@ -272,15 +264,23 @@ export const PIDControllerNode = memo((props: NodeProps & { data: IndustrialNode
             <div className="text-xs space-y-1">
               <div className="flex justify-between">
                 <span className="text-gray-400">Setpoint:</span>
-                <span className="text-white">{String(props.data.config.setpoint) || '0'}</span>
+                <span className="text-white">
+                  {props.data.config?.setpoint?.toString() ??
+                    props.data.setpoint?.toString() ??
+                    '0'}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Output:</span>
-                <span className="text-white">{String(props.data.config.output) || '0'}%</span>
+                <span className="text-white">
+                  {props.data.config?.output?.toString() ?? props.data.output?.toString() ?? '0'}%
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Error:</span>
-                <span className="text-white">{String(props.data.config.error) || '0'}</span>
+                <span className="text-white">
+                  {props.data.config?.error?.toString() ?? props.data.error?.toString() ?? '0'}
+                </span>
               </div>
             </div>
           </div>
@@ -296,9 +296,9 @@ export const PIDControllerNode = memo((props: NodeProps & { data: IndustrialNode
         className="w-3 h-3"
       />
     </div>
-  )
-})
-PIDControllerNode.displayName = 'PIDControllerNode'
+  );
+});
+PIDControllerNode.displayName = 'PIDControllerNode';
 
 // HMI Display Node
 export const HMIDisplayNode = memo((props: NodeProps & { data: IndustrialNodeData }) => (
@@ -308,8 +308,8 @@ export const HMIDisplayNode = memo((props: NodeProps & { data: IndustrialNodeDat
     color="#8B5CF6"
     handles={{ inputs: 3, outputs: 1 }}
   />
-))
-HMIDisplayNode.displayName = 'HMIDisplayNode'
+));
+HMIDisplayNode.displayName = 'HMIDisplayNode';
 
 // Data Logger Node
 export const DataLoggerNode = memo((props: NodeProps & { data: IndustrialNodeData }) => (
@@ -319,8 +319,8 @@ export const DataLoggerNode = memo((props: NodeProps & { data: IndustrialNodeDat
     color="#06B6D4"
     handles={{ inputs: 4, outputs: 1 }}
   />
-))
-DataLoggerNode.displayName = 'DataLoggerNode'
+));
+DataLoggerNode.displayName = 'DataLoggerNode';
 
 // Alarm Handler Node
 export const AlarmHandlerNode = memo((props: NodeProps & { data: IndustrialNodeData }) => (
@@ -330,8 +330,8 @@ export const AlarmHandlerNode = memo((props: NodeProps & { data: IndustrialNodeD
     color="#F59E0B"
     handles={{ inputs: 2, outputs: 2 }}
   />
-))
-AlarmHandlerNode.displayName = 'AlarmHandlerNode'
+));
+AlarmHandlerNode.displayName = 'AlarmHandlerNode';
 
 // Modbus Client Node
 export const ModbusClientNode = memo((props: NodeProps & { data: IndustrialNodeData }) => (
@@ -341,8 +341,8 @@ export const ModbusClientNode = memo((props: NodeProps & { data: IndustrialNodeD
     color="#EC4899"
     handles={{ inputs: 1, outputs: 3 }}
   />
-))
-ModbusClientNode.displayName = 'ModbusClientNode'
+));
+ModbusClientNode.displayName = 'ModbusClientNode';
 
 // OPC Server Node
 export const OPCServerNode = memo((props: NodeProps & { data: IndustrialNodeData }) => (
@@ -352,15 +352,15 @@ export const OPCServerNode = memo((props: NodeProps & { data: IndustrialNodeData
     color="#84CC16"
     handles={{ inputs: 3, outputs: 1 }}
   />
-))
-OPCServerNode.displayName = 'OPCServerNode'
+));
+OPCServerNode.displayName = 'OPCServerNode';
 
 // Custom Logic Node
 export const CustomLogicNode = memo((props: NodeProps & { data: IndustrialNodeData }) => {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <div 
+    <div
       className={cn(
         'bg-[#2d2d2d] border rounded-lg shadow-lg min-w-[200px]',
         props.selected ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-[#404040]'
@@ -386,9 +386,7 @@ export const CustomLogicNode = memo((props: NodeProps & { data: IndustrialNodeDa
       <div className="drag-handle flex items-center justify-between p-3 border-b border-[#404040] bg-gradient-to-r from-orange-900/20 to-red-900/20">
         <div className="flex items-center space-x-2">
           <Cpu className="w-5 h-5 text-orange-400" />
-          <span className="text-sm font-medium text-white">
-            {props.data.label}
-          </span>
+          <span className="text-sm font-medium text-white">{props.data.label}</span>
         </div>
         <button
           onClick={() => setIsEditing(!isEditing)}
@@ -400,18 +398,17 @@ export const CustomLogicNode = memo((props: NodeProps & { data: IndustrialNodeDa
 
       {/* Content */}
       <div className="p-3">
-        <div className="text-xs text-gray-400 mb-2">
-          Logic Function
-        </div>
-        
+        <div className="text-xs text-gray-400 mb-2">Logic Function</div>
+
         {isEditing ? (
           <textarea
             className="w-full h-20 text-xs bg-[#1e1e1e] text-white border border-[#404040] rounded p-2 font-mono"
             placeholder="// Enter custom logic here..."
             value={String(props.data.config.logic) || ''}
-            onChange={(e) => {
-              // TODO: Update node config
-              console.log('Logic updated:', e.target.value)
+            onChange={e => {
+              // Logic update would be handled by the parent workflow canvas
+              // through React Flow's onNodesChange callback
+              console.log('Logic updated:', e.target.value);
             }}
           />
         ) : (
@@ -424,9 +421,7 @@ export const CustomLogicNode = memo((props: NodeProps & { data: IndustrialNodeDa
           <span className="text-gray-400">
             Runtime: {String(props.data.config.runtime) || '0ms'}
           </span>
-          <span className="text-gray-400">
-            Cycles: {String(props.data.config.cycles) || '0'}
-          </span>
+          <span className="text-gray-400">Cycles: {String(props.data.config.cycles) || '0'}</span>
         </div>
       </div>
 
@@ -446,16 +441,16 @@ export const CustomLogicNode = memo((props: NodeProps & { data: IndustrialNodeDa
         className="w-3 h-3"
       />
     </div>
-  )
-})
-CustomLogicNode.displayName = 'CustomLogicNode'
+  );
+});
+CustomLogicNode.displayName = 'CustomLogicNode';
 
 // N8N Workflow Node
 export const N8NWorkflowNode = memo((props: NodeProps & { data: IndustrialNodeData }) => {
-  const [isConnected] = useState(false)
+  const [isConnected] = useState(false);
 
   return (
-    <div 
+    <div
       className={cn(
         'bg-[#2d2d2d] border rounded-lg shadow-lg min-w-[180px]',
         props.selected ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-[#404040]'
@@ -474,14 +469,9 @@ export const N8NWorkflowNode = memo((props: NodeProps & { data: IndustrialNodeDa
       <div className="drag-handle flex items-center justify-between p-3 border-b border-[#404040] bg-gradient-to-r from-purple-900/20 to-pink-900/20">
         <div className="flex items-center space-x-2">
           <Wifi className="w-5 h-5 text-purple-400" />
-          <span className="text-sm font-medium text-white">
-            {props.data.label}
-          </span>
+          <span className="text-sm font-medium text-white">{props.data.label}</span>
         </div>
-        <div className={cn(
-          'w-2 h-2 rounded-full',
-          isConnected ? 'bg-green-500' : 'bg-gray-500'
-        )} />
+        <div className={cn('w-2 h-2 rounded-full', isConnected ? 'bg-green-500' : 'bg-gray-500')} />
       </div>
 
       {/* Content */}
@@ -493,12 +483,10 @@ export const N8NWorkflowNode = memo((props: NodeProps & { data: IndustrialNodeDa
               {String(props.data.config.workflowId) || 'N/A'}
             </span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-400">Executions:</span>
-            <span className="text-white">
-              {String(props.data.config.executions) || '0'}
-            </span>
+            <span className="text-white">{String(props.data.config.executions) || '0'}</span>
           </div>
 
           <div className="flex justify-between">
@@ -510,15 +498,15 @@ export const N8NWorkflowNode = memo((props: NodeProps & { data: IndustrialNodeDa
         </div>
 
         <div className="mt-3 flex space-x-2">
-          <button 
+          <button
             className="flex-1 bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs flex items-center justify-center space-x-1"
             onClick={() => console.log('Start N8N workflow')}
           >
             <Play className="w-3 h-3" />
             <span>Start</span>
           </button>
-          
-          <button 
+
+          <button
             className="flex-1 bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs flex items-center justify-center space-x-1"
             onClick={() => console.log('Stop N8N workflow')}
           >
@@ -537,9 +525,9 @@ export const N8NWorkflowNode = memo((props: NodeProps & { data: IndustrialNodeDa
         className="w-3 h-3"
       />
     </div>
-  )
-})
-N8NWorkflowNode.displayName = 'N8NWorkflowNode'
+  );
+});
+N8NWorkflowNode.displayName = 'N8NWorkflowNode';
 
 // Export all node types for React Flow
 export const industrialNodeTypes = {
@@ -553,4 +541,4 @@ export const industrialNodeTypes = {
   'opc-server': OPCServerNode,
   'custom-logic': CustomLogicNode,
   'n8n-workflow': N8NWorkflowNode,
-} 
+};

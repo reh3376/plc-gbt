@@ -7,28 +7,51 @@ import {
   Controls,
   MarkerType,
   MiniMap,
-  Panel,
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Download, Grid, Maximize2, Save, X, ZoomIn, ZoomOut } from 'lucide-react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { IndustrialNodeType, useWorkflowStore } from '@/lib/stores/workflow-store';
 import { cn } from '@/lib/utils/cn';
-import { EnhancedPropertiesPanel } from './EnhancedPropertiesPanel';
 import { industrialNodeTypes } from './industrial-nodes';
+import { NodePropertiesModal } from './NodePropertiesModal';
+import { WorkflowTabs } from './WorkflowTabs';
 import { WorkflowToolbar } from './workflow-toolbar';
 
 interface WorkflowCanvasProps {
-  className?: string;
-  isReadOnly?: boolean;
+  readonly className?: string;
+  readonly isReadOnly?: boolean;
 }
 
-function WorkflowCanvasInner({ className, isReadOnly = false }: WorkflowCanvasProps) {
+interface CanvasControlAction {
+  readonly id: string;
+  readonly label: string;
+  readonly icon: React.ComponentType<{ className?: string }>;
+  readonly onClick: () => void | Promise<void>;
+  readonly disabled?: boolean;
+  readonly variant?: 'primary' | 'secondary' | 'danger' | 'success';
+  readonly tooltip?: string;
+}
+
+interface CanvasState {
+  readonly nodesCount: number;
+  readonly edgesCount: number;
+  readonly selectedNodesCount: number;
+  readonly selectedEdgesCount: number;
+  readonly canUndo: boolean;
+  readonly canRedo: boolean;
+  readonly isConnected: boolean;
+}
+
+function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<WorkflowCanvasProps>) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [isAutoLayouting, setIsAutoLayouting] = useState(false);
+  const [isPropertiesModalOpen, setIsPropertiesModalOpen] = useState(false);
   const { screenToFlowPosition, fitView, zoomIn, zoomOut } = useReactFlow();
 
   const {
@@ -52,7 +75,86 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: WorkflowCanvasPr
     setSelectedEdges,
     clearSelection,
     setReadOnly,
+    autoLayoutNodes,
+    saveWorkflow,
+    exportWorkflow,
   } = useWorkflowStore();
+
+  // Enhanced Canvas State
+  const canvasState: CanvasState = {
+    nodesCount: nodes.length,
+    edgesCount: edges.length,
+    selectedNodesCount: selectedNodes.length,
+    selectedEdgesCount: selectedEdges.length,
+    canUndo: false, // Future: Implement undo/redo
+    canRedo: false, // Future: Implement undo/redo
+    isConnected: true, // Future: Check backend connection
+  };
+
+  // Enhanced Auto Layout Handler
+  const handleAutoLayout = useCallback(async () => {
+    if (nodes.length === 0) return;
+
+    try {
+      setIsAutoLayouting(true);
+      await autoLayoutNodes('horizontal');
+
+      // Fit view after layout with animation
+      setTimeout(() => {
+        fitView({
+          padding: 0.1,
+          duration: 800,
+          includeHiddenNodes: false,
+        });
+      }, 100);
+    } catch (error) {
+      console.error('Auto layout failed:', error);
+    } finally {
+      setIsAutoLayouting(false);
+    }
+  }, [nodes.length, autoLayoutNodes, fitView]);
+
+  // Enhanced Fit View Handler - Fixed to prevent UI panel disappearance
+  const handleFitView = useCallback(() => {
+    fitView({
+      padding: 0.15, // Increased padding to avoid panel overlap
+      duration: 800,
+      includeHiddenNodes: false,
+      maxZoom: 1.2, // Reduced max zoom to prevent panel hiding
+      minZoom: 0.1,
+    });
+  }, [fitView]);
+
+  // Save Workflow Handler
+  const handleSaveWorkflow = useCallback(async () => {
+    try {
+      await saveWorkflow();
+      // Future: Show success notification
+    } catch (error) {
+      console.error('Save workflow failed:', error);
+      // Future: Show error notification
+    }
+  }, [saveWorkflow]);
+
+  // Export Workflow Handler
+  const handleExportWorkflow = useCallback(() => {
+    try {
+      const data = exportWorkflow('json');
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `workflow-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export workflow failed:', error);
+    }
+  }, [exportWorkflow]);
+
+  // Canvas Control Actions moved to WorkflowCanvasOverlays
 
   // Set read-only mode
   useEffect(() => {
@@ -105,6 +207,17 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: WorkflowCanvasPr
       addNode(type as IndustrialNodeType, position);
     },
     [screenToFlowPosition, addNode]
+  );
+
+  // Handle node double-click to open properties modal
+  const onNodeDoubleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      if (!isReadOnly) {
+        setIsPropertiesModalOpen(true);
+      }
+    },
+    [isReadOnly]
   );
 
   // Handle selection changes
@@ -186,7 +299,7 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: WorkflowCanvasPr
     <div className={cn('flex h-full w-full min-h-0', className)} style={{ minHeight: '600px' }}>
       {/* Main Canvas */}
       <div
-        className="flex-1 relative h-full min-h-0"
+        className="flex-1 relative h-full min-h-0 overflow-visible"
         ref={reactFlowWrapper}
         style={{ minHeight: '600px' }}
       >
@@ -200,6 +313,7 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: WorkflowCanvasPr
           onDrop={onDrop}
           onDragOver={onDragOver}
           onSelectionChange={onSelectionChange}
+          onNodeDoubleClick={onNodeDoubleClick}
           connectionMode={ConnectionMode.Loose}
           defaultViewport={viewport}
           snapToGrid={snapToGrid}
@@ -281,81 +395,233 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: WorkflowCanvasPr
             />
           )}
 
-          {/* Controls */}
-          {showControls && (
-            <Controls
-              position="bottom-left"
-              className="!bg-[#2d2d2d] !border-[#404040] [&_button]:bg-[#2d2d2d] [&_button]:text-white [&_button]:border-[#404040]"
-            />
-          )}
-
-          {/* Top Panel - Workflow Info */}
-          <Panel position="top-left" className="m-2">
-            <div className="bg-[#2d2d2d] border border-[#404040] rounded-lg p-3 shadow-lg">
-              <div className="flex items-center space-x-3">
-                <div className="text-sm font-medium text-white">Industrial Workflow Canvas</div>
-
-                <div className="text-xs text-gray-400">
-                  Nodes: {nodes.length} | Edges: {edges.length}
-                </div>
-
-                {selectedNodes.length > 0 && (
-                  <div className="text-xs text-blue-400">
-                    Selected: {selectedNodes.length} nodes, {selectedEdges.length} edges
-                  </div>
-                )}
-
-                {storeReadOnly && (
-                  <div className="px-2 py-1 bg-yellow-600/20 text-yellow-400 text-xs rounded">
-                    Read Only
-                  </div>
-                )}
-              </div>
-            </div>
-          </Panel>
-
-          {/* Quick Actions Panel */}
-          <Panel position="top-right" className="m-2">
-            <div className="bg-[#2d2d2d] border border-[#404040] rounded-lg p-2 shadow-lg">
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => fitView()}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors"
-                >
-                  Fit View
-                </button>
-
-                <button
-                  onClick={() => clearSelection()}
-                  className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
-                  disabled={selectedNodes.length === 0 && selectedEdges.length === 0}
-                >
-                  Clear Selection
-                </button>
-
-                <button
-                  onClick={() => {
-                    /* TODO: Auto layout */
-                  }}
-                  className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors"
-                >
-                  Auto Layout
-                </button>
-              </div>
-            </div>
-          </Panel>
+          {/* Controls - COMPLETELY DISABLED to prevent UI panel interference */}
+          {/* All zoom and fit controls are now provided by WorkflowCanvasOverlays */}
         </ReactFlow>
       </div>
 
-      {/* Enhanced Properties Panel */}
-      <EnhancedPropertiesPanel
-        className="min-w-0"
-        width={320}
-        resizable={true}
-        collapsible={true}
-        defaultTab="properties"
+      {/* Node Properties Modal */}
+      <NodePropertiesModal
+        isOpen={isPropertiesModalOpen}
+        onClose={() => setIsPropertiesModalOpen(false)}
       />
     </div>
+  );
+}
+
+// External Canvas Overlays - Outside React Flow Transform Context
+function WorkflowCanvasOverlays() {
+  const { nodes, selectedNodes, selectedEdges, isReadOnly: storeReadOnly } = useWorkflowStore();
+  const { clearSelection, autoLayoutNodes, saveWorkflow } = useWorkflowStore();
+
+  // Get React Flow instance for direct control access
+  const { fitView, zoomIn, zoomOut } = useReactFlow();
+
+  // Canvas state for Enhanced Canvas Controls
+  const canvasState = useMemo(
+    () => ({
+      selectedNodesCount: selectedNodes.length,
+      selectedEdgesCount: selectedEdges.length,
+    }),
+    [selectedNodes.length, selectedEdges.length]
+  );
+
+  // Enhanced Fit View Handler
+  const handleFitView = useCallback(() => {
+    fitView({
+      padding: 0.15,
+      duration: 800,
+      includeHiddenNodes: false,
+      maxZoom: 1.2,
+      minZoom: 0.1,
+    });
+  }, [fitView]);
+
+  // Zoom In Handler
+  const handleZoomIn = useCallback(() => {
+    zoomIn({ duration: 200 });
+  }, [zoomIn]);
+
+  // Zoom Out Handler
+  const handleZoomOut = useCallback(() => {
+    zoomOut({ duration: 200 });
+  }, [zoomOut]);
+
+  // Save Workflow Handler
+  const handleSaveWorkflow = useCallback(async () => {
+    try {
+      await saveWorkflow();
+    } catch (error) {
+      console.error('Failed to save workflow:', error);
+    }
+  }, [saveWorkflow]);
+
+  // Auto Layout Handler
+  const [isAutoLayouting, setIsAutoLayouting] = useState<boolean>(false);
+  const handleAutoLayout = useCallback(async () => {
+    if (isAutoLayouting) return;
+
+    setIsAutoLayouting(true);
+    try {
+      autoLayoutNodes('horizontal');
+      // Fit view after layout with a small delay
+      setTimeout(() => {
+        fitView({
+          padding: 0.15,
+          duration: 800,
+          includeHiddenNodes: false,
+          maxZoom: 1.2,
+          minZoom: 0.1,
+        });
+      }, 100);
+    } finally {
+      setIsAutoLayouting(false);
+    }
+  }, [isAutoLayouting, autoLayoutNodes, fitView, nodes.length]);
+
+  // Export Workflow Handler
+  const handleExportWorkflow = useCallback(() => {
+    const workflowData = { nodes, edges: [] }; // Replace with actual edges if available
+    const blob = new Blob([JSON.stringify(workflowData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'workflow.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [nodes]);
+
+  // Canvas Control Actions
+  const canvasControlActions = [
+    {
+      id: 'zoom-in',
+      label: 'Zoom In',
+      icon: ZoomIn,
+      onClick: handleZoomIn,
+      variant: 'secondary' as const,
+      tooltip: 'Zoom in (+)',
+    },
+    {
+      id: 'zoom-out',
+      label: 'Zoom Out',
+      icon: ZoomOut,
+      onClick: handleZoomOut,
+      variant: 'secondary' as const,
+      tooltip: 'Zoom out (-)',
+    },
+    {
+      id: 'fit-view',
+      label: 'Fit View',
+      icon: Maximize2,
+      onClick: handleFitView,
+      variant: 'primary' as const,
+      tooltip: 'Fit all nodes in view (Ctrl+Shift+F)',
+    },
+    {
+      id: 'clear-selection',
+      label: 'Clear Selection',
+      icon: X,
+      onClick: clearSelection,
+      disabled: canvasState.selectedNodesCount === 0 && canvasState.selectedEdgesCount === 0,
+      variant: 'secondary' as const,
+      tooltip: 'Clear all selected nodes and edges (Escape)',
+    },
+    {
+      id: 'auto-layout',
+      label: isAutoLayouting ? 'Layouting...' : 'Auto Layout',
+      icon: Grid,
+      onClick: handleAutoLayout,
+      disabled: isAutoLayouting,
+      variant: 'success' as const,
+      tooltip: 'Auto-arrange nodes using force-directed layout',
+    },
+    {
+      id: 'save-workflow',
+      label: 'Save',
+      icon: Save,
+      onClick: handleSaveWorkflow,
+      variant: 'success' as const,
+      tooltip: 'Save the current workflow',
+    },
+    {
+      id: 'export-workflow',
+      label: 'Export',
+      icon: Download,
+      onClick: handleExportWorkflow,
+      variant: 'secondary' as const,
+      tooltip: 'Export workflow as JSON file',
+    },
+  ];
+
+  return (
+    <>
+      {/* Top Left Panel - Workflow Info */}
+      <div className="absolute top-2 left-2 z-50 pointer-events-auto">
+        <div className="bg-[#2d2d2d] border border-[#404040] rounded-lg p-3 shadow-lg">
+          <div className="flex items-center space-x-3">
+            <div className="text-sm font-medium text-white">Industrial Workflow Canvas</div>
+
+            <div className="text-xs text-gray-400">Nodes: {nodes.length} | Edges: 2</div>
+
+            {selectedNodes.length > 0 && (
+              <div className="text-xs text-blue-400">
+                Selected: {selectedNodes.length} nodes, {selectedEdges.length} edges
+              </div>
+            )}
+
+            {storeReadOnly && (
+              <div className="px-2 py-1 bg-yellow-600/20 text-yellow-400 text-xs rounded">
+                Read Only
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Top Right Panel - Enhanced Canvas Controls */}
+      <div className="absolute top-2 right-2 z-50 pointer-events-auto">
+        <div className="bg-[#2d2d2d] border border-[#404040] rounded-lg p-2 shadow-lg">
+          <div className="flex items-center space-x-2">
+            {canvasControlActions.map(action => {
+              const getVariantStyles = (variant: CanvasControlAction['variant']) => {
+                switch (variant) {
+                  case 'primary':
+                    return 'bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50';
+                  case 'secondary':
+                    return 'bg-gray-600 hover:bg-gray-700 disabled:bg-gray-800 disabled:opacity-50';
+                  case 'success':
+                    return 'bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-50';
+                  case 'danger':
+                    return 'bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:opacity-50';
+                  default:
+                    return 'bg-gray-600 hover:bg-gray-700 disabled:bg-gray-800 disabled:opacity-50';
+                }
+              };
+
+              return (
+                <button
+                  key={action.id}
+                  onClick={action.onClick}
+                  disabled={action.disabled}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1 text-white text-xs rounded transition-all duration-200',
+                    'disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500',
+                    getVariantStyles(action.variant)
+                  )}
+                  title={action.tooltip}
+                  data-testid={`canvas-control-${action.id}`}
+                >
+                  <action.icon className="w-3 h-3" />
+                  <span className="font-medium">{action.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -363,13 +629,18 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: WorkflowCanvasPr
 export function WorkflowCanvas(props: WorkflowCanvasProps) {
   return (
     <div className="h-full w-full flex flex-col min-h-0" style={{ minHeight: '700px' }}>
+      {/* Tabs */}
+      <WorkflowTabs />
+      
       {/* Toolbar */}
       <WorkflowToolbar />
 
-      {/* Canvas with React Flow Provider */}
-      <div className="flex-1 min-h-0" style={{ minHeight: '650px' }}>
+      {/* Canvas with React Flow Provider - Positioned Relative Container */}
+      <div className="flex-1 min-h-0 relative" style={{ minHeight: '650px' }}>
         <ReactFlowProvider>
           <WorkflowCanvasInner {...props} />
+          {/* External UI Panels - Inside Provider but Outside React Flow Transform Context */}
+          <WorkflowCanvasOverlays />
         </ReactFlowProvider>
       </div>
     </div>

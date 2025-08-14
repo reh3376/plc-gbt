@@ -1,0 +1,89 @@
+{
+  "id": "2",
+  "name": "Emergency Shutdown",
+  "description": "Emergency shutdown protocol for all systems",
+  "version": "1.0.0",
+  "author": "PLC-GBT",
+  "created": "2024-01-15T10:00:00Z",
+  "modified": "2024-01-15T10:00:00Z",
+  "tags": ["emergency", "safety", "shutdown"],
+  "category": "control",
+  "nodes": [
+    {
+      "id": "alarm-1",
+      "type": "alarm-handler",
+      "position": { "x": 100, "y": 150 },
+      "data": {
+        "label": "Emergency Stop",
+        "description": "Emergency stop button triggered",
+        "status": "critical",
+        "value": false,
+        "alarmType": "critical",
+        "requiresAck": true
+      }
+    },
+    {
+      "id": "shutdown-1",
+      "type": "plc-output",
+      "position": { "x": 400, "y": 150 },
+      "data": {
+        "label": "Main Shutdown",
+        "description": "Shutdown all systems",
+        "status": "offline",
+        "value": false,
+        "isDigital": true,
+        "address": "Q10.0"
+      }
+    },
+    {
+      "id": "pump-stop-1",
+      "type": "plc-output",
+      "position": { "x": 400, "y": 250 },
+      "data": {
+        "label": "Stop All Pumps",
+        "description": "Emergency stop all pumps",
+        "status": "offline",
+        "value": false,
+        "isDigital": true,
+        "address": "Q10.1"
+      }
+    },
+    {
+      "id": "valve-close-1",
+      "type": "plc-output",
+      "position": { "x": 400, "y": 350 },
+      "data": {
+        "label": "Close All Valves",
+        "description": "Emergency close all valves",
+        "status": "offline",
+        "value": false,
+        "isDigital": true,
+        "address": "Q10.2"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "alarm-1",
+      "target": "shutdown-1",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "id": "e2",
+      "source": "alarm-1",
+      "target": "pump-stop-1",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "id": "e3",
+      "source": "alarm-1",
+      "target": "valve-close-1",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    }
+  ],
+  "viewport": { "x": 0, "y": 0, "zoom": 1 }
+}
