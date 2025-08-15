@@ -308,9 +308,20 @@ if (!isValid) {
 
 #### **🚀 Playwright MCP Server Integration**
 
+**⚠️ CRITICAL FOR ALL BROWSER AUTOMATION**: When using Playwright MCP, always use the correct Docker networking address:
+
+- **✅ CORRECT**: `host.docker.internal:3000` (for Docker environments)
+- **❌ INCORRECT**: `localhost:3000` (will fail in Docker containers)
+
 ```typescript
 // ✅ MANDATORY: Use MCP_Docker Playwright server for automated testing
 import { useMCPPlaywrightServer } from '@/lib/mcp-docker-client'
+
+// ✅ CORRECT: Use Docker networking address for browser navigation
+await mcpPlaywright.browser_navigate('http://host.docker.internal:3000')
+
+// ❌ WRONG: localhost will fail in Docker environments
+await mcpPlaywright.browser_navigate('http://localhost:3000')
 
 interface AutomatedUITestSuite {
   componentTests: PlaywrightComponentTest[]
@@ -327,7 +338,7 @@ async function executeAutomatedUITestSuite(
   const mcpPlaywright = await useMCPPlaywrightServer()
   
   // 1. Initialize test environment
-  await mcpPlaywright.browser_navigate(implementation.testUrl)
+  await mcpPlaywright.browser_navigate('http://host.docker.internal:3000')
   
   // 2. Execute component interaction tests
   const componentResults = await runComponentTests(mcpPlaywright, implementation)

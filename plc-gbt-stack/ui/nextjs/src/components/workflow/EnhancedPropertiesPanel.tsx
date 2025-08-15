@@ -790,11 +790,11 @@ function PropertiesTabContent({
 }
 
 function ConnectionsTabContent({
-  schema,
-  config,
-  testResults,
-  isLoading,
-  onTestConnection,
+  schema: _schema,
+  config: _config,
+  testResults: _testResults,
+  isLoading: _isLoading,
+  onTestConnection: _onTestConnection,
 }: Readonly<{
   schema: NodePropertySchema;
   config: Record<string, unknown>;
@@ -812,8 +812,8 @@ function ConnectionsTabContent({
 }
 
 function ValidationTabContent({
-  validationResults,
-  onRevalidate,
+  validationResults: _validationResults,
+  onRevalidate: _onRevalidate,
 }: Readonly<{
   validationResults: ReadonlyArray<ValidationResult>;
   onRevalidate: () => Promise<ReadonlyArray<ValidationResult>>;

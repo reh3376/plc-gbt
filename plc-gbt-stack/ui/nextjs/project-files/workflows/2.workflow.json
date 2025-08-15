@@ -67,22 +67,22 @@
       "id": "e1",
       "source": "alarm-1",
       "target": "shutdown-1",
-      "sourceHandle": "output",
-      "targetHandle": "input"
+      "sourceHandle": "output-0",
+      "targetHandle": "input-0"
     },
     {
       "id": "e2",
       "source": "alarm-1",
       "target": "pump-stop-1",
-      "sourceHandle": "output",
-      "targetHandle": "input"
+      "sourceHandle": "output-0",
+      "targetHandle": "input-0"
     },
     {
       "id": "e3",
       "source": "alarm-1",
       "target": "valve-close-1",
-      "sourceHandle": "output",
-      "targetHandle": "input"
+      "sourceHandle": "output-0",
+      "targetHandle": "input-0"
     }
   ],
   "viewport": { "x": 0, "y": 0, "zoom": 1 }

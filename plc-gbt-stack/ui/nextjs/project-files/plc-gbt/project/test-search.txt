@@ -1,0 +1,18 @@
+This is a test file for the search functionality.
+
+Here are some example lines:
+- Temperature control is important
+- The temperature sensor reads values
+- FUNCTION CalculateTemperature() returns the current temperature
+- Variable Temperature_PV stores the process value
+
+// This is a comment about temperature
+# Another comment style
+
+Let's test different search patterns:
+1. Simple text search
+2. Case sensitive search
+3. Whole word matching
+4. Regular expression support
+
+Temperature Temperature TEMPERATURE temperature

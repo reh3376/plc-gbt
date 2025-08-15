@@ -29,6 +29,7 @@ import {
   FolderOpen,
   FolderPlus,
   Loader2,
+  Package,
   Plus,
   RefreshCw,
   Upload,
@@ -36,6 +37,8 @@ import {
 import React, { useCallback, useRef, useState } from 'react';
 import { ContextMenu, useContextMenu } from './ContextMenu';
 import { DragDropProvider } from './DragDropProvider';
+import type { ProjectCreationData } from './ProjectTemplateWizard';
+import { ProjectTemplateWizard } from './ProjectTemplateWizard';
 import { FileItemWrapper } from './SortableFileItem';
 import { SortDropdown } from './SortDropdown';
 
@@ -119,6 +122,9 @@ export default function EnhancedFileExplorer({
     operation: null,
     file: null,
   });
+
+  // Project Template Wizard state
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   // Context menu state
   const {
@@ -814,6 +820,43 @@ export default function EnhancedFileExplorer({
     folderUploadRef.current?.click();
   }, []);
 
+  // Handle project creation from template
+  const handleCreateProject = useCallback(
+    async (projectData: ProjectCreationData) => {
+      console.log('🚀 Creating new project:', projectData);
+
+      // Create project structure
+      const projectPath = `/${projectData.name}`;
+
+      try {
+        // Create main project folder
+        await createFile({
+          name: projectData.name,
+          type: 'folder',
+          parentPath: '/',
+        });
+
+        // Create project files based on template
+        // This is a simplified version - in production, you'd have more complex template logic
+        await createFile({
+          name: 'README.md',
+          type: 'file',
+          parentPath: projectPath,
+          content: `# ${projectData.name}\n\nProject created from ${projectData.template} template.`,
+        });
+
+        // Close wizard
+        setIsWizardOpen(false);
+
+        // Refresh file tree to show new project
+        await refreshFiles();
+      } catch (error) {
+        console.error('Failed to create project:', error);
+      }
+    },
+    [createFile, refreshFiles]
+  );
+
   return (
     <div
       className={cn('h-full w-full flex flex-col bg-[#252526] text-[#cccccc]', className)}
@@ -829,6 +872,17 @@ export default function EnhancedFileExplorer({
         <span className="text-sm font-medium text-[#cccccc]">Explorer</span>
 
         <div className="flex items-center space-x-1">
+          {/* New Project Button */}
+          <button
+            onClick={() => setIsWizardOpen(true)}
+            className="p-1 hover:bg-[#2a2d2e] rounded text-[#cccccc] transition-colors"
+            title="New Project"
+            aria-label="Create new project from template"
+            data-testid="new-project-btn"
+          >
+            <Package className="w-4 h-4" />
+          </button>
+
           {/* Create File Button */}
           {enableFileCreation && (
             <button
@@ -1199,6 +1253,14 @@ export default function EnhancedFileExplorer({
           directory: '',
         } as React.InputHTMLAttributes<HTMLInputElement>)}
         multiple
+      />
+
+      {/* Project Template Wizard */}
+      <ProjectTemplateWizard
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        onCreateProject={handleCreateProject}
+        parentPath="/"
       />
     </div>
   );

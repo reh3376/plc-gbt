@@ -1,5 +1,6 @@
 'use client';
 
+import { useLayoutStore } from '@/lib/stores/layout-store';
 import { useWorkflowStore } from '@/lib/stores/workflow-store';
 import { cn } from '@/lib/utils/cn';
 import {
@@ -286,11 +287,44 @@ function WorkflowPanel() {
     }));
   };
 
-  const handleEditWorkflow = (workflowId: string) => {
-    // Note: Full workflow editing functionality will be implemented in future iteration
-    // This would typically open a workflow editor modal or navigate to editor
-    console.log('Edit workflow properties for:', workflowId);
-    alert(`Edit functionality for workflow ${workflowId} will be implemented in the next phase`);
+  const { openWorkflowInNewTab } = useWorkflowStore();
+  const { setActiveTool, setMainContentMode } = useLayoutStore();
+
+  const handleEditWorkflow = async (workflowId: string) => {
+    // COMPREHENSIVE FIX: Complete workflow edit implementation with proper sequencing
+    try {
+      console.log(`[WorkflowPanel] Starting edit workflow: ${workflowId}`);
+
+      // Step 1: Set the active tool to workflows (left sidebar)
+      setActiveTool('workflows');
+      console.log('[WorkflowPanel] Set active tool to workflows');
+
+      // Step 2: Set main content mode to workflow (main area)
+      setMainContentMode('workflow');
+      console.log('[WorkflowPanel] Set main content mode to workflow');
+
+      // Step 3: Small delay to ensure WorkflowCanvas component is mounted
+      // This prevents race conditions with component mounting
+      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log('[WorkflowPanel] Waited for WorkflowCanvas mount');
+
+      // Step 4: Load the workflow data and create tab
+      // This will fetch data from API and update the workflow store
+      await openWorkflowInNewTab(workflowId);
+      console.log(`[WorkflowPanel] Called openWorkflowInNewTab for workflow ${workflowId}`);
+
+      // Step 5: Close any open modals (for mini/list views)
+      setModalWorkflow(null);
+      console.log('[WorkflowPanel] Closed workflow modal if open');
+
+      // Success log
+      console.log(`[WorkflowPanel] Successfully initiated workflow edit for: ${workflowId}`);
+    } catch (error) {
+      console.error('[WorkflowPanel] Failed to open workflow:', error);
+      alert(
+        `Failed to open workflow ${workflowId}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   };
 
   const handleViewModeChange = (newMode: ViewMode) => {
@@ -301,21 +335,21 @@ function WorkflowPanel() {
     setMonitorState(prev => ({ ...prev, filter: newFilter }));
   };
 
-  const { openWorkflowInNewTab } = useWorkflowStore();
-
-  const handleWorkflowSelect = async (workflowId: string | null) => {
-    if (workflowId) {
-      // Open the workflow in the canvas
-      await openWorkflowInNewTab(workflowId);
-    }
-    
+  // FIXED: Separate selection handler that only manages selection state
+  const handleWorkflowSelection = (workflowId: string | null) => {
     setMonitorState(prev => ({
       ...prev,
       selectedWorkflow: prev.selectedWorkflow === workflowId ? null : workflowId,
     }));
   };
 
+  // FIXED: Modal handler that includes selection state management
   const handleModalOpen = (workflow: Workflow) => {
+    // Update selection state when opening modal
+    setMonitorState(prev => ({
+      ...prev,
+      selectedWorkflow: workflow.id,
+    }));
     setModalWorkflow(workflow);
     setShowModal(true);
   };
@@ -323,6 +357,8 @@ function WorkflowPanel() {
   const handleModalClose = () => {
     setShowModal(false);
     setModalWorkflow(null);
+    // FIXED: Don't clear selection state when modal closes - preserve blue overlay
+    // Selection state should persist until user clicks another workflow
   };
 
   const formatTime = (date: Date | string | undefined) => {
@@ -582,7 +618,7 @@ function WorkflowPanel() {
                 );
               }
 
-              // Default icons view
+              // Default standard view
               return (
                 <div
                   key={workflow.id}
@@ -592,11 +628,11 @@ function WorkflowPanel() {
                       ? 'border-[#007acc] bg-[#1e3a5a]'
                       : 'border-[#3c3c3c] hover:border-[#505050] hover:bg-[#2a2d2e]'
                   )}
-                  onClick={() => handleWorkflowSelect(workflow.id)}
+                  onClick={() => handleWorkflowSelection(workflow.id)}
                   onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      handleWorkflowSelect(workflow.id);
+                      handleWorkflowSelection(workflow.id);
                     }
                   }}
                   role="button"
@@ -688,9 +724,9 @@ function WorkflowPanel() {
                       )}
 
                       <button
-                        onClick={e => {
+                        onClick={async e => {
                           e.stopPropagation();
-                          handleEditWorkflow(workflow.id);
+                          await handleEditWorkflow(workflow.id);
                         }}
                         className="flex items-center space-x-1 px-2 py-1 bg-[#3c3c3c] hover:bg-[#505050] text-[#cccccc] text-xs rounded transition-colors"
                       >
@@ -813,8 +849,8 @@ function WorkflowPanel() {
                 )}
 
                 <button
-                  onClick={() => {
-                    handleEditWorkflow(modalWorkflow.id);
+                  onClick={async () => {
+                    await handleEditWorkflow(modalWorkflow.id);
                     handleModalClose();
                   }}
                   className="flex items-center space-x-1 px-3 py-1.5 bg-[#3c3c3c] hover:bg-[#505050] text-[#cccccc] text-sm rounded transition-colors"

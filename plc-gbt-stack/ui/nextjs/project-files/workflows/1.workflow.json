@@ -6,19 +6,11 @@
   "author": "PLC-GBT",
   "created": "2025-08-13T22:25:03.635Z",
   "modified": "2025-08-13T22:25:03.635Z",
-  "tags": [
-    "automation",
-    "startup",
-    "distillation"
-  ],
+  "tags": ["automation", "startup", "distillation"],
   "category": "automation",
   "priority": "medium",
   "isPublic": true,
-  "permissions": [
-    "read",
-    "write",
-    "execute"
-  ],
+  "permissions": ["read", "write", "execute"],
   "nodes": [
     {
       "id": "init-1",
@@ -88,15 +80,8 @@
       "id": "e1",
       "source": "init-1",
       "target": "pump-1",
-      "sourceHandle": "output",
-      "targetHandle": "input"
-    },
-    {
-      "id": "e2",
-      "source": "pump-1",
-      "target": "temp-1",
-      "sourceHandle": "output",
-      "targetHandle": "input"
+      "sourceHandle": "output-0",
+      "targetHandle": "input-0"
     }
   ],
   "viewport": {

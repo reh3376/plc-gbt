@@ -1,145 +1,112 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { cn } from '@/lib/utils/cn'
-import { 
-  Search, 
-  X, 
-  FileText,
-  ChevronDown,
-  ChevronRight
-} from 'lucide-react'
-
-interface SearchResult {
-  id: string
-  file: string
-  line: number
-  content: string
-  match: string
-  type: 'text' | 'variable' | 'function' | 'tag'
-}
-
-const mockResults: SearchResult[] = [
-  {
-    id: '1',
-    file: 'Distillation_Control.acd',
-    line: 45,
-    content: 'Temperature_PV := AI_Temperature_01;',
-    match: 'Temperature',
-    type: 'variable'
-  },
-  {
-    id: '2',
-    file: 'Distillation_Control.acd',
-    line: 67,
-    content: '// Set temperature setpoint for distillation column',
-    match: 'temperature',
-    type: 'text'
-  },
-  {
-    id: '3',
-    file: 'PID_Temperature.acd',
-    line: 12,
-    content: 'FUNCTION PID_Temperature_Control',
-    match: 'Temperature',
-    type: 'function'
-  },
-  {
-    id: '4',
-    file: 'Flow_Control.acd',
-    line: 23,
-    content: 'Temperature_Interlock := TRUE;',
-    match: 'Temperature',
-    type: 'variable'
-  }
-]
+import { useSearch } from '@/hooks/useSearch';
+import type { SearchOptions, SearchResult } from '@/lib/types/search.types';
+import { cn } from '@/lib/utils/cn';
+import { AlertCircle, ChevronDown, ChevronRight, FileText, Search, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 function SearchPanel() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [filters, setFilters] = useState({
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<SearchOptions>({
     matchCase: false,
     wholeWord: false,
-    regex: false,
-    includeComments: true
-  })
-  const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set())
+    useRegex: false,
+    includeComments: true,
+    includeBinary: false,
+    maxResults: 500,
+    contextLines: 0,
+  });
+  const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
 
-  const handleSearch = async () => {
+  // Use the search hook
+  const { search, results, isSearching, error, totalCount, searchTime, clearResults } = useSearch({
+    debounceMs: 300,
+    cacheResults: true,
+    onError: err => console.error('Search error:', err),
+  });
+
+  const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) {
-      setResults([])
-      return
+      clearResults();
+      return;
     }
 
-    setIsSearching(true)
-    
-    // Simulate search delay
-    setTimeout(() => {
-      const filteredResults = mockResults.filter(result =>
-        result.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        result.match.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      setResults(filteredResults)
-      setIsSearching(false)
-      
-      // Auto-expand first file
-      if (filteredResults.length > 0) {
-        setExpandedFiles(new Set([filteredResults[0].file]))
+    await search(searchQuery, filters);
+  }, [searchQuery, filters, search, clearResults]);
+
+  // Auto-expand first file when results change
+  useEffect(() => {
+    if (results.length > 0) {
+      const firstFile = results[0].file;
+      setExpandedFiles(new Set([firstFile]));
+    }
+  }, [results]);
+
+  // Trigger search on Enter key
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleSearch();
       }
-    }, 500)
-  }
+    },
+    [handleSearch]
+  );
+
+  // Clear search and results
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+    clearResults();
+    setExpandedFiles(new Set());
+  }, [clearResults]);
 
   const toggleFileExpansion = (fileName: string) => {
-    const newExpanded = new Set(expandedFiles)
+    const newExpanded = new Set(expandedFiles);
     if (newExpanded.has(fileName)) {
-      newExpanded.delete(fileName)
+      newExpanded.delete(fileName);
     } else {
-      newExpanded.add(fileName)
+      newExpanded.add(fileName);
     }
-    setExpandedFiles(newExpanded)
-  }
-
-  const clearSearch = () => {
-    setSearchQuery('')
-    setResults([])
-    setExpandedFiles(new Set())
-  }
+    setExpandedFiles(newExpanded);
+  };
 
   // Group results by file
-  const groupedResults = results.reduce((acc, result) => {
-    if (!acc[result.file]) {
-      acc[result.file] = []
-    }
-    acc[result.file].push(result)
-    return acc
-  }, {} as Record<string, SearchResult[]>)
+  const groupedResults = results.reduce(
+    (acc, result) => {
+      if (!acc[result.file]) {
+        acc[result.file] = [];
+      }
+      acc[result.file].push(result);
+      return acc;
+    },
+    {} as Record<string, SearchResult[]>
+  );
 
   const getTypeIcon = (type: SearchResult['type']) => {
     switch (type) {
       case 'function':
-        return '𝑓'
+        return '𝑓';
       case 'variable':
-        return 'V'
+        return 'V';
       case 'tag':
-        return 'T'
+        return 'T';
       default:
-        return '"'
+        return '"';
     }
-  }
+  };
 
   const getTypeColor = (type: SearchResult['type']) => {
     switch (type) {
       case 'function':
-        return 'text-[#dcdcaa]'
+        return 'text-[#dcdcaa]';
       case 'variable':
-        return 'text-[#9cdcfe]'
+        return 'text-[#9cdcfe]';
       case 'tag':
-        return 'text-[#4fc1ff]'
+        return 'text-[#4fc1ff]';
       default:
-        return 'text-[#ce9178]'
+        return 'text-[#ce9178]';
     }
-  }
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -151,13 +118,13 @@ function SearchPanel() {
             type="text"
             placeholder="Search in files..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full pl-8 pr-8 py-2 text-sm bg-[#3c3c3c] text-[#cccccc] placeholder-[#969696] rounded border border-[#3c3c3c] focus:border-[#007acc] focus:outline-none"
           />
           {searchQuery && (
             <button
-              onClick={clearSearch}
+              onClick={handleClearSearch}
               className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#969696] hover:text-[#cccccc]"
             >
               <X className="w-4 h-4" />
@@ -166,31 +133,44 @@ function SearchPanel() {
         </div>
 
         {/* Search Filters */}
-        <div className="flex items-center space-x-3 text-xs">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
           <button
             className={cn(
-              "flex items-center space-x-1 px-2 py-1 rounded transition-colors",
-              filters.matchCase 
-                ? "bg-[#007acc] text-white" 
-                : "bg-[#3c3c3c] text-[#cccccc] hover:bg-[#505050]"
+              'flex items-center space-x-1 px-2 py-1 rounded transition-colors',
+              filters.matchCase
+                ? 'bg-[#007acc] text-white'
+                : 'bg-[#3c3c3c] text-[#cccccc] hover:bg-[#505050]'
             )}
             onClick={() => setFilters(prev => ({ ...prev, matchCase: !prev.matchCase }))}
           >
             <span>Aa</span>
             <span>Match Case</span>
           </button>
-          
+
           <button
             className={cn(
-              "flex items-center space-x-1 px-2 py-1 rounded transition-colors",
-              filters.wholeWord 
-                ? "bg-[#007acc] text-white" 
-                : "bg-[#3c3c3c] text-[#cccccc] hover:bg-[#505050]"
+              'flex items-center space-x-1 px-2 py-1 rounded transition-colors',
+              filters.wholeWord
+                ? 'bg-[#007acc] text-white'
+                : 'bg-[#3c3c3c] text-[#cccccc] hover:bg-[#505050]'
             )}
             onClick={() => setFilters(prev => ({ ...prev, wholeWord: !prev.wholeWord }))}
           >
             <span>ab</span>
             <span>Whole Word</span>
+          </button>
+
+          <button
+            className={cn(
+              'flex items-center space-x-1 px-2 py-1 rounded transition-colors',
+              filters.useRegex
+                ? 'bg-[#007acc] text-white'
+                : 'bg-[#3c3c3c] text-[#cccccc] hover:bg-[#505050]'
+            )}
+            onClick={() => setFilters(prev => ({ ...prev, useRegex: !prev.useRegex }))}
+          >
+            <span>.*</span>
+            <span>Regex</span>
           </button>
         </div>
 
@@ -203,12 +183,22 @@ function SearchPanel() {
         </button>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="p-3 bg-[#5a1d1d] border border-[#f14c4c] rounded m-2">
+          <div className="flex items-center space-x-2 text-[#f14c4c]">
+            <AlertCircle className="w-4 h-4" />
+            <span className="text-sm">{error.message}</span>
+          </div>
+        </div>
+      )}
+
       {/* Results */}
       <div className="flex-1 overflow-auto">
-        {results.length === 0 && searchQuery && !isSearching ? (
-                     <div className="p-4 text-center text-[#969696] text-sm">
-             No results found for &quot;{searchQuery}&quot;
-           </div>
+        {results.length === 0 && searchQuery && !isSearching && !error ? (
+          <div className="p-4 text-center text-[#969696] text-sm">
+            No results found for &quot;{searchQuery}&quot;
+          </div>
         ) : (
           <div className="p-2">
             {Object.entries(groupedResults).map(([fileName, fileResults]) => (
@@ -216,7 +206,15 @@ function SearchPanel() {
                 {/* File Header */}
                 <button
                   onClick={() => toggleFileExpansion(fileName)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleFileExpansion(fileName);
+                    }
+                  }}
                   className="flex items-center w-full p-2 hover:bg-[#2a2d2e] rounded transition-colors"
+                  aria-expanded={expandedFiles.has(fileName)}
+                  aria-label={`${expandedFiles.has(fileName) ? 'Collapse' : 'Expand'} ${fileName}`}
                 >
                   {expandedFiles.has(fileName) ? (
                     <ChevronDown className="w-4 h-4 mr-2 text-[#cccccc]" />
@@ -233,28 +231,33 @@ function SearchPanel() {
                 {/* File Results */}
                 {expandedFiles.has(fileName) && (
                   <div className="ml-6 space-y-1">
-                    {fileResults.map((result) => (
+                    {fileResults.map(result => (
                       <div
                         key={result.id}
                         className="p-2 hover:bg-[#2a2d2e] rounded cursor-pointer transition-colors"
                         onClick={() => console.log('Navigate to:', result.file, result.line)}
                       >
                         <div className="flex items-center space-x-2 text-xs mb-1">
-                          <span className={cn("font-mono", getTypeColor(result.type))}>
+                          <span className={cn('font-mono', getTypeColor(result.type))}>
                             {getTypeIcon(result.type)}
                           </span>
                           <span className="text-[#969696]">Line {result.line}</span>
                         </div>
                         <div className="text-sm text-[#cccccc] font-mono">
-                          {result.content.split(new RegExp(`(${result.match})`, 'gi')).map((part, index) => 
-                            part.toLowerCase() === result.match.toLowerCase() ? (
-                              <mark key={index} className="bg-[#664c00] text-[#ffffff] px-1 rounded">
-                                {part}
-                              </mark>
-                            ) : (
-                              <span key={index}>{part}</span>
-                            )
-                          )}
+                          {result.content
+                            .split(new RegExp(`(${result.match})`, 'gi'))
+                            .map((part, partIndex) =>
+                              part.toLowerCase() === result.match.toLowerCase() ? (
+                                <mark
+                                  key={`${result.id}-match-${partIndex}`}
+                                  className="bg-[#664c00] text-[#ffffff] px-1 rounded"
+                                >
+                                  {part}
+                                </mark>
+                              ) : (
+                                <span key={`${result.id}-text-${partIndex}`}>{part}</span>
+                              )
+                            )}
                         </div>
                       </div>
                     ))}
@@ -268,22 +271,29 @@ function SearchPanel() {
 
       {/* Results Summary */}
       {results.length > 0 && (
-        <div className="p-2 border-t border-[#3c3c3c] text-xs text-[#969696]">
-          {results.length} result{results.length !== 1 ? 's' : ''} in {Object.keys(groupedResults).length} file{Object.keys(groupedResults).length !== 1 ? 's' : ''}
+        <div className="p-2 border-t border-[#3c3c3c] text-xs text-[#969696] flex justify-between">
+          <span>
+            {totalCount > results.length
+              ? `Showing ${results.length} of ${totalCount}`
+              : totalCount}{' '}
+            result{totalCount !== 1 ? 's' : ''} in {Object.keys(groupedResults).length} file
+            {Object.keys(groupedResults).length !== 1 ? 's' : ''}
+          </span>
+          {searchTime > 0 && <span>{searchTime}ms</span>}
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default SearchPanel
+export default SearchPanel;
 
 /**
  * SearchPanel Component
- * 
+ *
  * @description Advanced search functionality for PLC code and documentation
  * @specification Implements main-ui-spec.md SearchPanel tool requirements
- * 
+ *
  * @features
  * - Full-text search across PLC files
  * - Advanced filtering options (case sensitive, whole word, regex)
@@ -291,20 +301,20 @@ export default SearchPanel
  * - Syntax highlighting for different result types
  * - Real-time search with loading states
  * - Navigation to search results
- * 
+ *
  * @searchTypes
  * - Text: Comments and string literals
  * - Variable: PLC variable references
  * - Function: Function and routine definitions
  * - Tag: PLC tag references
- * 
+ *
  * @accessibility
  * - Keyboard navigation support
  * - Clear search state indicators
  * - Screen reader friendly results
- * 
+ *
  * @performance
  * - Lazy loaded via Suspense
  * - Debounced search input
  * - Efficient result grouping
- */ 
+ */

@@ -16,6 +16,28 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## 🐳 Docker Environment & Automation
+
+**⚠️ CRITICAL FOR CODING AGENTS & BROWSER AUTOMATION**: When working with Docker containers, browser automation, or MCP testing tools, use the Docker networking address:
+
+- **✅ For Browser Automation**: `http://host.docker.internal:3000`
+- **✅ For API Calls from Docker**: `http://host.docker.internal:3000/api/v1/...`
+- **✅ For WebSocket Connections**: `ws://host.docker.internal:3000/ws`
+
+**Examples:**
+```typescript
+// Playwright MCP browser navigation
+await mcp.browser_navigate('http://host.docker.internal:3000')
+
+// API testing from containerized environments
+const response = await fetch('http://host.docker.internal:3000/api/v1/health')
+
+// WebSocket connections from Docker services
+const ws = new WebSocket('ws://host.docker.internal:3000/ws/workflow')
+```
+
+This ensures proper networking when the development server runs on the host while automation tools run in Docker containers.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

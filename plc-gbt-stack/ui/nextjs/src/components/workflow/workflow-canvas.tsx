@@ -4,7 +4,6 @@ import {
   Background,
   BackgroundVariant,
   ConnectionMode,
-  Controls,
   MarkerType,
   MiniMap,
   ReactFlow,
@@ -13,14 +12,14 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Download, Grid, Maximize2, Save, X, ZoomIn, ZoomOut } from 'lucide-react';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { IndustrialNodeType, useWorkflowStore } from '@/lib/stores/workflow-store';
 import { cn } from '@/lib/utils/cn';
 import { industrialNodeTypes } from './industrial-nodes';
 import { NodePropertiesModal } from './NodePropertiesModal';
-import { WorkflowTabs } from './WorkflowTabs';
 import { WorkflowToolbar } from './workflow-toolbar';
+import { WorkflowTabs } from './WorkflowTabs';
 
 interface WorkflowCanvasProps {
   readonly className?: string;
@@ -49,8 +48,7 @@ interface CanvasState {
 
 function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<WorkflowCanvasProps>) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-  const [isAutoLayouting, setIsAutoLayouting] = useState(false);
+  const [_isAutoLayouting, setIsAutoLayouting] = useState(false);
   const [isPropertiesModalOpen, setIsPropertiesModalOpen] = useState(false);
   const { screenToFlowPosition, fitView, zoomIn, zoomOut } = useReactFlow();
 
@@ -61,11 +59,8 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
     snapToGrid,
     gridSize,
     showMinimap,
-    showControls,
     showBackground,
     isReadOnly: storeReadOnly,
-    selectedNodes,
-    selectedEdges,
 
     onNodesChange,
     onEdgesChange,
@@ -73,26 +68,65 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
     addNode,
     setSelectedNodes,
     setSelectedEdges,
-    clearSelection,
     setReadOnly,
     autoLayoutNodes,
     saveWorkflow,
     exportWorkflow,
   } = useWorkflowStore();
 
-  // Enhanced Canvas State
-  const canvasState: CanvasState = {
-    nodesCount: nodes.length,
-    edgesCount: edges.length,
-    selectedNodesCount: selectedNodes.length,
-    selectedEdgesCount: selectedEdges.length,
-    canUndo: false, // Future: Implement undo/redo
-    canRedo: false, // Future: Implement undo/redo
-    isConnected: true, // Future: Check backend connection
-  };
+  // Debug logging for workflow data and auto-fit view
+  useEffect(() => {
+    console.log('[WorkflowCanvas] Component mounted/updated:', {
+      nodeCount: nodes.length,
+      edgeCount: edges.length,
+      hasNodes: nodes.length > 0,
+      firstNode: nodes[0],
+      viewport,
+    });
+
+    // Auto-fit view when nodes are loaded
+    if (nodes.length > 0) {
+      // Small delay to ensure React Flow has rendered the nodes
+      setTimeout(() => {
+        fitView({
+          padding: 0.1,
+          duration: 500,
+        });
+      }, 100);
+    }
+  }, [nodes.length, fitView]);
+
+  // Handle container resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (nodes.length > 0) {
+        // Re-fit view on resize with a debounce
+        setTimeout(() => {
+          fitView({
+            padding: 0.1,
+            duration: 200,
+          });
+        }, 100);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [nodes.length, fitView]);
+
+  // Enhanced Canvas State (unused for now, prepared for future features)
+  // const canvasState: CanvasState = {
+  //   nodesCount: nodes.length,
+  //   edgesCount: edges.length,
+  //   selectedNodesCount: selectedNodes.length,
+  //   selectedEdgesCount: selectedEdges.length,
+  //   canUndo: false, // Future: Implement undo/redo
+  //   canRedo: false, // Future: Implement undo/redo
+  //   isConnected: true, // Future: Check backend connection
+  // };
 
   // Enhanced Auto Layout Handler
-  const handleAutoLayout = useCallback(async () => {
+  const _handleAutoLayout = useCallback(async () => {
     if (nodes.length === 0) return;
 
     try {
@@ -115,7 +149,7 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
   }, [nodes.length, autoLayoutNodes, fitView]);
 
   // Enhanced Fit View Handler - Fixed to prevent UI panel disappearance
-  const handleFitView = useCallback(() => {
+  const _handleFitView = useCallback(() => {
     fitView({
       padding: 0.15, // Increased padding to avoid panel overlap
       duration: 800,
@@ -126,7 +160,7 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
   }, [fitView]);
 
   // Save Workflow Handler
-  const handleSaveWorkflow = useCallback(async () => {
+  const _handleSaveWorkflow = useCallback(async () => {
     try {
       await saveWorkflow();
       // Future: Show success notification
@@ -137,7 +171,7 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
   }, [saveWorkflow]);
 
   // Export Workflow Handler
-  const handleExportWorkflow = useCallback(() => {
+  const _handleExportWorkflow = useCallback(() => {
     try {
       const data = exportWorkflow('json');
       const blob = new Blob([data], { type: 'application/json' });
@@ -160,24 +194,6 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
   useEffect(() => {
     setReadOnly(isReadOnly);
   }, [isReadOnly, setReadOnly]);
-
-  // Track container dimensions for React Flow
-  useLayoutEffect(() => {
-    const resizeObserver = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setDimensions({ width, height });
-      }
-    });
-
-    if (reactFlowWrapper.current) {
-      resizeObserver.observe(reactFlowWrapper.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
 
   // Handle viewport changes
   // const onMoveEnd = useCallback(() => {
@@ -296,13 +312,9 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
   }, [zoomIn, zoomOut, fitView]);
 
   return (
-    <div className={cn('flex h-full w-full min-h-0', className)} style={{ minHeight: '600px' }}>
+    <div className={cn('flex h-full w-full min-h-0', className)}>
       {/* Main Canvas */}
-      <div
-        className="flex-1 relative h-full min-h-0 overflow-visible"
-        ref={reactFlowWrapper}
-        style={{ minHeight: '600px' }}
-      >
+      <div className="flex-1 relative h-full w-full" ref={reactFlowWrapper}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -329,11 +341,10 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
           nodesFocusable={!storeReadOnly}
           proOptions={{ hideAttribution: true }}
           className="bg-[#1e1e1e]"
-          style={{
-            width: dimensions.width,
-            height: dimensions.height,
-            minWidth: '800px',
-            minHeight: '600px',
+          fitView
+          fitViewOptions={{
+            padding: 0.1,
+            includeHiddenNodes: false,
           }}
           defaultEdgeOptions={{
             type: 'default',
@@ -411,7 +422,13 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
 
 // External Canvas Overlays - Outside React Flow Transform Context
 function WorkflowCanvasOverlays() {
-  const { nodes, selectedNodes, selectedEdges, isReadOnly: storeReadOnly } = useWorkflowStore();
+  const {
+    nodes,
+    edges,
+    selectedNodes,
+    selectedEdges,
+    isReadOnly: storeReadOnly,
+  } = useWorkflowStore();
   const { clearSelection, autoLayoutNodes, saveWorkflow } = useWorkflowStore();
 
   // Get React Flow instance for direct control access
@@ -477,7 +494,7 @@ function WorkflowCanvasOverlays() {
     } finally {
       setIsAutoLayouting(false);
     }
-  }, [isAutoLayouting, autoLayoutNodes, fitView, nodes.length]);
+  }, [isAutoLayouting, autoLayoutNodes, fitView]);
 
   // Export Workflow Handler
   const handleExportWorkflow = useCallback(() => {
@@ -563,7 +580,9 @@ function WorkflowCanvasOverlays() {
           <div className="flex items-center space-x-3">
             <div className="text-sm font-medium text-white">Industrial Workflow Canvas</div>
 
-            <div className="text-xs text-gray-400">Nodes: {nodes.length} | Edges: 2</div>
+            <div className="text-xs text-gray-400">
+              Nodes: {nodes.length} | Edges: {edges.length}
+            </div>
 
             {selectedNodes.length > 0 && (
               <div className="text-xs text-blue-400">
@@ -628,15 +647,15 @@ function WorkflowCanvasOverlays() {
 // Main Workflow Canvas with Provider
 export function WorkflowCanvas(props: WorkflowCanvasProps) {
   return (
-    <div className="h-full w-full flex flex-col min-h-0" style={{ minHeight: '700px' }}>
+    <div className="h-full w-full flex flex-col min-h-0">
       {/* Tabs */}
       <WorkflowTabs />
-      
+
       {/* Toolbar */}
       <WorkflowToolbar />
 
       {/* Canvas with React Flow Provider - Positioned Relative Container */}
-      <div className="flex-1 min-h-0 relative" style={{ minHeight: '650px' }}>
+      <div className="flex-1 min-h-0 relative">
         <ReactFlowProvider>
           <WorkflowCanvasInner {...props} />
           {/* External UI Panels - Inside Provider but Outside React Flow Transform Context */}

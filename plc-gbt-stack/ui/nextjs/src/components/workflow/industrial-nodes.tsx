@@ -6,17 +6,25 @@ import { Handle, NodeProps, Position } from '@xyflow/react';
 import {
   Activity,
   AlertTriangle,
+  Brain,
+  Code,
   Cpu,
   Database,
   Gauge,
+  GitBranch,
+  Layout,
+  LineChart,
   Monitor,
   Network,
   Play,
+  RefreshCw,
   RotateCw,
   Server,
   Settings,
   Square,
+  Target,
   Wifi,
+  Wrench,
   Zap,
 } from 'lucide-react';
 import React, { memo, useState } from 'react';
@@ -529,6 +537,170 @@ export const N8NWorkflowNode = memo((props: NodeProps & { data: IndustrialNodeDa
 });
 N8NWorkflowNode.displayName = 'N8NWorkflowNode';
 
+// Node palette for dynamic node creation
+
+// Node palette lookup map (must match workflow-toolbar.tsx nodePalette)
+const nodePaletteMap: Record<
+  string,
+  {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    color: string;
+    description: string;
+  }
+> = {
+  'plc-input': {
+    label: 'PLC Input',
+    icon: RefreshCw,
+    color: '#10B981',
+    description: 'Digital or analog input from PLC',
+  },
+  'plc-output': {
+    label: 'PLC Output',
+    icon: GitBranch,
+    color: '#EF4444',
+    description: 'Digital or analog output to PLC',
+  },
+  'pid-controller': {
+    label: 'PID Controller',
+    icon: Cpu,
+    color: '#8B5CF6',
+    description: 'Proportional-Integral-Derivative controller',
+  },
+  'hmi-display': {
+    label: 'HMI Display',
+    icon: Monitor,
+    color: '#8B5CF6',
+    description: 'Human-machine interface display',
+  },
+  'data-logger': {
+    label: 'Data Logger',
+    icon: Database,
+    color: '#06B6D4',
+    description: 'Historical data logging and storage',
+  },
+  'alarm-handler': {
+    label: 'Alarm Handler',
+    icon: AlertTriangle,
+    color: '#F59E0B',
+    description: 'Process alarm management',
+  },
+  'modbus-client': {
+    label: 'Modbus Client',
+    icon: Wrench,
+    color: '#EC4899',
+    description: 'Modbus TCP/RTU client connection',
+  },
+  'opc-server': {
+    label: 'OPC Server',
+    icon: Code,
+    color: '#84CC16',
+    description: 'OPC-UA server interface',
+  },
+  'custom-logic': {
+    label: 'Custom Logic',
+    icon: AlertTriangle,
+    color: '#F97316',
+    description: 'Custom logic block with scripting',
+  },
+  'n8n-workflow': {
+    label: 'N8N Workflow',
+    icon: Layout,
+    color: '#8B5CF6',
+    description: 'N8N automation workflow',
+  },
+  // ML Algorithm nodes
+  'narx-neural-network': {
+    label: 'NARX Neural Network',
+    icon: Brain,
+    color: '#3B82F6',
+    description: 'Nonlinear AutoRegressive with eXogenous inputs for complex process dynamics',
+  },
+  'gaussian-process-regression': {
+    label: 'Gaussian Process Regression',
+    icon: Target,
+    color: '#3B82F6',
+    description: 'GPR for uncertainty quantification and probabilistic predictions',
+  },
+  'lstm-model': {
+    label: 'LSTM Model',
+    icon: RefreshCw,
+    color: '#3B82F6',
+    description: 'Long Short-Term Memory networks for time series prediction',
+  },
+  'sindy-identifier': {
+    label: 'SINDy Identifier',
+    icon: Code,
+    color: '#3B82F6',
+    description: 'Sparse Identification of Nonlinear Dynamics for physics-ML fusion',
+  },
+  'reinforcement-learning': {
+    label: 'Reinforcement Learning',
+    icon: Brain,
+    color: '#3B82F6',
+    description: 'DDPG, SAC, TD3 algorithms for adaptive control',
+  },
+  // MPC nodes
+  'mpc-controller': {
+    label: 'MPC Controller',
+    icon: Cpu,
+    color: '#8B5CF6',
+    description: 'Model Predictive Control with constraints',
+  },
+  'mpc-optimizer': {
+    label: 'MPC Optimizer',
+    icon: Zap,
+    color: '#8B5CF6',
+    description: 'Optimization engine for MPC solutions',
+  },
+  'constraint-handler': {
+    label: 'Constraint Handler',
+    icon: AlertTriangle,
+    color: '#8B5CF6',
+    description: 'Handle process and operational constraints',
+  },
+  'horizon-predictor': {
+    label: 'Horizon Predictor',
+    icon: Target,
+    color: '#8B5CF6',
+    description: 'Prediction horizon management for MPC',
+  },
+  'reference-tracker': {
+    label: 'Reference Tracker',
+    icon: LineChart,
+    color: '#8B5CF6',
+    description: 'Track reference trajectories and setpoints',
+  },
+  // Add more as needed - this covers the most common ones
+};
+
+// Generic Industrial Node Component
+export const GenericIndustrialNode = memo((props: NodeProps & { data: IndustrialNodeData }) => {
+  const nodeConfig = nodePaletteMap[props.type];
+
+  if (!nodeConfig) {
+    // Fallback for unknown node types
+    return (
+      <BaseIndustrialNode
+        {...props}
+        icon={AlertTriangle}
+        color="#F97316"
+        handles={{ inputs: 1, outputs: 1 }}
+      />
+    );
+  }
+
+  return (
+    <BaseIndustrialNode
+      {...props}
+      icon={nodeConfig.icon}
+      color={nodeConfig.color}
+      handles={{ inputs: 1, outputs: 1 }}
+    />
+  );
+});
+GenericIndustrialNode.displayName = 'GenericIndustrialNode';
+
 // Export all node types for React Flow
 export const industrialNodeTypes = {
   'plc-input': PLCInputNode,
@@ -541,4 +713,47 @@ export const industrialNodeTypes = {
   'opc-server': OPCServerNode,
   'custom-logic': CustomLogicNode,
   'n8n-workflow': N8NWorkflowNode,
+  // Generic node for all other types
+  'narx-neural-network': GenericIndustrialNode,
+  'gaussian-process-regression': GenericIndustrialNode,
+  'lstm-model': GenericIndustrialNode,
+  'sindy-identifier': GenericIndustrialNode,
+  'reinforcement-learning': GenericIndustrialNode,
+  'mpc-controller': GenericIndustrialNode,
+  'mpc-optimizer': GenericIndustrialNode,
+  'constraint-handler': GenericIndustrialNode,
+  'horizon-predictor': GenericIndustrialNode,
+  'reference-tracker': GenericIndustrialNode,
+  // Add all the remaining node types
+  'arx-model': GenericIndustrialNode,
+  'armax-model': GenericIndustrialNode,
+  'subspace-n4sid': GenericIndustrialNode,
+  'subspace-moesp': GenericIndustrialNode,
+  'era-identifier': GenericIndustrialNode,
+  'koopman-operator': GenericIndustrialNode,
+  'pilco-rl': GenericIndustrialNode,
+  'pets-rl': GenericIndustrialNode,
+  'ddpg-rl': GenericIndustrialNode,
+  'td3-rl': GenericIndustrialNode,
+  'sac-rl': GenericIndustrialNode,
+  'ziegler-nichols-tuner': GenericIndustrialNode,
+  'cohen-coon-tuner': GenericIndustrialNode,
+  'lambda-tuner': GenericIndustrialNode,
+  'imc-tuner': GenericIndustrialNode,
+  'relay-feedback-tuner': GenericIndustrialNode,
+  'data-source-csv': GenericIndustrialNode,
+  'data-source-database': GenericIndustrialNode,
+  'data-source-opc': GenericIndustrialNode,
+  'data-source-mqtt': GenericIndustrialNode,
+  'data-source-modbus': GenericIndustrialNode,
+  'data-filter': GenericIndustrialNode,
+  'data-transformer': GenericIndustrialNode,
+  'data-aggregator': GenericIndustrialNode,
+  'data-validator': GenericIndustrialNode,
+  'data-normalizer': GenericIndustrialNode,
+  'report-generator': GenericIndustrialNode,
+  'dashboard-widget': GenericIndustrialNode,
+  'chart-generator': GenericIndustrialNode,
+  'export-csv': GenericIndustrialNode,
+  'export-pdf': GenericIndustrialNode,
 };

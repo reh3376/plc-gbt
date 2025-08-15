@@ -521,7 +521,14 @@ export function WorkflowToolbar() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showNodePalette, setShowNodePalette] = useState(true);
   const [nodeViewMode, setNodeViewMode] = useState<NodeViewMode>('standard');
+  const [nodePanelHeight, setNodePanelHeight] = useState(120); // Default height in pixels
+  const [isResizing, setIsResizing] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Constants for resizing limits
+  const DEFAULT_HEIGHT = 120;
+  const MIN_HEIGHT = Math.round(DEFAULT_HEIGHT * 0.5); // 50% = 60px
+  const MAX_HEIGHT = Math.round(DEFAULT_HEIGHT * 3.0); // 300% = 360px
 
   const {
     nodes,
@@ -566,6 +573,50 @@ export function WorkflowToolbar() {
     const defaultMode = getDefaultViewMode(selectedCategory, nodeCount);
     setNodeViewMode(defaultMode);
   }, [selectedCategory]);
+
+  // Handle mouse resize functionality
+  const handleMouseDown = React.useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const handleMouseMove = React.useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      // Calculate new height based on mouse position relative to the node panel
+      const rect = document.querySelector('[data-node-panel]')?.getBoundingClientRect();
+      if (!rect) return;
+
+      const newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, e.clientY - rect.top));
+      setNodePanelHeight(newHeight);
+    },
+    [isResizing, MIN_HEIGHT, MAX_HEIGHT]
+  );
+
+  const handleMouseUp = React.useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  // Global mouse event listeners for resizing
+  React.useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'row-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, handleMouseMove, handleMouseUp]);
 
   // Calculate node count for each category for display badges
   const getCategoryNodeCount = (categoryId: string): number => {
@@ -924,18 +975,23 @@ export function WorkflowToolbar() {
             </div>
           </div>
 
-          {/* Enhanced Node Palette with Scrollable Container */}
+          {/* Enhanced Node Palette with Resizable Container */}
           <div className="relative">
             <div
+              data-node-panel
               className={cn(
-                'overflow-y-auto overflow-x-hidden',
-                'max-h-[120px]', // Reduced by 70% from 400px to 120px for more canvas space
+                'overflow-y-auto overflow-x-hidden transition-all duration-150',
                 'scrollbar-thin scrollbar-track-[#2d2d2d] scrollbar-thumb-[#505050] hover:scrollbar-thumb-[#606060]'
               )}
+              style={{
+                height: `${nodePanelHeight}px`,
+                minHeight: `${MIN_HEIGHT}px`,
+                maxHeight: `${MAX_HEIGHT}px`,
+              }}
             >
               {nodeViewMode === 'list' ? (
-                /* List View - Dense layout for many nodes */
-                <div className="space-y-1">
+                /* List View - Dense layout, 3 per row, 50% height reduction, single line text */
+                <div className="grid grid-cols-3 gap-1">
                   {filteredNodes.map(node => (
                     <div
                       key={node.type}
@@ -950,7 +1006,7 @@ export function WorkflowToolbar() {
                         }
                       }}
                       className={cn(
-                        'flex items-center gap-3 p-2 rounded border border-[#404040] transition-all duration-200',
+                        'flex items-center gap-2 p-1 rounded border border-[#404040] transition-all duration-200 min-h-0 h-6', // Reduced padding and fixed height for 50% reduction
                         'focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400',
                         isReadOnly
                           ? 'opacity-50 cursor-not-allowed'
@@ -959,19 +1015,18 @@ export function WorkflowToolbar() {
                       title={`${node.description} - Drag to canvas`}
                       aria-label={`Add ${node.label} node to workflow`}
                     >
-                      <node.icon className="w-4 h-4 text-white flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm text-gray-300 font-medium truncate">
+                      <node.icon className="w-3 h-3 text-white flex-shrink-0" />
+                      <div className="flex-1 min-w-0 flex items-center gap-1">
+                        <span className="text-xs text-gray-300 font-medium truncate">
                           {node.label}
-                        </div>
-                        <div className="text-xs text-gray-500 truncate">{node.description}</div>
+                        </span>
+                        <span className="text-xs text-gray-500 truncate">- {node.description}</span>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <div
-                          className="w-2 h-2 rounded-full"
+                          className="w-1.5 h-1.5 rounded-full"
                           style={{ backgroundColor: node.color }}
                         />
-                        <span className="text-xs text-gray-500">{node.category}</span>
                       </div>
                     </div>
                   ))}
@@ -980,10 +1035,10 @@ export function WorkflowToolbar() {
                 /* Card Views - Standard and Mini */
                 <div
                   className={cn(
-                    'grid gap-2',
+                    'grid gap-2 w-full', // Add w-full for full width flex
                     nodeViewMode === 'mini'
-                      ? 'grid-cols-6' // More columns for mini cards
-                      : 'grid-cols-4' // Reduced from 5 to 4 for better sizing
+                      ? 'grid-cols-10' // 10 columns for mini cards per user requirement
+                      : 'grid-cols-8' // 8 columns for standard cards per user requirement
                   )}
                 >
                   {filteredNodes.map(node => (
@@ -1000,9 +1055,9 @@ export function WorkflowToolbar() {
                         }
                       }}
                       className={cn(
-                        'flex flex-col items-center rounded-lg border border-[#404040] transition-all duration-200',
+                        'flex flex-col items-center rounded-lg border border-[#404040] transition-all duration-200 w-full', // Add w-full for flex sizing
                         'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400',
-                        nodeViewMode === 'mini' ? 'p-2' : 'p-3', // Smaller padding for mini
+                        nodeViewMode === 'mini' ? 'p-1.5' : 'p-2.5', // Adjusted padding for better fit
                         isReadOnly
                           ? 'opacity-50 cursor-not-allowed'
                           : 'cursor-grab hover:border-[#505050] hover:bg-[#3d3d3d] hover:shadow-sm group active:cursor-grabbing'
@@ -1022,14 +1077,7 @@ export function WorkflowToolbar() {
                       />
 
                       {/* Node label with adjusted text size */}
-                      <span
-                        className={cn(
-                          'text-gray-300 text-center leading-tight font-medium',
-                          nodeViewMode === 'mini'
-                            ? 'text-xs' // Keep small text for mini
-                            : 'text-xs' // Consistent text size
-                        )}
-                      >
+                      <span className="text-xs text-gray-300 text-center leading-tight font-medium">
                         {node.label}
                       </span>
 
@@ -1047,6 +1095,27 @@ export function WorkflowToolbar() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Resize Handle */}
+            <div
+              className={cn(
+                'absolute bottom-0 left-0 right-0 h-2 cursor-row-resize',
+                'flex items-center justify-center group',
+                'hover:bg-blue-500/10 transition-colors duration-200',
+                isResizing && 'bg-blue-500/20'
+              )}
+              onMouseDown={handleMouseDown}
+              title="Drag to resize node panel (50% - 300% of default height)"
+            >
+              {/* Resize indicator */}
+              <div
+                className={cn(
+                  'w-8 h-0.5 rounded-full bg-gray-500 transition-all duration-200',
+                  'group-hover:bg-blue-400 group-hover:w-12',
+                  isResizing && 'bg-blue-400 w-12'
+                )}
+              />
             </div>
           </div>
         </div>
