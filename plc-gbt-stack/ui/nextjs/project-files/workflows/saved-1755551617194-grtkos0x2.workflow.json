@@ -1,0 +1,143 @@
+{
+  "id": "saved-1755551617194-grtkos0x2",
+  "name": "test-workflow02",
+  "description": "Saved workflow",
+  "version": "1.0.0",
+  "author": "PLC-GBT",
+  "created": "2025-08-18T21:13:56.183Z",
+  "modified": "2025-08-18T21:13:56.183Z",
+  "tags": [
+    "saved"
+  ],
+  "category": "control",
+  "priority": "medium",
+  "isPublic": true,
+  "permissions": [
+    "read",
+    "write",
+    "execute"
+  ],
+  "nodes": [
+    {
+      "id": "plc-input-1755545652019-tliasy2ja",
+      "type": "plc-input",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "label": "Plc Input",
+        "description": "plc-input node",
+        "config": {},
+        "status": "configuring",
+        "tags": [
+          "plc-input"
+        ],
+        "lastUpdate": "2025-08-18T19:34:12.019Z"
+      },
+      "dragHandle": ".drag-handle",
+      "selectable": true,
+      "focusable": true,
+      "measured": {
+        "width": 160,
+        "height": 115
+      }
+    },
+    {
+      "id": "custom-logic-1755545655524-xujh7kvzx",
+      "type": "custom-logic",
+      "position": {
+        "x": 272,
+        "y": 0
+      },
+      "data": {
+        "label": "Custom Logic",
+        "description": "custom-logic node",
+        "config": {},
+        "status": "configuring",
+        "tags": [
+          "custom-logic"
+        ],
+        "lastUpdate": "2025-08-18T19:34:15.524Z"
+      },
+      "dragHandle": ".drag-handle",
+      "selectable": true,
+      "focusable": true,
+      "measured": {
+        "width": 225,
+        "height": 179
+      }
+    },
+    {
+      "id": "plc-output-1755545660300-8hutew7yi",
+      "type": "plc-output",
+      "position": {
+        "x": 544,
+        "y": 0
+      },
+      "data": {
+        "label": "Plc Output",
+        "description": "plc-output node",
+        "config": {},
+        "status": "configuring",
+        "tags": [
+          "plc-output"
+        ],
+        "lastUpdate": "2025-08-18T19:34:20.300Z"
+      },
+      "dragHandle": ".drag-handle",
+      "selectable": true,
+      "focusable": true,
+      "measured": {
+        "width": 160,
+        "height": 115
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "type": "default",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#6B7280"
+      },
+      "focusable": true,
+      "selectable": true,
+      "source": "custom-logic-1755545655524-xujh7kvzx",
+      "sourceHandle": "output-1",
+      "target": "plc-output-1755545660300-8hutew7yi",
+      "targetHandle": "input-0",
+      "id": "xy-edge__custom-logic-1755545655524-xujh7kvzxoutput-1-plc-output-1755545660300-8hutew7yiinput-0"
+    },
+    {
+      "type": "default",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#6B7280"
+      },
+      "focusable": true,
+      "selectable": true,
+      "source": "plc-input-1755545652019-tliasy2ja",
+      "sourceHandle": "output-0",
+      "target": "custom-logic-1755545655524-xujh7kvzx",
+      "targetHandle": "input-1",
+      "id": "xy-edge__plc-input-1755545652019-tliasy2jaoutput-0-custom-logic-1755545655524-xujh7kvzxinput-1"
+    }
+  ],
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "variables": {}
+}

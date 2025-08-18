@@ -1,0 +1,20 @@
+{
+  "nodes": [
+    {
+      "id": "test-node-1",
+      "type": "plc-input",
+      "position": { "x": 100, "y": 100 },
+      "data": {
+        "label": "Test Import Node",
+        "description": "Test node for import functionality",
+        "status": "online"
+      }
+    }
+  ],
+  "edges": [],
+  "metadata": {
+    "name": "Test Import Workflow",
+    "description": "Test workflow for import functionality",
+    "version": "1.0.0"
+  }
+}

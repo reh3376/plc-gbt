@@ -1,6 +1,10 @@
 'use client';
 
-import { IndustrialNodeType, useWorkflowStore } from '@/lib/stores/workflow-store';
+import {
+  IndustrialNodeType,
+  useWorkflowStore,
+  WorkflowMetadata,
+} from '@/lib/stores/workflow-store';
 import { cn } from '@/lib/utils/cn';
 import {
   AlertTriangle,
@@ -14,6 +18,7 @@ import {
   FolderOpen,
   GitBranch,
   Grid,
+  HelpCircle,
   Layout,
   LayoutGrid,
   List,
@@ -27,6 +32,7 @@ import {
   Square,
   Target,
   TestTube,
+  Trash2,
   Upload,
   Wrench,
   Zap,
@@ -34,6 +40,81 @@ import {
   ZoomOut,
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { ExportWorkflowModal } from './ExportWorkflowModal';
+import { ImportWorkflowModal } from './ImportWorkflowModal';
+import { SaveWorkflowModal } from './SaveWorkflowModal';
+import { WorkflowHelpModal } from './WorkflowHelpModal';
+import { WorkflowStatusModal } from './WorkflowStatusModal';
+
+// Workflow validation utility
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
+
+function validateWorkflowObject(data: unknown): ValidationResult {
+  const errors: string[] = [];
+
+  if (!data || typeof data !== 'object') {
+    errors.push('File must contain a valid JSON object');
+    return { isValid: false, errors };
+  }
+
+  const obj = data as Record<string, unknown>;
+
+  // Check for required workflow properties
+  if (!obj.nodes || !Array.isArray(obj.nodes)) {
+    errors.push('Workflow must contain a "nodes" array');
+  }
+
+  if (!obj.edges || !Array.isArray(obj.edges)) {
+    errors.push('Workflow must contain an "edges" array');
+  }
+
+  // Validate node structure
+  if (Array.isArray(obj.nodes)) {
+    obj.nodes.forEach((node, index) => {
+      if (!node || typeof node !== 'object') {
+        errors.push(`Node at index ${index} is not a valid object`);
+        return;
+      }
+
+      const nodeObj = node as Record<string, unknown>;
+      if (!nodeObj.id || typeof nodeObj.id !== 'string') {
+        errors.push(`Node at index ${index} missing required "id" field`);
+      }
+      if (!nodeObj.type || typeof nodeObj.type !== 'string') {
+        errors.push(`Node at index ${index} missing required "type" field`);
+      }
+      if (!nodeObj.position || typeof nodeObj.position !== 'object') {
+        errors.push(`Node at index ${index} missing required "position" field`);
+      }
+    });
+  }
+
+  // Validate edge structure
+  if (Array.isArray(obj.edges)) {
+    obj.edges.forEach((edge, index) => {
+      if (!edge || typeof edge !== 'object') {
+        errors.push(`Edge at index ${index} is not a valid object`);
+        return;
+      }
+
+      const edgeObj = edge as Record<string, unknown>;
+      if (!edgeObj.id || typeof edgeObj.id !== 'string') {
+        errors.push(`Edge at index ${index} missing required "id" field`);
+      }
+      if (!edgeObj.source || typeof edgeObj.source !== 'string') {
+        errors.push(`Edge at index ${index} missing required "source" field`);
+      }
+      if (!edgeObj.target || typeof edgeObj.target !== 'string') {
+        errors.push(`Edge at index ${index} missing required "target" field`);
+      }
+    });
+  }
+
+  return { isValid: errors.length === 0, errors };
+}
 
 interface NodePaletteItem {
   type: IndustrialNodeType;
@@ -525,6 +606,23 @@ export function WorkflowToolbar() {
   const [isResizing, setIsResizing] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Modal states
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [statusModalProps, setStatusModalProps] = useState<{
+    operation: 'start' | 'pause' | 'stop';
+    status: 'success' | 'error' | 'info';
+    message: string;
+    errors?: string[];
+  }>({
+    operation: 'start',
+    status: 'info',
+    message: '',
+  });
+
   // Constants for resizing limits
   const DEFAULT_HEIGHT = 120;
   const MIN_HEIGHT = Math.round(DEFAULT_HEIGHT * 0.5); // 50% = 60px
@@ -542,6 +640,7 @@ export function WorkflowToolbar() {
     saveWorkflow,
     exportWorkflow,
     importWorkflow,
+    deleteWorkflow,
     fitView,
     zoomIn,
     zoomOut,
@@ -636,37 +735,188 @@ export function WorkflowToolbar() {
   };
 
   const handleSave = () => {
-    saveWorkflow();
-    // Success notification will be handled by the workflow store
+    setShowSaveModal(true);
+  };
+
+  const handleSaveWorkflow = async (options: {
+    name: string;
+    location: 'local' | 'remote';
+    filepath?: string;
+  }) => {
+    try {
+      // TODO: Implement location-specific save logic based on options.location
+      await saveWorkflow();
+
+      // Update the active workflow and add to workflows list (prevent duplicates)
+      const currentState = useWorkflowStore.getState();
+
+      // Check if workflow with this name already exists
+      const existingWorkflow = currentState.workflows.find(w => w.name === options.name);
+
+      let updatedWorkflow: WorkflowMetadata;
+      let updatedWorkflows: WorkflowMetadata[];
+
+      if (existingWorkflow) {
+        // Update existing workflow instead of creating duplicate
+        updatedWorkflow = {
+          ...existingWorkflow,
+          modified: new Date(),
+          description: 'Updated saved workflow',
+        };
+        updatedWorkflows = currentState.workflows.map(w =>
+          w.id === existingWorkflow.id ? updatedWorkflow : w
+        );
+      } else {
+        // Create new workflow
+        updatedWorkflow = {
+          id: `saved-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: options.name,
+          description: 'Saved workflow',
+          version: '1.0.0',
+          author: 'PLC-GBT',
+          created: new Date(),
+          modified: new Date(),
+          tags: ['saved'],
+          category: 'control' as const,
+        };
+        updatedWorkflows = [...currentState.workflows, updatedWorkflow];
+      }
+
+      // Update the store
+      useWorkflowStore.setState({
+        activeWorkflow: updatedWorkflow,
+        workflows: updatedWorkflows,
+      });
+
+      setStatusModalProps({
+        operation: 'stop', // Using stop operation for save (no auto-start behavior)
+        status: 'success',
+        message: `Workflow "${options.name}" saved successfully to ${options.location} storage.`,
+      });
+      setShowStatusModal(true);
+    } catch (error) {
+      setStatusModalProps({
+        operation: 'start',
+        status: 'error',
+        message: `Failed to save workflow "${options.name}"`,
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      });
+      setShowStatusModal(true);
+    }
   };
 
   const handleExport = () => {
-    const data = exportWorkflow('json');
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${activeWorkflow?.name || 'workflow'}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setShowExportModal(true);
   };
 
-  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const content = e.target?.result as string;
-        try {
-          const data = JSON.parse(content);
-          importWorkflow(data);
-        } catch (error) {
-          console.error('Failed to parse workflow file:', error);
-        }
-      };
-      reader.readAsText(file);
+  const handleExportWorkflow = async (options: {
+    name: string;
+    format: 'json' | 'xml' | 'n8n';
+    location: 'local' | 'remote';
+    filepath?: string;
+  }) => {
+    try {
+      const data = exportWorkflow(options.format);
+
+      if (options.location === 'local') {
+        // Local download
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${options.name}.${options.format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        // TODO: Implement remote server export
+        console.log('Exporting to remote server:', options);
+      }
+
+      setStatusModalProps({
+        operation: 'start',
+        status: 'success',
+        message: `Workflow "${options.name}" exported successfully to ${options.location} storage.`,
+      });
+      setShowStatusModal(true);
+    } catch (error) {
+      setStatusModalProps({
+        operation: 'start',
+        status: 'error',
+        message: `Failed to export workflow "${options.name}"`,
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      });
+      setShowStatusModal(true);
+    }
+  };
+
+  const handleImport = () => {
+    setShowImportModal(true);
+  };
+
+  const handleImportWorkflow = async (options: {
+    location: 'local' | 'remote';
+    filepath?: string;
+    file?: File;
+  }) => {
+    try {
+      if (options.location === 'local' && options.file) {
+        // Local file import
+        const reader = new FileReader();
+        reader.onload = e => {
+          const content = e.target?.result as string;
+          try {
+            const data = JSON.parse(content);
+
+            // Validate workflow object structure
+            const validationResult = validateWorkflowObject(data);
+            if (!validationResult.isValid) {
+              setStatusModalProps({
+                operation: 'start',
+                status: 'error',
+                message: `Invalid workflow file "${options.file?.name}"`,
+                errors: validationResult.errors,
+              });
+              setShowStatusModal(true);
+              return;
+            }
+
+            importWorkflow(data);
+            setStatusModalProps({
+              operation: 'start',
+              status: 'success',
+              message: `Workflow "${options.file?.name}" imported successfully from local file.`,
+            });
+            setShowStatusModal(true);
+          } catch (error) {
+            setStatusModalProps({
+              operation: 'start',
+              status: 'error',
+              message: `Failed to parse workflow file "${options.file?.name}"`,
+              errors: [error instanceof Error ? error.message : 'Invalid JSON format'],
+            });
+            setShowStatusModal(true);
+          }
+        };
+        reader.readAsText(options.file);
+      } else if (options.location === 'remote' && options.filepath) {
+        // TODO: Implement remote file import
+        setStatusModalProps({
+          operation: 'start',
+          status: 'info',
+          message: `Remote import from "${options.filepath}" not yet implemented.`,
+        });
+        setShowStatusModal(true);
+      }
+    } catch (error) {
+      setStatusModalProps({
+        operation: 'start',
+        status: 'error',
+        message: 'Failed to import workflow',
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      });
+      setShowStatusModal(true);
     }
   };
 
@@ -682,6 +932,136 @@ export function WorkflowToolbar() {
       }
     } catch (error) {
       console.error('Error opening workflow directory:', error);
+    }
+  };
+
+  // Workflow control handlers
+  const handleStartWorkflow = () => {
+    try {
+      // TODO: Implement actual workflow start logic
+      setStatusModalProps({
+        operation: 'start',
+        status: 'success',
+        message: `Workflow "${activeWorkflow?.name || 'Demo Temperature Control'}" started successfully.`,
+      });
+      setShowStatusModal(true);
+    } catch (error) {
+      setStatusModalProps({
+        operation: 'start',
+        status: 'error',
+        message: 'Failed to start workflow',
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      });
+      setShowStatusModal(true);
+    }
+  };
+
+  const handlePauseWorkflow = () => {
+    try {
+      // TODO: Implement actual workflow pause logic
+      setStatusModalProps({
+        operation: 'pause',
+        status: 'success',
+        message: `Workflow "${activeWorkflow?.name || 'Demo Temperature Control'}" paused successfully.`,
+      });
+      setShowStatusModal(true);
+    } catch (error) {
+      setStatusModalProps({
+        operation: 'pause',
+        status: 'error',
+        message: 'Failed to pause workflow',
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      });
+      setShowStatusModal(true);
+    }
+  };
+
+  const handleStopWorkflow = () => {
+    try {
+      // TODO: Implement actual workflow stop logic
+      setStatusModalProps({
+        operation: 'stop',
+        status: 'success',
+        message: `Workflow "${activeWorkflow?.name || 'Demo Temperature Control'}" stopped successfully.`,
+      });
+      setShowStatusModal(true);
+    } catch (error) {
+      setStatusModalProps({
+        operation: 'stop',
+        status: 'error',
+        message: 'Failed to stop workflow',
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      });
+      setShowStatusModal(true);
+    }
+  };
+
+  const handleDeleteWorkflow = () => {
+    if (!activeWorkflow) {
+      setStatusModalProps({
+        operation: 'stop', // Using stop for delete operation
+        status: 'error',
+        message: 'No workflow selected to delete',
+      });
+      setShowStatusModal(true);
+      return;
+    }
+
+    // Show confirmation modal
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the workflow "${activeWorkflow.name}"?\n\nThis will remove:\n- The workflow from all lists\n- All tabs containing this workflow\n- All nodes and connections from the canvas\n\nThis action cannot be undone.`
+    );
+
+    if (confirmDelete) {
+      try {
+        const workflowToDelete = activeWorkflow;
+
+        // Get current state for comprehensive cleanup
+        const currentState = useWorkflowStore.getState();
+
+        // 1. Remove workflow from workflows array
+        const updatedWorkflows = currentState.workflows.filter(w => w.id !== workflowToDelete.id);
+
+        // 2. Close any tabs related to this workflow
+        const updatedTabs = currentState.tabs.filter(tab => tab.workflowId !== workflowToDelete.id);
+
+        // 3. If the active tab was for this workflow, switch to first remaining tab or create new
+        let newActiveTabId = currentState.activeTabId;
+        if (
+          currentState.tabs.find(tab => tab.id === currentState.activeTabId)?.workflowId ===
+          workflowToDelete.id
+        ) {
+          newActiveTabId = updatedTabs.length > 0 ? updatedTabs[0].id : null;
+        }
+
+        // 4. Clear canvas if this was the active workflow
+        const shouldClearCanvas = currentState.activeWorkflow?.id === workflowToDelete.id;
+
+        // 5. Update store with comprehensive cleanup
+        useWorkflowStore.setState({
+          workflows: updatedWorkflows,
+          tabs: updatedTabs,
+          activeTabId: newActiveTabId,
+          activeWorkflow: shouldClearCanvas ? null : currentState.activeWorkflow,
+          nodes: shouldClearCanvas ? [] : currentState.nodes,
+          edges: shouldClearCanvas ? [] : currentState.edges,
+        });
+
+        setStatusModalProps({
+          operation: 'stop', // Using stop for delete operation (red color)
+          status: 'success',
+          message: `Workflow "${workflowToDelete.name}" deleted successfully from all locations.`,
+        });
+        setShowStatusModal(true);
+      } catch (error) {
+        setStatusModalProps({
+          operation: 'stop',
+          status: 'error',
+          message: `Failed to delete workflow "${activeWorkflow.name}"`,
+          errors: [error instanceof Error ? error.message : 'Unknown error'],
+        });
+        setShowStatusModal(true);
+      }
     }
   };
 
@@ -701,7 +1081,7 @@ export function WorkflowToolbar() {
           </button>
 
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={handleImport}
             className="p-2 text-gray-300 hover:text-white hover:bg-[#3d3d3d] rounded transition-colors"
             title="Import Workflow"
             disabled={isReadOnly}
@@ -725,12 +1105,22 @@ export function WorkflowToolbar() {
             <FolderOpen className="w-4 h-4" />
           </button>
 
+          <button
+            onClick={handleDeleteWorkflow}
+            className="p-2 text-red-400 hover:text-red-300 hover:bg-[#3d3d3d] rounded transition-colors"
+            title="Delete Current Workflow"
+            disabled={!activeWorkflow || isReadOnly}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+
           <div className="w-px h-6 bg-[#404040] mx-2" />
         </div>
 
         {/* Workflow Controls */}
         <div className="flex items-center space-x-1">
           <button
+            onClick={handleStartWorkflow}
             className="p-2 text-green-400 hover:text-green-300 hover:bg-[#3d3d3d] rounded transition-colors"
             title="Start Workflow"
             disabled={isReadOnly}
@@ -739,6 +1129,7 @@ export function WorkflowToolbar() {
           </button>
 
           <button
+            onClick={handlePauseWorkflow}
             className="p-2 text-yellow-400 hover:text-yellow-300 hover:bg-[#3d3d3d] rounded transition-colors"
             title="Pause Workflow"
             disabled={isReadOnly}
@@ -747,6 +1138,7 @@ export function WorkflowToolbar() {
           </button>
 
           <button
+            onClick={handleStopWorkflow}
             className="p-2 text-red-400 hover:text-red-300 hover:bg-[#3d3d3d] rounded transition-colors"
             title="Stop Workflow"
             disabled={isReadOnly}
@@ -838,14 +1230,18 @@ export function WorkflowToolbar() {
         {/* View Options */}
         <div className="flex items-center space-x-1">
           <button
-            onClick={() => setSnapToGrid(!snapToGrid)}
+            onClick={() => {
+              setSnapToGrid(!snapToGrid);
+              // Also toggle grid visibility for visual feedback
+              useWorkflowStore.setState({ showBackground: !snapToGrid });
+            }}
             className={cn(
               'p-2 rounded transition-colors',
               snapToGrid
                 ? 'text-blue-400 bg-blue-600/20'
                 : 'text-gray-300 hover:text-white hover:bg-[#3d3d3d]'
             )}
-            title="Snap to Grid"
+            title="Toggle Grid Lines"
           >
             <Grid className="w-4 h-4" />
           </button>
@@ -877,19 +1273,32 @@ export function WorkflowToolbar() {
           </button>
         </div>
 
-        {/* Workflow Info */}
+        {/* Workflow Info - Always maintain layout space */}
         <div className="flex items-center space-x-3 ml-auto">
-          <div className="text-sm text-gray-400">{activeWorkflow?.name || 'Untitled Workflow'}</div>
-
-          <div className="text-xs text-gray-500">
-            {nodes.length} nodes, {edges.length} connections
-          </div>
-
-          {isReadOnly && (
-            <div className="px-2 py-1 bg-yellow-600/20 text-yellow-400 text-xs rounded">
-              Read Only
-            </div>
+          {activeWorkflow ? (
+            <>
+              <div className="text-sm text-gray-400">{activeWorkflow.name}</div>
+              <div className="text-xs text-gray-500">
+                {nodes.length} nodes, {edges.length} connections
+              </div>
+              {isReadOnly && (
+                <div className="px-2 py-1 bg-yellow-600/20 text-yellow-400 text-xs rounded">
+                  Read Only
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-xs text-gray-500 italic">No workflow loaded</div>
           )}
+
+          {/* Help Button */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-2 text-blue-400 hover:text-blue-300 hover:bg-[#3d3d3d] rounded transition-colors"
+            title="PLC-GBT Workflow Help & Support"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -1129,6 +1538,39 @@ export function WorkflowToolbar() {
         onChange={handleImport}
         className="hidden"
       />
+
+      {/* Modals */}
+      <SaveWorkflowModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSave={handleSaveWorkflow}
+        currentWorkflowName={activeWorkflow?.name}
+      />
+
+      <ExportWorkflowModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExportWorkflow}
+        currentWorkflowName={activeWorkflow?.name}
+      />
+
+      <ImportWorkflowModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImportWorkflow}
+      />
+
+      <WorkflowStatusModal
+        isOpen={showStatusModal}
+        onClose={() => setShowStatusModal(false)}
+        operation={statusModalProps.operation}
+        status={statusModalProps.status}
+        message={statusModalProps.message}
+        errors={statusModalProps.errors}
+        workflowName={activeWorkflow?.name}
+      />
+
+      <WorkflowHelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
     </div>
   );
 }

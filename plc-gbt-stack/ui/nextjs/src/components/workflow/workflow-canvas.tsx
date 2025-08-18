@@ -61,6 +61,7 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
     showMinimap,
     showBackground,
     isReadOnly: storeReadOnly,
+    zoomCommand,
 
     onNodesChange,
     onEdgesChange,
@@ -72,6 +73,7 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
     autoLayoutNodes,
     saveWorkflow,
     exportWorkflow,
+    clearZoomCommand,
   } = useWorkflowStore();
 
   // Debug logging for workflow data and auto-fit view
@@ -95,6 +97,36 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
       }, 100);
     }
   }, [nodes.length, fitView]);
+
+  // Listen for zoom commands from toolbar
+  useEffect(() => {
+    if (zoomCommand) {
+      console.log('[WorkflowCanvas] Executing zoom command:', zoomCommand);
+      switch (zoomCommand) {
+        case 'zoom-in':
+          zoomIn({ duration: 200 });
+          break;
+        case 'zoom-out':
+          zoomOut({ duration: 200 });
+          break;
+        case 'fit-view':
+          fitView({
+            padding: 0.15,
+            duration: 800,
+            includeHiddenNodes: false,
+            maxZoom: 1.2,
+            minZoom: 0.1,
+          });
+          break;
+        case 'reset-zoom':
+          // Reset to 1x zoom centered
+          fitView({ padding: 0.15, duration: 800, maxZoom: 1, minZoom: 1 });
+          break;
+      }
+      // Clear the command after execution
+      clearZoomCommand();
+    }
+  }, [zoomCommand, zoomIn, zoomOut, fitView, clearZoomCommand]);
 
   // Handle container resize
   useEffect(() => {

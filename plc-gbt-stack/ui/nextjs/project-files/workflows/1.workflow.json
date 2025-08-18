@@ -4,84 +4,91 @@
   "description": "Automated startup sequence for distillation column",
   "version": "1.0.0",
   "author": "PLC-GBT",
-  "created": "2025-08-13T22:25:03.635Z",
-  "modified": "2025-08-13T22:25:03.635Z",
-  "tags": ["automation", "startup", "distillation"],
+  "created": "2025-08-18T14:37:02.841Z",
+  "modified": "2025-08-18T14:37:02.841Z",
+  "tags": [
+    "automation",
+    "startup",
+    "distillation"
+  ],
   "category": "automation",
   "priority": "medium",
   "isPublic": true,
-  "permissions": ["read", "write", "execute"],
+  "permissions": [
+    "read",
+    "write",
+    "execute"
+  ],
   "nodes": [
     {
-      "id": "init-1",
-      "type": "plc-input",
+      "id": "hmi-display-1755527756078-2q0udwr6q",
+      "type": "hmi-display",
       "position": {
-        "x": 100,
-        "y": 100
+        "x": 240,
+        "y": 225
       },
       "data": {
-        "label": "System Ready",
-        "description": "Check system ready status",
-        "status": "online",
-        "value": true,
-        "isDigital": true,
-        "address": "I0.0"
+        "label": "Hmi Display",
+        "description": "hmi-display node",
+        "config": {},
+        "status": "configuring",
+        "tags": [
+          "hmi-display"
+        ],
+        "lastUpdate": "2025-08-18T14:35:56.078Z"
       },
+      "dragHandle": ".drag-handle",
+      "selectable": true,
+      "focusable": true,
       "measured": {
-        "width": 957,
-        "height": 139
+        "width": 161,
+        "height": 115
       }
     },
     {
-      "id": "pump-1",
-      "type": "plc-output",
+      "id": "data-logger-1755527758914-74cna59sq",
+      "type": "data-logger",
       "position": {
-        "x": 400,
-        "y": 100
+        "x": 480,
+        "y": 270
       },
       "data": {
-        "label": "Feed Pump Start",
-        "description": "Start feed pump",
-        "status": "online",
-        "value": false,
-        "isDigital": true,
-        "address": "Q0.0"
+        "label": "Data Logger",
+        "description": "data-logger node",
+        "config": {},
+        "status": "configuring",
+        "tags": [
+          "data-logger"
+        ],
+        "lastUpdate": "2025-08-18T14:35:58.915Z"
       },
+      "dragHandle": ".drag-handle",
+      "selectable": true,
+      "focusable": true,
       "measured": {
-        "width": 957,
-        "height": 139
-      }
-    },
-    {
-      "id": "temp-1",
-      "type": "pid-controller",
-      "position": {
-        "x": 250,
-        "y": 250
-      },
-      "data": {
-        "label": "Column Temperature",
-        "description": "Control column temperature",
-        "status": "active",
-        "kp": 2.5,
-        "ki": 0.5,
-        "kd": 0.1,
-        "setpoint": 85,
-        "processValue": 82
-      },
-      "measured": {
-        "width": 957,
-        "height": 139
+        "width": 163,
+        "height": 115
       }
     }
   ],
   "edges": [
     {
-      "id": "e1",
-      "source": "init-1",
-      "target": "pump-1",
+      "type": "default",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#6B7280"
+      },
+      "focusable": true,
+      "selectable": true,
+      "source": "hmi-display-1755527756078-2q0udwr6q",
       "sourceHandle": "output-0",
-      "targetHandle": "input-0"
+      "target": "data-logger-1755527758914-74cna59sq",
+      "targetHandle": "input-0",
+      "id": "xy-edge__hmi-display-1755527756078-2q0udwr6qoutput-0-data-logger-1755527758914-74cna59sqinput-0"
     }
   ],
   "viewport": {

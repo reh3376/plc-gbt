@@ -38,6 +38,34 @@ const ws = new WebSocket('ws://host.docker.internal:3000/ws/workflow')
 
 This ensures proper networking when the development server runs on the host while automation tools run in Docker containers.
 
+## 🚨 CRITICAL: API Development Standards
+
+**MANDATORY FOR ALL DEVELOPERS**: This project enforces strict API development standards with ZERO tolerance for manual type definitions.
+
+### Required Reading Before ANY API Work:
+- 📘 **[API Creation Methodology](../docs/API_CREATION_METHODOLOGY.md)** - Complete methodology (MUST READ)
+- 📋 **[API Development Checklist](../docs/API_DEVELOPMENT_AGENT_CHECKLIST.md)** - Quick reference for agents
+- 🔧 **[AI Task Orchestrator Guide](../docs/AI_TASK_ORCHESTRATOR_TS_GUIDE.md)** - Overall development framework
+
+### Key Rules:
+1. **ALL API schemas defined using OpenAPI Schema MCP** - No exceptions
+2. **ALL types generated from OpenAPI** - Never manually write API types
+3. **ALL requests/responses validated with Zod** - No unvalidated JSON
+4. **Zero `any` types allowed** - Use `unknown` with type guards
+
+### Quick Start:
+```bash
+# 1. Define schema in openapi-schema-client.ts
+# 2. Generate types and Zod schemas
+pnpm api:gen
+
+# 3. Use ONLY generated types
+import type { components } from '@/api/types.gen'
+import { WorkflowSchema } from '@/api/zod-schemas'
+```
+
+**Violations of these rules will cause immediate build failures.**
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

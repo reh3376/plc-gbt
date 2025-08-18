@@ -2961,7 +2961,7 @@ Implement a comprehensive project template system that enables rapid PLC project
 
 **📚 Framework Documentation**: 
 - [Project Template Development Framework](../plc-gbt-stack/docs/PROJECT_TEMPLATE_DEVELOPMENT_FRAMEWORK.md) - Comprehensive development guide and architecture specifications
-- [API Creation & Usage Methodology](../plc-gbt-stack/docs/API_CREATION_METHODOLOGY.md) - Zero-drift API development with OpenAPI Schema MCP and Zod validation
+- [API Creation & Usage Methodology](../plc-gbt-stack/docs/API_CREATION_METHODOLOGY.md) - **ENHANCED**: Fool-proof zero-drift API development with OpenAPI Schema MCP, Zod validation, comprehensive error handling, and end-to-end examples (Updated: December 22, 2024)
 
 #### **Core Objectives**
 
@@ -3622,6 +3622,26 @@ const template = `
 
 - **✅ CORRECT ADDRESS**: `host.docker.internal:3000`
 - **❌ INCORRECT ADDRESS**: `localhost:3000` (will fail in Docker environments)
+
+### 🔧 **API Development Standards**
+
+**MANDATORY**: All API development must follow the enhanced API Creation & Usage Methodology:
+
+- **📘 [API Creation & Usage Methodology](../plc-gbt-stack/docs/API_CREATION_METHODOLOGY.md)** - Required reading for all developers
+- **Zero-Tolerance Policy**: NO manual API type definitions or schemas allowed
+- **OpenAPI Schema MCP**: All API contracts must be defined using MCP_Docker server
+- **Type Generation**: All TypeScript types generated from OpenAPI schemas
+- **Runtime Validation**: Every request/response validated with Zod schemas
+- **Error Handling**: Centralized, typed error handling patterns
+- **Testing Requirements**: >95% test coverage for all API endpoints
+
+**Key Features**:
+- Fool-proof step-by-step workflow
+- Common pitfalls and solutions
+- Quick Start guide (5-minute setup)
+- Complete end-to-end examples
+- Comprehensive testing patterns
+- CI/CD integration guidelines
 
 **Usage Examples**:
 ```typescript

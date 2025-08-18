@@ -118,6 +118,9 @@ const availableWorkflows: Workflow[] = [
 ];
 
 function WorkflowPanel() {
+  // ===== INTEGRATION WITH WORKFLOW STORE =====
+  const { workflows: savedWorkflows, openWorkflowInNewTab } = useWorkflowStore();
+
   // ===== PERSISTENT STATE MANAGEMENT WITH LOCALSTORAGE =====
   const [monitorState, setMonitorState] = useState<WorkflowMonitorState>(() => {
     if (typeof window !== 'undefined') {
@@ -159,6 +162,20 @@ function WorkflowPanel() {
       filter: 'all' as const,
     };
   });
+
+  // ===== COMBINE SAVED WORKFLOWS WITH AVAILABLE WORKFLOWS =====
+  const combinedAvailableWorkflows = [
+    ...availableWorkflows,
+    // Convert saved workflows from store to Workflow format
+    ...savedWorkflows.map(wf => ({
+      id: wf.id,
+      name: wf.name,
+      description: wf.description,
+      status: 'stopped' as const,
+      type: wf.category as 'automation' | 'maintenance' | 'emergency' | 'manual',
+      priority: 'medium' as const,
+    })),
+  ];
 
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -287,7 +304,6 @@ function WorkflowPanel() {
     }));
   };
 
-  const { openWorkflowInNewTab } = useWorkflowStore();
   const { setActiveTool, setMainContentMode } = useLayoutStore();
 
   const handleEditWorkflow = async (workflowId: string) => {
@@ -401,8 +417,8 @@ function WorkflowPanel() {
     error: monitorState.monitoredWorkflows.filter(w => w.status === 'error').length,
   };
 
-  // Available workflows that aren't currently monitored
-  const availableForMonitoring = monitorState.availableWorkflows.filter(
+  // Available workflows that aren't currently monitored (includes saved workflows from store)
+  const availableForMonitoring = combinedAvailableWorkflows.filter(
     aw => !monitorState.monitoredWorkflows.find(mw => mw.id === aw.id)
   );
 

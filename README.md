@@ -162,6 +162,36 @@ graph TB
 
 ---
 
+## 🚨 **API Development Standards**
+
+**CRITICAL**: This project enforces strict API development standards with zero tolerance for manual type definitions.
+
+### **Mandatory Methodology**
+All developers and coding agents MUST follow the comprehensive API Creation & Usage Methodology:
+
+- 📘 **[API Creation Methodology](plc-gbt-stack/docs/API_CREATION_METHODOLOGY.md)** - Complete zero-drift API development guide
+- 📋 **[Agent Checklist](plc-gbt-stack/docs/API_DEVELOPMENT_AGENT_CHECKLIST.md)** - Quick reference for coding agents
+- 📚 **[Development Framework](plc-gbt-stack/docs/AI_TASK_ORCHESTRATOR_TS_GUIDE.md)** - Overall TypeScript development guide
+
+### **Core Principles**
+1. **Contract-First Development** - OpenAPI schema exists before implementation
+2. **Zero Manual Types** - All TypeScript types generated from OpenAPI
+3. **Runtime Validation** - Every API interaction validated with Zod
+4. **MCP Enforcement** - OpenAPI Schema MCP from Docker server only
+5. **CI/CD Integration** - Build fails if schemas are out of sync
+
+### **Quick Example**
+```typescript
+// ❌ NEVER DO THIS
+interface User { id: string }
+
+// ✅ ALWAYS DO THIS
+import type { components } from '@/api/types.gen'
+type User = components['schemas']['User']
+```
+
+---
+
 ## 🛠️ **Command-Line Tools & APIs**
 
 ### **Primary CLI Commands**

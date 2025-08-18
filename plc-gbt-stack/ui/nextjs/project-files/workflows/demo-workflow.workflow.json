@@ -4,8 +4,8 @@
   "description": "Sample workflow showing PLC temperature control",
   "version": "1.0.0",
   "author": "PLC-GBT",
-  "created": "2025-08-13T21:56:38.908Z",
-  "modified": "2025-08-13T21:56:38.908Z",
+  "created": "2025-08-18T18:38:32.670Z",
+  "modified": "2025-08-18T18:38:32.670Z",
   "tags": [
     "demo",
     "temperature",
@@ -21,227 +21,126 @@
   ],
   "nodes": [
     {
-      "id": "plc-input-1755101629088-qvl514d4w",
+      "id": "demo-plc-input-1",
       "type": "plc-input",
       "position": {
         "x": 0,
         "y": 0
       },
       "data": {
-        "label": "Plc Input",
-        "description": "plc-input node",
-        "config": {},
-        "status": "configuring",
+        "label": "Temperature Sensor",
+        "description": "Digital temperature sensor input",
+        "config": {
+          "address": "I:0/0",
+          "dataType": "REAL"
+        },
+        "status": "online",
         "tags": [
-          "plc-input"
+          "temperature",
+          "sensor",
+          "input"
         ],
-        "lastUpdate": "2025-08-13T16:13:49.088Z"
+        "lastUpdate": "2025-08-18T14:27:20.961Z"
       },
-      "dragHandle": ".drag-handle",
-      "selectable": true,
-      "focusable": true,
       "measured": {
-        "width": 160,
+        "width": 213,
         "height": 115
-      },
-      "selected": false,
-      "dragging": false
+      }
     },
     {
-      "id": "plc-input-1755101658988-aq6cnvscf",
-      "type": "plc-input",
-      "position": {
-        "x": 0,
-        "y": 130
-      },
-      "data": {
-        "label": "Plc Input",
-        "description": "plc-input node",
-        "config": {},
-        "status": "configuring",
-        "tags": [
-          "plc-input"
-        ],
-        "lastUpdate": "2025-08-13T16:14:18.988Z"
-      },
-      "dragHandle": ".drag-handle",
-      "selectable": true,
-      "focusable": true,
-      "measured": {
-        "width": 160,
-        "height": 115
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
-      "id": "plc-input-1755101675128-ij2vfn2v3",
-      "type": "plc-input",
-      "position": {
-        "x": 0,
-        "y": 260
-      },
-      "data": {
-        "label": "Plc Input",
-        "description": "plc-input node",
-        "config": {},
-        "status": "configuring",
-        "tags": [
-          "plc-input"
-        ],
-        "lastUpdate": "2025-08-13T16:14:35.128Z"
-      },
-      "dragHandle": ".drag-handle",
-      "selectable": true,
-      "focusable": true,
-      "measured": {
-        "width": 160,
-        "height": 115
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
-      "id": "data-logger-1755101695161-qqwqb23pg",
-      "type": "data-logger",
+      "id": "demo-pid-1",
+      "type": "pid-controller",
       "position": {
         "x": 272,
-        "y": 130
+        "y": 0
       },
       "data": {
-        "label": "Data Logger",
-        "description": "data-logger node",
-        "config": {},
-        "status": "configuring",
+        "label": "Temperature PID",
+        "description": "PID controller for temperature regulation",
+        "config": {
+          "kp": 1,
+          "ki": 0.1,
+          "kd": 0.01
+        },
+        "status": "online",
         "tags": [
-          "data-logger"
+          "pid",
+          "temperature",
+          "control"
         ],
-        "lastUpdate": "2025-08-13T16:14:55.161Z"
+        "lastUpdate": "2025-08-18T14:27:20.961Z"
       },
-      "dragHandle": ".drag-handle",
-      "selectable": true,
-      "focusable": true,
       "measured": {
-        "width": 163,
-        "height": 115
-      },
-      "selected": false,
-      "dragging": false
+        "width": 180,
+        "height": 103
+      }
     },
     {
-      "id": "plc-output-1755101715838-a1n8mv5ha",
+      "id": "demo-plc-output-1",
       "type": "plc-output",
       "position": {
-        "x": 540,
-        "y": 60
-      },
-      "data": {
-        "label": "Plc Output",
-        "description": "plc-output node",
-        "config": {},
-        "status": "configuring",
-        "tags": [
-          "plc-output"
-        ],
-        "lastUpdate": "2025-08-13T16:15:15.838Z"
-      },
-      "dragHandle": ".drag-handle",
-      "selectable": true,
-      "focusable": true,
-      "measured": {
-        "width": 160,
-        "height": 115
-      },
-      "selected": true,
-      "dragging": false
-    },
-    {
-      "id": "custom-logic-1755101760535-57jcm6ce3",
-      "type": "custom-logic",
-      "position": {
         "x": 544,
-        "y": 195
+        "y": 0
       },
       "data": {
-        "label": "Custom Logic",
-        "description": "custom-logic node",
-        "config": {},
-        "status": "configuring",
+        "label": "Heater Control",
+        "description": "Digital output for heater control",
+        "config": {
+          "address": "O:0/0",
+          "dataType": "BOOL"
+        },
+        "status": "online",
         "tags": [
-          "custom-logic"
+          "heater",
+          "output",
+          "control"
         ],
-        "lastUpdate": "2025-08-13T16:16:00.535Z"
+        "lastUpdate": "2025-08-18T14:27:20.961Z"
       },
-      "dragHandle": ".drag-handle",
-      "selectable": true,
-      "focusable": true,
       "measured": {
-        "width": 225,
-        "height": 179
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
-      "id": "data-logger-1755101788468-n8vemzoqz",
-      "type": "data-logger",
-      "position": {
-        "x": 816,
-        "y": 195
-      },
-      "data": {
-        "label": "Data Logger",
-        "description": "data-logger node",
-        "config": {},
-        "status": "configuring",
-        "tags": [
-          "data-logger"
-        ],
-        "lastUpdate": "2025-08-13T16:16:28.468Z"
-      },
-      "dragHandle": ".drag-handle",
-      "selectable": true,
-      "focusable": true,
-      "measured": {
-        "width": 163,
+        "width": 190,
         "height": 115
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
-      "id": "custom-logic-1755101829634-ga1z3v7os",
-      "type": "custom-logic",
-      "position": {
-        "x": 1088,
-        "y": 195
-      },
-      "data": {
-        "label": "Custom Logic",
-        "description": "custom-logic node",
-        "config": {},
-        "status": "configuring",
-        "tags": [
-          "custom-logic"
-        ],
-        "lastUpdate": "2025-08-13T16:17:09.634Z"
-      },
-      "dragHandle": ".drag-handle",
-      "selectable": true,
-      "focusable": true,
-      "measured": {
-        "width": 225,
-        "height": 179
-      },
-      "selected": false,
-      "dragging": false
+      }
     }
   ],
-  "edges": [],
+  "edges": [
+    {
+      "id": "demo-edge-1",
+      "source": "demo-plc-input-1",
+      "target": "demo-pid-1",
+      "sourceHandle": "output-0",
+      "targetHandle": "setpoint",
+      "type": "default",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#6B7280"
+      }
+    },
+    {
+      "id": "demo-edge-2",
+      "source": "demo-pid-1",
+      "target": "demo-plc-output-1",
+      "sourceHandle": "output",
+      "targetHandle": "input-0",
+      "type": "default",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#6B7280"
+      }
+    }
+  ],
   "viewport": {
     "x": 0,
     "y": 0,
-    "zoom": 1
+    "zoom": 1.2
   },
   "variables": {}
 }

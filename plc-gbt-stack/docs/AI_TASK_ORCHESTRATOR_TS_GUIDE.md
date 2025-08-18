@@ -193,7 +193,12 @@ const validateTuningQueueEntry = (data: unknown): TuningQueueEntry => {
 
 **BEFORE implementing any API integration OR UI schemas, AI agents MUST:**
 
-1. **Connect to MCP_Docker Server**
+1. **Read API Creation Methodology**
+   - 📘 **MANDATORY**: Review `plc-gbt-stack/docs/API_CREATION_METHODOLOGY.md`
+   - 📋 **CHECKLIST**: Follow `plc-gbt-stack/docs/API_DEVELOPMENT_AGENT_CHECKLIST.md`
+   - 🚨 **ZERO TOLERANCE**: No manual API definitions or schemas allowed
+
+2. **Connect to MCP_Docker Server**
    ```typescript
    // Verify MCP_Docker server connection
    const mcpClient = await connectToMCPDocker()
