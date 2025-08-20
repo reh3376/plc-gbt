@@ -27,19 +27,23 @@ import {
 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import {
+  type ConnectionTestResult,
+  type IndustrialNodeType,
+  type NodePropertySchema,
+  type PropertyField,
+  type ValidationResult,
+} from '@/api/zod-schemas';
 import { nodeSchemaRegistry } from '@/lib/schemas/industrial-node-schemas';
 import { useWorkflowStore } from '@/lib/stores/workflow-store';
 import {
-  ConnectionTestResult,
-  EnhancedPropertiesPanelProps,
-  NodePropertySchema,
-  PropertiesTab,
-  PropertyField,
-  PropertyFieldChangeEvent,
-  ValidationResult,
+  type EnhancedPropertiesPanelProps,
+  type PropertyFieldChangeEvent,
 } from '@/lib/types/enhanced-properties-panel.types';
-import { IndustrialNodeType } from '@/lib/types/workflow-management.types';
 import { cn } from '@/lib/utils/cn';
+
+// Legacy type compatibility
+type PropertiesTab = 'properties' | 'connections' | 'validation' | 'templates' | 'advanced';
 
 // Tab configuration with icons and labels
 const PANEL_TABS: ReadonlyArray<{
@@ -120,7 +124,7 @@ export function EnhancedPropertiesPanel({
 
   // Get selected node and its schema
   const selectedNode = useMemo(() => {
-    return selectedNodes.length === 1 ? (nodes.find(n => n.id === selectedNodes[0]) ?? null) : null;
+    return selectedNodes.length === 1 ? nodes.find(n => n.id === selectedNodes[0]) ?? null : null;
   }, [nodes, selectedNodes]);
 
   const nodeSchema = useMemo((): NodePropertySchema | null => {
@@ -151,19 +155,26 @@ export function EnhancedPropertiesPanel({
     const results: ValidationResult[] = [];
 
     // Validate each group
-    for (const group of nodeSchema.groups) {
-      for (const field of group.fields) {
-        if (field.validation) {
-          const value = editingConfig[field.key];
-          const validationResult = field.validation(value, editingConfig, {
-            nodeType: selectedNode.type as IndustrialNodeType,
-            allNodes: [],
-            connectedNodes: [],
-            workflowConfig: {},
-          });
+    // Get the original schema with validation functions from the registry
+    const originalSchema = nodeSchemaRegistry.getSchema(
+      selectedNode.type as 'pid-controller' | 'modbus-client' | 'opc-server' | 'hmi-display'
+    );
 
-          if (validationResult) {
-            results.push(validationResult);
+    if (originalSchema) {
+      for (const group of originalSchema.groups) {
+        for (const field of group.fields) {
+          if ('validation' in field && typeof field.validation === 'function') {
+            const value = editingConfig[field.key];
+            const validationResult = field.validation(value, editingConfig, {
+              nodeType: selectedNode.type as IndustrialNodeType,
+              allNodes: [],
+              connectedNodes: [],
+              workflowConfig: {},
+            });
+
+            if (validationResult) {
+              results.push(validationResult);
+            }
           }
         }
       }
@@ -234,35 +245,71 @@ export function EnhancedPropertiesPanel({
   // Test connection
   const handleTestConnection = useCallback(
     async (testId: string): Promise<void> => {
-      if (!nodeSchema) return;
+      if (!nodeSchema || !selectedNode) return;
 
       const connectionTest = nodeSchema.connectionTests?.find(test => test.id === testId);
       if (!connectionTest) return;
 
       setIsLoading(true);
       try {
-        const result = await connectionTest.validator(editingConfig);
+        // Use the API endpoint for connection testing instead of direct validator
+        const response = await fetch(
+          `/api/v1/node-properties/${selectedNode.type}/test-connection`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              testId,
+              configuration: editingConfig,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Connection test failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const result = data.result;
+
+        // Convert to legacy format for the old component
+        const legacyResult = {
+          ...result,
+          timestamp: new Date(result.timestamp),
+        };
+
         setConnectionTestResults(prev => ({
           ...prev,
-          [testId]: result,
+          [testId]: result, // Store in new format
         }));
-        onConnectionTest?.(result);
+        onConnectionTest?.(
+          legacyResult as unknown as import('@/lib/types/enhanced-properties-panel.types').ConnectionTestResult
+        ); // Convert for legacy callback
       } catch (error) {
         const errorResult: ConnectionTestResult = {
           success: false,
           message: `Test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          timestamp: new Date(),
+          timestamp: new Date().toISOString(),
         };
+
+        // Convert to legacy format for the old component
+        const legacyResult = {
+          ...errorResult,
+          timestamp: new Date(errorResult.timestamp),
+        };
+
         setConnectionTestResults(prev => ({
           ...prev,
-          [testId]: errorResult,
+          [testId]: errorResult, // Store in new format
         }));
-        onConnectionTest?.(errorResult);
+        onConnectionTest?.(
+          legacyResult as unknown as import('@/lib/types/enhanced-properties-panel.types').ConnectionTestResult
+        ); // Convert for legacy callback
       } finally {
         setIsLoading(false);
       }
     },
-    [nodeSchema, editingConfig, onConnectionTest]
+    [nodeSchema, editingConfig, onConnectionTest, selectedNode]
   );
 
   // Toggle group expansion

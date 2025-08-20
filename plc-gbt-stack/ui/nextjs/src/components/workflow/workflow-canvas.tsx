@@ -444,10 +444,9 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
       </div>
 
       {/* Node Properties Modal */}
-      <NodePropertiesModal
-        isOpen={isPropertiesModalOpen}
-        onClose={() => setIsPropertiesModalOpen(false)}
-      />
+      {isPropertiesModalOpen && (
+        <NodePropertiesModal onClose={() => setIsPropertiesModalOpen(false)} />
+      )}
     </div>
   );
 }

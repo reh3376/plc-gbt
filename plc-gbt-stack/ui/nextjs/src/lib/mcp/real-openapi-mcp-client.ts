@@ -105,7 +105,7 @@ export class RealOpenAPISchemaMCPClient {
 
       // Test connection to Docker MCP server
       const healthCheck = await this.makeRequest('/health', 'GET');
-      
+
       if (!healthCheck.success) {
         throw new Error(`Health check failed: ${healthCheck.error}`);
       }
@@ -118,18 +118,19 @@ export class RealOpenAPISchemaMCPClient {
       console.log('✅ Connected to Docker MCP OpenAPI server');
       console.log(`📊 Loaded ${Object.keys(this.componentSchemas).length} component schemas`);
       console.log(`🔗 Loaded ${this.endpointSchemas.size} API endpoints`);
-
     } catch (error) {
       console.error('❌ Failed to connect to Docker MCP server:', error);
-      
+
       if (this.connectionRetries < this.maxRetries) {
         this.connectionRetries++;
-        console.log(`🔄 Retrying connection (${this.connectionRetries}/${this.maxRetries}) in ${this.retryDelay}ms...`);
-        
+        console.log(
+          `🔄 Retrying connection (${this.connectionRetries}/${this.maxRetries}) in ${this.retryDelay}ms...`
+        );
+
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
         return this.connect();
       }
-      
+
       console.warn('⚠️ Max retries reached. Using fallback mode.');
       this.isConnected = false;
       throw error;
@@ -143,7 +144,7 @@ export class RealOpenAPISchemaMCPClient {
     try {
       // Request schemas from Docker MCP server
       const schemasResponse = await this.makeRequest('/schemas/openapi', 'GET');
-      
+
       if (!schemasResponse.success) {
         throw new Error(`Failed to load schemas: ${schemasResponse.error}`);
       }
@@ -162,7 +163,6 @@ export class RealOpenAPISchemaMCPClient {
       }
 
       console.log('📋 Schemas loaded from Docker MCP server');
-      
     } catch (error) {
       console.error('❌ Failed to load schemas from MCP:', error);
       throw error;
@@ -173,41 +173,41 @@ export class RealOpenAPISchemaMCPClient {
    * Make HTTP request to Docker MCP server
    */
   private async makeRequest(
-    path: string, 
+    path: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     body?: unknown
   ): Promise<DockerMCPResponse> {
     try {
       const url = `${this.mcpServerUrl}${path}`;
-      
+
       const requestOptions: RequestInit = {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       };
-      
+
       if (body) {
         requestOptions.body = JSON.stringify(body);
       }
 
       const response = await fetch(url, requestOptions);
-      
+
       if (!response.ok) {
         return {
           success: false,
-          error: `HTTP ${response.status}: ${response.statusText}`
+          error: `HTTP ${response.status}: ${response.statusText}`,
         };
       }
 
       const data = await response.json();
-      
+
       const result: DockerMCPResponse = {
         success: true,
         data,
       };
-      
+
       if (data && typeof data === 'object' && data !== null) {
         const dataObj = data as Record<string, unknown>;
         if (dataObj.schemas) {
@@ -217,13 +217,12 @@ export class RealOpenAPISchemaMCPClient {
           result.endpoints = dataObj.endpoints as OpenAPIEndpoint[];
         }
       }
-      
+
       return result;
-      
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -246,7 +245,7 @@ export class RealOpenAPISchemaMCPClient {
       const validationResponse = await this.makeRequest('/validate/request', 'POST', {
         method: method.toUpperCase(),
         path,
-        data
+        data,
       });
 
       if (!validationResponse.success) {
@@ -256,14 +255,13 @@ export class RealOpenAPISchemaMCPClient {
 
       return {
         valid: true,
-        data: validationResponse.data
+        data: validationResponse.data,
       };
-
     } catch (error) {
       console.warn('⚠️ Request validation error:', error);
-      return { 
-        valid: false, 
-        errors: [error instanceof Error ? error.message : 'Validation error'] 
+      return {
+        valid: false,
+        errors: [error instanceof Error ? error.message : 'Validation error'],
       };
     }
   }
@@ -288,30 +286,29 @@ export class RealOpenAPISchemaMCPClient {
         method: method.toUpperCase(),
         path,
         statusCode,
-        data
+        data,
       });
 
       if (!validationResponse.success) {
         console.warn(`⚠️ Response validation failed: ${validationResponse.error}`);
-        return { 
-          valid: false, 
+        return {
+          valid: false,
           errors: [validationResponse.error || 'Validation failed'],
-          statusCode 
+          statusCode,
         };
       }
 
       return {
         valid: true,
         data: validationResponse.data,
-        statusCode
+        statusCode,
       };
-
     } catch (error) {
       console.warn('⚠️ Response validation error:', error);
-      return { 
-        valid: false, 
+      return {
+        valid: false,
         errors: [error instanceof Error ? error.message : 'Validation error'],
-        statusCode 
+        statusCode,
       };
     }
   }
@@ -343,12 +340,12 @@ export class RealOpenAPISchemaMCPClient {
    */
   generateTypeScriptTypes(): string {
     const types: string[] = [];
-    
+
     for (const [name, schema] of Object.entries(this.componentSchemas)) {
       const typeDefinition = this.schemaToTypeScript(name, schema);
       types.push(typeDefinition);
     }
-    
+
     return types.join('\n\n');
   }
 
@@ -358,21 +355,21 @@ export class RealOpenAPISchemaMCPClient {
   private schemaToTypeScript(name: string, schema: OpenAPISchema): string {
     // Basic TypeScript type generation
     // This is a simplified implementation - a full implementation would handle all OpenAPI features
-    
+
     if (schema.type === 'object' && schema.properties) {
       const properties: string[] = [];
-      
+
       for (const [propName, propSchema] of Object.entries(schema.properties)) {
         const isRequired = schema.required?.includes(propName) ?? false;
         const optional = isRequired ? '' : '?';
         const propType = this.getTypeScriptType(propSchema);
-        
+
         properties.push(`  ${propName}${optional}: ${propType};`);
       }
-      
+
       return `export interface ${name} {\n${properties.join('\n')}\n}`;
     }
-    
+
     return `export type ${name} = ${this.getTypeScriptType(schema)};`;
   }
 
@@ -385,7 +382,7 @@ export class RealOpenAPISchemaMCPClient {
       const refParts = schema.$ref.split('/');
       return refParts[refParts.length - 1];
     }
-    
+
     switch (schema.type) {
       case 'string':
         return schema.enum ? schema.enum.map(v => `'${v}'`).join(' | ') : 'string';

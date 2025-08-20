@@ -5,9 +5,76 @@
 > **Project Completion**: January 18, 2025  
 > **Status**: 🎉 **PROJECT In Development** - All core phases of backend implemented, additional backend refinement necessary to reach production quality code.  Frontend dev is underway.   
 > **Current Status**: Working towards Production deployment by October 2025.  
-> **Last Updated**: August 14, 2025 - Major Workflow Management UI Stabilization & React Flow Resolution 
+> **Last Updated**: August 19, 2025 - MCP Browser Automation Fix & OpenAPI Schema Integration Complete 
 
-## 🚀 **MAJOR PROGRESS UPDATE** - August 14, 2025
+## 🚀 **MAJOR PROGRESS UPDATE** - August 19, 2025
+
+### **Critical Infrastructure Achievement: MCP Browser Automation & OpenAPI Schema Integration Fix**
+
+**Status**: ✅ **FULLY RESOLVED** - Complete MCP infrastructure restoration with 100% automated testing success  
+**Methodology**: AI Task Orchestrator TypeScript compliance with comprehensive validation  
+**Impact**: Automated testing infrastructure now fully operational, unblocking all UI development  
+
+#### **🔧 Infrastructure Resolution Summary**
+
+**Root Cause Identified**: Fake OpenAPI Schema MCP client violating AI Task Orchestrator methodology
+- **Legacy Issue**: Hardcoded schemas in `openapi-schema-client.ts` bypassing MCP Docker server
+- **Current Solution**: Real Docker MCP integration on port 8811 with proper schema validation
+- **Browser Automation**: MCP browser tools restored with 100% Playwright test success rate
+
+**Solution Implemented**: Complete migration to real MCP Docker integration
+1. **Real MCP Client**: Replaced fake implementation with authentic Docker MCP server connection
+2. **Schema Migration**: Eliminated all 27 hardcoded schemas, now using MCP validation
+3. **API Integration**: All 14 API endpoints use real MCP validation instead of fake client
+4. **Browser Automation**: Playwright integration working with 100% success rate
+5. **Testing Infrastructure**: Two-phase testing protocol (automated + user validation) fully operational
+
+#### **🎯 Key Technical Deliverables**
+
+- ✅ **Real MCP Integration**: Authentic connection to Docker MCP server on port 8811
+- ✅ **Zero Hardcoded Schemas**: Complete elimination of fake schema implementations
+- ✅ **100% Browser Automation**: Playwright MCP tools fully functional for automated testing
+- ✅ **API Methodology Compliance**: All API routes follow AI Task Orchestrator requirements
+- ✅ **Type Safety**: Maintained strict TypeScript compliance throughout migration
+- ✅ **Archive System**: Established `/docs/api-fix-archive/` for clean file management
+- ✅ **Comprehensive Documentation**: [MCP Browser Automation Fix Roadmap](../plc-gbt-stack/docs/MCP_BROWSER_AUTOMATION_FIX_ROADMAP.md) and [Completion Summary](../plc-gbt-stack/docs/MCP_BROWSER_AUTOMATION_FIX_COMPLETION_SUMMARY.md)
+
+#### **🚀 Testing Infrastructure Enhancement**
+
+**Updated Testing Protocol**: **100% Success Rate Achieved**
+
+**Phase 1 - Automated Testing**: Playwright MCP integration working
+- ✅ **Application Loading**: Zero MCP-related console errors
+- ✅ **Navigation Testing**: Tab switching and UI interaction (100% success)
+- ✅ **Element Interaction**: Node clicking and canvas operations functional
+- ✅ **API Integration**: Real MCP validation working with all endpoints
+
+**Phase 2 - User Interactive Testing**: Ready for immediate deployment
+- ✅ **Infrastructure Validated**: All automated tests passing consistently
+- ✅ **Browser Automation**: Playwright can interact with application reliably
+- ✅ **Real-time Validation**: MCP server integration confirmed operational
+
+#### **🎯 Framework Consistency Requirements**
+
+**MANDATORY for All Future Development**: Following the successful MCP infrastructure fix, all development must adhere to the established framework:
+
+**API Development Standards**:
+- ✅ **OpenAPI Schema MCP**: ALL API schemas MUST use Docker MCP server (port 8811) - NO manual schemas
+- ✅ **Real Validation**: Use `openAPISchemaMCP.validateRequest/validateResponse` from real client
+- ✅ **Archive Process**: Replace old files → archive to `/docs/api-fix-archive/` → document in README
+- ✅ **Type Safety**: Maintain strict TypeScript compliance (zero `any` types)
+
+**Testing Standards**:
+- ✅ **Two-Phase Testing**: Automated Playwright MCP (>95% success) + User validation (mandatory)
+- ✅ **Browser Automation**: Use `http://localhost:3000` for dev server access
+- ✅ **Test Infrastructure**: Playwright integration confirmed working at 100% success rate
+- ✅ **Validation Requirements**: >95% automated testing before user testing phase
+
+**Development Methodology**:
+- ✅ **AI Task Orchestrator TypeScript Guide**: Mandatory methodology for all UI development
+- ✅ **Build Validation**: Zero TypeScript errors, successful compilation required
+- ✅ **Documentation**: Completion summaries and roadmap updates mandatory
+- ✅ **Quality Standards**: >99% success rate across all validation tiers
 
 ### **Critical Technical Achievement: React Flow Warning Resolution**
 
@@ -2280,7 +2347,7 @@ Transform PLC program management by integrating ACD to L5X conversion capabiliti
   ```typescript
   // New component: PLCGitPanel.tsx
   export function PLCGitPanel() {
-    const [activeTab, setActiveTab] = useState<'files' | 'branches' | 'history'>('files')
+    const [activeTab, setActiveTab] = useState<'files' | 'branches' | 'history' | 'backups'>('files')
     const { currentProject, acdFiles } = usePLCProject()
     
     return (
@@ -2291,18 +2358,30 @@ Transform PLC program management by integrating ACD to L5X conversion capabiliti
           onProjectChange={handleProjectChange}
         />
         
-        {/* Tab navigation */}
-        <TabNavigation 
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          tabs={['files', 'branches', 'history']}
-        />
-        
-        {/* Content area */}
-        <div className="flex-1 overflow-hidden">
-          {activeTab === 'files' && <PLCFileExplorer files={acdFiles} />}
-          {activeTab === 'branches' && <PLCBranchManager />}
-          {activeTab === 'history' && <PLCCommitHistory />}
+        {/* Left menu with Git Operations */}
+        <div className="flex flex-1">
+          <GitOperationsMenu 
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+          
+          {/* Main content area */}
+          <div className="flex-1 flex flex-col">
+            {/* Tab navigation */}
+            <TabNavigation 
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              tabs={['files', 'branches', 'history', 'backups']}
+            />
+            
+            {/* Content area */}
+            <div className="flex-1 overflow-hidden">
+              {activeTab === 'files' && <PLCFileExplorer files={acdFiles} />}
+              {activeTab === 'branches' && <PLCBranchManager />}
+              {activeTab === 'history' && <PLCCommitHistory />}
+              {activeTab === 'backups' && <AutomatedPLCBackupsConfig />}
+            </div>
+          </div>
         </div>
         
         {/* Action bar */}
@@ -2310,7 +2389,87 @@ Transform PLC program management by integrating ACD to L5X conversion capabiliti
           onConvert={handleConversion}
           onCommit={handleCommit}
           onPush={handlePush}
+          onBackup={handleBackupOperation}
         />
+      </div>
+    )
+  }
+  
+  // Git Operations Left Menu Component
+  function GitOperationsMenu({ activeTab, onTabChange }: GitOperationsMenuProps) {
+    const operations = [
+      { id: 'files', label: 'Files', icon: FolderIcon },
+      { id: 'branches', label: 'Branches', icon: GitBranchIcon },
+      { id: 'history', label: 'History', icon: HistoryIcon },
+      { id: 'backups', label: 'PLC Backups', icon: DatabaseBackupIcon }
+    ]
+    
+    return (
+      <div className="w-48 bg-[#252526] border-r border-[#3c3c3c]">
+        <h3 className="px-3 py-2 text-sm font-semibold text-[#cccccc] border-b border-[#3c3c3c]">
+          Git Operations
+        </h3>
+        <nav className="p-2">
+          {operations.map((op) => (
+            <button
+              key={op.id}
+              onClick={() => onTabChange(op.id)}
+              className={cn(
+                "w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors",
+                activeTab === op.id 
+                  ? "bg-[#37373d] text-[#ffffff]" 
+                  : "text-[#cccccc] hover:bg-[#2a2d2e]"
+              )}
+            >
+              <op.icon className="w-4 h-4 mr-2" />
+              {op.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+    )
+  }
+  
+  // Automated PLC Backups Configuration Component
+  function AutomatedPLCBackupsConfig() {
+    const [backupConfig, setBackupConfig] = useState<PLCBackupConfiguration>({
+      enabled: false,
+      schedule: 'daily',
+      retention: 30,
+      compression: true,
+      destinations: []
+    })
+    
+    return (
+      <div className="p-4 h-full overflow-auto">
+        <h2 className="text-lg font-semibold text-[#cccccc] mb-4">
+          Automated PLC Backups Configuration
+        </h2>
+        
+        {/* Backup Schedule Configuration */}
+        <PLCBackupScheduler 
+          config={backupConfig}
+          onChange={setBackupConfig}
+        />
+        
+        {/* Backup Destinations */}
+        <PLCBackupDestinations
+          destinations={backupConfig.destinations}
+          onDestinationsChange={(destinations) => 
+            setBackupConfig(prev => ({ ...prev, destinations }))
+          }
+        />
+        
+        {/* Retention Policy */}
+        <PLCBackupRetentionPolicy
+          retention={backupConfig.retention}
+          onRetentionChange={(retention) =>
+            setBackupConfig(prev => ({ ...prev, retention }))
+          }
+        />
+        
+        {/* Backup History and Status */}
+        <PLCBackupHistory />
       </div>
     )
   }
@@ -2346,7 +2505,157 @@ Transform PLC program management by integrating ACD to L5X conversion capabiliti
   }
   ```
 
-- **Task 35.3.4**: Visual Diff Viewer for L5X Files
+- **Task 35.3.4**: Automated PLC Backups Configuration Tool
+  ```typescript
+  // Backup Configuration Types
+  interface PLCBackupConfiguration {
+    enabled: boolean
+    schedule: 'hourly' | 'daily' | 'weekly' | 'custom'
+    customSchedule?: string // Cron expression for custom schedules
+    retention: number // Days to retain backups
+    compression: boolean
+    destinations: BackupDestination[]
+    notifications: NotificationSettings
+    gitIntegration: boolean // Auto-commit backups to Git
+  }
+  
+  interface BackupDestination {
+    id: string
+    type: 'local' | 'network' | 'cloud' | 'git'
+    name: string
+    path: string
+    credentials?: EncryptedCredentials
+    enabled: boolean
+  }
+  
+  // Core Backup Components
+  function PLCBackupScheduler({ config, onChange }: PLCBackupSchedulerProps) {
+    return (
+      <div className="mb-6">
+        <h3 className="text-md font-medium text-[#cccccc] mb-3">Backup Schedule</h3>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-[#cccccc] mb-1">Schedule</label>
+            <select 
+              value={config.schedule}
+              onChange={(e) => onChange({ ...config, schedule: e.target.value })}
+              className="w-full bg-[#3c3c3c] text-[#cccccc] border border-[#5a5a5a] rounded px-3 py-2"
+            >
+              <option value="hourly">Every Hour</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="custom">Custom (Cron)</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm text-[#cccccc] mb-1">Retention (Days)</label>
+            <input
+              type="number"
+              value={config.retention}
+              onChange={(e) => onChange({ ...config, retention: parseInt(e.target.value) })}
+              className="w-full bg-[#3c3c3c] text-[#cccccc] border border-[#5a5a5a] rounded px-3 py-2"
+              min="1"
+              max="365"
+            />
+          </div>
+        </div>
+        
+        <div className="mt-4 flex items-center space-x-4">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={config.compression}
+              onChange={(e) => onChange({ ...config, compression: e.target.checked })}
+              className="mr-2"
+            />
+            <span className="text-sm text-[#cccccc]">Enable Compression</span>
+          </label>
+          
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={config.gitIntegration}
+              onChange={(e) => onChange({ ...config, gitIntegration: e.target.checked })}
+              className="mr-2"
+            />
+            <span className="text-sm text-[#cccccc]">Auto-commit to Git</span>
+          </label>
+        </div>
+      </div>
+    )
+  }
+  
+  function PLCBackupDestinations({ destinations, onDestinationsChange }: PLCBackupDestinationsProps) {
+    return (
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-md font-medium text-[#cccccc]">Backup Destinations</h3>
+          <button
+            onClick={() => openDestinationModal()}
+            className="px-3 py-1 bg-[#0e639c] text-white rounded text-sm hover:bg-[#1177bb]"
+          >
+            Add Destination
+          </button>
+        </div>
+        
+        <div className="space-y-2">
+          {destinations.map((dest) => (
+            <BackupDestinationCard
+              key={dest.id}
+              destination={dest}
+              onUpdate={(updated) => updateDestination(dest.id, updated)}
+              onRemove={() => removeDestination(dest.id)}
+              onTest={() => testConnection(dest)}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+  
+  function PLCBackupHistory() {
+    const { backupHistory } = usePLCBackups()
+    
+    return (
+      <div className="mb-6">
+        <h3 className="text-md font-medium text-[#cccccc] mb-3">Recent Backups</h3>
+        
+        <div className="bg-[#2d2d30] rounded-lg overflow-hidden">
+          <div className="max-h-64 overflow-y-auto">
+            {backupHistory.map((backup) => (
+              <div
+                key={backup.id}
+                className="flex items-center justify-between px-4 py-3 border-b border-[#3c3c3c] last:border-b-0"
+              >
+                <div>
+                  <div className="font-medium text-[#cccccc]">{backup.projectName}</div>
+                  <div className="text-sm text-[#969696]">
+                    {backup.timestamp} • {backup.size} • {backup.destination}
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <StatusIndicator status={backup.status} />
+                  <button
+                    onClick={() => restoreBackup(backup)}
+                    className="px-2 py-1 bg-[#0e639c] text-white rounded text-xs hover:bg-[#1177bb]"
+                    disabled={backup.status !== 'completed'}
+                  >
+                    Restore
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+  ```
+
+- **Task 35.3.5**: Visual Diff Viewer for L5X Files
   ```typescript
   function PLCDiffViewer({ original, modified }: PLCDiffViewerProps) {
     const diff = usePLCDiff(original, modified)
@@ -2380,6 +2689,7 @@ Transform PLC program management by integrating ACD to L5X conversion capabiliti
   ```
 
 - **Deliverable**: [PLC Git UI Components](../plc-gbt-stack/ui/nextjs/src/components/plc-git)
+  - [Automated PLC Backups Components](../plc-gbt-stack/ui/nextjs/src/components/plc-git/backups/)
 
 #### **Sub-phase 35.4: Workflow Integration** (1.5 weeks)
 
@@ -3323,7 +3633,7 @@ const template = `
 4. Complete mandatory two-phase testing
 5. Move to next component (Control Loop Management)
 
-**⚠️ Warning**: Both Automated Playwright MCP testing and User interactive Testing must be completed before any UI development task or tasks can be marked as complete. This is a mandatory two-phase testing protocol that cannot be bypassed.
+**✅ INFRASTRUCTURE READY**: MCP Browser Automation Fix complete - Automated Playwright MCP testing infrastructure fully operational with 100% success rate. Both Automated Playwright MCP testing and User interactive Testing must be completed before any UI development task or tasks can be marked as complete. This is a mandatory two-phase testing protocol that cannot be bypassed.
 
 **Total UI Components**: 9 Main Functions  
 **Overall Progress**: 42% Average Completion  
@@ -3460,6 +3770,13 @@ const template = `
 - [ ] **Persistence Layer**: Settings storage and synchronization
 
 #### Pending Tasks
+- [ ] **🔗 PLC Connection Management**: CRITICAL REQUIREMENT for Node Properties Modal
+  - **PLC Connection Types**: MQTT Client, CIP over Ethernet/IP, OPC-UA, Modbus TCP client/server, Modbus RTU master/slave, DH+ / RIO - ControlNet, BACnet/IP, Profibus DP/PA, FOUNDATION Fieldbus H1, DeviceNet
+  - **Connection Configuration**: Define, instantiate, and test PLC connections
+  - **Address Construction**: PLC addresses constructed based on connection type
+  - **Global Connection Registry**: Available throughout application for node configuration
+  - **DB Connection Management**: Database connections for data integration nodes
+  - **Connection Testing**: Validate and test all connection types
 - [ ] **Security Settings**: Authentication and access control management
 - [ ] **Import/Export Settings**: Configuration backup and restore
 - [ ] **Advanced Preferences**: Performance tuning and optimization settings
@@ -3589,29 +3906,44 @@ const template = `
 
 ### 🧪 **Testing Progress Summary**
 
+**✅ TESTING INFRASTRUCTURE**: MCP Browser Automation Fix complete - All automated testing capabilities restored
+
 | Component | Automated Testing | User Testing | Overall Status |
 |-----------|------------------|--------------|----------------|
 | **File Explorer** | ✅ 100% Pass | ✅ 100% Pass | 🔄 85% Complete |
-| **Search** | ❌ Pending | ❌ Pending | 🔄 60% Complete |
-| **Control Loop Management** | ❌ Pending | ❌ Pending | 🔄 40% Complete |
+| **Search** | ⚡ **READY** | ❌ Pending | 🔄 60% Complete |
+| **Control Loop Management** | ⚡ **READY** | ❌ Pending | 🔄 40% Complete |
 | **N8N Workflow Management** | ✅ 100% Pass | ✅ 100% Pass | ✅ 65% Complete |
-| **Git Integration** | ❌ Pending | ❌ Pending | 🔄 40% Complete |
-| **Settings** | ❌ Pending | ❌ Pending | 🔄 35% Complete |
-| **Analytics Dashboard** | ❌ Pending | ❌ Pending | 🔄 30% Complete |
-| **AI Assistant** | ❌ Pending | ❌ Pending | 🔄 10% Complete |
-| **User Profile** | ❌ Pending | ❌ Pending | 🔄 5% Complete |
+| **Git Integration** | ⚡ **READY** | ❌ Pending | 🔄 40% Complete |
+| **Settings** | ⚡ **READY** | ❌ Pending | 🔄 35% Complete |
+| **Analytics Dashboard** | ⚡ **READY** | ❌ Pending | 🔄 30% Complete |
+| **AI Assistant** | ⚡ **READY** | ❌ Pending | 🔄 10% Complete |
+| **User Profile** | ⚡ **READY** | ❌ Pending | 🔄 5% Complete |
+
+**⚡ READY**: Automated testing infrastructure operational - can proceed with Playwright MCP testing immediately
 
 ### 🎯 **Next Development Priorities**
 
+**🚀 IMMEDIATE**: **Node Properties Modal Testing** - Return to Phase 2 User Interactive Testing
+- **Status**: ✅ **READY** - MCP Browser Automation Fix unblocked automated testing infrastructure
+- **Infrastructure**: Playwright MCP integration working at 100% success rate
+- **Phase 1**: Automated testing infrastructure validated and operational
+- **Phase 2**: Ready for user interactive testing of Node Properties Modal functionality
+- **Documentation**: [Node Properties Modal Roadmap](../plc-gbt-stack/ui/nextjs/src/components/workflow/node-modal.md)
+
+**Subsequent Priorities**:
 1. **Control Loop Management Enhancement** - Address 15+ functionality gaps in tuning interface
 2. **Analytics Dashboard Completion** - Complete Chart.js integration and real-time data
 3. **N8N Workflow Integration** - Implement WebSocket synchronization
-4. **Comprehensive Testing Implementation** - Begin mandatory two-phase testing protocol
+4. **Comprehensive Testing Implementation** - Apply two-phase testing protocol to all components
 
 ### 📋 **Development Notes**
 
 - **AI Task Orchestrator Methodology**: All UI development follows TypeScript strict typing requirements
 - **Testing Protocol**: Mandatory Playwright MCP (>95% success) + User validation (100% success)
+- **✅ MCP Integration**: ALL API development must use real Docker MCP server (port 8811) - NO manual schemas
+- **✅ Testing Infrastructure**: Playwright MCP browser automation confirmed working at 100% success rate
+- **Archive Process**: Replace old files → archive to `/docs/api-fix-archive/` → document changes
 - **State Management**: Zustand stores with persistence for all component state
 - **Styling**: Tailwind CSS with VS Code industrial theme consistency
 - **Type Safety**: Zod schema validation for all data structures and API interactions

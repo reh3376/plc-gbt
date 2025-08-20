@@ -1,26 +1,19 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { cn } from '@/lib/utils/cn'
-import { 
-  Wifi, 
-  WifiOff, 
-  Database,
-  Cpu,
-  MemoryStick,
-  Clock
-} from 'lucide-react'
+import { cn } from '@/lib/utils/cn';
+import { Clock, Cpu, Database, MemoryStick, Wifi, WifiOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface FooterProps {
-  className?: string
+  className?: string;
 }
 
 interface SystemStatus {
-  connected: boolean
-  activeConnections: number
-  memoryUsage: number
-  cpuUsage: number
-  uptime: string
+  connected: boolean;
+  activeConnections: number;
+  memoryUsage: number;
+  cpuUsage: number;
+  uptime: string;
 }
 
 export function Footer({ className }: FooterProps) {
@@ -29,28 +22,39 @@ export function Footer({ className }: FooterProps) {
     activeConnections: 3,
     memoryUsage: 45,
     cpuUsage: 12,
-    uptime: '2h 15m'
-  })
+    uptime: '2h 15m',
+  });
 
-  // Mock real-time status updates
+  // Mock real-time status updates with proper cleanup and error handling
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStatus(prev => ({
-        ...prev,
-        memoryUsage: Math.max(30, Math.min(80, prev.memoryUsage + (Math.random() - 0.5) * 5)),
-        cpuUsage: Math.max(5, Math.min(50, prev.cpuUsage + (Math.random() - 0.5) * 10)),
-      }))
-    }, 5000)
+    let interval: NodeJS.Timeout | null = null;
 
-    return () => clearInterval(interval)
-  }, [])
+    try {
+      interval = setInterval(() => {
+        setStatus(prev => ({
+          ...prev,
+          memoryUsage: Math.max(30, Math.min(80, prev.memoryUsage + (Math.random() - 0.5) * 5)),
+          cpuUsage: Math.max(5, Math.min(50, prev.cpuUsage + (Math.random() - 0.5) * 10)),
+        }));
+      }, 5000);
+    } catch (error) {
+      console.error('Footer status update error:', error);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+  }, []);
 
   return (
-    <footer 
-      id="footer-row" 
+    <footer
+      id="footer-row"
       className={cn(
-        "h-6 bg-[#007acc] border-t border-[#005a9e]",
-        "flex items-center justify-between px-2 text-white text-xs select-none",
+        'h-6 bg-[#007acc] border-t border-[#005a9e]',
+        'flex items-center justify-between px-2 text-white text-xs select-none',
         className
       )}
     >
@@ -108,20 +112,18 @@ export function Footer({ className }: FooterProps) {
         </div>
 
         {/* Version */}
-        <div className="text-[#cce7f0]">
-          PLC-GBT v1.0.0
-        </div>
+        <div className="text-[#cce7f0]">PLC-GBT v1.0.0</div>
       </div>
     </footer>
-  )
+  );
 }
 
 /**
  * Footer Component
- * 
+ *
  * @description Fixed 24px height status bar spanning full width
  * @specification Matches VS Code status bar design from main-ui-spec.md
- * 
+ *
  * @features
  * - Fixed 24px height (h-6 = 1.5rem = 24px)
  * - System status indicators on left
@@ -129,9 +131,9 @@ export function Footer({ className }: FooterProps) {
  * - Version info on right
  * - Real-time status updates
  * - VS Code inspired blue theme
- * 
+ *
  * @accessibility
  * - Semantic footer element
  * - Clear status indicators
  * - Keyboard accessible buttons
- */ 
+ */

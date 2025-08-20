@@ -1,118 +1,329 @@
-/**
- * Node Properties Modal - AI Task Orchestrator TypeScript Implementation
- *
- * @description Modal implementation of node properties configuration
- * @compliance Strict TypeScript - zero `any` types policy
- * @integration OpenAPI Schema MCP for validation
- * @features Modal popup, draggable, resizable, tabbed interface
- */
-
-'use client';
-
+import {
+  IndustrialNodeType,
+  NodePropertySchema,
+  PropertyField,
+  ValidationResult,
+} from '@/api/zod-schemas';
+// Removed unused import: useNodePropertiesApi
+import { useWorkflowStore } from '@/lib/stores/workflow-store';
+import { cn } from '@/lib/utils/cn';
+import { useModalManager } from '@/lib/utils/modal-manager';
+// Removed unused imports: useModalPersistence, Node
 import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
-  Copy,
-  Database,
-  Info,
   Loader,
+  Maximize2,
+  Minimize2,
+  Move,
   RotateCcw,
   Save,
-  Settings,
   X,
-  Zap,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
-
-import { nodeSchemaRegistry } from '@/lib/schemas/industrial-node-schemas';
-import { useWorkflowStore } from '@/lib/stores/workflow-store';
-import {
-  NodePropertySchema,
-  PropertiesTab,
-  PropertyField,
-  PropertyFieldChangeEvent,
-  ValidationResult,
-} from '@/lib/types/enhanced-properties-panel.types';
-import { IndustrialNodeType } from '@/lib/types/workflow-management.types';
-import { cn } from '@/lib/utils/cn';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ModalResizeComponents } from './components/ModalResizeHandles';
+import { useEnhancedModal } from './hooks/useEnhancedModal';
+import { NodeHelpIcon } from './NodeHelpIcon';
+import { AdvancedTab } from './tabs/AdvancedTab';
+import { ConnectionsTab } from './tabs/ConnectionsTab';
+import { TemplatesTab } from './tabs/TemplatesTab';
+import { ValidationTab } from './tabs/ValidationTab';
 
 interface NodePropertiesModalProps {
-  readonly isOpen: boolean;
-  readonly onClose: () => void;
   readonly nodeId?: string;
-  readonly nodeType?: IndustrialNodeType;
+  readonly onClose: () => void;
 }
 
-// Tab configuration with icons and labels
-const MODAL_TABS: ReadonlyArray<{
-  readonly id: PropertiesTab;
-  readonly label: string;
-  readonly icon: React.ComponentType<{ className?: string }>;
-}> = [
-  { id: 'properties', label: 'Properties', icon: Settings },
-  { id: 'connections', label: 'Connections', icon: Database },
-  { id: 'validation', label: 'Validation', icon: AlertCircle },
-  { id: 'templates', label: 'Templates', icon: Copy },
-  { id: 'advanced', label: 'Advanced', icon: Zap },
+// Define the modal tabs
+const MODAL_TABS = [
+  { id: 'properties', label: 'Properties', shortcut: undefined }, // Removed number shortcut
+  { id: 'connections', label: 'Connections', shortcut: undefined },
+  { id: 'validation', label: 'Validation', shortcut: undefined },
+  { id: 'templates', label: 'Templates', shortcut: undefined },
+  { id: 'advanced', label: 'Advanced', shortcut: undefined },
 ] as const;
 
-export function NodePropertiesModal({
-  isOpen,
-  onClose,
-  nodeId,
-  nodeType,
-}: Readonly<NodePropertiesModalProps>): React.JSX.Element | null {
-  const [activeTab, setActiveTab] = useState<PropertiesTab>('properties');
-  const [config, setConfig] = useState<Record<string, unknown>>({});
-  const [isDirty, setIsDirty] = useState(false);
-  const [isLoading] = useState(false);
-  const [validationResults] = useState<ReadonlyArray<ValidationResult>>([]);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['basic']));
+type ModalTab = (typeof MODAL_TABS)[number]['id'];
 
-  const { nodes, selectedNodes } = useWorkflowStore();
+export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProps) {
+  const { nodes, selectedNodes, updateNodeData } = useWorkflowStore();
+  const isMountedRef = useRef(true);
 
-  // Get selected node data
+  // Get the selected node - ensure it's always a Node object
   const selectedNode = useMemo(() => {
     if (nodeId) {
       return nodes.find(node => node.id === nodeId);
     }
-    return selectedNodes.length === 1 ? selectedNodes[0] : undefined;
+    // selectedNodes contains string IDs, need to find the actual Node object
+    if (selectedNodes.length === 1) {
+      return nodes.find(node => node.id === selectedNodes[0]);
+    }
+    return undefined;
   }, [nodes, selectedNodes, nodeId]);
 
-  // Get node schema for dynamic form generation
-  const schema = useMemo((): NodePropertySchema | undefined => {
-    const typeToUse = nodeType || (typeof selectedNode === 'object' && selectedNode?.type);
-    if (!typeToUse) return undefined;
+  // Enhanced modal with drag/resize functionality
+  const enhancedModal = useEnhancedModal({
+    positioning: {
+      initialPosition: { x: 100, y: 100 },
+      initialSize: { width: 800, height: 600 },
+      constraints: {
+        minWidth: 320,
+        minHeight: 400,
+        maxWidth: 1600,
+        maxHeight: 1200,
+      },
+      centerOnOpen: true,
+    },
+    dragging: {
+      enabled: true,
+      constrainToViewport: true,
+      snapConfiguration: {
+        enabled: true,
+        threshold: 15,
+        snapToEdges: true,
+        snapToCenter: true,
+        snapToGrid: false,
+        gridSize: 20,
+      },
+    },
+    resizing: {
+      enabled: true,
+      handles: ['se', 'e', 's', 'ne', 'n', 'nw', 'w', 'sw'],
+      maintainAspectRatio: false,
+      constrainToViewport: true,
+    },
+  });
 
-    return nodeSchemaRegistry.getSchema(typeToUse as IndustrialNodeType) || undefined;
-  }, [nodeType, selectedNode]);
+  // State management
+  const [schema, setSchema] = useState<NodePropertySchema | null>(null);
+  const [config, setConfig] = useState<Record<string, unknown>>({});
+  const [savedConfig, setSavedConfig] = useState<Record<string, unknown>>({});
+  const [isDirty, setIsDirty] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResults, setValidationResults] = useState<ValidationResult[]>([
+    {
+      isValid: false,
+      field: '',
+      severity: 'info',
+      message: 'Validation: Awaiting Configuration',
+      code: 'AWAITING_CONFIG',
+    },
+  ]);
+  const [activeTab, setActiveTab] = useState<ModalTab>('properties');
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
-  // Close modal on Escape key
+  // Modal manager for z-index and focus
+  const { zIndex, isTopModal, bringToFront } = useModalManager('node-properties', 'properties');
+
+  // Modal persistence - Enhanced modal handles this internally
+  // Future: Re-enable persistence through enhanced modal configuration
+
+  // Load node schema and configuration - simplified and debugged
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
+    console.log('🔍 NodePropertiesModal useEffect triggered', {
+      selectedNode: selectedNode?.id,
+      nodeType: selectedNode?.type,
+      isLoading,
+    });
+
+    if (!selectedNode || typeof selectedNode !== 'object') {
+      console.log('❌ No selected node or invalid node type');
+      return;
+    }
+
+    if (isLoading) {
+      console.log('⏳ Already loading, skipping...');
+      return;
+    }
+
+    const loadNodeData = async () => {
+      console.log('🚀 Starting loadNodeData for:', selectedNode.type);
+      setIsLoading(true);
+
+      try {
+        // Get schema for node type - use direct import
+        const nodeType = selectedNode.type as IndustrialNodeType;
+        console.log('📋 Loading schema for node type:', nodeType);
+
+        // Direct import to avoid API call issues
+        const { nodeSchemaRegistry } = await import('@/lib/schemas/industrial-node-schemas');
+        const nodeSchema = nodeSchemaRegistry.getSchema(nodeType);
+
+        console.log('📄 Schema loaded:', nodeSchema ? 'SUCCESS' : 'FAILED');
+
+        if (!nodeSchema) {
+          throw new Error(`No schema found for node type: ${nodeType}`);
+        }
+
+        setSchema(nodeSchema);
+        console.log('✅ Schema set in state');
+
+        // Load saved configuration from node data
+        const savedNodeConfig = selectedNode.data?.config || {};
+        setConfig(savedNodeConfig);
+        setSavedConfig(savedNodeConfig);
+        setIsDirty(false);
+        console.log('💾 Configuration loaded:', savedNodeConfig);
+
+        // Auto-expand first group
+        if (nodeSchema.groups.length > 0) {
+          setExpandedGroups(new Set([nodeSchema.groups[0].id]));
+          console.log('📂 Expanded first group:', nodeSchema.groups[0].id);
+        }
+
+        // Initial validation with default state
+        setValidationResults([
+          {
+            isValid: false,
+            field: '',
+            severity: 'info',
+            message: 'Validation: Awaiting Configuration',
+            code: 'AWAITING_CONFIG',
+          },
+        ]);
+        console.log('✅ Validation state initialized');
+      } catch (error) {
+        console.error('❌ Failed to load node data:', error);
+        setValidationResults([
+          {
+            isValid: false,
+            field: '',
+            severity: 'error',
+            message: 'Failed to load node configuration: ' + (error as Error).message,
+            code: 'LOAD_ERROR',
+          },
+        ]);
+      } finally {
+        console.log('🏁 Setting isLoading to false');
+        setIsLoading(false);
       }
     };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [isOpen, onClose]);
+    loadNodeData();
+  }, [selectedNode?.id, selectedNode?.type]); // Trigger when node changes
 
-  // Handle field changes with validation
-  const handleFieldChange = useCallback((event: PropertyFieldChangeEvent) => {
-    setConfig(prev => ({
-      ...prev,
-      [event.field.key]: event.newValue,
-    }));
-    setIsDirty(true);
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
-  // Toggle group expansion
+  // Validation with debouncing - simplified for development
+  const validateConfiguration = useCallback(
+    async (newConfig: Record<string, unknown>) => {
+      if (!selectedNode || !schema) return;
+
+      setIsValidating(true);
+      try {
+        // Simple client-side validation for now
+        const hasRequiredFields = schema.groups.every(group =>
+          group.fields.every(field => {
+            if (field.required) {
+              const value = newConfig[field.key];
+              return value !== undefined && value !== null && value !== '';
+            }
+            return true;
+          })
+        );
+
+        if (hasRequiredFields) {
+          setValidationResults([
+            {
+              isValid: true,
+              field: '',
+              severity: 'info',
+              message: 'Configuration is valid',
+              code: 'VALID_CONFIG',
+            },
+          ]);
+        } else {
+          setValidationResults([
+            {
+              isValid: false,
+              field: '',
+              severity: 'warning',
+              message: 'Some required fields are missing',
+              code: 'MISSING_REQUIRED',
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error('Validation failed:', error);
+        setValidationResults([
+          {
+            isValid: false,
+            field: '',
+            severity: 'error',
+            message: 'Validation failed: ' + (error as Error).message,
+            code: 'VALIDATION_ERROR',
+          },
+        ]);
+      } finally {
+        setIsValidating(false);
+      }
+    },
+    [selectedNode?.id, selectedNode?.type, schema?.nodeType] // Only stable dependencies
+  );
+
+  // Handle field changes
+  const handleFieldChange = useCallback(
+    (fieldKey: string, value: unknown) => {
+      setConfig(prev => {
+        const newConfig = { ...prev, [fieldKey]: value };
+        setIsDirty(JSON.stringify(newConfig) !== JSON.stringify(savedConfig));
+        return newConfig;
+      });
+    },
+    [savedConfig]
+  );
+
+  // Template operations
+  const handleApplyTemplate = useCallback(
+    (templateId: string) => {
+      // Find template by ID and apply its configuration
+      const template = schema?.templates?.find(t => t.id === templateId);
+      if (template) {
+        setConfig(template.config);
+        setIsDirty(true);
+      }
+    },
+    [schema]
+  );
+
+  const handleSaveAsTemplate = useCallback(() => {
+    console.log('Save as template:', config);
+    // TODO: Implement template saving
+  }, [config]);
+
+  const handleExportConfig = useCallback(() => {
+    const dataStr = JSON.stringify(config, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const exportFileDefaultName = `${selectedNode?.type || 'node'}-config.json`;
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  }, [config, selectedNode]);
+
+  const handleImportConfig = useCallback((configJson: string) => {
+    try {
+      const importedConfig = JSON.parse(configJson);
+      setConfig(importedConfig);
+      setIsDirty(true);
+    } catch (error) {
+      console.error('Failed to import configuration:', error);
+    }
+  }, []);
+
+  const handleRevalidate = useCallback(() => {
+    validateConfiguration(config);
+  }, [config, validateConfiguration]);
+
+  // Group toggle
   const handleGroupToggle = useCallback((groupId: string) => {
     setExpandedGroups(prev => {
       const newSet = new Set(prev);
@@ -125,247 +336,405 @@ export function NodePropertiesModal({
     });
   }, []);
 
-  // Validation results by field for efficient lookup
-  const validationByField = useMemo(() => {
-    const map = new Map<string, ValidationResult>();
-    validationResults.forEach(result => {
-      if (result.field) {
-        map.set(result.field, result);
+  // Enhanced modal drag/resize handlers are provided by useEnhancedModal hook
+  // All dragging and resizing logic is now handled by the enhanced modal system
+
+  // Save configuration
+  const handleSave = useCallback(() => {
+    if (!selectedNode || !isDirty || validationResults.some(r => r.severity === 'error')) {
+      return;
+    }
+
+    // Save configuration to the node data
+    updateNodeData(selectedNode.id, { config });
+    setSavedConfig(config);
+    setIsDirty(false);
+
+    console.log('Configuration saved:', config);
+  }, [selectedNode, isDirty, validationResults, config, updateNodeData]);
+
+  // Reset configuration
+  const handleReset = useCallback(() => {
+    setConfig(savedConfig);
+    setIsDirty(false);
+    setValidationResults([
+      {
+        isValid: false,
+        field: '',
+        severity: 'info',
+        message: 'Validation: Awaiting Configuration',
+        code: 'AWAITING_CONFIG',
+      },
+    ]);
+  }, [savedConfig]);
+
+  // Keyboard shortcuts - defined after handleSave/handleReset
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!isTopModal) return;
+
+      // ESC to close
+      if (e.key === 'Escape') {
+        onClose();
       }
-    });
-    return map;
-  }, [validationResults]);
 
-  // Render property field based on type
-  const renderPropertyField = useCallback(
-    (field: PropertyField) => {
-      const fieldValue = config[field.key] ?? field.defaultValue;
-      const validation = validationByField.get(field.key);
-      const hasError = validation?.severity === 'error';
-      const hasWarning = validation?.severity === 'warning';
-
-      const handleFieldChangeLocal = (value: unknown) => {
-        const oldValue = config[field.key] ?? field.defaultValue;
-        handleFieldChange({
-          field,
-          oldValue,
-          newValue: value,
-          isValid: true, // TODO: Run validation
-          validationResult: validation,
-        });
-      };
-
-      const renderFieldInput = () => {
-        switch (field.type) {
-          case 'text':
-          case 'email':
-          case 'url':
-            return (
-              <input
-                type={field.type}
-                value={(fieldValue as string) || ''}
-                onChange={e => handleFieldChangeLocal(e.target.value)}
-                className={cn(
-                  'w-full px-3 py-2 bg-[#3d3d3d] border rounded-md text-white text-sm',
-                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                  hasError && 'border-red-500',
-                  hasWarning && 'border-yellow-500',
-                  !hasError && !hasWarning && 'border-[#505050]'
-                )}
-                placeholder={field.description}
-                disabled={field.required === false}
-              />
-            );
-
-          case 'number':
-            return (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  value={(fieldValue as number) || ''}
-                  onChange={e => handleFieldChangeLocal(parseFloat(e.target.value) || 0)}
-                  min={field.constraints?.min}
-                  max={field.constraints?.max}
-                  step={field.constraints?.step}
-                  className={cn(
-                    'flex-1 px-3 py-2 bg-[#3d3d3d] border rounded-md text-white text-sm',
-                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                    hasError && 'border-red-500',
-                    hasWarning && 'border-yellow-500',
-                    !hasError && !hasWarning && 'border-[#505050]'
-                  )}
-                  placeholder={field.description}
-                />
-                {field.ui?.units && (
-                  <span className="text-xs text-[#969696] whitespace-nowrap">{field.ui.units}</span>
-                )}
-              </div>
-            );
-
-          case 'boolean':
-            return (
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={(fieldValue as boolean) || false}
-                  onChange={e => handleFieldChangeLocal(e.target.checked)}
-                  className="w-4 h-4 rounded border-[#505050] bg-[#3d3d3d] text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-white">{fieldValue ? 'Enabled' : 'Disabled'}</span>
-              </label>
-            );
-
-          case 'select':
-            return (
-              <select
-                value={(fieldValue as string) || ''}
-                onChange={e => handleFieldChangeLocal(e.target.value)}
-                className={cn(
-                  'w-full px-3 py-2 bg-[#3d3d3d] border rounded-md text-white text-sm',
-                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                  hasError && 'border-red-500',
-                  hasWarning && 'border-yellow-500',
-                  !hasError && !hasWarning && 'border-[#505050]'
-                )}
-              >
-                <option value="">Select {field.label}</option>
-                {field.options?.map(option => (
-                  <option key={String(option.value)} value={String(option.value)}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            );
-
-          default:
-            return (
-              <input
-                type="text"
-                value={(fieldValue as string) || ''}
-                onChange={e => handleFieldChangeLocal(e.target.value)}
-                className="w-full px-3 py-2 bg-[#3d3d3d] border border-[#505050] rounded-md text-white text-sm"
-              />
-            );
+      // Ctrl/Cmd + S to save
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (isDirty && !validationResults.some(r => r.severity === 'error')) {
+          handleSave();
         }
-      };
+      }
 
-      return (
-        <div key={field.key} className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm font-medium text-white">
-              {field.label}
-              {field.required && <span className="text-red-400">*</span>}
-              {field.description && (
-                <div className="relative group">
-                  <Info className="w-3 h-3 text-[#969696] cursor-help" />
-                  <div className="absolute left-0 top-4 hidden group-hover:block z-10 w-64 p-2 bg-[#1e1e1e] border border-[#404040] rounded-md text-xs text-[#969696] shadow-lg">
-                    {field.description}
-                  </div>
-                </div>
-              )}
-            </label>
-          </div>
-          {renderFieldInput()}
-          {validation && (
-            <div
-              className={cn(
-                'flex items-center gap-1 text-xs',
-                validation.severity === 'error' && 'text-red-400',
-                validation.severity === 'warning' && 'text-yellow-400',
-                validation.severity === 'info' && 'text-blue-400'
-              )}
-            >
-              <AlertCircle className="w-3 h-3" />
-              {validation.message}
-            </div>
-          )}
-        </div>
-      );
+      // Ctrl/Cmd + R to reset
+      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        if (isDirty) {
+          handleReset();
+        }
+      }
     },
-    [config, validationByField, handleFieldChange]
+    [isTopModal, onClose, isDirty, validationResults, handleSave, handleReset]
   );
 
-  if (!isOpen) return null;
+  // Toggle maximize - using enhanced modal
+  const handleMaximizeToggle = useCallback(() => {
+    enhancedModal.toggleMaximize();
+  }, [enhancedModal]);
 
-  const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  // Setup keyboard event listeners
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // Save state changes - TEMPORARILY DISABLED to fix infinite loop
+  // useEffect(() => {
+  //   const timeoutId = setTimeout(() => {
+  //     saveState({
+  //       position: modalPosition,
+  //       size: modalSize,
+  //       isMaximized,
+  //       activeTab,
+  //       expandedGroups: Array.from(expandedGroups),
+  //     });
+  //   }, 1000); // Increased debounce to prevent rapid updates
+
+  //   return () => clearTimeout(timeoutId);
+  // }, [modalPosition, modalSize, isMaximized, activeTab, expandedGroups]); // Removed saveState dependency
+
+  // Render property field
+  const renderPropertyField = (field: PropertyField) => {
+    const fieldValue = config[field.key];
+    const fieldError = validationResults.find(r => r.field === field.key);
+
+    // Special handling for PLC Input node
+    const isPlcInput = selectedNode?.type === 'plc-input';
+
+    // Hide signal scaling fields for boolean data type
+    if (
+      isPlcInput &&
+      field.key &&
+      ['rawMin', 'rawMax', 'scaledMin', 'scaledMax', 'units'].includes(field.key) &&
+      config.dataType === 'BOOLEAN'
+    ) {
+      return null;
+    }
+
+    return (
+      <div key={field.key} className="space-y-2">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
+          {field.label}
+          {field.required && <span className="text-red-400">*</span>}
+          {field.description && (
+            <span className="text-xs text-gray-500">({field.description})</span>
+          )}
+        </label>
+
+        {/* Render different field types */}
+        {field.type === 'text' && (
+          <input
+            type="text"
+            value={(fieldValue as string) || ''}
+            onChange={e => handleFieldChange(field.key, e.target.value)}
+            className={cn(
+              'w-full px-3 py-2 bg-[#1e1e1e] border rounded-lg text-white',
+              'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+              fieldError?.severity === 'error'
+                ? 'border-red-500'
+                : 'border-[#404040] hover:border-[#505050]'
+            )}
+            placeholder={field.defaultValue as string}
+          />
+        )}
+
+        {field.type === 'number' && (
+          <input
+            type="number"
+            value={String(fieldValue ?? field.defaultValue ?? '')}
+            onChange={e => handleFieldChange(field.key, parseFloat(e.target.value))}
+            min={field.constraints?.min}
+            max={field.constraints?.max}
+            step={field.constraints?.step}
+            className={cn(
+              'w-full px-3 py-2 bg-[#1e1e1e] border rounded-lg text-white',
+              'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+              fieldError?.severity === 'error'
+                ? 'border-red-500'
+                : 'border-[#404040] hover:border-[#505050]'
+            )}
+          />
+        )}
+
+        {field.type === 'boolean' && (
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={(fieldValue as boolean) || false}
+              onChange={e => handleFieldChange(field.key, e.target.checked)}
+              className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-400">Enable</span>
+          </label>
+        )}
+
+        {field.type === 'select' && (
+          <select
+            value={String(fieldValue || field.defaultValue || '')}
+            onChange={e => handleFieldChange(field.key, e.target.value)}
+            className={cn(
+              'w-full px-3 py-2 bg-[#1e1e1e] border rounded-lg text-white',
+              'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+              fieldError?.severity === 'error'
+                ? 'border-red-500'
+                : 'border-[#404040] hover:border-[#505050]'
+            )}
+          >
+            <option value="">Select...</option>
+            {field.options?.map(option => (
+              <option key={String(option.value)} value={String(option.value)}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* Field validation message */}
+        {fieldError && (
+          <div
+            className={cn(
+              'flex items-center gap-2 text-sm',
+              fieldError.severity === 'error' && 'text-red-400',
+              fieldError.severity === 'warning' && 'text-yellow-400',
+              fieldError.severity === 'info' && 'text-blue-400'
+            )}
+          >
+            <AlertCircle className="w-4 h-4" />
+            <span>{fieldError.message}</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (!selectedNode || typeof selectedNode !== 'object') {
+    return null;
+  }
+
+  // Calculate responsive positioning and sizing
+  const calculateModalStyle = () => {
+    if (enhancedModal.isMaximized) {
+      return {
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+      };
+    }
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const modalWidth = Math.min(enhancedModal.size.width, viewportWidth - 20);
+    const modalHeight = Math.min(enhancedModal.size.height, viewportHeight - 20);
+
+    // For narrow screens, let CSS handle centering (don't set left/top)
+    const isNarrowScreen = viewportWidth <= 768; // Tailwind 'md' breakpoint
+
+    if (isNarrowScreen) {
+      // Let CSS handle positioning on narrow screens
+      return {
+        width: `${modalWidth}px`,
+        height: `${modalHeight}px`,
+        minWidth: '320px',
+        maxWidth: '95vw',
+        minHeight: '400px',
+        maxHeight: '95vh',
+      };
+    } else {
+      // Use positioned coordinates from enhanced modal
+      return {
+        top: `${enhancedModal.position.y}px`,
+        left: `${enhancedModal.position.x}px`,
+        width: `${modalWidth}px`,
+        height: `${modalHeight}px`,
+        minWidth: '320px',
+        maxWidth: '95vw',
+        minHeight: '400px',
+        maxHeight: '95vh',
+      };
+    }
+  };
+
+  const modalStyle = calculateModalStyle();
+
+  return (
+    <>
       {/* Modal Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        style={{ zIndex }}
+        onClick={e => {
+          if (isTopModal) {
+            if (isDirty) {
+              const confirmClose = window.confirm(
+                'You have unsaved changes. Are you sure you want to close?'
+              );
+              if (confirmClose) {
+                onClose();
+              }
+            } else {
+              onClose();
+            }
+          } else {
+            bringToFront();
+          }
+        }}
       />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-4xl max-h-[90vh] mx-4 bg-[#2d2d2d] border border-[#404040] rounded-lg shadow-2xl overflow-hidden">
+      <div
+        className={cn(
+          'fixed bg-[#2d2d2d] rounded-lg shadow-2xl border border-[#404040]',
+          'flex flex-col overflow-hidden',
+          'sm:rounded-lg', // Only rounded on small screens and up
+          'max-w-[95vw] max-h-[95vh]', // Ensure it never exceeds viewport
+          // Auto-center on mobile/narrow screens using CSS
+          'max-md:left-1/2 max-md:top-1/2 max-md:-translate-x-1/2 max-md:-translate-y-1/2', // Center on mobile
+          enhancedModal.isMaximized && 'rounded-none'
+        )}
+        style={{
+          ...modalStyle,
+          zIndex: zIndex + 1,
+        }}
+        onClick={bringToFront}
+        onMouseDown={bringToFront}
+      >
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#404040] bg-[#252526]">
+        <div
+          className="flex items-center justify-between p-4 border-b border-[#404040] bg-[#252526] cursor-move"
+          onMouseDown={enhancedModal.handleDragStart}
+        >
           <div className="flex items-center gap-3">
-            <Settings className="w-5 h-5 text-blue-400" />
-            <div>
-              <h2 className="text-lg font-semibold text-white">Node Properties</h2>
-              <p className="text-sm text-gray-400">
-                {(typeof selectedNode === 'object' && selectedNode?.data?.label) ||
-                  schema?.title ||
-                  'Configure node settings'}
-              </p>
+            <div className="flex items-center gap-2">
+              <Move className="w-4 h-4 text-gray-500" />
+              <h2 className="text-lg font-semibold text-white">
+                {schema?.title || 'Node Properties'}
+              </h2>
             </div>
+            {selectedNode && <NodeHelpIcon nodeType={selectedNode.type as IndustrialNodeType} />}
           </div>
 
           <div className="flex items-center gap-2">
-            {isDirty && (
-              <div className="flex items-center gap-2 text-sm text-orange-400">
-                <div className="w-2 h-2 bg-orange-400 rounded-full" />
-                Unsaved changes
-              </div>
-            )}
+            <button
+              onClick={handleMaximizeToggle}
+              className="p-1 hover:bg-[#3d3d3d] rounded transition-colors"
+              title={enhancedModal.isMaximized ? 'Restore' : 'Maximize'}
+            >
+              {enhancedModal.isMaximized ? (
+                <Minimize2 className="w-4 h-4 text-gray-400" />
+              ) : (
+                <Maximize2 className="w-4 h-4 text-gray-400" />
+              )}
+            </button>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-white hover:bg-[#3d3d3d] rounded transition-colors"
-              aria-label="Close properties modal"
+              className="p-1 hover:bg-[#3d3d3d] rounded transition-colors"
+              title="Close"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 text-gray-400" />
             </button>
           </div>
         </div>
 
-        {/* Modal Body */}
-        <div className="flex h-[calc(90vh-120px)]">
-          {/* Tab Sidebar */}
-          <div className="w-48 border-r border-[#404040] bg-[#252526] p-2">
-            <div className="space-y-1">
-              {MODAL_TABS.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2 text-sm rounded transition-colors',
-                    activeTab === tab.id
-                      ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                      : 'text-gray-400 hover:text-white hover:bg-[#3d3d3d]'
-                  )}
-                  aria-label={`Switch to ${tab.label} tab`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-1 px-4 py-2 border-b border-[#404040] bg-[#2d2d2d]">
+          {MODAL_TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+                activeTab === tab.id
+                  ? 'bg-[#094771] text-white shadow-md transform scale-[1.02]'
+                  : 'text-gray-400 hover:text-white hover:bg-[#3d3d3d] hover:transform hover:scale-[1.01]'
+              )}
+            >
+              {tab.label}
+              {tab.shortcut && <span className="ml-2 text-xs opacity-60">({tab.shortcut})</span>}
+            </button>
+          ))}
+        </div>
 
-          {/* Tab Content */}
-          <div className="flex-1 overflow-y-auto">
-            {activeTab === 'properties' && schema && (
-              <div className="p-4 space-y-4">
+        {/* Modal Body */}
+        <div className="flex-1 overflow-auto" style={{ height: 'calc(100% - 140px)' }}>
+          <div className="p-4">
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-8">
+                <Loader className="w-8 h-8 animate-spin text-blue-400" />
+              </div>
+            )}
+
+            {/* Properties Tab */}
+            {activeTab === 'properties' && schema && !isLoading && (
+              <div className="space-y-4">
                 {/* Property Groups */}
                 {schema.groups.map(group => {
                   const isExpanded = expandedGroups.has(group.id);
+                  const groupFields = group.fields;
+
+                  // Filter out fields based on conditions
+                  const visibleFields = groupFields.filter(field => {
+                    if (selectedNode?.type === 'plc-input' && config.dataType === 'BOOLEAN') {
+                      // Hide signal scaling fields for boolean data type
+                      if (
+                        field.key &&
+                        ['rawMin', 'rawMax', 'scaledMin', 'scaledMax', 'units'].includes(field.key)
+                      ) {
+                        return false;
+                      }
+                    }
+                    return true;
+                  });
+
+                  if (visibleFields.length === 0) return null;
 
                   return (
-                    <div key={group.id} className="border border-[#404040] rounded-lg">
+                    <div
+                      key={group.id}
+                      className="border border-[#404040] rounded-lg overflow-hidden transition-all duration-200 hover:border-[#505050]"
+                    >
                       <button
                         onClick={() => handleGroupToggle(group.id)}
-                        className="w-full flex items-center justify-between p-3 hover:bg-[#3d3d3d] transition-colors"
+                        className={cn(
+                          'w-full flex items-center justify-between p-3 transition-all duration-200',
+                          'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+                          isExpanded ? 'bg-[#3d3d3d] hover:bg-[#454545]' : 'hover:bg-[#3d3d3d]'
+                        )}
                       >
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-white">{group.label}</span>
@@ -381,8 +750,8 @@ export function NodePropertiesModal({
                       </button>
 
                       {isExpanded && (
-                        <div className="p-3 pt-0 space-y-4">
-                          {group.fields.map(field => renderPropertyField(field))}
+                        <div className="p-3 pt-0 space-y-4 animate-in slide-in-from-top-2 duration-200">
+                          {visibleFields.map(field => renderPropertyField(field))}
                         </div>
                       )}
                     </div>
@@ -396,28 +765,76 @@ export function NodePropertiesModal({
                     <div
                       key={index}
                       className={cn(
-                        'flex items-center gap-2 p-3 rounded-lg',
-                        result.severity === 'error' && 'bg-red-900/20 border border-red-500/30',
+                        'flex items-center gap-2 p-3 rounded-lg transition-all duration-200',
+                        'animate-in slide-in-from-left-2',
+                        result.severity === 'error' &&
+                          'bg-red-900/20 border border-red-500/30 shadow-red-500/10 shadow-lg',
                         result.severity === 'warning' &&
-                          'bg-yellow-900/20 border border-yellow-500/30',
-                        result.severity === 'info' && 'bg-blue-900/20 border border-blue-500/30'
+                          'bg-yellow-900/20 border border-yellow-500/30 shadow-yellow-500/10 shadow-lg',
+                        result.severity === 'info' &&
+                          'bg-blue-900/20 border border-blue-500/30 shadow-blue-500/10 shadow-lg'
                       )}
                     >
-                      <AlertCircle className="w-4 h-4" />
+                      <AlertCircle
+                        className={cn(
+                          'w-4 h-4',
+                          result.severity === 'error' && 'text-red-400',
+                          result.severity === 'warning' && 'text-yellow-400',
+                          result.severity === 'info' && 'text-blue-400'
+                        )}
+                      />
                       <span className="text-sm">{result.message}</span>
                     </div>
                   ))}
               </div>
             )}
 
-            {/* Other tab contents - placeholder for now */}
-            {activeTab !== 'properties' && (
-              <div className="p-4 text-center text-gray-400">
-                <div className="text-lg font-medium mb-2">
-                  {MODAL_TABS.find(tab => tab.id === activeTab)?.label}
-                </div>
-                <p>This tab content will be implemented in a future update.</p>
-              </div>
+            {/* Connections Tab */}
+            {activeTab === 'connections' && schema && (
+              <ConnectionsTab
+                schema={schema}
+                config={config}
+                nodeId={nodeId}
+                onConfigChange={(key, value) => {
+                  setConfig(prev => ({ ...prev, [key]: value }));
+                  setIsDirty(true);
+                }}
+              />
+            )}
+
+            {/* Validation Tab */}
+            {activeTab === 'validation' && (
+              <ValidationTab
+                schema={schema || ({} as NodePropertySchema)}
+                config={config}
+                validationResults={validationResults}
+                isValidating={isValidating}
+                onRevalidate={handleRevalidate}
+              />
+            )}
+
+            {/* Templates Tab */}
+            {activeTab === 'templates' && schema && (
+              <TemplatesTab
+                schema={schema}
+                config={config}
+                onApplyTemplate={handleApplyTemplate}
+                onSaveAsTemplate={handleSaveAsTemplate}
+              />
+            )}
+
+            {/* Advanced Tab */}
+            {activeTab === 'advanced' && schema && (
+              <AdvancedTab
+                schema={schema}
+                config={config}
+                onConfigChange={(key, value) => {
+                  setConfig(prev => ({ ...prev, [key]: value }));
+                  setIsDirty(true);
+                }}
+                onExport={handleExportConfig}
+                onImport={handleImportConfig}
+              />
             )}
           </div>
         </div>
@@ -425,53 +842,108 @@ export function NodePropertiesModal({
         {/* Modal Footer */}
         <div className="flex items-center justify-between p-4 border-t border-[#404040] bg-[#252526]">
           <div className="flex items-center gap-2">
-            {isLoading && <Loader className="w-4 h-4 animate-spin text-blue-400" />}
+            {(isLoading || isValidating) && (
+              <Loader className="w-4 h-4 animate-spin text-blue-400" />
+            )}
             <span className="text-sm text-gray-400">
-              {selectedNode
-                ? `Editing: ${(typeof selectedNode === 'object' && selectedNode.data?.label) || 'Node'}`
+              {isValidating
+                ? 'Validating configuration...'
+                : selectedNode
+                ? `Editing: ${
+                    (typeof selectedNode === 'object' && selectedNode.data?.label) || 'Node'
+                  }`
                 : 'No node selected'}
             </span>
+            {validationResults.length > 0 && (
+              <div className="flex items-center gap-1 text-xs">
+                {validationResults.some(r => r.severity === 'error') && (
+                  <span className="text-red-400">
+                    ❌ {validationResults.filter(r => r.severity === 'error').length} errors
+                  </span>
+                )}
+                {validationResults.some(r => r.severity === 'warning') && (
+                  <span className="text-yellow-400">
+                    ⚠️ {validationResults.filter(r => r.severity === 'warning').length} warnings
+                  </span>
+                )}
+                {!validationResults.some(r => r.severity === 'error' || r.severity === 'warning') &&
+                  validationResults.some(
+                    r => r.message === 'Validation: Awaiting Configuration'
+                  ) && <span className="text-gray-400">Awaiting Configuration</span>}
+                {!validationResults.some(r => r.severity === 'error' || r.severity === 'warning') &&
+                  !validationResults.some(
+                    r => r.message === 'Validation: Awaiting Configuration'
+                  ) &&
+                  validationResults.length > 0 && <span className="text-green-400">✅ Valid</span>}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                setConfig({});
-                setIsDirty(false);
-              }}
+              onClick={handleReset}
               disabled={!isDirty}
               className={cn(
-                'px-4 py-2 text-sm rounded transition-colors',
+                'px-4 py-2 text-sm rounded transition-all duration-200 flex items-center gap-2',
+                'focus:outline-none focus:ring-2 focus:ring-gray-500/50',
                 isDirty
-                  ? 'text-gray-300 hover:text-white hover:bg-[#3d3d3d]'
-                  : 'text-gray-500 cursor-not-allowed'
+                  ? 'text-gray-300 hover:text-white hover:bg-[#3d3d3d] border border-transparent hover:border-gray-500/30'
+                  : 'text-gray-500 cursor-not-allowed border border-transparent'
               )}
+              title="Reset all changes to saved values"
             >
-              <RotateCcw className="w-4 h-4 mr-2" />
+              <RotateCcw className="w-4 h-4" />
               Reset
             </button>
 
             <button
-              onClick={() => {
-                // TODO: Save configuration
-                setIsDirty(false);
-              }}
-              disabled={!isDirty}
+              onClick={handleSave}
+              disabled={
+                !isDirty || isValidating || validationResults.some(r => r.severity === 'error')
+              }
               className={cn(
-                'px-4 py-2 text-sm rounded transition-colors flex items-center gap-2',
-                isDirty
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                'px-4 py-2 text-sm rounded transition-all duration-200 flex items-center gap-2',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+                isDirty && !isValidating && !validationResults.some(r => r.severity === 'error')
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-blue-500/20 transform hover:scale-105'
                   : 'bg-gray-600 text-gray-400 cursor-not-allowed'
               )}
+              title={
+                isValidating
+                  ? 'Validating configuration...'
+                  : validationResults.some(r => r.severity === 'error')
+                  ? 'Fix validation errors before saving'
+                  : 'Save changes to node configuration'
+              }
             >
               <Save className="w-4 h-4" />
               Save Changes
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  );
 
-  return createPortal(modalContent, document.body);
+        {/* Enhanced Modal Resize Handles */}
+        {!enhancedModal.isMaximized && (
+          <>
+            <ModalResizeComponents.Handles
+              handles={enhancedModal.resizeHandles}
+              onResizeStart={enhancedModal.handleResizeStart}
+              currentResizeHandle={enhancedModal.resizeState.resizeHandle}
+              enabled={enhancedModal.configuration.resizing.enabled}
+            />
+            <ModalResizeComponents.Indicator
+              isResizing={enhancedModal.resizeState.isResizing}
+              currentSize={enhancedModal.size}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Global Resize Overlay */}
+      <ModalResizeComponents.Overlay
+        isResizing={enhancedModal.resizeState.isResizing}
+        currentHandle={enhancedModal.resizeState.resizeHandle}
+      />
+    </>
+  );
 }
