@@ -4,13 +4,30 @@
 
 This roadmap outlines the comprehensive development plan for the Node Properties and Configuration Modal, a critical component of the PLC-GBT workflow management system. The modal will provide category-specific property configuration for all node types, including the new Workflow nodes for creating nested and complex workflows.
 
+### 🎯 **Strategic Development Approach**
+
+Based on architectural decisions, this development follows a **3-Phase Sequential Approach**:
+
+1. **Phase 1: Base Framework & UI/UX** - Solid foundation with core functionality and user experience
+2. **Phase 2: Documentation Templates & Content** - Template-driven documentation system with placeholder content
+3. **Phase 3: Advanced Features & Completion** - Scientific calculator, complex validations, and production optimization
+
+### 🔧 **Key Architectural Decisions**
+
+- **Sequential Development**: Build one piece at a time to ensure solid base framework before parallel development
+- **OpenAPI Schema Migration**: Migrate existing schemas to OpenAPI Schema MCP using API Creation & Usage Methodology (Option A)
+- **Basic Schemas First**: Implement all basic schemas and UI framework before advanced features
+- **Placeholder Documentation**: Create placeholder documentation pages in Phase 2, detailed content in Phase 3
+- **Template-Driven Approach**: Ensure all development can be templatized for efficient future node creation
+- **Comprehensive Testing**: Full testing at completion of each phase (not incremental)
+
 ## 🚨 CRITICAL: AI Task Orchestrator Compliance
 
 **MANDATORY**: All development must follow strict TypeScript typing and OpenAPI Schema MCP patterns as defined in the AI_TASK_ORCHESTRATOR_TS_GUIDE.md and AI_TASK_ORCHESTRATOR_TS_GUIDE.py files.
 
 ### Key Compliance Requirements:
-- ✅ **Zero `any` types** - Use `unknown` with proper type guards
-- ✅ **OpenAPI Schema MCP** - All schemas must be validated through MCP_Docker
+- **Zero `any` types** - Use `unknown` with proper type guards
+- **OpenAPI Schema MCP** - All schemas must be validated through MCP_Docker
   - ### 🔧 **API Development Standards** **MANDATORY**: All API development must follow the enhanced API Creation & Usage Methodology:
     - **📘 [API Creation & Usage Methodology](../plc-gbt-stack/docs/API_CREATION_METHODOLOGY.md)** - Required reading for all developers
     - **Zero-Tolerance Policy**: NO manual API type definitions or schemas allowed
@@ -19,8 +36,9 @@ This roadmap outlines the comprehensive development plan for the Node Properties
     - **Runtime Validation**: Every request/response validated with Zod schemas
     - **Error Handling**: Centralized, typed error handling patterns
     - **Testing Requirements**: >95% test coverage for all API endpoints
-- ✅ **Two-Phase Testing** - Automated Playwright MCP + User validation
-- ✅ **>99% Test Coverage** - Before marking any feature complete
+- **Two-Phase Testing** - Automated Playwright MCP + User validation
+- **Modular Code Structure**: Ensure code is implemented in a modular manner to maximize your ability to add new functionality without having to rework the entire codebase. 
+- **>99% Test Coverage** - Before marking any feature complete
 
 ## 🏗️ Architecture Overview
 
@@ -146,7 +164,7 @@ node-modal/
 - Signal routing configuration
 - Protocol-specific settings
 
-### ✅ Validation Tab
+###  Validation Tab
 - Real-time validation results
 - Severity levels (Error, Warning, Info)
 - Field-specific validation messages
@@ -170,328 +188,370 @@ node-modal/
 - Node-specific advanced features
 - Integration settings
 
-## 🔧 Implementation Phases with Detailed Task Breakdown
+## 🔧 **3-Phase Sequential Implementation Plan**
 
-### Phase 0: Documentation Templates & Foundation (Week 0-1)
+### **PHASE 1: Base Framework & UI/UX** (Weeks 1-4)
+*Focus: Solid foundation with core functionality and exceptional user experience*
 
-#### Sub-Phase 0.1: Documentation Template System
-- [ ] **Task 0.1.1**: Create master documentation template structure
-- [ ] **Task 0.1.2**: Define reusable component library for docs
-- [ ] **Task 0.1.3**: Set up documentation site infrastructure
-- [ ] **Task 0.1.4**: Create automated template generation scripts
-- [ ] **Task 0.1.5**: Implement documentation versioning system
+#### Sub-Phase 1.1: OpenAPI Schema Migration & Infrastructure
+- [ ] **Task 1.1.1**: Migrate existing schemas to OpenAPI Schema MCP (API Creation & Usage Methodology)
+- [ ] **Task 1.1.2**: Set up automated codegen pipeline for types and Zod schemas
+- [ ] **Task 1.1.3**: Update NodePropertiesModal to use generated types
+- [ ] **Task 1.1.4**: Implement OpenAPI Schema MCP validation in all API routes
+- [ ] **Task 1.1.5**: Create type-safe API client with runtime validation
 
-#### Sub-Phase 0.2: Template Components
-- [ ] **Task 0.2.1**: Create Overview section template
-- [ ] **Task 0.2.2**: Build Configuration Guide template
-- [ ] **Task 0.2.3**: Design Parameters Reference template
-- [ ] **Task 0.2.4**: Create Examples section template
-- [ ] **Task 0.2.5**: Implement interactive code playground component
+#### Sub-Phase 1.2: Enhanced Modal Infrastructure
+- [ ] **Task 1.2.1**: Enhance NodePropertiesModal base component with improved UX
+- [ ] **Task 1.2.2**: Implement modal positioning, dragging, and resizing functionality
+- [ ] **Task 1.2.3**: Add modal z-index management for multiple modals
+- [ ] **Task 1.2.4**: Enhance ESC key and outside click handling
+- [ ] **Task 1.2.5**: Implement modal state persistence across sessions
 
-#### Sub-Phase 0.3: Documentation Standards
-- [ ] **Task 0.3.1**: Define documentation style guide
-- [ ] **Task 0.3.2**: Create screenshot and diagram standards
-- [ ] **Task 0.3.3**: Establish API reference format
-- [ ] **Task 0.3.4**: Set up documentation review process
-- [ ] **Task 0.3.5**: Create documentation testing framework
+#### Sub-Phase 1.3: Complete Tab System Implementation
+- [ ] **Task 1.3.1**: Complete Connections Tab implementation
+- [ ] **Task 1.3.2**: Complete Validation Tab implementation
+- [ ] **Task 1.3.3**: Complete Templates Tab implementation
+- [ ] **Task 1.3.4**: Complete Advanced Tab implementation
+- [ ] **Task 1.3.5**: Add tab transition animations and keyboard navigation
 
-### Phase 1: Core Infrastructure (Week 1-2)
+#### Sub-Phase 1.4: Basic Node Schema Coverage
+- [ ] **Task 1.4.1**: Implement all PLC Control node schemas (10 nodes)
+- [ ] **Task 1.4.2**: Implement all Data Source node schemas (5 nodes)
+- [ ] **Task 1.4.3**: Implement basic ML/AI Algorithm node schemas (5 nodes)
+- [ ] **Task 1.4.4**: Implement basic MPC Control node schemas (5 nodes)
+- [ ] **Task 1.4.5**: Implement basic Reporting node schemas (5 nodes)
 
-#### Sub-Phase 1.1: Base Modal Structure
-- [ ] **Task 1.1.1**: Update NodePropertiesModal base component structure
-- [ ] **Task 1.1.2**: Implement modal positioning and dragging functionality
-- [ ] **Task 1.1.3**: Add modal resize capabilities with min/max constraints
-- [ ] **Task 1.1.4**: Implement modal z-index management for multiple modals
-- [ ] **Task 1.1.5**: Add ESC key and outside click handling
+#### Sub-Phase 1.5: Help Icon System & Placeholder Documentation
+- [ ] **Task 1.5.1**: Implement CircleHelp icon system for all nodes
+- [ ] **Task 1.5.2**: Create tooltip infrastructure with usage explanations
+- [ ] **Task 1.5.3**: Create placeholder documentation pages (29 pages)
+- [ ] **Task 1.5.4**: Implement documentation URL linking system
+- [ ] **Task 1.5.5**: Set up documentation routing and navigation
 
-#### Sub-Phase 1.2: Tab System Implementation
-- [ ] **Task 1.2.1**: Create TabNavigation component with active state management
-- [ ] **Task 1.2.2**: Implement tab content lazy loading for performance
-- [ ] **Task 1.2.3**: Add tab transition animations
-- [ ] **Task 1.2.4**: Implement keyboard navigation between tabs
-- [ ] **Task 1.2.5**: Add tab state persistence in workflow store
+#### Sub-Phase 1.6: Template-Driven Node Creation System
+- [ ] **Task 1.6.1**: Create node schema template generator
+- [ ] **Task 1.6.2**: Build automated property field generation system
+- [ ] **Task 1.6.3**: Implement validation template system
+- [ ] **Task 1.6.4**: Create connection test template framework
+- [ ] **Task 1.6.5**: Build node registration automation
 
-#### Sub-Phase 1.3: Shared Components
-- [ ] **Task 1.3.1**: Create PropertyField base component with TypeScript interfaces
-- [ ] **Task 1.3.2**: Implement ValidationDisplay component for error/warning messages
-- [ ] **Task 1.3.3**: Create ConnectionTester component with async testing
-- [ ] **Task 1.3.4**: Build TemplateSelector with search and filtering
-- [ ] **Task 1.3.5**: Add CollapsibleSection component for grouped fields
+### **PHASE 2: Documentation Templates & Content** (Weeks 5-6)
+*Focus: Template-driven documentation system with comprehensive content creation*
 
-#### Sub-Phase 1.4: State Management Integration
-- [ ] **Task 1.4.1**: Integrate with Zustand workflow store
-- [ ] **Task 1.4.2**: Implement optimistic updates with rollback
-- [ ] **Task 1.4.3**: Add undo/redo support for property changes
-- [ ] **Task 1.4.4**: Create dirty state tracking system
-- [ ] **Task 1.4.5**: Implement auto-save with debouncing
+#### Sub-Phase 2.1: Documentation Template System (From Phase 0)
+- [ ] **Task 2.1.1**: Create master documentation template structure
+- [ ] **Task 2.1.2**: Define reusable component library for docs
+- [ ] **Task 2.1.3**: Set up documentation site infrastructure
+- [ ] **Task 2.1.4**: Create automated template generation scripts
+- [ ] **Task 2.1.5**: Implement documentation versioning system
 
-#### Sub-Phase 1.5: Validation Framework
-- [ ] **Task 1.5.1**: Set up OpenAPI Schema MCP validation
-- [ ] **Task 1.5.2**: Create real-time field validation system
-- [ ] **Task 1.5.3**: Implement cross-field dependency validation
-- [ ] **Task 1.5.4**: Add async validation support for external checks
-- [ ] **Task 1.5.5**: Create validation debouncing mechanism
+#### Sub-Phase 2.2: Template Components (From Phase 0)
+- [ ] **Task 2.2.1**: Create Overview section template
+- [ ] **Task 2.2.2**: Build Configuration Guide template
+- [ ] **Task 2.2.3**: Design Parameters Reference template
+- [ ] **Task 2.2.4**: Create Examples section template
+- [ ] **Task 2.2.5**: Implement interactive code playground component
 
-### Phase 2: PLC Control Nodes (Week 2-3)
+#### Sub-Phase 2.3: Documentation Standards (From Phase 0)
+- [ ] **Task 2.3.1**: Define documentation style guide
+- [ ] **Task 2.3.2**: Create screenshot and diagram standards
+- [ ] **Task 2.3.3**: Establish API reference format
+- [ ] **Task 2.3.4**: Set up documentation review process
+- [ ] **Task 2.3.5**: Create documentation testing framework
 
-#### Sub-Phase 2.1: Basic I/O Nodes
-- [ ] **Task 2.1.1**: PLC Input node properties panel
-  - [ ] Add help icon with usage explanation
-  - [ ] Add URL link to PLC input documentation
-- [ ] **Task 2.1.2**: PLC Output node properties panel
-  - [ ] Add help icon with usage explanation
-  - [ ] Add URL link to PLC output documentation
-- [ ] **Task 2.1.3**: Create address validation for I/O nodes
-- [ ] **Task 2.1.4**: Implement data type selection (BOOL, INT, REAL, etc.)
-- [ ] **Task 2.1.5**: Add scaling and engineering units configuration
+#### Sub-Phase 2.4: Content Population
+- [ ] **Task 2.4.1**: Populate all 29 placeholder documentation pages with template content
+- [ ] **Task 2.4.2**: Create node-specific examples and use cases
+- [ ] **Task 2.4.3**: Add troubleshooting guides for each node type
+- [ ] **Task 2.4.4**: Create cross-references between related nodes
+- [ ] **Task 2.4.5**: Implement search functionality within documentation
 
-#### Sub-Phase 2.2: Control Nodes
-- [ ] **Task 2.2.1**: PID Controller advanced tuning panel
-  - [ ] Add help icon explaining PID tuning
-  - [ ] Add URL link to PID tuning guide
-- [ ] **Task 2.2.2**: Feedforward Controller configuration
-  - [ ] Add help icon for feedforward concepts
-  - [ ] Create custom documentation page
-- [ ] **Task 2.2.3**: Implement tuning algorithm selection
-- [ ] **Task 2.2.4**: Add real-time tuning preview graphs
-- [ ] **Task 2.2.5**: Create tuning templates library
+### **PHASE 3: Advanced Features & Production Completion** (Weeks 7-10)
+*Focus: Scientific calculator, complex validations, and production-ready optimization*
 
-#### Sub-Phase 2.3: Communication Nodes
-- [ ] **Task 2.3.1**: Modbus Client configuration panel
-  - [ ] Add help icon for Modbus protocol
-  - [ ] Add URL link to Modbus specification
-- [ ] **Task 2.3.2**: OPC UA Server configuration
-  - [ ] Add help icon for OPC UA concepts
-  - [ ] Add URL link to OPC Foundation
-- [ ] **Task 2.3.3**: OPC UA Client configuration
-  - [ ] Add help icon for client setup
-  - [ ] Add URL link to OPC UA resources
-- [ ] **Task 2.3.4**: Implement connection testing framework
-- [ ] **Task 2.3.5**: Add protocol-specific validation
+#### Sub-Phase 3.1: Advanced Node Features
+- [ ] **Task 3.1.1**: Implement Scientific Calculator Modal for Math/Function Creator node
+- [ ] **Task 3.1.2**: Add complex validation rules and cross-field dependencies
+- [ ] **Task 3.1.3**: Implement advanced connection testing with real protocols
+- [ ] **Task 3.1.4**: Add advanced templating with conditional logic
+- [ ] **Task 3.1.5**: Create workflow nesting capabilities for Workflow nodes
 
-#### Sub-Phase 2.4: Specialized Nodes
-- [ ] **Task 2.4.1**: URL Display node configuration
-  - [ ] Add help icon for URL display usage
-  - [ ] Create custom documentation
-- [ ] **Task 2.4.2**: Data Logger configuration
-  - [ ] Add help icon for logging concepts
-  - [ ] Create custom documentation
-- [ ] **Task 2.4.3**: Alarm Handler configuration
-  - [ ] Add help icon for alarm management
-  - [ ] Add URL link to ISA-18.2 standard
-- [ ] **Task 2.4.4**: Custom Logic editor
-  - [ ] Add help icon for scripting
-  - [ ] Create scripting guide
+#### Sub-Phase 3.2: Production Optimization
+- [ ] **Task 3.2.1**: Implement performance optimization (lazy loading, virtualization)
+- [ ] **Task 3.2.2**: Add comprehensive error handling and recovery
+- [ ] **Task 3.2.3**: Implement accessibility compliance (WCAG 2.1 AA)
+- [ ] **Task 3.2.4**: Add internationalization support
+- [ ] **Task 3.2.5**: Optimize bundle size and loading performance
+- [ ] **Task 3.2.6**: **CRITICAL NODE REVIEW** - Comprehensive review of every node's property modal to ensure all necessary configuration settings are defined and properly implemented
+- [ ] **Task 3.2.7**: **PLC CONNECTION MANAGEMENT INTEGRATION** - Integrate with Settings UI for global PLC connection management and address construction
 
-### Phase 3: ML/AI Algorithm Nodes (Week 3-4)
+#### Sub-Phase 3.3: Advanced Documentation Features
+- [ ] **Task 3.3.1**: Add interactive tutorials within documentation
+- [ ] **Task 3.3.2**: Create video embedding and multimedia support
+- [ ] **Task 3.3.3**: Implement community features (comments, ratings)
+- [ ] **Task 3.3.4**: Add version comparison and migration guides
+- [ ] **Task 3.3.5**: Create API documentation auto-generation
 
-#### Sub-Phase 3.1: Neural Network Nodes
-- [ ] **Task 3.1.1**: NARX Neural Network configuration
-  - [ ] Add help icon explaining NARX
-  - [ ] Add URL link to NARX documentation
-- [ ] **Task 3.1.2**: LSTM Model configuration
-  - [ ] Add help icon for LSTM concepts
-  - [ ] Add URL link to LSTM guide
-- [ ] **Task 3.1.3**: Create network architecture designer
-- [ ] **Task 3.1.4**: Add layer configuration interface
-- [ ] **Task 3.1.5**: Implement training parameter controls
+### **🧪 PHASE 1 USER TESTING FEEDBACK INTEGRATION**
 
-#### Sub-Phase 3.2: Advanced ML Nodes
-- [ ] **Task 3.2.1**: Gaussian Process Regression setup
-  - [ ] Add help icon for GPR concepts
-  - [ ] Add URL link to GPR tutorial
-- [ ] **Task 3.2.2**: SINDy Identifier configuration
-  - [ ] Add help icon for SINDy method
-  - [ ] Add URL link to SINDy paper
-- [ ] **Task 3.2.3**: Reinforcement Learning configuration
-  - [ ] Add help icon for RL concepts
-  - [ ] Add URL link to RL resources
-- [ ] **Task 3.2.4**: Create hyperparameter tuning interface
-- [ ] **Task 3.2.5**: Add model evaluation metrics display
+**Status**: User testing completed with comprehensive feedback requiring systematic fixes
 
-### Phase 4: MPC Control Nodes (Week 4-5)
+#### **Critical Issues Identified & Resolution Status**
+- [x] **Reset/Save Buttons**: Fixed - buttons now properly save configuration to node data
+- [x] **Field Persistence**: Fixed - configuration now persists correctly between tabs
+- [x] **PLC Input Schema**: Enhanced with Input Type (Digital/Analog) and Data Type (BOOLEAN, SINT, INT, DINT, REAL, STRING, UDT, Arrays)
+- [x] **Engineering Units**: Converted to dropdown with standard industrial units
+- [x] **Documentation Scroll**: Fixed - documentation pages now have proper scroll behavior
+- [x] **Tooltip Content**: Enhanced with Input Type and Data Type information
+- [x] **Connection Handles**: PLC Input nodes now have correct output-only handles
+- [x] **Signal Mapping**: Hidden for PLC Input nodes (not applicable)
+- [x] **Add Handle Button**: Implemented functional handle creation
+- [x] **Template Creation**: Added Raw Configuration modal for template creation
+- [x] **Validation Default State**: Set to "Awaiting Configuration" for unconfigured nodes
 
-#### Sub-Phase 4.1: Core MPC Nodes
-- [ ] **Task 4.1.1**: MPC Controller configuration
-  - [ ] Add help icon for MPC concepts
-  - [ ] Add URL link to MPC tutorial
-- [ ] **Task 4.1.2**: Kalman Filter setup ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon explaining Kalman filtering
-  - [ ] Create comprehensive Kalman filter guide
-- [ ] **Task 4.1.3**: IMC Controller configuration ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for IMC concepts
-  - [ ] Create IMC controller documentation
-- [ ] **Task 4.1.4**: Create constraint editor with visualization
-- [ ] **Task 4.1.5**: Implement cost function designer
+#### **Keyboard Navigation Fixes**
+- [x] **Number Key Removal**: Removed 1-5 number key tab navigation to prevent conflicts with field editing
+- [x] **Tab Selection**: Tab and Enter navigation remains functional
 
-#### Sub-Phase 4.2: Optimization Nodes
-- [ ] **Task 4.2.1**: Quadratic Programming solver ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for QP concepts
-  - [ ] Create QP solver guide
-- [ ] **Task 4.2.2**: Subspace Identification (N4SID) ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for subspace methods
-  - [ ] Create N4SID documentation
-- [ ] **Task 4.2.3**: Add optimization solver selection
-- [ ] **Task 4.2.4**: Create constraint visualization tools
-- [ ] **Task 4.2.5**: Implement performance preview
+#### **Node-Specific Configuration Requirements**
+- [ ] **PLC Connection Dropdown**: Requires Settings UI implementation for global connection management
+- [ ] **Multiple Output Handles**: Analog inputs need multiple output scaling options
+- [ ] **Validation Criteria Management**: Add/delete validation criteria functionality
+- [ ] **Template System Enhancement**: Complete integration with Raw Configuration modal
 
-### Phase 5: Model Tuning & Testing Nodes (Week 5-6)
+#### **Documentation System Enhancements**
+- [x] **Scroll Behavior**: Fixed documentation page overflow and scrolling
+- [x] **Layout Alignment**: Fixed header and content alignment with consistent 10px left border padding
+- [ ] **CLI Access Documentation**: Document where CLI commands can be tested
+- [ ] **Node Creation UI**: Implement UI for creating new nodes from templates
 
-#### Sub-Phase 5.1: System Identification
-- [ ] **Task 5.1.1**: ARX/ARMAX Identifier ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for ARX/ARMAX models
-  - [ ] Create comprehensive identification guide
-- [ ] **Task 5.1.2**: Recursive Least Squares ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for RLS algorithm
-  - [ ] Create RLS documentation
-- [ ] **Task 5.1.3**: Model Validation tools ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for validation methods
-  - [ ] Create validation guide
-- [ ] **Task 5.1.4**: Implement model order selection
-- [ ] **Task 5.1.5**: Add estimation method configuration
+### **COMPREHENSIVE TESTING PHASES**
 
-#### Sub-Phase 5.2: Optimization Algorithms
-- [ ] **Task 5.2.1**: Genetic Algorithm configuration ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for GA concepts
-  - [ ] Create GA optimization guide
-- [ ] **Task 5.2.2**: PILCO/PETS setup ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for PILCO/PETS
-  - [ ] Create model-based RL documentation
-- [ ] **Task 5.2.3**: Create population parameter controls
-- [ ] **Task 5.2.4**: Add fitness function designer
-- [ ] **Task 5.2.5**: Implement convergence visualization
+#### **Phase 1 Testing** (Week 4)
+- [ ] **Task T1.1**: Automated UI testing with Playwright MCP (>99% success rate)
+- [ ] **Task T1.2**: User interactive testing validation
+- [ ] **Task T1.3**: OpenAPI Schema validation testing
+- [ ] **Task T1.4**: Cross-browser compatibility testing
+- [ ] **Task T1.5**: Performance benchmarking
 
-#### Sub-Phase 5.3: Testing Nodes
-- [ ] **Task 5.3.1**: PRBS Generator configuration ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for PRBS signals
-  - [ ] Create PRBS usage guide
-- [ ] **Task 5.3.2**: Relay Feedback Test setup ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for relay method
-  - [ ] Create relay tuning documentation
-- [ ] **Task 5.3.3**: Step Response Analyzer ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for step testing
-  - [ ] Create step response guide
-- [ ] **Task 5.3.4**: Distillation Simulator ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for distillation
-  - [ ] Create distillation control guide
-- [ ] **Task 5.3.5**: Performance Metrics calculator ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for KPIs
-  - [ ] Create metrics documentation
+#### **Phase 2 Testing** (Week 6)
+- [ ] **Task T2.1**: Documentation accuracy and completeness testing
+- [ ] **Task T2.2**: Template generation system testing
+- [ ] **Task T2.3**: Search functionality testing
+- [ ] **Task T2.4**: Cross-reference validation testing
+- [ ] **Task T2.5**: Content management system testing
 
-### Phase 6: Data Integration Nodes (Week 6-7)
+#### **Phase 3 Testing** (Week 10)
+- [ ] **Task T3.1**: Advanced feature integration testing
+- [ ] **Task T3.2**: Scientific calculator validation testing
+- [ ] **Task T3.3**: Production load testing
+- [ ] **Task T3.4**: Security and accessibility auditing
+- [ ] **Task T3.5**: **NODE CONFIGURATION REVIEW** - Comprehensive review and validation of all 54+ node property modals for configuration completeness
+- [ ] **Task T3.6**: Final user acceptance testing
 
-#### Sub-Phase 6.1: Database Connectors
-- [ ] **Task 6.1.1**: PostgreSQL Connector ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for PostgreSQL setup
-  - [ ] Create PostgreSQL integration guide
-- [ ] **Task 6.1.2**: Redis Connector ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for Redis usage
-  - [ ] Create Redis integration guide
-- [ ] **Task 6.1.3**: Neo4j Connector ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for graph queries
-  - [ ] Create Neo4j usage guide
-- [ ] **Task 6.1.4**: Qdrant Connector ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for vector search
-  - [ ] Create Qdrant integration guide
-- [ ] **Task 6.1.5**: Historian Connector ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for historian systems
-  - [ ] Create historian integration guide
 
-#### Sub-Phase 6.2: Query & Connection Management
-- [ ] **Task 6.2.1**: Create query builder interfaces
-- [ ] **Task 6.2.2**: Add schema mapping tools
-- [ ] **Task 6.2.3**: Implement authentication managers
-- [ ] **Task 6.2.4**: Add connection pooling configuration
-- [ ] **Task 6.2.5**: Create connection testing framework
 
-### Phase 7: Data Processing Nodes (Week 7-8)
+## 🔗 **CRITICAL: PLC Connection Management Integration**
 
-#### Sub-Phase 7.1: Dataset Creation
-- [ ] **Task 7.1.1**: CSV Dataset Creator ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for CSV schemas
-  - [ ] Create CSV dataset guide
-- [ ] **Task 7.1.2**: Excel Dataset Creator ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for Excel mapping
-  - [ ] Create Excel integration guide
-- [ ] **Task 7.1.3**: Data Cleaner configuration ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for data cleaning
-  - [ ] Create data quality guide
-- [ ] **Task 7.1.4**: Implement schema designers
-- [ ] **Task 7.1.5**: Add data preview functionality
+### **Global Connection Management System Requirement**
 
-#### Sub-Phase 7.2: Advanced Processing
-- [ ] **Task 7.2.1**: Feature Engineer setup ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for feature engineering
-  - [ ] Create feature engineering guide
-- [ ] **Task 7.2.2**: Time Series Processor ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for time series
-  - [ ] Create time series guide
-- [ ] **Task 7.2.3**: Math/Function Creator
-  - [ ] Add help icon for equations
-  - [ ] Implement scientific calculator modal
-- [ ] **Task 7.2.4**: Data Distribution Analyzer
-  - [ ] Add help icon for distributions
-  - [ ] Create distribution guide
-- [ ] **Task 7.2.5**: Add transformation pipeline builder
+**MANDATORY DEPENDENCY**: The Node Properties Modal requires a comprehensive PLC Connection Management system to be implemented in the Settings UI. This system will provide:
 
-### Phase 8: Reporting & Workflow Nodes (Week 8-9)
+#### **PLC Connection Types Support**
+- **MQTT Client**: Message queuing telemetry transport
+- **CIP over Ethernet/IP**: Common Industrial Protocol over Ethernet
+- **OPC-UA**: OPC Unified Architecture client/server
+- **Modbus TCP**: Modbus over TCP/IP client/server
+- **Modbus RTU**: Modbus over serial master/slave
+- **DH+ / RIO - ControlNet**: Allen-Bradley proprietary protocols
+- **BACnet/IP**: Building automation and control networks
+- **Profibus DP/PA**: Process field bus for industrial automation
+- **FOUNDATION Fieldbus H1**: Digital communication protocol for process control
+- **DeviceNet**: Industrial network for connecting industrial devices
 
-#### Sub-Phase 8.1: Reporting Nodes
-- [ ] **Task 8.1.1**: Dashboard Generator ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for dashboards
-  - [ ] Create dashboard design guide
-- [ ] **Task 8.1.2**: PDF Report Generator ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for PDF templates
-  - [ ] Create PDF reporting guide
-- [ ] **Task 8.1.3**: Email Notifier setup ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for notifications
-  - [ ] Create email automation guide
-- [ ] **Task 8.1.4**: Chart Generator configuration
-  - [ ] Add help icon for charts
-  - [ ] Add URL to chart.js docs
-- [ ] **Task 8.1.5**: KPI Calculator setup ⚠️ NEEDS CUSTOM PAGE
-  - [ ] Add help icon for KPIs
-  - [ ] Create KPI calculation guide
+#### **Connection Management Features**
+- **Connection Definition**: Create and configure connection parameters
+- **Connection Testing**: Validate and test all connection types
+- **Address Construction**: Generate PLC addresses based on connection type
+- **Global Registry**: Make connections available throughout application
+- **Connection Persistence**: Save and load connection configurations
+- **Connection Status**: Monitor connection health and status
 
-#### Sub-Phase 8.2: Workflow Nodes
-- [ ] **Task 8.2.1**: Workflow Reference browser
-  - [ ] Add help icon for nesting
-  - [ ] Create workflow nesting guide
-- [ ] **Task 8.2.2**: Workflow Subset extractor
-  - [ ] Add help icon for subsets
-  - [ ] Create subset documentation
-- [ ] **Task 8.2.3**: Workflow Conditional logic
-  - [ ] Add help icon for conditions
-  - [ ] Create conditional guide
-- [ ] **Task 8.2.4**: Workflow Parallel executor
-  - [ ] Add help icon for parallelism
-  - [ ] Create parallel execution guide
-- [ ] **Task 8.2.5**: Workflow Loop controller
-  - [ ] Add help icon for loops
-  - [ ] Create iteration guide
+#### **Integration Requirements**
+- **Settings UI Integration**: Implement in main Settings panel
+- **Node Properties Integration**: Dropdown selection in PLC Address fields
+- **Real-time Updates**: Connection status updates in node properties
+- **Validation Integration**: Connection-specific address format validation
 
-### Phase 9: Testing & Documentation (Week 9-10)
+## 🔍 **CRITICAL: Node Property Modal Configuration Review**
 
-#### Sub-Phase 9.1: Automated Testing
-- [ ] **Task 9.1.1**: Unit tests for all property components
-- [ ] **Task 9.1.2**: Integration tests for modal interactions
-- [ ] **Task 9.1.3**: E2E tests with Playwright MCP
-- [ ] **Task 9.1.4**: Performance benchmarking
-- [ ] **Task 9.1.5**: Accessibility compliance testing
+### **Comprehensive Node Configuration Audit Requirement**
 
-#### Sub-Phase 9.2: User Testing
-- [ ] **Task 9.2.1**: User acceptance testing scenarios
-- [ ] **Task 9.2.2**: Usability testing with real workflows
-- [ ] **Task 9.2.3**: Performance perception testing
-- [ ] **Task 9.2.4**: Documentation effectiveness testing
-- [ ] **Task 9.2.5**: Cross-browser compatibility testing
+**MANDATORY PHASE 3.2 TASK**: Before production deployment, every node's property modal must undergo comprehensive review to ensure all necessary configuration settings are properly defined and implemented.
 
-#### Sub-Phase 9.3: Documentation
-- [ ] **Task 9.3.1**: Create all missing node documentation pages
-- [ ] **Task 9.3.2**: Write developer API documentation
-- [ ] **Task 9.3.3**: Create user configuration guides
-- [ ] **Task 9.3.4**: Record video tutorials
-- [ ] **Task 9.3.5**: Generate quick reference cards
+#### **Review Scope & Criteria**
+
+**All 54+ Node Types Must Be Reviewed For:**
+
+1. **Configuration Completeness**
+   - All essential parameters are exposed in the property modal
+   - No critical configuration options are missing
+   - Parameter ranges and constraints are appropriate for real-world usage
+   - Default values are production-ready and safe
+
+2. **Industrial Standards Compliance**
+   - Configuration parameters align with industry standards for each node type
+   - Protocol-specific settings match official specifications
+   - Safety parameters and limits are properly implemented
+   - Regulatory compliance requirements are addressed
+
+3. **User Experience Validation**
+   - Configuration workflow is intuitive and logical
+   - Parameter grouping makes sense for operators
+   - Help text and descriptions are clear and actionable
+   - Validation messages provide helpful guidance
+
+4. **Technical Implementation Verification**
+   - All configuration parameters are properly connected to backend functionality
+   - Validation rules accurately reflect technical constraints
+   - Connection tests work with real industrial protocols
+   - Template configurations are production-ready
+
+#### **Node Categories Requiring Special Attention**
+
+**🔧 PLC Control Nodes (12 nodes)**
+- Verify PLC address formats match target PLC systems
+- Ensure data type mappings are complete and accurate
+- Validate scan rates and timing parameters
+- Check safety interlocks and emergency stop configurations
+
+**🤖 ML Algorithm Nodes (5 nodes)**
+- Review hyperparameter ranges for practical applicability
+- Ensure training data format specifications are complete
+- Validate model performance metrics and thresholds
+- Check computational resource requirements
+
+**🎯 MPC Control Nodes (5 nodes)**
+- Verify constraint handling parameters are comprehensive
+- Ensure prediction and control horizons are configurable
+- Validate economic optimization parameters
+- Check model adaptation and tuning options
+
+**💾 Data Source Nodes (5 nodes)**
+- Verify connection string formats for all supported databases
+- Ensure query optimization parameters are exposed
+- Validate data security and authentication options
+- Check data retention and archiving settings
+
+**📊 Reporting Nodes (5 nodes)**
+- Verify template configuration options are complete
+- Ensure all output formats are properly supported
+- Validate scheduling and automation parameters
+- Check notification and distribution settings
+
+#### **Review Process Requirements**
+
+**Phase 1: Automated Configuration Audit**
+- [ ] Run automated schema validation across all nodes
+- [ ] Check parameter coverage against industry standards
+- [ ] Validate default values for production safety
+- [ ] Verify constraint ranges and validation rules
+
+**Phase 2: Expert Domain Review**
+- [ ] Control theory expert review of control nodes
+- [ ] Network/protocol expert review of communication nodes
+- [ ] Database expert review of data integration nodes
+- [ ] ML/AI expert review of algorithm nodes
+
+**Phase 3: User Experience Testing**
+- [ ] Operator usability testing for each node category
+- [ ] Configuration workflow validation
+- [ ] Help system effectiveness testing
+- [ ] Error message clarity assessment
+
+**Phase 4: Production Readiness Validation**
+- [ ] Real-world configuration testing
+- [ ] Performance impact assessment
+- [ ] Security configuration review
+- [ ] Compliance requirements verification
+
+#### **Review Documentation Requirements**
+
+**For Each Node Type:**
+- [ ] Configuration completeness checklist
+- [ ] Parameter justification documentation
+- [ ] User experience test results
+- [ ] Production readiness certification
+
+**Deliverables:**
+- [ ] Node Configuration Audit Report
+- [ ] Missing Parameter Identification List
+- [ ] Configuration Enhancement Recommendations
+- [ ] Production Deployment Readiness Certification
+
+#### **Success Criteria**
+
+**Each Node Must Achieve:**
+- 100% configuration parameter coverage for its domain
+- All parameters have appropriate validation and constraints
+- User experience testing shows >95% task completion rate
+- Expert domain review approval
+- Production safety certification
+
+**Overall System Requirements:**
+- Zero critical configuration gaps across all node types
+- Consistent user experience patterns across categories
+- Complete help documentation for all parameters
+- Production-ready default values and constraints
+
+#### **Node-by-Node Review Checklist Template**
+
+**For Each Node Type, Verify:**
+
+**📋 Configuration Parameters**
+- [ ] All essential parameters are exposed in property modal
+- [ ] Parameter names are clear and follow industry conventions
+- [ ] Parameter descriptions are comprehensive and actionable
+- [ ] Default values are safe and appropriate for production use
+- [ ] Parameter ranges and constraints reflect real-world limitations
+- [ ] Units are clearly specified and consistent
+
+**🔍 Validation & Error Handling**
+- [ ] All required fields have proper validation
+- [ ] Validation error messages are clear and helpful
+- [ ] Cross-field dependencies are properly implemented
+- [ ] Edge cases and boundary conditions are handled
+- [ ] Connection validation works with real protocols
+
+**🎯 User Experience**
+- [ ] Parameter grouping is logical and intuitive
+- [ ] Help icons provide useful contextual information
+- [ ] Configuration workflow follows natural progression
+- [ ] Advanced parameters are appropriately grouped
+- [ ] Templates provide meaningful starting points
+
+**🔧 Technical Implementation**
+- [ ] All parameters are properly connected to backend functionality
+- [ ] Configuration changes are immediately reflected in node behavior
+- [ ] Performance impact of configuration changes is acceptable
+- [ ] Security considerations are properly addressed
+- [ ] Integration with other nodes works as expected
+
+**📚 Documentation & Help**
+- [ ] Help documentation is complete and accurate
+- [ ] Examples demonstrate real-world usage scenarios
+- [ ] Troubleshooting guides address common issues
+- [ ] Related nodes are properly cross-referenced
+- [ ] External documentation links are current and valid
+
+**Production Readiness**
+- [ ] Configuration has been tested in production-like environment
+- [ ] Safety parameters and interlocks are properly configured
+- [ ] Performance benchmarks are met
+- [ ] Regulatory compliance requirements are addressed
+- [ ] Operator training materials are available
+
+---
 
 ## 📚 Help Documentation Requirements
 
@@ -650,7 +710,7 @@ Each custom documentation page should include:
 ### Real-World Scenario
 [Detailed walkthrough of implementing this node in a production environment]
 
-## ✅ Best Practices
+## Best Practices
 
 ### Do's
 - ✅ Always validate input data before processing
@@ -1000,29 +1060,25 @@ The Node Properties Modal is considered complete when:
 ## 📊 Progress Tracking
 
 ### Overall Progress
-- **Total Phases**: 10
-- **Total Sub-Phases**: 35
-- **Total Tasks**: 210
-- **Tasks Completed**: 0
-- **Completion Percentage**: 0%
+- **Total Main Phases**: 3 (Sequential Implementation)
+- **Total Sub-Phases**: 12
+- **Total Tasks**: 87 (Core Implementation + Testing + Node Review)
+- **Tasks Completed**: 13 (User Testing Feedback Integration + Documentation Fixes)
+- **Completion Percentage**: 15%
 
 ### Phase Progress Summary
-- **Phase 0 (Documentation Templates)**: 0/15 tasks (0%)
-- **Phase 1 (Core Infrastructure)**: 0/25 tasks (0%)
-- **Phase 2 (PLC Control Nodes)**: 0/20 tasks (0%)
-- **Phase 3 (ML/AI Algorithm Nodes)**: 0/15 tasks (0%)
-- **Phase 4 (MPC Control Nodes)**: 0/15 tasks (0%)
-- **Phase 5 (Model Tuning & Testing)**: 0/25 tasks (0%)
-- **Phase 6 (Data Integration)**: 0/15 tasks (0%)
-- **Phase 7 (Data Processing)**: 0/15 tasks (0%)
-- **Phase 8 (Reporting & Workflow)**: 0/20 tasks (0%)
-- **Phase 9 (Testing & Documentation)**: 0/15 tasks (0%)
+- **Phase 1 (Base Framework & UI/UX)**: 0/30 tasks (0%)
+- **Phase 2 (Documentation Templates & Content)**: 0/20 tasks (0%)
+- **Phase 3 (Advanced Features & Production)**: 0/21 tasks (0%) - *Includes critical node configuration review*
+- **Testing Phases**: 0/16 tasks (0%) - *Includes node configuration validation testing*
 
 ### Critical Path Items
-1. **OpenAPI Schema MCP Integration** - Required for all API validations
-2. **Help Documentation System** - 29 custom pages needed
-3. **Scientific Calculator Modal** - Complex UI component
-4. **Two-Phase Testing Protocol** - Mandatory for completion
+1. **OpenAPI Schema MCP Migration** - Phase 1 foundation requirement
+2. **Template-Driven Node Creation System** - Enables efficient future development
+3. **Help Documentation Infrastructure** - 29 custom pages with placeholder content
+4. **Scientific Calculator Modal** - Phase 3 advanced feature
+5. **NODE CONFIGURATION REVIEW** - Comprehensive audit of all 54+ node property modals for configuration completeness (Phase 3.2)
+6. **Comprehensive Testing Protocol** - >99% success rate at each phase completion
 
 ### Documentation Pages Status
 - **Total Required**: 29 custom pages
@@ -1032,7 +1088,14 @@ The Node Properties Modal is considered complete when:
 
 ---
 
-**Last Updated**: January 2025
-**Version**: 1.2.0
-**Status**: Planning Phase (Documentation Template System Added)
+**Last Updated**: August 2025
+**Version**: 2.1.0
+**Status**: Phase 1 User Testing Feedback Integration Complete - Ready for Phase 1 Development
 **Owner**: AI Task Orchestrator Team
+
+## 🚀 **Development Status**
+
+**Current Phase**: Phase 1 - Base Framework & UI/UX  
+**Next Milestone**: OpenAPI Schema MCP Migration (Sub-Phase 1.1)  
+**Development Approach**: Sequential implementation with comprehensive testing at each phase completion  
+**Template-Driven**: All development designed for efficient future node creation
