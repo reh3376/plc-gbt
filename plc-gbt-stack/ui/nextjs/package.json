@@ -21,7 +21,18 @@
     "node:stats": "npx tsx scripts/node-template-cli.ts stats",
     "node:help": "npx tsx scripts/node-template-cli.ts help",
     "test:enhanced-modal": "npx tsx src/tests/run-enhanced-modal-tests.ts",
-    "test:enhanced-modal-safe": "npx playwright test src/tests/enhanced-modal-drag-resize.test.ts --project=chromium --workers=1 --timeout=60000"
+    "test:enhanced-modal-safe": "npx playwright test src/tests/enhanced-modal-drag-resize.test.ts --project=chromium --workers=1 --timeout=60000",
+    "test:workflow-help-modal": "npx tsx scripts/run-workflow-help-modal-tests.ts",
+    "test:workflow-help-modal-playwright": "npx playwright test src/tests/workflow-help-modal-comprehensive.test.ts --project=chromium --workers=1 --timeout=30000",
+    "test:workflow-help-modal-mcp": "PLAYWRIGHT_BASE_URL=http://host.docker.internal:3000 npx playwright test src/tests/workflow-help-modal-comprehensive.test.ts --project=chromium --workers=1",
+    "docker:setup": "npx tsx ../scripts/docker-environment-setup.ts",
+    "docker:validate": "npx tsx ../scripts/validate-mcp-connectivity.ts",
+    "docker:start": "cd .. && docker-compose up -d",
+    "docker:stop": "cd .. && docker-compose down",
+    "docker:status": "cd .. && docker-compose ps",
+    "docs:generate-prototypes": "npx tsx src/docs/generate-prototype-documentation.ts",
+    "docs:validate": "npx tsx src/docs/validate-documentation.ts",
+    "docs:build-all": "npm run docs:generate-prototypes && npm run docs:validate"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

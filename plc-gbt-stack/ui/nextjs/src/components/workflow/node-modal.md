@@ -40,6 +40,117 @@ Based on architectural decisions, this development follows a **3-Phase Sequentia
 - **Modular Code Structure**: Ensure code is implemented in a modular manner to maximize your ability to add new functionality without having to rework the entire codebase. 
 - **>99% Test Coverage** - Before marking any feature complete
 
+## 🤝 **CRITICAL: Collaborative Documentation Development Protocol**
+
+**MANDATORY REQUIREMENT**: All node documentation MUST be developed collaboratively between AI and human expert. This is not optional - it is fundamental to the success of the Node Properties Modal system.
+
+### 🎯 **Critical Insight: Why Collaboration is Essential**
+
+The initial prototype documentation achieved a **93.3% structural quality score**, but this was based on completeness metrics, NOT true industrial-grade technical accuracy and depth. For the Node Properties Modal development to succeed, we need **perfect documentation** that serves as comprehensive context for each node's configuration requirements.
+
+**Key Discovery**: AI cannot generate truly accurate industrial control documentation without deep domain expertise. The documentation must be perfect or the plan to use it as context for individual node Property Modal configuration will fail.
+
+### 🔧 **Mandatory Collaborative Workflow Structure**
+
+#### **Phase 2A: COMPLETED - Documentation Infrastructure**
+- ✅ **Core Documentation System**: TypeScript-based system (`node-documentation-system.ts`)
+- ✅ **Template Generator**: Automated markdown generation (`documentation-template-generator.ts`)
+- ✅ **Prototype Specifications**: 3 comprehensive node specs (`prototype-node-specifications.ts`)
+- ✅ **Generation & Validation**: Automated scripts with quality scoring system
+- ✅ **Infrastructure Quality**: 93.3% average structural score (PID Controller: 100%, PostgreSQL: 100%, Math Function: 80%)
+
+#### **Phase 2B: REQUIRED - Collaborative Documentation Refinement**
+
+**CRITICAL WORKFLOW**: Instead of mass generation, work together on each document iteratively:
+
+**Step 1: Node Selection & Prioritization**
+- **Human Role**: Select which node to work on based on development priorities
+- **AI Role**: Analyze the selected node's current specification and prepare technical questions
+
+**Step 2: Context Gathering Session**
+- **Human Role**: Provide industrial expertise, real-world use cases, parameter details
+- **AI Role**: Ask specific technical questions about:
+  - Critical parameters and their industrial significance
+  - Real-world configuration examples and constraints
+  - Common failure modes and troubleshooting procedures
+  - Integration patterns with other nodes and systems
+  - Safety considerations and regulatory requirements
+
+**Step 3: Collaborative Documentation Creation**
+- **Human Role**: Review each section as AI drafts it, provide corrections/enhancements
+- **AI Role**: Generate documentation sections iteratively with human feedback
+
+**Step 4: Iterative Refinement**
+- **Human Role**: Test the documentation against actual node implementation needs
+- **AI Role**: Refine content until it reaches true production quality for Modal development
+
+**Step 5: Validation & Integration**
+- **Human Role**: Confirm the documentation provides sufficient context for Modal development
+- **AI Role**: Integrate into the overall documentation system and mark as production-ready
+
+### 📋 **Current Documentation Status & Requirements**
+
+#### **Prototype Nodes (Phase 2A Complete - Structural Only)**
+- ✅ **PID Controller** (100% structural) - REQUIRES collaborative refinement for technical accuracy
+- ✅ **PostgreSQL Connector** (100% structural) - REQUIRES collaborative refinement for technical accuracy  
+- ✅ **Math Function Creator** (80% structural) - REQUIRES collaborative refinement for technical accuracy
+
+#### **Remaining Nodes Requiring Collaborative Development**
+- **Control & Optimization**: 25 nodes (Kalman Filter, IMC Controller, Genetic Algorithm, etc.)
+- **Testing & Analysis**: 5 nodes (PRBS Generator, Relay Feedback Test, etc.)
+- **Data Integration**: 6 nodes (Redis, Neo4j, Qdrant, Historian connectors, etc.)
+- **Data Processing**: 7 nodes (CSV Dataset Creator, Data to CSV Creator, Excel creators, Data Cleaner, Feature Engineer, etc.)
+- **Reporting**: 5 nodes (Dashboard Generator, PDF Report Generator, etc.)
+- **Total Remaining**: **48 nodes requiring collaborative documentation**
+
+#### **Quality Requirements for Node Properties Modal Success**
+- **Technical Accuracy**: 100% - All parameters must reflect real industrial usage
+- **Completeness**: 100% - All critical configuration options must be documented
+- **Context Depth**: Must provide sufficient detail for Property Modal parameter decisions
+- **Integration Guidance**: Clear connections between nodes and real-world systems
+- **Safety & Compliance**: Regulatory requirements and safety considerations included
+
+### 🎯 **Collaborative Session Structure Template**
+
+**For Each Node Documentation Session:**
+
+1. **Pre-Session Preparation** (AI):
+   - Analyze current node specification
+   - Prepare technical questions about parameters, constraints, use cases
+   - Research industry standards and common practices
+   - Identify knowledge gaps requiring human expertise
+
+2. **Collaborative Session** (AI + Human):
+   - Review node purpose and industrial applications
+   - Discuss critical parameters and their significance
+   - Define real-world configuration examples
+   - Identify common failure modes and troubleshooting
+   - Establish integration patterns and dependencies
+
+3. **Iterative Documentation** (AI + Human):
+   - AI drafts sections based on session input
+   - Human reviews and provides corrections/enhancements
+   - Refine until technical accuracy is achieved
+   - Validate against Property Modal development needs
+
+4. **Quality Validation** (AI + Human):
+   - Confirm documentation serves Property Modal context requirements
+   - Verify technical accuracy and completeness
+   - Test against real-world implementation scenarios
+   - Mark as production-ready for Modal development
+
+### 🚀 **Integration with Node Properties Modal Development**
+
+**CRITICAL DEPENDENCY**: Perfect documentation is essential for Property Modal success because:
+
+1. **Parameter Context**: Each node's parameters must be accurately represented in Property Modal
+2. **Configuration Logic**: Modal validation rules depend on documented parameter constraints  
+3. **User Experience**: Help text and tooltips derive from documentation content
+4. **Template Creation**: Property Modal templates require accurate default configurations
+5. **Integration Guidance**: Modal connection tabs need accurate relationship information
+
+**SUCCESS METRIC**: Documentation is ready when it provides 100% of the context needed for Property Modal parameter implementation without additional research.
+
 ## 🏗️ Architecture Overview
 
 ### Component Structure
@@ -124,7 +235,8 @@ node-modal/
 - **MQTT 5 Broker**:  MQTT Broker that can publish data from the plc-gbt application
 
 ### 7. 🔄 Data Processing Nodes
-- **csv-dataset-creator**: Schema, validation rules
+- **csv-dataset-creator**: Takes CSV input and curates it for analysis tools, ML models, MPCs, monitoring/reporting with template-based output (CSV, JSON, Markdown, XML, text)
+- **data-to-csv-creator**: Takes inputs from various data sources and converts time/date ranges into CSV based on user-defined configuration constraints
 - **excel-dataset-creator**: Sheet mapping, data types
 - **data-cleaner**: Cleaning rules, outlier detection
 - **feature-engineer**: Feature definitions, transformations
