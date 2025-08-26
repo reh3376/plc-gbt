@@ -1,0 +1,44 @@
+# N8N Framework Integration - Linting Exclusions
+# Exclude cloned n8n framework from linting and git tracking
+n8n-framework/
+n8n-framework/**/*
+
+# Workflow Engine Build Outputs
+api/workflow_engine/tests/coverage_html/
+api/workflow_engine/tests/coverage.xml
+api/workflow_engine/node_modules/
+api/workflow_engine/dist/
+
+# Environment and Configuration
+.env
+.env.local
+*.log
+
+# Database and Redis
+*.sql.backup
+redis-dump.rdb
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Generated
+.DS_Store
+Thumbs.db

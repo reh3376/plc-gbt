@@ -27,6 +27,12 @@ node_modules/
 .venv/
 __pycache__/
 
+# N8N Framework Integration - Complete Isolation
+# Exclude cloned n8n framework from ESLint scanning
+n8n-framework/
+n8n-framework/**/*
+**/n8n-framework/**/*
+
 # Exclude configuration files that shouldn't be linted
 *.config.js
 *.config.ts

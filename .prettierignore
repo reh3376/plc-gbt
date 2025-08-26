@@ -24,6 +24,11 @@ node_modules/
 .venv/
 __pycache__/
 
+# CRITICAL: Exclude N8N Framework from ALL formatting
+n8n-framework/
+n8n-framework/**/*
+**/n8n-framework/**
+
 # Exclude generated files
 *.d.ts.map
 *.js.map

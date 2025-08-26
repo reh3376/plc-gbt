@@ -12,6 +12,7 @@
 import fs from 'fs';
 import path from 'path';
 import { DocumentationTemplateGenerator } from './documentation-template-generator';
+import { NODE_REGISTRY, NodeDocumentationSpec } from './node-documentation-system';
 import {
   MATH_FUNCTION_CREATOR_SPEC,
   PID_CONTROLLER_SPEC,
@@ -70,7 +71,9 @@ class PrototypeDocumentationGenerator {
   /**
    * Generate documentation for a single node
    */
-  private async generateNodeDocumentation(spec: any): Promise<DocumentationGenerationResult> {
+  private async generateNodeDocumentation(
+    spec: NodeDocumentationSpec
+  ): Promise<DocumentationGenerationResult> {
     try {
       // Generate main documentation
       const mainDoc = DocumentationTemplateGenerator.generateMarkdownDocumentation(spec);
@@ -196,7 +199,7 @@ The prototype documentation demonstrates:
 
 ### **Scalable Infrastructure**  
 - **Template-Driven**: Automated generation scales to all ${
-      Object.keys(require('./node-documentation-system').NODE_REGISTRY).length
+      Object.keys(NODE_REGISTRY).length
     }+ nodes
 - **Category Extensions**: Specialized content for each node category
 - **Validation Framework**: Built-in testing and accuracy verification
@@ -204,7 +207,7 @@ The prototype documentation demonstrates:
 
 ### **Next Steps**
 1. **Complete Remaining Nodes**: Use template system for all ${
-      Object.keys(require('./node-documentation-system').NODE_REGISTRY).length - 3
+      Object.keys(NODE_REGISTRY).length - 3
     } remaining nodes
 2. **Documentation Testing**: Implement automated testing framework
 3. **Integration Testing**: Connect with Node Properties Modal system
@@ -252,7 +255,7 @@ ${results
 **Documentation System**: PLC-GBT Node Documentation Generator v1.0  
 **AI Task Orchestrator**: TypeScript Implementation Complete  
 **Next Phase**: Phase 2B - Complete Node Coverage (${
-      Object.keys(require('./node-documentation-system').NODE_REGISTRY).length - successCount
+      Object.keys(NODE_REGISTRY).length - successCount
     } remaining nodes)  
 
 *This report demonstrates successful completion of Phase 2A documentation infrastructure with production-ready prototype documentation covering industrial control, database integration, and mathematical processing domains.*`;

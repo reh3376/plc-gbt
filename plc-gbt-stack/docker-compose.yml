@@ -194,8 +194,18 @@ services:
       - N8N_PROTOCOL=http
       - NODE_ENV=production
 
-      # Database Configuration - SQLite (for N8N internal use)
-      # Note: Environment isolation maintained through external DB settings below
+      # Database Configuration - PostgreSQL (with isolated schema)
+      - DB_TYPE=${DB_TYPE:-postgresdb}
+      - DB_POSTGRESDB_HOST=${DB_POSTGRESDB_HOST:-postgres}
+      - DB_POSTGRESDB_PORT=${DB_POSTGRESDB_PORT:-5432}
+      - DB_POSTGRESDB_DATABASE=${DB_POSTGRESDB_DATABASE:-plc_gbt}
+      - DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER:-plc_user}
+      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD:-postgres_password}
+      - DB_POSTGRESDB_SCHEMA=${N8N_DB_SCHEMA:-n8n}
+
+      # Task Runner Configuration (fixes deprecation warnings)
+      - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED:-true}
+      - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=${OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS:-true}
 
       # Queue Configuration - Redis (Environment Isolation - Database 2)
       - QUEUE_BULL_REDIS_HOST=redis
@@ -206,6 +216,10 @@ services:
       # Security and File Permissions
       - N8N_ENCRYPTION_KEY=plc-gbt-n8n-encryption-key-2025
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_SECURE_COOKIE=false # Allow insecure connections for Docker testing
+
+      # License Configuration
+      - N8N_LICENSE_KEY=${N8N_LICENSE_KEY}
 
       # Logging
       - N8N_LOG_LEVEL=info
@@ -240,7 +254,7 @@ services:
       - plc-internal-network
       - plc-database-network
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:5678/healthz']
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:5678/healthz']
       interval: 30s
       timeout: 10s
       retries: 5

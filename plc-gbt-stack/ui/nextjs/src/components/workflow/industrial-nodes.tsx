@@ -741,6 +741,8 @@ export const industrialNodeTypes = {
   'lambda-tuner': GenericIndustrialNode,
   'imc-tuner': GenericIndustrialNode,
   'relay-feedback-tuner': GenericIndustrialNode,
+  // Data Processing nodes
+  'csv-dataset-creator': GenericIndustrialNode,
   'data-source-csv': GenericIndustrialNode,
   'data-source-database': GenericIndustrialNode,
   'data-source-opc': GenericIndustrialNode,

@@ -118,6 +118,7 @@ extend-exclude = '''
   | \.venv
   | build
   | dist
+  | n8n-framework
   # markdown files
   | .*\.md$
   | .*\.mdx$
@@ -132,6 +133,9 @@ exclude = [
     "*.mdx",
     "**/*.md",
     "**/*.mdx",
+    "n8n-framework/",
+    "n8n-framework/**/*",
+    "**/n8n-framework/**/*",
 ]
 select = [
     "E",  # pycodestyle errors
@@ -169,6 +173,10 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
+exclude = [
+    "n8n-framework/",
+    "n8n-framework/.*",
+]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

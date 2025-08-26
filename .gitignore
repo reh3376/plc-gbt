@@ -100,5 +100,14 @@ openai_test_report_*.json
 node_modules/
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log* acd-l5x-tool-lib/
+yarn-error.log*
+
+# N8N Framework Integration - Complete Isolation  
+# Exclude cloned n8n framework from git tracking and linting
+n8n-framework/
+n8n-framework/**/*
+**/n8n-framework/**/*
+
+# Previously duplicated entries - cleaning up
 acd-l5x-tool-lib/
+n8n-framework-temp/

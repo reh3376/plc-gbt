@@ -1,0 +1,122 @@
+# PLC-GBT N8N Framework Integration - Python Configuration
+# Phase 1.5: Automated Testing Suite with Linting Isolation
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "plc-gbt-n8n-integration"
+version = "1.0.0"
+description = "N8N Framework Integration for PLC-GBT Industrial Automation"
+authors = [
+    {name = "AI Task Orchestrator", email = "ai-orchestrator@plc-gbt.com"}
+]
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "asyncpg>=0.29.0",
+    "redis[hiredis]>=5.0.0",
+    "pydantic>=2.5.0",
+    "httpx>=0.25.0",
+    "aiofiles>=23.2.0",
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.5.0"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["api/workflow_engine/tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--verbose",
+    "--tb=short", 
+    "--cov=api/workflow_engine",
+    "--cov-report=html:api/workflow_engine/tests/coverage_html",
+    "--cov-report=term-missing",
+    "--cov-report=xml:api/workflow_engine/tests/coverage.xml",
+    "--cov-fail-under=95",
+    "--strict-markers",
+    "--disable-warnings"
+]
+markers = [
+    "unit: Unit tests for individual components",
+    "integration: Integration tests for API endpoints",
+    "performance: Performance tests for industrial benchmarks", 
+    "database: Database schema and persistence tests",
+    "playwright: Browser automation tests via MCP",
+    "industrial: Industrial compliance and safety tests",
+    "slow: Long-running tests (>1 second)"
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::pytest.PytestUnraisableExceptionWarning"
+]
+timeout = 300
+asyncio_mode = "auto"
+
+[tool.pylint]
+init-hook = "import sys; sys.path.append('.')"
+
+[tool.pylint.main]
+py-version = "3.11"
+ignore = [
+    "n8n-framework"
+]
+ignore-patterns = [
+    "n8n-framework/.*",
+    "node_modules/.*", 
+    "dist/.*",
+    "build/.*",
+    "coverage/.*"
+]
+
+[tool.pylint.messages_control]
+disable = [
+    "missing-module-docstring",
+    "missing-class-docstring", 
+    "missing-function-docstring",
+    "too-few-public-methods",
+    "logging-fstring-interpolation"
+]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.pytest_cache  
+  | \.venv
+  | \.env
+  | _build
+  | buck-out
+  | build
+  | dist
+  | n8n-framework
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip = ["n8n-framework"]
+skip_glob = ["n8n-framework/**/*"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+exclude = [
+    "n8n-framework/.*",
+    "node_modules/.*"
+]

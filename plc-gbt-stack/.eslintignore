@@ -1,0 +1,24 @@
+# ESLint Ignore - N8N Framework Integration
+# Exclude n8n framework from linting to avoid contamination
+
+# N8N Framework (cloned repository)
+n8n-framework/
+n8n-framework/**/*
+
+# Build outputs
+dist/
+build/
+coverage/
+node_modules/
+
+# Generated files
+*.min.js
+*.bundle.js
+
+# Test coverage
+api/workflow_engine/tests/coverage_html/
+api/workflow_engine/tests/coverage.xml
+
+# Environment files
+.env
+.env.local
