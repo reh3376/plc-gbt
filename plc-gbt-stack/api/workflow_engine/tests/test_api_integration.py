@@ -22,7 +22,7 @@ import httpx
 from fastapi.testclient import TestClient
 from fastapi import status
 
-from api.workflow_engine.fastapi_router import create_workflow_router, get_workflow_engine
+from api.workflow_engine.fastapi_router import router as workflow_router, get_workflow_engine
 from api.workflow_engine.n8n_integration import (
     PLCGBTWorkflowEngine,
     WorkflowDefinition, 
@@ -57,8 +57,7 @@ def test_app(mock_workflow_engine):
     app.dependency_overrides[get_workflow_engine] = lambda: mock_workflow_engine
     
     # Include router
-    workflow_router = create_workflow_router()
-    app.include_router(workflow_router, prefix="/api/v1/workflows")
+    app.include_router(workflow_router)
     
     return app
 

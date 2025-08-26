@@ -14,7 +14,7 @@ Phase: 1.3 - Core Engine Integration
 import os
 from pathlib import Path
 from typing import Optional
-from pydantic import Field
+from pydantic import Field, ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -106,10 +106,12 @@ class WorkflowEngineConfig(BaseSettings):
         description="Enable debug logging"
     )
     
-    class Config:
-        env_file = ".env"
-        env_prefix = "WORKFLOW_ENGINE_"
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file=".env",
+        env_prefix="WORKFLOW_ENGINE_",
+        case_sensitive=False,
+        extra="ignore"  # Allow extra environment variables to be ignored
+    )
 
 
 def get_config() -> WorkflowEngineConfig:

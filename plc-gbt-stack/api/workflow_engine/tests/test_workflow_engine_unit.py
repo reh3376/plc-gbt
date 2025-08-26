@@ -30,9 +30,11 @@ from api.workflow_engine.n8n_integration import (
 from api.workflow_engine.config import WorkflowEngineConfig
 
 
+@pytest.mark.unit
 class TestWorkflowEngineConfiguration:
     """Test workflow engine configuration and initialization."""
     
+    @pytest.mark.unit
     def test_config_initialization(self):
         """Test configuration model creation and validation."""
         config = WorkflowEngineConfig(
@@ -49,6 +51,7 @@ class TestWorkflowEngineConfiguration:
         assert config.max_concurrent_executions == 5
         assert config.industrial_performance_threshold_ms == 50.0
     
+    @pytest.mark.unit
     def test_config_validation_constraints(self):
         """Test configuration validation constraints."""
         # Test concurrent execution limits

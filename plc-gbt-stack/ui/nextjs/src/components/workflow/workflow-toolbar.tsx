@@ -493,6 +493,57 @@ const nodePalette: NodePaletteItem[] = [
     category: 'Reporting',
     description: 'Calculate and track key performance indicators',
   },
+  // Advanced Workflow Control Nodes
+  {
+    type: 'workflow-conditional',
+    label: 'Workflow Conditional',
+    icon: GitBranch,
+    color: '#F59E0B',
+    category: 'Workflow Control',
+    description: 'Execute different workflow paths based on conditions and decision logic',
+  },
+  {
+    type: 'workflow-parallel',
+    label: 'Workflow Parallel',
+    icon: Layout,
+    color: '#8B5CF6',
+    category: 'Workflow Control',
+    description: 'Execute multiple workflow paths simultaneously with synchronization',
+  },
+  {
+    type: 'workflow-loop',
+    label: 'Workflow Loop',
+    icon: RefreshCw,
+    color: '#06B6D4',
+    category: 'Workflow Control',
+    description: 'Execute workflow paths iteratively with various loop types',
+  },
+  // Enhanced Industrial PLC Connectivity Nodes
+  {
+    type: 'advanced-modbus-client',
+    label: 'Advanced Modbus Client',
+    icon: Wrench,
+    color: '#DC2626',
+    category: 'Communication',
+    description: 'Industrial-grade Modbus TCP/RTU client with enhanced diagnostics and security',
+  },
+  {
+    type: 'advanced-opcua-client',
+    label: 'Advanced OPC-UA Client',
+    icon: Network,
+    color: '#16A34A',
+    category: 'Communication',
+    description: 'Industrial-grade OPC-UA client with enhanced security and real-time performance',
+  },
+  {
+    type: 'advanced-ethernet-ip',
+    label: 'Advanced EtherNet/IP',
+    icon: Zap,
+    color: '#2563EB',
+    category: 'Communication',
+    description:
+      'Industrial-grade EtherNet/IP client for Allen-Bradley PLCs with enhanced diagnostics',
+  },
 ];
 
 // Enhanced category system with metadata
@@ -564,6 +615,12 @@ const categoryInfo: ReadonlyArray<CategoryInfo> = [
     label: 'Reporting',
     description: 'Analytics and reporting output systems',
     color: '#F59E0B',
+  },
+  {
+    id: 'Workflow Control',
+    label: 'Workflow Control',
+    description: 'Advanced workflow control and automation logic',
+    color: '#7C3AED',
   },
 ] as const;
 
@@ -942,7 +999,9 @@ export function WorkflowToolbar() {
       setStatusModalProps({
         operation: 'start',
         status: 'success',
-        message: `Workflow "${activeWorkflow?.name || 'Demo Temperature Control'}" started successfully.`,
+        message: `Workflow "${
+          activeWorkflow?.name || 'Demo Temperature Control'
+        }" started successfully.`,
       });
       setShowStatusModal(true);
     } catch (error) {
@@ -962,7 +1021,9 @@ export function WorkflowToolbar() {
       setStatusModalProps({
         operation: 'pause',
         status: 'success',
-        message: `Workflow "${activeWorkflow?.name || 'Demo Temperature Control'}" paused successfully.`,
+        message: `Workflow "${
+          activeWorkflow?.name || 'Demo Temperature Control'
+        }" paused successfully.`,
       });
       setShowStatusModal(true);
     } catch (error) {
@@ -982,7 +1043,9 @@ export function WorkflowToolbar() {
       setStatusModalProps({
         operation: 'stop',
         status: 'success',
-        message: `Workflow "${activeWorkflow?.name || 'Demo Temperature Control'}" stopped successfully.`,
+        message: `Workflow "${
+          activeWorkflow?.name || 'Demo Temperature Control'
+        }" stopped successfully.`,
       });
       setShowStatusModal(true);
     } catch (error) {

@@ -66,6 +66,10 @@ export const IndustrialNodeTypeSchema = z.enum([
   'workflow-conditional',
   'workflow-parallel',
   'workflow-loop',
+  // Enhanced Industrial PLC Connectivity Nodes
+  'advanced-modbus-client',
+  'advanced-opcua-client',
+  'advanced-ethernet-ip',
 ]);
 
 // Property Field Type Schema

@@ -758,4 +758,35 @@ export const industrialNodeTypes = {
   'chart-generator': GenericIndustrialNode,
   'export-csv': GenericIndustrialNode,
   'export-pdf': GenericIndustrialNode,
+  // ===== MISSING NODE REGISTRATIONS - AI Task Orchestrator Fix =====
+  // Advanced Control & Analysis Nodes
+  'genetic-algorithm': GenericIndustrialNode,
+  'pilco-pets': GenericIndustrialNode,
+  'step-response-analyzer': GenericIndustrialNode,
+  'subspace-identification': GenericIndustrialNode,
+  'arx-armax-identifier': GenericIndustrialNode,
+  'recursive-least-squares': GenericIndustrialNode,
+  'model-validation': GenericIndustrialNode,
+  'relay-feedback-test': GenericIndustrialNode,
+  'performance-metrics': GenericIndustrialNode,
+  'prbs-generator': GenericIndustrialNode,
+  'distillation-simulator': GenericIndustrialNode,
+  // Data Source & Processing Nodes
+  'postgresql-connector': GenericIndustrialNode,
+  'qdrant-connector': GenericIndustrialNode,
+  'excel-dataset-creator': GenericIndustrialNode,
+  'time-series-processor': GenericIndustrialNode,
+  'data-cleaner': GenericIndustrialNode,
+  'feature-engineer': GenericIndustrialNode,
+  // Reporting & Communication Nodes
+  'pdf-report-generator': GenericIndustrialNode,
+  'email-notifier': GenericIndustrialNode,
+  // Advanced Workflow Control Nodes
+  'workflow-conditional': GenericIndustrialNode,
+  'workflow-parallel': GenericIndustrialNode,
+  'workflow-loop': GenericIndustrialNode,
+  // Enhanced Industrial PLC Connectivity Nodes
+  'advanced-modbus-client': GenericIndustrialNode,
+  'advanced-opcua-client': GenericIndustrialNode,
+  'advanced-ethernet-ip': GenericIndustrialNode,
 };

@@ -657,6 +657,85 @@ const NODE_HELP_CONTENT: Record<IndustrialNodeType, NodeHelpContent> = {
     documentationUrl: '/docs/nodes/time-series-processor',
     isCustomPage: true,
   },
+  // Enhanced Industrial PLC Connectivity Nodes
+  'advanced-modbus-client': {
+    title: 'Advanced Modbus Client',
+    description:
+      'Industrial-grade Modbus TCP/RTU client with enhanced diagnostics, security, and performance optimization',
+    keyParameters: [
+      'Connection Type',
+      'High-Performance Mode',
+      'Security Level',
+      'Data Buffering',
+      'Diagnostics',
+    ],
+    useCases: [
+      'Industrial PLC Communication',
+      'SCADA Integration',
+      'Real-time Data Acquisition',
+      'Process Monitoring',
+    ],
+    troubleshooting: [
+      'Verify network connectivity to Modbus device',
+      'Check unit ID and addressing configuration',
+      'Review security and encryption settings',
+      'Monitor connection pool and performance metrics',
+    ],
+    documentationUrl: '/docs/nodes/communication/advanced-modbus-client',
+    isCustomPage: false,
+  },
+  'advanced-opcua-client': {
+    title: 'Advanced OPC-UA Client',
+    description:
+      'Industrial-grade OPC-UA client with enhanced security, subscription management, and real-time performance',
+    keyParameters: [
+      'Security Mode',
+      'Subscription Settings',
+      'Performance Mode',
+      'Certificate Config',
+      'Node Operations',
+    ],
+    useCases: [
+      'Industrial Automation',
+      'SCADA Systems',
+      'Real-time Monitoring',
+      'Secure Data Exchange',
+    ],
+    troubleshooting: [
+      'Verify OPC-UA server endpoint and availability',
+      'Check certificate configuration and security policies',
+      'Review subscription and publishing interval settings',
+      'Monitor connection pooling and performance metrics',
+    ],
+    documentationUrl: '/docs/nodes/communication/advanced-opcua-client',
+    isCustomPage: false,
+  },
+  'advanced-ethernet-ip': {
+    title: 'Advanced EtherNet/IP Client',
+    description:
+      'Industrial-grade EtherNet/IP client for Allen-Bradley PLCs with enhanced diagnostics and performance',
+    keyParameters: [
+      'PLC Model',
+      'Performance Mode',
+      'Tag Configuration',
+      'Diagnostic Level',
+      'Connection Settings',
+    ],
+    useCases: [
+      'Allen-Bradley PLC Communication',
+      'Factory Automation',
+      'Process Control',
+      'Data Acquisition',
+    ],
+    troubleshooting: [
+      'Verify PLC host address and port configuration',
+      'Check CPU slot number and connection path',
+      'Review tag names and data type mappings',
+      'Monitor diagnostic level and health checks',
+    ],
+    documentationUrl: '/docs/nodes/communication/advanced-ethernet-ip',
+    isCustomPage: false,
+  },
 };
 
 /**

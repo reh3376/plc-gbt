@@ -673,13 +673,14 @@ async def shutdown_workflow_engine():
 
 
 # =============================================================================
-# ERROR HANDLERS AND MIDDLEWARE
+# ERROR HANDLING FUNCTIONS
 # =============================================================================
+# Note: Exception handlers are managed at the FastAPI app level, not router level.
+# These functions are available for use by the main application if needed.
 
-@router.exception_handler(HTTPException)
-async def http_exception_handler(request, exc: HTTPException):
-    """Custom HTTP exception handler with enhanced logging."""
-    logger.warning(f"HTTP {exc.status_code}: {exc.detail}")
+async def handle_workflow_http_exception(request, exc: HTTPException):
+    """Custom HTTP exception handler for workflow endpoints."""
+    logger.warning(f"Workflow API HTTP {exc.status_code}: {exc.detail}")
     
     return JSONResponse(
         status_code=exc.status_code,
@@ -687,22 +688,23 @@ async def http_exception_handler(request, exc: HTTPException):
             "error": exc.detail,
             "status_code": exc.status_code,
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "component": "workflow_engine",
             "phase": "1.3"
         }
     )
 
 
-@router.exception_handler(Exception)
-async def general_exception_handler(request, exc: Exception):
-    """General exception handler for unhandled errors."""
-    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+async def handle_workflow_general_exception(request, exc: Exception):
+    """General exception handler for unhandled workflow errors."""
+    logger.error(f"Workflow API unhandled exception: {exc}", exc_info=True)
     
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
-            "error": "Internal server error",
+            "error": "Workflow engine internal error",
             "message": str(exc),
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "component": "workflow_engine", 
             "phase": "1.3"
         }
     )
