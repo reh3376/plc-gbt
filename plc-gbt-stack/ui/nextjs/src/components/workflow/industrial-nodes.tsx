@@ -13,6 +13,7 @@ import {
   Gauge,
   GitBranch,
   Layout,
+  LayoutGrid,
   LineChart,
   Monitor,
   Network,
@@ -671,7 +672,58 @@ const nodePaletteMap: Record<
     color: '#8B5CF6',
     description: 'Track reference trajectories and setpoints',
   },
-  // Add more as needed - this covers the most common ones
+  // ===== MISSING ORPHAN NODES - AI Task Orchestrator Fix =====
+  // Control & MPC Nodes
+  'kalman-filter': {
+    label: 'Kalman Filter',
+    icon: Target,
+    color: '#8B5CF6',
+    description: 'State estimation with Riccati-solved gains for process variables',
+  },
+  'imc-controller': {
+    label: 'IMC Controller',
+    icon: Settings,
+    color: '#8B5CF6',
+    description: 'Internal Model Control for robust feedforward compensation',
+  },
+  'quadratic-programming': {
+    label: 'Quadratic Programming',
+    icon: Zap,
+    color: '#8B5CF6',
+    description: 'QP solver for constrained optimization in real-time control',
+  },
+  // Data Source Nodes
+  'redis-connector': {
+    label: 'Redis Connector',
+    icon: Database,
+    color: '#9333EA',
+    description: 'High-speed Redis cache for real-time data operations',
+  },
+  'historian-connector': {
+    label: 'Historian Connector',
+    icon: Database,
+    color: '#9333EA',
+    description: 'Industrial historian for time-series process data',
+  },
+  'neo4j-connector': {
+    label: 'Neo4j Connector',
+    icon: Network,
+    color: '#9333EA',
+    description: 'Graph database for knowledge representation and relationships',
+  },
+  // Reporting Nodes
+  'dashboard-generator': {
+    label: 'Dashboard Generator',
+    icon: LayoutGrid,
+    color: '#F59E0B',
+    description: 'Create interactive dashboards for process monitoring',
+  },
+  'kpi-calculator': {
+    label: 'KPI Calculator',
+    icon: Network,
+    color: '#F59E0B',
+    description: 'Calculate and track key performance indicators',
+  },
 };
 
 // Generic Industrial Node Component
@@ -789,4 +841,16 @@ export const industrialNodeTypes = {
   'advanced-modbus-client': GenericIndustrialNode,
   'advanced-opcua-client': GenericIndustrialNode,
   'advanced-ethernet-ip': GenericIndustrialNode,
+  // ===== ORPHAN NODES FIX - AI Task Orchestrator =====
+  // Control & MPC Nodes
+  'kalman-filter': GenericIndustrialNode,
+  'imc-controller': GenericIndustrialNode,
+  'quadratic-programming': GenericIndustrialNode,
+  // Data Source Nodes
+  'redis-connector': GenericIndustrialNode,
+  'historian-connector': GenericIndustrialNode,
+  'neo4j-connector': GenericIndustrialNode,
+  // Reporting Nodes
+  'dashboard-generator': GenericIndustrialNode,
+  'kpi-calculator': GenericIndustrialNode,
 };

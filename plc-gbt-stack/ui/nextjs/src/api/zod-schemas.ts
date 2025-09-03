@@ -129,6 +129,7 @@ export const PropertyUIHintsSchema = z
     helpText: z.string().optional(),
     units: z.string().optional(),
     format: z.string().optional(),
+    specialComponent: z.string().optional(),
   })
   .strict();
 

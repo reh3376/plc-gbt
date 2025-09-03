@@ -1,29 +1,41 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { 
-  Settings,
-  X,
-  ChevronDown,
-  ChevronRight,
-  Trash,
-  Copy,
-  Save,
-  Undo,
+import { useWorkflowStore } from '@/lib/stores/workflow-store';
+import { cn } from '@/lib/utils/cn';
+import {
   AlertCircle,
   CheckCircle,
-  Clock
-} from 'lucide-react'
-import { cn } from '@/lib/utils/cn'
-import { useWorkflowStore } from '@/lib/stores/workflow-store'
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Copy,
+  Save,
+  Settings,
+  Trash,
+  Undo,
+  X,
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface PropertyField {
-  key: string
-  label: string
-  type: 'text' | 'number' | 'boolean' | 'select' | 'textarea' | 'json'
-  options?: string[]
-  description?: string
-  validation?: (value: unknown) => string | null
+  key: string;
+  label: string;
+  type:
+    | 'text'
+    | 'number'
+    | 'boolean'
+    | 'select'
+    | 'textarea'
+    | 'json'
+    | 'object'
+    | 'array'
+    | 'password';
+  options?: string[];
+  description?: string;
+  validation?: (value: unknown) => string | null;
+  required?: boolean;
+  defaultValue?: unknown;
+  specialComponent?: string;
 }
 
 const commonProperties: PropertyField[] = [
@@ -31,21 +43,21 @@ const commonProperties: PropertyField[] = [
     key: 'label',
     label: 'Label',
     type: 'text',
-    description: 'Display name for the node'
+    description: 'Display name for the node',
   },
   {
     key: 'description',
     label: 'Description',
     type: 'textarea',
-    description: 'Detailed description of the node function'
+    description: 'Detailed description of the node function',
   },
   {
     key: 'tags',
     label: 'Tags',
     type: 'text',
-    description: 'Comma-separated tags for categorization'
+    description: 'Comma-separated tags for categorization',
   },
-]
+];
 
 const nodeTypeProperties: Record<string, PropertyField[]> = {
   'pid-controller': [
@@ -54,39 +66,39 @@ const nodeTypeProperties: Record<string, PropertyField[]> = {
       label: 'Proportional Gain (Kp)',
       type: 'number',
       description: 'Proportional gain coefficient',
-      validation: (value) => (typeof value === 'number' && value < 0) ? 'Must be positive' : null
+      validation: value => (typeof value === 'number' && value < 0 ? 'Must be positive' : null),
     },
     {
       key: 'ki',
       label: 'Integral Gain (Ki)',
       type: 'number',
       description: 'Integral gain coefficient',
-      validation: (value) => (typeof value === 'number' && value < 0) ? 'Must be positive' : null
+      validation: value => (typeof value === 'number' && value < 0 ? 'Must be positive' : null),
     },
     {
       key: 'kd',
       label: 'Derivative Gain (Kd)',
       type: 'number',
       description: 'Derivative gain coefficient',
-      validation: (value) => (typeof value === 'number' && value < 0) ? 'Must be positive' : null
+      validation: value => (typeof value === 'number' && value < 0 ? 'Must be positive' : null),
     },
     {
       key: 'setpoint',
       label: 'Setpoint',
       type: 'number',
-      description: 'Target value for control'
+      description: 'Target value for control',
     },
     {
       key: 'outputMin',
       label: 'Minimum Output',
       type: 'number',
-      description: 'Minimum control output value'
+      description: 'Minimum control output value',
     },
     {
       key: 'outputMax',
       label: 'Maximum Output',
       type: 'number',
-      description: 'Maximum control output value'
+      description: 'Maximum control output value',
     },
   ],
   'plc-input': [
@@ -94,20 +106,20 @@ const nodeTypeProperties: Record<string, PropertyField[]> = {
       key: 'address',
       label: 'PLC Address',
       type: 'text',
-      description: 'PLC memory address (e.g., %I0.0)'
+      description: 'PLC memory address (e.g., %I0.0)',
     },
     {
       key: 'dataType',
       label: 'Data Type',
       type: 'select',
       options: ['BOOL', 'INT', 'REAL', 'DINT'],
-      description: 'PLC data type'
+      description: 'PLC data type',
     },
     {
       key: 'scanRate',
       label: 'Scan Rate (ms)',
       type: 'number',
-      description: 'Data acquisition rate in milliseconds'
+      description: 'Data acquisition rate in milliseconds',
     },
   ],
   'plc-output': [
@@ -115,20 +127,20 @@ const nodeTypeProperties: Record<string, PropertyField[]> = {
       key: 'address',
       label: 'PLC Address',
       type: 'text',
-      description: 'PLC memory address (e.g., %Q0.0)'
+      description: 'PLC memory address (e.g., %Q0.0)',
     },
     {
       key: 'dataType',
       label: 'Data Type',
       type: 'select',
       options: ['BOOL', 'INT', 'REAL', 'DINT'],
-      description: 'PLC data type'
+      description: 'PLC data type',
     },
     {
       key: 'safeValue',
       label: 'Safe Value',
       type: 'text',
-      description: 'Safe value when connection is lost'
+      description: 'Safe value when connection is lost',
     },
   ],
   'modbus-client': [
@@ -136,25 +148,25 @@ const nodeTypeProperties: Record<string, PropertyField[]> = {
       key: 'host',
       label: 'Host Address',
       type: 'text',
-      description: 'Modbus server IP address'
+      description: 'Modbus server IP address',
     },
     {
       key: 'port',
       label: 'Port',
       type: 'number',
-      description: 'Modbus server port (usually 502)'
+      description: 'Modbus server port (usually 502)',
     },
     {
       key: 'unitId',
       label: 'Unit ID',
       type: 'number',
-      description: 'Modbus slave unit identifier'
+      description: 'Modbus slave unit identifier',
     },
     {
       key: 'timeout',
       label: 'Timeout (ms)',
       type: 'number',
-      description: 'Connection timeout in milliseconds'
+      description: 'Connection timeout in milliseconds',
     },
   ],
   'custom-logic': [
@@ -162,14 +174,14 @@ const nodeTypeProperties: Record<string, PropertyField[]> = {
       key: 'logic',
       label: 'Logic Code',
       type: 'textarea',
-      description: 'Custom logic implementation'
+      description: 'Custom logic implementation',
     },
     {
       key: 'language',
       label: 'Language',
       type: 'select',
       options: ['JavaScript', 'Python', 'Structured Text'],
-      description: 'Programming language for logic'
+      description: 'Programming language for logic',
     },
   ],
   'n8n-workflow': [
@@ -177,114 +189,259 @@ const nodeTypeProperties: Record<string, PropertyField[]> = {
       key: 'workflowId',
       label: 'N8N Workflow ID',
       type: 'text',
-      description: 'Unique N8N workflow identifier'
+      description: 'Unique N8N workflow identifier',
     },
     {
       key: 'apiUrl',
       label: 'N8N API URL',
       type: 'text',
-      description: 'N8N instance API endpoint'
+      description: 'N8N instance API endpoint',
     },
     {
       key: 'apiKey',
       label: 'API Key',
       type: 'text',
-      description: 'N8N API authentication key'
+      description: 'N8N API authentication key',
     },
   ],
-}
+  // ===== DATABASE CONNECTOR NODES - AI Task Orchestrator Implementation =====
+  'postgresql-connector': [
+    {
+      key: 'connectionString',
+      label: 'Connection String',
+      type: 'text',
+      description: 'PostgreSQL connection string (postgresql://user:pass@host:port/db)',
+      required: true,
+    },
+    {
+      key: 'connectionPool',
+      label: 'Connection Pool Settings',
+      type: 'object',
+      description: 'Connection pooling configuration (min, max, idleTimeout)',
+      defaultValue: { min: 2, max: 10, idleTimeout: 30000 },
+    },
+    {
+      key: 'ssl',
+      label: 'SSL Configuration',
+      type: 'object',
+      description: 'SSL/TLS encryption settings',
+      defaultValue: { enabled: false, rejectUnauthorized: true },
+    },
+    {
+      key: 'sqlStatements',
+      label: 'SQL Query Builder',
+      type: 'array',
+      description: 'Construct and preview SQL statements with schema browser',
+      defaultValue: [{ name: 'Query1', sql: 'SELECT NOW() as current_time', enabled: true }],
+      specialComponent: 'SQLBuilder',
+    },
+    {
+      key: 'queryTimeout',
+      label: 'Query Timeout (ms)',
+      type: 'number',
+      description: 'Maximum query execution time',
+      defaultValue: 30000,
+    },
+  ],
+  'neo4j-connector': [
+    {
+      key: 'connectionUri',
+      label: 'Neo4j URI',
+      type: 'text',
+      description: 'Neo4j database URI (neo4j://localhost:7687)',
+      required: true,
+    },
+    {
+      key: 'username',
+      label: 'Username',
+      type: 'text',
+      description: 'Neo4j database username',
+      required: true,
+    },
+    {
+      key: 'password',
+      label: 'Password',
+      type: 'password',
+      description: 'Neo4j database password',
+      required: true,
+    },
+    {
+      key: 'database',
+      label: 'Database',
+      type: 'text',
+      description: 'Neo4j database name (default: neo4j)',
+      defaultValue: 'neo4j',
+    },
+    {
+      key: 'cypherStatements',
+      label: 'Cypher Query Builder',
+      type: 'array',
+      description: 'Construct and preview Cypher statements with schema browser',
+      defaultValue: [
+        { name: 'Query1', cypher: 'MATCH (n) RETURN COUNT(n) as nodeCount', enabled: true },
+      ],
+      specialComponent: 'CypherBuilder',
+    },
+    {
+      key: 'queryTimeout',
+      label: 'Query Timeout (ms)',
+      type: 'number',
+      description: 'Maximum query execution time',
+      defaultValue: 30000,
+    },
+  ],
+  'historian-connector': [
+    {
+      key: 'historianType',
+      label: 'Historian Type',
+      type: 'select',
+      options: [
+        'OSIsoft PI',
+        'Wonderware InTouch',
+        'GE iFIX',
+        'Rockwell FactoryTalk',
+        'Canary',
+        'Ignition Historian',
+      ],
+      description: 'Type of process historian system',
+      required: true,
+    },
+    {
+      key: 'serverAddress',
+      label: 'Server Address',
+      type: 'text',
+      description: 'Historian server IP address or hostname',
+      required: true,
+    },
+    {
+      key: 'port',
+      label: 'Port',
+      type: 'number',
+      description: 'Historian server port number',
+      defaultValue: 5450,
+    },
+    {
+      key: 'authentication',
+      label: 'Authentication',
+      type: 'object',
+      description: 'Authentication credentials and method',
+      defaultValue: { method: 'windows', username: '', password: '' },
+    },
+    {
+      key: 'tagConfiguration',
+      label: 'Tag Configuration',
+      type: 'array',
+      description: 'Process tags to monitor and retrieve',
+      defaultValue: [{ tagName: 'Tank01.Level', description: 'Tank 1 Level', dataType: 'REAL' }],
+    },
+    {
+      key: 'timeRange',
+      label: 'Time Range',
+      type: 'object',
+      description: 'Data retrieval time range configuration',
+      defaultValue: { start: '*-1h', end: '*', interval: '1m' },
+    },
+    {
+      key: 'compressionSettings',
+      label: 'Compression Settings',
+      type: 'object',
+      description: 'Data compression and archival settings',
+      defaultValue: { enabled: true, deadband: 0.1, maxDeviation: 1.0 },
+    },
+  ],
+};
 
 export function WorkflowPropertiesPanel() {
-  const [isVisible, setIsVisible] = useState(true)
-  const [activeTab, setActiveTab] = useState<'properties' | 'config' | 'status'>('properties')
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic']))
-  const [editingConfig, setEditingConfig] = useState<Record<string, unknown>>({})
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isVisible, setIsVisible] = useState(true);
+  const [activeTab, setActiveTab] = useState<'properties' | 'config' | 'status'>('properties');
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic']));
+  const [editingConfig, setEditingConfig] = useState<Record<string, unknown>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const {
-    nodes,
-    edges,
-    selectedNodes,
-    selectedEdges,
-    updateNodeData,
-    deleteNode,
-    duplicateNode,
-  } = useWorkflowStore()
+  const { nodes, edges, selectedNodes, selectedEdges, updateNodeData, deleteNode, duplicateNode } =
+    useWorkflowStore();
 
-  const selectedNode = selectedNodes.length === 1 ? nodes.find(n => n.id === selectedNodes[0]) : null
-  const selectedEdge = selectedEdges.length === 1 ? edges.find(e => e.id === selectedEdges[0]) : null
+  const selectedNode =
+    selectedNodes.length === 1 ? nodes.find(n => n.id === selectedNodes[0]) : null;
+  const selectedEdge =
+    selectedEdges.length === 1 ? edges.find(e => e.id === selectedEdges[0]) : null;
 
   useEffect(() => {
     if (selectedNode) {
-      setEditingConfig(selectedNode.data.config || {})
-      setErrors({})
+      setEditingConfig(selectedNode.data.config || {});
+      setErrors({});
     }
-  }, [selectedNode])
+  }, [selectedNode]);
 
   const toggleSection = (section: string) => {
-    const newExpanded = new Set(expandedSections)
+    const newExpanded = new Set(expandedSections);
     if (newExpanded.has(section)) {
-      newExpanded.delete(section)
+      newExpanded.delete(section);
     } else {
-      newExpanded.add(section)
+      newExpanded.add(section);
     }
-    setExpandedSections(newExpanded)
-  }
+    setExpandedSections(newExpanded);
+  };
 
   const validateField = (field: PropertyField, value: unknown): string | null => {
     if (field.validation) {
-      return field.validation(value)
+      return field.validation(value);
     }
-    return null
-  }
+    return null;
+  };
 
   const handleConfigChange = (key: string, value: unknown, field?: PropertyField) => {
-    const newConfig = { ...editingConfig, [key]: value }
-    setEditingConfig(newConfig)
+    const newConfig = { ...editingConfig, [key]: value };
+    setEditingConfig(newConfig);
 
     // Validate field
     if (field) {
-      const error = validateField(field, value)
+      const error = validateField(field, value);
       setErrors(prev => ({
         ...prev,
-        [key]: error || ''
-      }))
+        [key]: error || '',
+      }));
     }
-  }
+  };
 
   const handleSaveConfig = () => {
-    if (!selectedNode) return
+    if (!selectedNode) return;
 
     // Check for validation errors
-    const hasErrors = Object.values(errors).some(error => error !== '')
-    if (hasErrors) return
+    const hasErrors = Object.values(errors).some(error => error !== '');
+    if (hasErrors) return;
 
     updateNodeData(selectedNode.id, {
       config: editingConfig,
-      lastUpdate: new Date()
-    })
-  }
+      lastUpdate: new Date(),
+    });
+  };
 
   const handleResetConfig = () => {
     if (selectedNode) {
-      setEditingConfig(selectedNode.data.config || {})
-      setErrors({})
+      setEditingConfig(selectedNode.data.config || {});
+      setErrors({});
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'online': return <CheckCircle className="w-4 h-4 text-green-500" />
-      case 'offline': return <AlertCircle className="w-4 h-4 text-gray-500" />
-      case 'error': return <AlertCircle className="w-4 h-4 text-red-500" />
-      case 'configuring': return <Clock className="w-4 h-4 text-yellow-500" />
-      default: return <AlertCircle className="w-4 h-4 text-gray-500" />
+      case 'online':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'offline':
+        return <AlertCircle className="w-4 h-4 text-gray-500" />;
+      case 'error':
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
+      case 'configuring':
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      default:
+        return <AlertCircle className="w-4 h-4 text-gray-500" />;
     }
-  }
+  };
 
   const renderPropertyField = (field: PropertyField, value: unknown) => {
-    const error = errors[field.key]
-    const fieldId = `field-${field.key}-${selectedNode?.id || 'unknown'}`
+    const error = errors[field.key];
+    const fieldId = `field-${field.key}-${selectedNode?.id || 'unknown'}`;
 
     switch (field.type) {
       case 'text':
@@ -294,7 +451,7 @@ export function WorkflowPropertiesPanel() {
             name={field.key}
             type="text"
             value={String(value) || ''}
-            onChange={(e) => handleConfigChange(field.key, e.target.value, field)}
+            onChange={e => handleConfigChange(field.key, e.target.value, field)}
             className={cn(
               'w-full max-w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm',
               'min-w-0 box-border',
@@ -303,7 +460,7 @@ export function WorkflowPropertiesPanel() {
             placeholder={`Enter ${field.label.toLowerCase()}`}
             aria-describedby={error ? `${fieldId}-error` : undefined}
           />
-        )
+        );
 
       case 'number':
         return (
@@ -312,7 +469,7 @@ export function WorkflowPropertiesPanel() {
             name={field.key}
             type="number"
             value={String(value) || ''}
-            onChange={(e) => handleConfigChange(field.key, parseFloat(e.target.value) || 0, field)}
+            onChange={e => handleConfigChange(field.key, parseFloat(e.target.value) || 0, field)}
             className={cn(
               'w-full max-w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm',
               'min-w-0 box-border',
@@ -321,7 +478,7 @@ export function WorkflowPropertiesPanel() {
             placeholder={`Enter ${field.label.toLowerCase()}`}
             aria-describedby={error ? `${fieldId}-error` : undefined}
           />
-        )
+        );
 
       case 'boolean':
         return (
@@ -331,12 +488,12 @@ export function WorkflowPropertiesPanel() {
               name={field.key}
               type="checkbox"
               checked={Boolean(value) || false}
-              onChange={(e) => handleConfigChange(field.key, e.target.checked, field)}
+              onChange={e => handleConfigChange(field.key, e.target.checked, field)}
               className="w-4 h-4 text-blue-600 bg-[#1e1e1e] border-[#404040] rounded"
             />
             <span className="text-sm text-gray-300">Enabled</span>
           </label>
-        )
+        );
 
       case 'select':
         return (
@@ -344,7 +501,7 @@ export function WorkflowPropertiesPanel() {
             id={fieldId}
             name={field.key}
             value={String(value) || ''}
-            onChange={(e) => handleConfigChange(field.key, e.target.value, field)}
+            onChange={e => handleConfigChange(field.key, e.target.value, field)}
             className={cn(
               'w-full max-w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm',
               'min-w-0 box-border',
@@ -353,13 +510,13 @@ export function WorkflowPropertiesPanel() {
             aria-describedby={error ? `${fieldId}-error` : undefined}
           >
             <option value="">Select {field.label.toLowerCase()}</option>
-            {field.options?.map((option) => (
+            {field.options?.map(option => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
           </select>
-        )
+        );
 
       case 'textarea':
         return (
@@ -367,7 +524,7 @@ export function WorkflowPropertiesPanel() {
             id={fieldId}
             name={field.key}
             value={String(value) || ''}
-            onChange={(e) => handleConfigChange(field.key, e.target.value, field)}
+            onChange={e => handleConfigChange(field.key, e.target.value, field)}
             rows={4}
             className={cn(
               'w-full max-w-full px-3 py-2 bg-[#1e1e1e] border rounded text-white text-sm font-mono',
@@ -377,12 +534,12 @@ export function WorkflowPropertiesPanel() {
             placeholder={`Enter ${field.label.toLowerCase()}`}
             aria-describedby={error ? `${fieldId}-error` : undefined}
           />
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   if (!isVisible) {
     return (
@@ -392,7 +549,7 @@ export function WorkflowPropertiesPanel() {
       >
         <Settings className="w-4 h-4" />
       </button>
-    )
+    );
   }
 
   if (!selectedNode && !selectedEdge) {
@@ -400,24 +557,19 @@ export function WorkflowPropertiesPanel() {
       <div className="w-80 bg-[#2d2d2d] border-l border-[#404040] flex flex-col">
         <div className="flex items-center justify-between p-3 border-b border-[#404040]">
           <span className="text-sm font-medium text-white">Properties</span>
-          <button
-            onClick={() => setIsVisible(false)}
-            className="text-gray-400 hover:text-white"
-          >
+          <button onClick={() => setIsVisible(false)} className="text-gray-400 hover:text-white">
             <X className="w-4 h-4" />
           </button>
         </div>
-        
+
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="text-center">
             <Settings className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-sm">
-              Select a node or edge to view its properties
-            </p>
+            <p className="text-gray-400 text-sm">Select a node or edge to view its properties</p>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -457,7 +609,7 @@ export function WorkflowPropertiesPanel() {
 
       {/* Tabs */}
       <div className="flex border-b border-[#404040] flex-shrink-0">
-        {['properties', 'config', 'status'].map((tab) => (
+        {['properties', 'config', 'status'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as 'properties' | 'config' | 'status')}
@@ -490,15 +642,21 @@ export function WorkflowPropertiesPanel() {
                 )}
                 <span className="text-sm font-medium text-white">Basic Properties</span>
               </button>
-              
+
               {expandedSections.has('basic') && (
                 <div className="space-y-3 ml-5">
-                  {commonProperties.map((field) => (
+                  {commonProperties.map(field => (
                     <div key={field.key}>
-                      <label htmlFor={`field-${field.key}-${selectedNode?.id || 'unknown'}`} className="block text-xs text-gray-400 mb-1">
+                      <label
+                        htmlFor={`field-${field.key}-${selectedNode?.id || 'unknown'}`}
+                        className="block text-xs text-gray-400 mb-1"
+                      >
                         {field.label}
                       </label>
-                      {renderPropertyField(field, selectedNode.data[field.key as keyof typeof selectedNode.data])}
+                      {renderPropertyField(
+                        field,
+                        selectedNode.data[field.key as keyof typeof selectedNode.data]
+                      )}
                       {field.description && (
                         <p className="text-xs text-gray-500 mt-1">{field.description}</p>
                       )}
@@ -521,20 +679,26 @@ export function WorkflowPropertiesPanel() {
                     <ChevronRight className="w-4 h-4 mr-1 text-gray-400" />
                   )}
                   <span className="text-sm font-medium text-white">
-                    {selectedNode.type?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} Settings
+                    {selectedNode.type?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}{' '}
+                    Settings
                   </span>
                 </button>
-                
+
                 {expandedSections.has('specific') && (
                   <div className="space-y-3 ml-5">
-                    {nodeTypeProperties[selectedNode.type!].map((field) => (
+                    {nodeTypeProperties[selectedNode.type!].map(field => (
                       <div key={field.key}>
-                        <label htmlFor={`field-${field.key}-${selectedNode?.id || 'unknown'}`} className="block text-xs text-gray-400 mb-1">
+                        <label
+                          htmlFor={`field-${field.key}-${selectedNode?.id || 'unknown'}`}
+                          className="block text-xs text-gray-400 mb-1"
+                        >
                           {field.label}
                         </label>
                         {renderPropertyField(field, editingConfig[field.key])}
                         {errors[field.key] && (
-                          <p id={`${field.key}-error`} className="text-xs text-red-400 mt-1">{errors[field.key]}</p>
+                          <p id={`${field.key}-error`} className="text-xs text-red-400 mt-1">
+                            {errors[field.key]}
+                          </p>
                         )}
                         {field.description && !errors[field.key] && (
                           <p className="text-xs text-gray-500 mt-1">{field.description}</p>
@@ -573,22 +737,24 @@ export function WorkflowPropertiesPanel() {
               id="config-editor"
               name="config"
               value={JSON.stringify(editingConfig, null, 2)}
-              onChange={(e) => {
+              onChange={e => {
                 try {
-                  const parsed = JSON.parse(e.target.value)
-                  setEditingConfig(parsed)
-                  setErrors({})
+                  const parsed = JSON.parse(e.target.value);
+                  setEditingConfig(parsed);
+                  setErrors({});
                 } catch {
-                  setErrors({ json: 'Invalid JSON format' })
+                  setErrors({ json: 'Invalid JSON format' });
                 }
               }}
               className="w-full max-w-full h-64 px-3 py-2 bg-[#1e1e1e] border border-[#404040] rounded text-white text-xs font-mono min-w-0 box-border resize-y"
               aria-label="Configuration JSON editor"
-              aria-describedby={errors.json ? "config-error" : undefined}
+              aria-describedby={errors.json ? 'config-error' : undefined}
             />
-            
+
             {errors.json && (
-              <p id="config-error" className="text-xs text-red-400 mt-2">{errors.json}</p>
+              <p id="config-error" className="text-xs text-red-400 mt-2">
+                {errors.json}
+              </p>
             )}
           </div>
         )}
@@ -601,9 +767,7 @@ export function WorkflowPropertiesPanel() {
                 <div className="text-sm font-medium text-white capitalize">
                   {selectedNode.data.status}
                 </div>
-                <div className="text-xs text-gray-400">
-                  Current node status
-                </div>
+                <div className="text-xs text-gray-400">Current node status</div>
               </div>
             </div>
 
@@ -636,5 +800,5 @@ export function WorkflowPropertiesPanel() {
         )}
       </div>
     </div>
-  )
-} 
+  );
+}

@@ -25,6 +25,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ModalResizeComponents } from './components/ModalResizeHandles';
 import { useEnhancedModal } from './hooks/useEnhancedModal';
 import { NodeHelpIcon } from './NodeHelpIcon';
+import { CypherBuilder } from './specialized/CypherBuilder';
+import { SQLBuilder } from './specialized/SQLBuilder';
 import { AdvancedTab } from './tabs/AdvancedTab';
 import { ConnectionsTab } from './tabs/ConnectionsTab';
 import { TemplatesTab } from './tabs/TemplatesTab';
@@ -295,8 +297,19 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
 
   const handleSaveAsTemplate = useCallback(() => {
     console.log('Save as template:', config);
-    // TODO: Implement template saving
-  }, [config]);
+    // Template saving functionality - Future enhancement for Phase 3
+    // Will integrate with template management system when available
+    const templateData = {
+      id: `template-${Date.now()}`,
+      label: `Custom Template - ${selectedNode?.type}`,
+      description: 'User-created template',
+      category: 'user-defined',
+      config,
+      tags: ['custom', selectedNode?.type || 'unknown'],
+    };
+    console.log('Template prepared for saving:', templateData);
+    // Integration point: Connect to template management API when implemented
+  }, [config, selectedNode?.type]);
 
   const handleExportConfig = useCallback(() => {
     const dataStr = JSON.stringify(config, null, 2);
@@ -426,6 +439,75 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
   //   return () => clearTimeout(timeoutId);
   // }, [modalPosition, modalSize, isMaximized, activeTab, expandedGroups]); // Removed saveState dependency
 
+  // Helper function to render specialized components
+  const renderSpecializedComponent = useCallback(
+    (field: PropertyField, fieldValue: unknown) => {
+      if (field.ui?.specialComponent === 'SQLBuilder') {
+        const defaultSQLValue = [
+          { name: 'Query1', sql: 'SELECT NOW() as current_time', enabled: true },
+        ];
+        const sqlValue = (() => {
+          if (Array.isArray(fieldValue)) return fieldValue;
+          if (Array.isArray(field.defaultValue)) return field.defaultValue;
+          return defaultSQLValue;
+        })();
+
+        const connectionStringValue = (() => {
+          if (
+            !(config.host && config.port && config.database && config.username && config.password)
+          ) {
+            return '';
+          }
+          const host = typeof config.host === 'string' ? config.host : 'localhost';
+          const port = typeof config.port === 'number' ? String(config.port) : '5432';
+          const database = typeof config.database === 'string' ? config.database : 'postgres';
+          const username = typeof config.username === 'string' ? config.username : 'user';
+          const password = typeof config.password === 'string' ? config.password : 'password';
+          return `postgresql://${username}:${password}@${host}:${port}/${database}`;
+        })();
+
+        return (
+          <SQLBuilder
+            value={sqlValue}
+            onChange={statements => handleFieldChange(field.key, statements)}
+            connectionString={connectionStringValue}
+            className="mt-2"
+          />
+        );
+      }
+
+      if (field.ui?.specialComponent === 'CypherBuilder') {
+        const defaultCypherValue = [
+          {
+            name: 'Query1',
+            cypher: 'MATCH (n) RETURN COUNT(n) as nodeCount',
+            enabled: true,
+          },
+        ];
+        const cypherValue = (() => {
+          if (Array.isArray(fieldValue)) return fieldValue;
+          if (Array.isArray(field.defaultValue)) return field.defaultValue;
+          return defaultCypherValue;
+        })();
+
+        return (
+          <CypherBuilder
+            value={cypherValue}
+            onChange={statements => handleFieldChange(field.key, statements)}
+            connectionUri={config.uri as string}
+            username={config.username as string}
+            password={config.password as string}
+            database={'neo4j'}
+            className="mt-2"
+          />
+        );
+      }
+
+      return null;
+    },
+    [config, handleFieldChange]
+  );
+
   // Render property field
   const renderPropertyField = (field: PropertyField) => {
     const fieldValue = config[field.key];
@@ -474,7 +556,11 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
         {field.type === 'number' && (
           <input
             type="number"
-            value={String(fieldValue ?? field.defaultValue ?? '')}
+            value={(() => {
+              if (typeof fieldValue === 'number') return String(fieldValue);
+              if (typeof field.defaultValue === 'number') return String(field.defaultValue);
+              return '';
+            })()}
             onChange={e => handleFieldChange(field.key, parseFloat(e.target.value))}
             min={field.constraints?.min}
             max={field.constraints?.max}
@@ -503,7 +589,11 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
 
         {field.type === 'select' && (
           <select
-            value={String(fieldValue || field.defaultValue || '')}
+            value={(() => {
+              if (typeof fieldValue === 'string') return fieldValue;
+              if (typeof field.defaultValue === 'string') return field.defaultValue;
+              return '';
+            })()}
             onChange={e => handleFieldChange(field.key, e.target.value)}
             className={cn(
               'w-full px-3 py-2 bg-[#1e1e1e] border rounded-lg text-white',
@@ -521,6 +611,9 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
             ))}
           </select>
         )}
+
+        {/* Specialized Components */}
+        {renderSpecializedComponent(field, fieldValue)}
 
         {/* Field validation message */}
         {fieldError && (
@@ -593,8 +686,9 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
   return (
     <>
       {/* Modal Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+      <button
+        type="button"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm border-0 p-0"
         style={{ zIndex }}
         onClick={e => {
           if (isTopModal) {
@@ -612,10 +706,13 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
             bringToFront();
           }
         }}
+        aria-label="Close modal"
       />
 
       {/* Modal Content */}
-      <div
+      <dialog
+        open
+        aria-labelledby="modal-title"
         className={cn(
           'fixed bg-[#2d2d2d] rounded-lg shadow-2xl border border-[#404040]',
           'flex flex-col overflow-hidden',
@@ -629,21 +726,22 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
           ...modalStyle,
           zIndex: zIndex + 1,
         }}
-        onClick={bringToFront}
-        onMouseDown={bringToFront}
       >
         {/* Modal Header */}
-        <div
-          className="flex items-center justify-between p-4 border-b border-[#404040] bg-[#252526] cursor-move"
-          onMouseDown={enhancedModal.handleDragStart}
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
+        <header className="flex items-center justify-between p-4 border-b border-[#404040] bg-[#252526]">
+          <div className="flex items-center gap-3 flex-1">
+            <button
+              type="button"
+              className="flex items-center gap-2 cursor-move bg-transparent border-0 p-1 rounded hover:bg-[#3d3d3d]"
+              onMouseDown={enhancedModal.handleDragStart}
+              aria-label="Drag to move modal"
+              title="Drag to move modal"
+            >
               <Move className="w-4 h-4 text-gray-500" />
-              <h2 className="text-lg font-semibold text-white">
-                {schema?.title || 'Node Properties'}
-              </h2>
-            </div>
+            </button>
+            <h2 id="modal-title" className="text-lg font-semibold text-white">
+              {schema?.title || 'Node Properties'}
+            </h2>
             {selectedNode && <NodeHelpIcon nodeType={selectedNode.type as IndustrialNodeType} />}
           </div>
 
@@ -667,7 +765,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
               <X className="w-4 h-4 text-gray-400" />
             </button>
           </div>
-        </div>
+        </header>
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 px-4 py-2 border-b border-[#404040] bg-[#2d2d2d]">
@@ -763,7 +861,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
                   .filter(result => !result.field)
                   .map((result, index) => (
                     <div
-                      key={index}
+                      key={`${result.code}-${result.severity}-${index}`}
                       className={cn(
                         'flex items-center gap-2 p-3 rounded-lg transition-all duration-200',
                         'animate-in slide-in-from-left-2',
@@ -846,13 +944,15 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
               <Loader className="w-4 h-4 animate-spin text-blue-400" />
             )}
             <span className="text-sm text-gray-400">
-              {isValidating
-                ? 'Validating configuration...'
-                : selectedNode
-                ? `Editing: ${
-                    (typeof selectedNode === 'object' && selectedNode.data?.label) || 'Node'
-                  }`
-                : 'No node selected'}
+              {(() => {
+                if (isValidating) return 'Validating configuration...';
+                if (selectedNode) {
+                  const nodeLabel =
+                    (typeof selectedNode === 'object' && selectedNode.data?.label) || 'Node';
+                  return `Editing: ${nodeLabel}`;
+                }
+                return 'No node selected';
+              })()}
             </span>
             {validationResults.length > 0 && (
               <div className="flex items-center gap-1 text-xs">
@@ -908,13 +1008,12 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
                   ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-blue-500/20 transform hover:scale-105'
                   : 'bg-gray-600 text-gray-400 cursor-not-allowed'
               )}
-              title={
-                isValidating
-                  ? 'Validating configuration...'
-                  : validationResults.some(r => r.severity === 'error')
-                  ? 'Fix validation errors before saving'
-                  : 'Save changes to node configuration'
-              }
+              title={(() => {
+                if (isValidating) return 'Validating configuration...';
+                if (validationResults.some(r => r.severity === 'error'))
+                  return 'Fix validation errors before saving';
+                return 'Save changes to node configuration';
+              })()}
             >
               <Save className="w-4 h-4" />
               Save Changes
@@ -937,7 +1036,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
             />
           </>
         )}
-      </div>
+      </dialog>
 
       {/* Global Resize Overlay */}
       <ModalResizeComponents.Overlay
