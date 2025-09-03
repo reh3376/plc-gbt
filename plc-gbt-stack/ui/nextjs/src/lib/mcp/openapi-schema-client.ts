@@ -65,6 +65,7 @@ interface OpenAPIResponse {
 
 interface MCPOpenAPIValidationResult {
   valid: boolean;
+  success: boolean; // Alias for compatibility with existing API routes
   errors?: string[];
   data?: unknown;
   statusCode?: number;
@@ -91,8 +92,51 @@ export class RealOpenAPISchemaMCPClient {
   private maxRetries: number = 3;
   private retryDelay: number = 1000; // 1 second
 
-  constructor(mcpServerUrl: string = 'http://127.0.0.1:3000') {
-    this.mcpServerUrl = mcpServerUrl;
+  constructor(mcpServerUrl?: string) {
+    // Check if MCP server URL is provided via environment variable first
+    this.mcpServerUrl =
+      mcpServerUrl || process.env.NEXT_PUBLIC_MCP_SERVER_URL || 'http://127.0.0.1:3000';
+
+    // Only attempt connection if not in development mode without MCP server
+    if (this.shouldAttemptConnection()) {
+      // Initialize connection on construction for immediate use
+      this.initializeConnection();
+    } else {
+      console.log('🔄 MCP server not configured - using fallback validation mode');
+      this.isConnected = false;
+    }
+  }
+
+  /**
+   * Check if we should attempt to connect to MCP server
+   */
+  private shouldAttemptConnection(): boolean {
+    // Skip connection attempts if we detect common development scenarios without MCP
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      // In browser, check if this is a development environment
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      const hasExplicitMCPConfig = !!process.env.NEXT_PUBLIC_MCP_SERVER_URL;
+
+      // Only attempt connection if explicitly configured or not in development
+      return hasExplicitMCPConfig || !isDevelopment;
+    }
+
+    // Server-side always attempts connection
+    return true;
+  }
+
+  /**
+   * Initialize connection (non-blocking)
+   */
+  private initializeConnection(): void {
+    // Start connection asynchronously without blocking construction
+    this.connect().catch(error => {
+      // Suppress noisy error logs in development without MCP server
+      if (process.env.NODE_ENV !== 'development') {
+        console.warn('⚠️ MCP connection failed during initialization:', error.message);
+      }
+      console.log('🔄 Using fallback validation mode (MCP server not available)');
+    });
   }
 
   /**
@@ -119,19 +163,32 @@ export class RealOpenAPISchemaMCPClient {
       console.log(`📊 Loaded ${Object.keys(this.componentSchemas).length} component schemas`);
       console.log(`🔗 Loaded ${this.endpointSchemas.size} API endpoints`);
     } catch (error) {
-      console.error('❌ Failed to connect to Docker MCP server:', error);
+      // Only show detailed errors in non-development environments
+      if (process.env.NODE_ENV !== 'development') {
+        console.error('❌ Failed to connect to Docker MCP server:', error);
+      }
 
       if (this.connectionRetries < this.maxRetries) {
         this.connectionRetries++;
-        console.log(
-          `🔄 Retrying connection (${this.connectionRetries}/${this.maxRetries}) in ${this.retryDelay}ms...`
-        );
+
+        // Only log retries in non-development environments
+        if (process.env.NODE_ENV !== 'development') {
+          console.log(
+            `🔄 Retrying connection (${this.connectionRetries}/${this.maxRetries}) in ${this.retryDelay}ms...`
+          );
+        }
 
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
         return this.connect();
       }
 
-      console.warn('⚠️ Max retries reached. Using fallback mode.');
+      // Final warning - less noisy in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('ℹ️ MCP server not available - validation will use fallback mode');
+      } else {
+        console.warn('⚠️ Max retries reached. Using fallback mode.');
+      }
+
       this.isConnected = false;
       throw error;
     }
@@ -238,7 +295,7 @@ export class RealOpenAPISchemaMCPClient {
     try {
       if (!this.isConnected) {
         console.warn('⚠️ MCP server not connected, skipping validation');
-        return { valid: true, data };
+        return { valid: true, success: true, data };
       }
 
       // Send validation request to Docker MCP server
@@ -250,17 +307,23 @@ export class RealOpenAPISchemaMCPClient {
 
       if (!validationResponse.success) {
         console.warn(`⚠️ Request validation failed: ${validationResponse.error}`);
-        return { valid: false, errors: [validationResponse.error || 'Validation failed'] };
+        return {
+          valid: false,
+          success: false,
+          errors: [validationResponse.error || 'Validation failed'],
+        };
       }
 
       return {
         valid: true,
+        success: true,
         data: validationResponse.data,
       };
     } catch (error) {
       console.warn('⚠️ Request validation error:', error);
       return {
         valid: false,
+        success: false,
         errors: [error instanceof Error ? error.message : 'Validation error'],
       };
     }
@@ -278,7 +341,7 @@ export class RealOpenAPISchemaMCPClient {
     try {
       if (!this.isConnected) {
         console.warn('⚠️ MCP server not connected, skipping validation');
-        return { valid: true, data, statusCode };
+        return { valid: true, success: true, data, statusCode };
       }
 
       // Send validation request to Docker MCP server
@@ -293,6 +356,7 @@ export class RealOpenAPISchemaMCPClient {
         console.warn(`⚠️ Response validation failed: ${validationResponse.error}`);
         return {
           valid: false,
+          success: false,
           errors: [validationResponse.error || 'Validation failed'],
           statusCode,
         };
@@ -300,6 +364,7 @@ export class RealOpenAPISchemaMCPClient {
 
       return {
         valid: true,
+        success: true,
         data: validationResponse.data,
         statusCode,
       };
@@ -307,6 +372,7 @@ export class RealOpenAPISchemaMCPClient {
       console.warn('⚠️ Response validation error:', error);
       return {
         valid: false,
+        success: false,
         errors: [error instanceof Error ? error.message : 'Validation error'],
         statusCode,
       };
@@ -411,11 +477,11 @@ export class RealOpenAPISchemaMCPClient {
   }
 }
 
-// Create singleton instance
-const realOpenAPISchemaMCP = new RealOpenAPISchemaMCPClient();
+// Create singleton instance with expected export name
+const openAPISchemaMCP = new RealOpenAPISchemaMCPClient();
 
-// Export both class and instance
-export { realOpenAPISchemaMCP };
+// Export both class and instance (maintaining compatibility with existing imports)
+export { openAPISchemaMCP, RealOpenAPISchemaMCPClient as OpenAPISchemaMCPClient };
 
 // Export interfaces for compatibility
 export interface FileOperationResponse {
@@ -428,4 +494,21 @@ export interface FileOperationResult {
   success: boolean;
   message: string;
   data?: unknown;
+}
+
+/**
+ * React hook for OpenAPI Schema MCP integration
+ * Provides access to real MCP Docker server functionality
+ */
+export function useOpenAPISchemaMCP() {
+  return {
+    validateRequest: openAPISchemaMCP.validateRequest.bind(openAPISchemaMCP),
+    validateResponse: openAPISchemaMCP.validateResponse.bind(openAPISchemaMCP),
+    getEndpointSchema: openAPISchemaMCP.getEndpointSchema.bind(openAPISchemaMCP),
+    getComponentSchema: openAPISchemaMCP.getComponentSchema.bind(openAPISchemaMCP),
+    isConnected: openAPISchemaMCP.isSchemaServerConnected(),
+    connect: openAPISchemaMCP.connect.bind(openAPISchemaMCP),
+    disconnect: openAPISchemaMCP.disconnect.bind(openAPISchemaMCP),
+    generateTypeScriptTypes: openAPISchemaMCP.generateTypeScriptTypes.bind(openAPISchemaMCP),
+  };
 }
