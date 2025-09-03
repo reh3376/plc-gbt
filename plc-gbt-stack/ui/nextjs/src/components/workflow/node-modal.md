@@ -21,6 +21,103 @@ Based on architectural decisions, this development follows a **3-Phase Sequentia
 - **Template-Driven Approach**: Ensure all development can be templatized for efficient future node creation
 - **Comprehensive Testing**: Full testing at completion of each phase (not incremental)
 
+## 🆕 **NEW NODE SPECIFICATIONS - Advanced ML Classification & Analysis**
+
+### **📊 Recently Added Node Requirements (January 2025)**
+
+#### **1. 🎯 Binary Classification Node**
+
+**Purpose**: Advanced binary classification for industrial process data with multiple algorithm support and comprehensive model evaluation.
+
+**Core Functionality**:
+- **Algorithm Selection**: SVM, Random Forest, Logistic Regression, XGBoost, Neural Networks, Gradient Boosting
+- **Data Preprocessing**: Feature scaling, encoding, missing value handling, outlier detection
+- **Model Validation**: Cross-validation, train/test splits, holdout validation, time-series aware splits
+- **Hyperparameter Tuning**: Grid search, random search, Bayesian optimization, automated tuning
+- **Performance Metrics**: Accuracy, Precision, Recall, F1-Score, ROC-AUC, Confusion Matrix, Feature Importance
+- **Model Export**: Pickle, ONNX, TensorFlow SavedModel formats for production deployment
+
+**Input Requirements**:
+- **Training Dataset**: CSV/JSON with features and binary target variable (0/1, True/False, Yes/No)
+- **Feature Columns**: Configurable feature selection with data type inference
+- **Target Column**: Binary classification target with automatic encoding
+- **Validation Data**: Optional separate validation dataset
+
+**Configuration Parameters**:
+- **Algorithm Configuration**: Algorithm-specific hyperparameters with intelligent defaults
+- **Training Parameters**: Batch size, epochs, early stopping, learning rate schedules
+- **Validation Strategy**: Cross-validation folds, train/test ratio, stratification options
+- **Feature Engineering**: Polynomial features, interaction terms, feature selection methods
+- **Model Selection**: Ensemble methods, voting classifiers, stacking approaches
+
+**Output Format**:
+- **Trained Model**: Serialized model ready for inference
+- **Performance Report**: Comprehensive metrics with visualizations
+- **Feature Analysis**: Feature importance rankings and correlations
+- **Prediction Confidence**: Class probabilities and prediction intervals
+
+#### **2. 🎯 Multi-Category Classification Node**
+
+**Purpose**: Sophisticated multi-class classification supporting n-category problems with advanced ensemble methods and class balancing.
+
+**Core Functionality**:
+- **Algorithm Suite**: Decision Trees, Random Forest, SVM (OvR/OvO), Neural Networks, Gradient Boosting, Ensemble Methods
+- **Class Balancing**: SMOTE, ADASYN, Random Oversampling, Random Undersampling, Class Weight Adjustment
+- **Multi-Class Strategies**: One-vs-Rest, One-vs-One, Error-Correcting Output Codes
+- **Advanced Validation**: Stratified K-Fold, Leave-One-Out, Temporal Validation for time-series
+- **Feature Selection**: Mutual Information, Chi-Square, Recursive Feature Elimination, LASSO
+- **Ensemble Methods**: Voting, Bagging, Boosting, Stacking with meta-learners
+
+**Input Requirements**:
+- **Training Dataset**: Multi-class labeled data with categorical or numerical features
+- **Feature Matrix**: n-dimensional feature space with missing value handling
+- **Class Labels**: String or numeric class identifiers with automatic encoding
+- **Imbalanced Data Support**: Automatic detection and correction of class imbalances
+
+**Configuration Parameters**:
+- **Multi-Algorithm Configuration**: Parallel algorithm comparison with automated selection
+- **Class Balancing Strategy**: Configurable imbalance correction methods
+- **Ensemble Configuration**: Voting weights, stacking meta-learner selection
+- **Validation Parameters**: Custom scoring metrics, cross-validation strategies
+- **Performance Optimization**: Parallel processing, memory optimization, GPU acceleration
+
+**Advanced Features**:
+- **Hierarchical Classification**: Tree-structured class relationships
+- **Incremental Learning**: Online learning for streaming data
+- **Uncertainty Quantification**: Prediction confidence and uncertainty estimation
+- **Model Interpretability**: SHAP values, LIME explanations, feature attribution
+
+#### **3. 🎯 Distribution Analyzer Node**
+
+**Purpose**: Advanced statistical distribution identification with ML-enhanced pattern recognition for industrial process data analysis.
+
+**Core Functionality**:
+- **15+ Distribution Types**: Normal, Log-Normal, Exponential, Weibull, Gamma, Beta, Uniform, Poisson, Binomial, Chi-Square, Student's t, F-Distribution, Pareto, Laplace, Logistic
+- **Goodness-of-Fit Testing**: Kolmogorov-Smirnov, Anderson-Darling, Chi-Square, Shapiro-Wilk tests
+- **Parameter Estimation**: Maximum Likelihood, Method of Moments, Bayesian estimation
+- **ML-Enhanced Detection**: Neural network-based pattern recognition for complex distributions
+- **Mixture Models**: Gaussian Mixture Models for multi-modal distributions
+- **Visualization Suite**: Histograms, Q-Q plots, P-P plots, distribution overlays, interactive plots
+
+**Input Requirements**:
+- **2D Dataset**: Univariate or bivariate data for distribution analysis
+- **Data Format**: CSV, JSON, or direct data input with automatic cleaning
+- **Sample Size**: Minimum 30 samples, optimized for 100+ samples
+- **Data Quality**: Automatic outlier detection and handling options
+
+**Statistical Analysis Features**:
+- **Distribution Fitting**: Automatic fitting of all supported distributions
+- **Parameter Confidence**: Confidence intervals for distribution parameters
+- **Model Comparison**: AIC, BIC, likelihood ratio tests for model selection
+- **Hypothesis Testing**: Normality tests, distribution comparison tests
+- **Monte Carlo Methods**: Bootstrap confidence intervals, permutation tests
+
+**Advanced Capabilities**:
+- **Time Series Analysis**: Distribution evolution over time windows
+- **Process Monitoring**: Statistical process control chart generation
+- **Quality Assessment**: Data quality scoring and recommendations
+- **Industrial Integration**: Connection with process control systems for real-time analysis
+
 ## 🚨 CRITICAL: AI Task Orchestrator Compliance
 
 **MANDATORY**: All development must follow strict TypeScript typing and OpenAPI Schema MCP patterns as defined in the AI_TASK_ORCHESTRATOR_TS_GUIDE.md and AI_TASK_ORCHESTRATOR_TS_GUIDE.py files.
@@ -433,6 +530,8 @@ node-modal/
 - **lstm-model**: Layer configuration, sequence params
 - **sindy-identifier**: Library functions, sparsity
 - **reinforcement-learning**: Policy, reward configuration
+- **binary-classification**: Binary classification algorithms (SVM, Random Forest, Logistic Regression, XGBoost, Neural Networks), hyperparameter tuning, model validation
+- **multiclass-classification**: Multi-category classification with configurable algorithms (Decision Trees, Random Forest, SVM, Neural Networks, Ensemble Methods), class balancing, cross-validation
 
 ### 3. 🎯 MPC Control Nodes
 - **mpc-controller**: Horizon, constraints, cost function
@@ -473,7 +572,7 @@ node-modal/
 - **time-series-processor**: Window size, aggregations
 - **Math / Function Creator**: Create custom equations or functions
   - Add a scientific calculator modal to this node properties configuration modal.
-- **Data Distribution Analyzer**: Takes in a data set and attempts to provide a distriubtion type
+- **distribution-analyzer**: Advanced statistical distribution analysis with ML-enhanced detection, supports 15+ distribution types (Normal, Log-Normal, Exponential, Weibull, Gamma, Beta, Uniform, Poisson, Binomial, etc.), goodness-of-fit testing, parameter estimation, visualization, confidence intervals
 
 ### 8. 📊 Reporting & Visualization Nodes
 - **dashboard-generator**: Layout, widget configuration
@@ -942,6 +1041,9 @@ The following nodes need custom documentation pages created:
 - **Data Cleaner** - Data quality and cleaning rules
 - **Feature Engineer** - Feature engineering techniques
 - **Time Series Processor** - Time series analysis methods
+- **Binary Classification** - Binary classification algorithms and model selection
+- **Multiclass Classification** - Multi-category classification with ensemble methods
+- **Distribution Analyzer** - Statistical distribution identification and analysis
 
 #### Reporting Nodes
 - **Dashboard Generator** - Dashboard design principles
@@ -1633,6 +1735,58 @@ The Node Properties Modal is considered complete when:
 
 **🚀 CI/CD Infrastructure Status**: **FULLY OPERATIONAL** - Complete ecosystem restoration achieved
 
+### Recent Addition: Advanced ML Classification & Statistical Analysis Nodes
+
+**Implementation Date**: January 22, 2025  
+**Status**: ✅ **SPECIFICATION COMPLETE** - Ready for Development Implementation
+
+#### **✅ Three New ML & Analysis Nodes Added - COMPREHENSIVE SPECIFICATIONS**
+
+**Strategic Enhancement**: Added advanced machine learning and statistical analysis capabilities to the node ecosystem
+
+**🎯 New Nodes Implemented**:
+
+#### **1. ✅ Binary Classification Node - ML Algorithm Category**
+- **Purpose**: Advanced binary classification for industrial process fault detection and quality control
+- **Algorithms**: SVM, Random Forest, Logistic Regression, XGBoost, Neural Networks, Gradient Boosting
+- **Features**: Hyperparameter tuning, ensemble methods, class balancing, comprehensive validation
+- **Use Cases**: Fault detection, quality control, equipment monitoring, safety classification
+- **Performance**: Multi-algorithm comparison with automated selection and optimization
+
+#### **2. ✅ Multi-Category Classification Node - ML Algorithm Category**  
+- **Purpose**: Sophisticated n-class classification with advanced ensemble methods
+- **Capabilities**: Decision Trees, Random Forest, SVM (OvR/OvO), Neural Networks, Ensemble Methods
+- **Advanced Features**: Class balancing (SMOTE, ADASYN), model interpretability (SHAP, LIME), hierarchical classification
+- **Use Cases**: Process state classification, product categorization, equipment health levels, safety assessment
+- **Quality**: Confusion matrix analysis, per-class performance metrics, uncertainty quantification
+
+#### **3. ✅ Distribution Analyzer Node - Data Processing Category**
+- **Purpose**: Advanced statistical distribution identification with ML-enhanced pattern recognition  
+- **Capabilities**: 15+ distribution types, goodness-of-fit testing, parameter estimation, mixture models
+- **Analysis Features**: Kolmogorov-Smirnov, Anderson-Darling, Chi-Square, Shapiro-Wilk tests
+- **Industrial Integration**: Process monitoring, control limit establishment, quality assessment
+- **Visualization**: Histograms, Q-Q plots, P-P plots, distribution overlays, SPC charts
+
+**📚 Comprehensive Documentation Created**:
+- ✅ **Binary Classification Wiki**: Complete technical documentation with industrial examples
+- ✅ **Multiclass Classification Wiki**: Advanced ensemble methods and class balancing guide
+- ✅ **Distribution Analyzer Wiki**: Statistical analysis and process monitoring documentation
+
+**🎯 Technical Specifications Ready**:
+- **Configuration Parameters**: Comprehensive parameter sets for each node type
+- **Input/Output Definitions**: Detailed data format specifications
+- **Advanced Features**: Ensemble methods, interpretability, optimization
+- **Industrial Use Cases**: Process control, quality assurance, equipment monitoring
+- **API Interfaces**: Complete TypeScript interfaces and event definitions
+
+**📋 Implementation Requirements**:
+- **Schema Integration**: Ready for `industrial-node-schemas.ts` registration
+- **Node Palette**: Ready for `industrial-nodes.tsx` visual integration  
+- **Property Modals**: Comprehensive configuration parameter definitions
+- **Testing Framework**: Two-phase testing protocol ready for implementation
+
+**🚀 Development Ready**: All specifications complete and ready for systematic implementation following AI Task Orchestrator methodology
+
 #### **Current Infrastructure Status - ALL SYSTEMS OPERATIONAL**
 - ✅ **Git Operations**: Repository management without LFS complications  
 - ✅ **GitHub Actions**: All 12+ workflows executing successfully
@@ -1768,8 +1922,8 @@ projects: process.env.CI ? [/* all browsers */] : [{ name: 'chromium' }]
 6. **Comprehensive Testing Protocol** - >99% success rate at each phase completion
 
 ### Documentation Pages Status
-- **Total Required**: 29 custom pages
-- **Created**: 0
+- **Total Required**: 32 custom pages (+3 new ML Classification & Analysis nodes)
+- **Created**: 3 **NEW**: Binary Classification, Multiclass Classification, Distribution Analyzer
 - **In Progress**: 0
 - **Not Started**: 29
 
