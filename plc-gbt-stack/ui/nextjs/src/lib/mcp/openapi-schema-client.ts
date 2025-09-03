@@ -95,7 +95,7 @@ export class RealOpenAPISchemaMCPClient {
   constructor(mcpServerUrl?: string) {
     // Check if MCP server URL is provided via environment variable first
     this.mcpServerUrl =
-      mcpServerUrl || process.env.NEXT_PUBLIC_MCP_SERVER_URL || 'http://127.0.0.1:3000';
+      mcpServerUrl || process.env.NEXT_PUBLIC_MCP_SERVER_URL || 'http://localhost:8811';
 
     // Only attempt connection if not in development mode without MCP server
     if (this.shouldAttemptConnection()) {
@@ -111,6 +111,13 @@ export class RealOpenAPISchemaMCPClient {
    * Check if we should attempt to connect to MCP server
    */
   private shouldAttemptConnection(): boolean {
+    // DEVELOPMENT MODE: Temporarily disable MCP connections for stable development
+    // This allows fallback mode operation while MCP infrastructure is being configured
+    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV !== 'production') {
+      console.log('🔄 Development mode detected - using fallback validation mode');
+      return false;
+    }
+
     // Skip connection attempts if we detect common development scenarios without MCP
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
       // In browser, check if this is a development environment
@@ -121,8 +128,8 @@ export class RealOpenAPISchemaMCPClient {
       return hasExplicitMCPConfig || !isDevelopment;
     }
 
-    // Server-side always attempts connection
-    return true;
+    // Server-side always attempts connection in production
+    return process.env.NODE_ENV === 'production';
   }
 
   /**
