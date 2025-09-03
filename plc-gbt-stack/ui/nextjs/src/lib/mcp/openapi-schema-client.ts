@@ -95,7 +95,7 @@ export class RealOpenAPISchemaMCPClient {
   constructor(mcpServerUrl?: string) {
     // Check if MCP server URL is provided via environment variable first
     this.mcpServerUrl =
-      mcpServerUrl || process.env.NEXT_PUBLIC_MCP_SERVER_URL || 'http://localhost:8811';
+      mcpServerUrl || process.env.NEXT_PUBLIC_MCP_SERVER_URL || 'http://127.0.0.1:3000';
 
     // Only attempt connection if not in development mode without MCP server
     if (this.shouldAttemptConnection()) {
@@ -204,11 +204,25 @@ export class RealOpenAPISchemaMCPClient {
    */
   private async loadSchemasFromMCP(): Promise<void> {
     try {
-      // Request schemas from Docker MCP server
+      // Test if this is an n8n MCP server (different from OpenAPI Schema MCP)
+      const serverInfo = await this.makeRequest('/', 'GET');
+      
+      if (serverInfo.success && serverInfo.description?.includes('n8n Documentation')) {
+        console.log('ℹ️ Connected to n8n MCP server - using local schemas for OpenAPI validation');
+        // This is an n8n MCP server, not an OpenAPI schema server
+        // Use local schemas but maintain MCP connection for n8n tools
+        this.componentSchemas = {};
+        return;
+      }
+
+      // Request schemas from OpenAPI Schema MCP server (if available)
       const schemasResponse = await this.makeRequest('/schemas/openapi', 'GET');
 
       if (!schemasResponse.success) {
-        throw new Error(`Failed to load schemas: ${schemasResponse.error}`);
+        console.log('ℹ️ MCP server available but no OpenAPI schemas - using local validation');
+        // Server is running but doesn't provide OpenAPI schemas - use local validation
+        this.componentSchemas = {};
+        return;
       }
 
       // Parse component schemas
