@@ -27,14 +27,6 @@ interface ConnectionHandle {
   readonly connectedTo?: string;
 }
 
-interface ConnectionMapping {
-  readonly sourceHandle: string;
-  readonly targetHandle: string;
-  readonly dataType: string;
-  readonly isCompatible: boolean;
-  readonly transformFunction?: string;
-}
-
 interface ConnectionsTabProps {
   readonly schema: NodePropertySchema;
   readonly config: Record<string, unknown>;
@@ -237,7 +229,7 @@ export function ConnectionsTab({
 
     // Include custom handles
     return [...handles, ...customHandles];
-  }, [schema.nodeType, config.inputType, config.dataType, customHandles]);
+  }, [schema.nodeType, config.inputType, customHandles]);
 
   // Test connection for nodes that support it
   const handleConnectionTest = useCallback(

@@ -6,9 +6,7 @@
  * @integration MCP_Docker OpenAPI validation for all requests/responses
  */
 
-import type { components } from '@/api/types.gen';
 import {
-  ErrorResponseSchema,
   IndustrialNodeTypeSchema,
   NodePropertySchemaResponseSchema,
   type ErrorResponse,

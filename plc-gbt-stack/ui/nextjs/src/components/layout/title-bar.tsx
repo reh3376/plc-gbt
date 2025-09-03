@@ -1,6 +1,7 @@
 'use client';
 
 import { HelpCircle, Minimize2, Square, X } from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
 import { WorkflowHelpModal } from '../workflow/WorkflowHelpModal';
 
@@ -14,9 +15,11 @@ export function TitleBar() {
           {/* Background element for logo visibility - wider to show full logo */}
           <div className="absolute inset-0 bg-white/10 rounded-sm border border-white/20" />
           {/* Logo with higher z-index */}
-          <img
+          <Image
             src="/whk-logo.png"
             alt="PLC-GBT Logo"
+            width={24}
+            height={24}
             className="relative w-6 h-4 object-contain z-10"
           />
         </div>

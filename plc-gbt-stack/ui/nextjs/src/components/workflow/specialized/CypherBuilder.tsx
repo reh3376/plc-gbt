@@ -163,7 +163,7 @@ export function CypherBuilder({
     } finally {
       setIsConnecting(false);
     }
-  }, [connectionUri, username, password]);
+  }, [connectionUri, username, password, database]);
 
   // Load database schema
   const loadDatabaseSchema = useCallback(async () => {

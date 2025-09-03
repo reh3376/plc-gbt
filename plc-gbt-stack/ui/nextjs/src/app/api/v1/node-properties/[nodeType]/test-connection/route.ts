@@ -13,7 +13,6 @@ import {
   type ConnectionTestResult,
   type ErrorResponse,
   type IndustrialNodeType,
-  type NodeConnectionTestRequest,
   type NodeConnectionTestResponse,
 } from '@/api/zod-schemas';
 import { openAPISchemaMCP } from '@/lib/mcp/openapi-schema-client';

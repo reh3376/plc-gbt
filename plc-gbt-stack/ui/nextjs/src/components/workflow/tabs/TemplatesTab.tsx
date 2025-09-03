@@ -45,9 +45,6 @@ export function TemplatesTab({
   const [newTemplateDescription, setNewTemplateDescription] = useState('');
   const [newTemplateCategory, setNewTemplateCategory] = useState('');
 
-  // Remove unused config parameter warning
-  const _ = config;
-
   // Group templates by category
   const templateCategories = useMemo((): ReadonlyArray<TemplateCategory> => {
     if (!schema.templates?.length) return [];
@@ -285,6 +282,7 @@ export function TemplatesTab({
         config={config}
         title="Create Template from Configuration"
         onSave={rawConfig => {
+          // TODO: Use rawConfig for template creation
           // After editing raw config, show the template creation form with the config
           setShowRawConfigModal(false);
           setIsCreatingTemplate(true);

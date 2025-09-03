@@ -1,29 +1,9 @@
 {
   "compilerOptions": {
-    "noEmit": true,
+    "moduleResolution": "node",
     "skipLibCheck": true,
-    "allowJs": false,
-    "checkJs": false,
-    "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "strictBindCallApply": false,
-    "strictPropertyInitialization": false,
-    "noImplicitThis": false,
-    "alwaysStrict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitReturns": false,
-    "noFallthroughCasesInSwitch": false,
-    "noUncheckedIndexedAccess": false,
-    "noImplicitOverride": false,
-    "noPropertyAccessFromIndexSignature": false,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": false,
-    "moduleResolution": "node"
+    "noEmit": true
   },
-  "files": [],
-  "include": [],
-  "exclude": ["**/*"]
+  "include": ["./ui/nextjs/**/*"],
+  "references": []
 }

@@ -41,9 +41,6 @@ export function ValidationTab({
   isValidating,
   onRevalidate,
 }: Readonly<ValidationTabProps>): React.JSX.Element {
-  // Remove unused parameter warnings
-  const _unusedSchema = schema;
-  const _unusedConfig = config;
   // Calculate validation summary
   const validationSummary = useMemo((): ValidationSummary => {
     const errors = validationResults.filter(r => r.severity === 'error').length;

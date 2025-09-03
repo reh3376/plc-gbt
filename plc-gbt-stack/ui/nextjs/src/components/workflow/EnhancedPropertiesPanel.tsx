@@ -837,11 +837,11 @@ function PropertiesTabContent({
 }
 
 function ConnectionsTabContent({
-  schema: _schema,
-  config: _config,
-  testResults: _testResults,
-  isLoading: _isLoading,
-  onTestConnection: _onTestConnection,
+  schema,
+  config,
+  testResults,
+  isLoading,
+  onTestConnection,
 }: Readonly<{
   schema: NodePropertySchema;
   config: Record<string, unknown>;
@@ -849,6 +849,8 @@ function ConnectionsTabContent({
   isLoading: boolean;
   onTestConnection: (testId: string) => Promise<void>;
 }>): React.JSX.Element {
+  // TODO: Implement connection management using provided props
+  // Placeholder acknowledges future use of: schema, config, testResults, isLoading, onTestConnection
   return (
     <div className="p-4">
       <div className="text-sm text-[#969696]">
@@ -859,12 +861,14 @@ function ConnectionsTabContent({
 }
 
 function ValidationTabContent({
-  validationResults: _validationResults,
-  onRevalidate: _onRevalidate,
+  validationResults,
+  onRevalidate,
 }: Readonly<{
   validationResults: ReadonlyArray<ValidationResult>;
   onRevalidate: () => Promise<ReadonlyArray<ValidationResult>>;
 }>): React.JSX.Element {
+  // TODO: Implement validation details using provided props
+  // Placeholder acknowledges future use of: validationResults, onRevalidate
   return (
     <div className="p-4">
       <div className="text-sm text-[#969696]">
@@ -875,14 +879,16 @@ function ValidationTabContent({
 }
 
 function TemplatesTabContent({
-  schema: _schema,
-  config: _config,
-  onApplyTemplate: _onApplyTemplate,
+  schema,
+  config,
+  onApplyTemplate,
 }: Readonly<{
   schema: NodePropertySchema;
   config: Record<string, unknown>;
   onApplyTemplate: (template: { config: Record<string, unknown> }) => void;
 }>): React.JSX.Element {
+  // TODO: Implement template management using provided props
+  // Placeholder acknowledges future use of: schema, config, onApplyTemplate
   return (
     <div className="p-4">
       <div className="text-sm text-[#969696]">
@@ -893,14 +899,16 @@ function TemplatesTabContent({
 }
 
 function AdvancedTabContent({
-  config: _config,
-  onConfigChange: _onConfigChange,
-  onExport: _onExport,
+  config,
+  onConfigChange,
+  onExport,
 }: Readonly<{
   config: Record<string, unknown>;
   onConfigChange: (config: Record<string, unknown>) => void;
   onExport: () => void;
 }>): React.JSX.Element {
+  // TODO: Implement advanced configuration using provided props
+  // Placeholder acknowledges future use of: config, onConfigChange, onExport
   return (
     <div className="p-4">
       <div className="text-sm text-[#969696]">

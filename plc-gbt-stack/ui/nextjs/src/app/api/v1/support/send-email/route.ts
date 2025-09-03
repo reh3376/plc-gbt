@@ -77,7 +77,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       };
 
       // Validate error response
-      const errorValidation = await openAPISchemaMCP.validateResponse(
+      await openAPISchemaMCP.validateResponse(
         'POST',
         '/api/v1/support/send-email',
         500,

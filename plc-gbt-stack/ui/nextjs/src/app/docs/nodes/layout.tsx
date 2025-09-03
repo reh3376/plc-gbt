@@ -9,6 +9,7 @@
 'use client';
 
 import { ArrowLeft, BookOpen, Filter, Search, X } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
@@ -135,9 +136,11 @@ export default function DocsLayout({ children }: Readonly<DocLayoutProps>): Reac
                   {/* Background element for logo visibility */}
                   <div className="absolute inset-0 bg-gray-100 dark:bg-gray-700 rounded-sm border border-gray-200 dark:border-gray-600" />
                   {/* Logo with higher z-index */}
-                  <img
+                  <Image
                     src="/whk-logo.png"
                     alt="PLC-GBT Logo"
+                    width={24}
+                    height={24}
                     className="relative w-7 h-5 object-contain z-10"
                   />
                 </div>

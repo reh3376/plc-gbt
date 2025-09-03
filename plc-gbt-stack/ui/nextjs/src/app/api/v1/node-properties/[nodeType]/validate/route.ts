@@ -12,7 +12,6 @@ import {
   NodeConfigurationValidationResponseSchema,
   type ErrorResponse,
   type IndustrialNodeType,
-  type NodeConfigurationValidationRequest,
   type NodeConfigurationValidationResponse,
   type ValidationResult,
 } from '@/api/zod-schemas';

@@ -213,8 +213,9 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
     initializeSystems();
   }, [setConditionEvaluator, updateOrchestrationConfig]);
 
-  // Demo scenario execution (regular function to avoid hoisting issues)
-  const executeScenario = async (scenario: DemoScenario) => {
+  // Demo scenario execution (wrapped in useCallback to stabilize reference)
+  const executeScenario = useCallback(
+    async (scenario: DemoScenario) => {
       console.log(`🧪 Starting demo scenario: ${scenario.name}`);
 
       setTestResults(prev => ({
@@ -299,10 +300,12 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
         setIsRunningTests(false);
         setCurrentStep(0);
       }
-  };
+    },
+    [setTestResults, setCurrentStep, setIsRunningTests, startWorkflowExecution, testResults]
+  ); // useCallback dependencies
 
   // Scenario implementations
-  const demonstrateConditionalExecution = async () => {
+  const demonstrateConditionalExecution = useCallback(async () => {
     console.log('🔀 Demonstrating conditional execution...');
 
     // Test simple condition
@@ -336,9 +339,9 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
 
     setCurrentStep(4);
     await new Promise(resolve => setTimeout(resolve, 2000));
-  };
+  }, [setCurrentStep, executeConditionalNode, evaluateCondition]);
 
-  const demonstrateParallelProcessing = async () => {
+  const demonstrateParallelProcessing = useCallback(async () => {
     console.log('🔀 Demonstrating parallel processing...');
 
     setCurrentStep(1);
@@ -355,9 +358,9 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
       setCurrentStep(i);
       await new Promise(resolve => setTimeout(resolve, 3000));
     }
-  };
+  }, [setCurrentStep, startParallelExecution]);
 
-  const demonstrateLoopControl = async () => {
+  const demonstrateLoopControl = useCallback(async () => {
     console.log('🔄 Demonstrating loop control...');
 
     setCurrentStep(1);
@@ -367,9 +370,9 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
       setCurrentStep(i);
       await new Promise(resolve => setTimeout(resolve, 4000));
     }
-  };
+  }, [setCurrentStep]);
 
-  const demonstratePLCIntegration = async () => {
+  const demonstratePLCIntegration = useCallback(async () => {
     console.log('🏭 Demonstrating PLC integration...');
 
     setCurrentStep(1);
@@ -388,9 +391,9 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
     setCurrentStep(4);
     console.log('Testing emergency response...');
     await new Promise(resolve => setTimeout(resolve, 3000));
-  };
+  }, [setCurrentStep]);
 
-  const demonstrateLLMIntelligence = async () => {
+  const demonstrateLLMIntelligence = useCallback(async () => {
     console.log('🧠 Demonstrating LLM intelligence...');
 
     setCurrentStep(1);
@@ -408,9 +411,9 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
     setCurrentStep(4);
     console.log('Validating LLM recommendations...');
     await new Promise(resolve => setTimeout(resolve, 3000));
-  };
+  }, [setCurrentStep]);
 
-  const demonstrateStatePersistence = async () => {
+  const demonstrateStatePersistence = useCallback(async () => {
     console.log('💾 Demonstrating state persistence...');
 
     setCurrentStep(1);
@@ -428,9 +431,9 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
     setCurrentStep(4);
     console.log('Recovering from saved state...');
     await new Promise(resolve => setTimeout(resolve, 3000));
-  };
+  }, [setCurrentStep, startWorkflowExecution]);
 
-  const demonstratePerformanceOptimization = async () => {
+  const demonstratePerformanceOptimization = useCallback(async () => {
     console.log('⚡ Demonstrating performance optimization...');
 
     setCurrentStep(1);
@@ -452,7 +455,7 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
     setCurrentStep(5);
     console.log('Measuring improvement...');
     await new Promise(resolve => setTimeout(resolve, 3000));
-  };
+  }, [setTestResults, setCurrentStep, setIsRunningTests, startWorkflowExecution]);
 
   // Run all scenarios
   const runAllScenarios = useCallback(async () => {

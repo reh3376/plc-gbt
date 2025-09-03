@@ -4,8 +4,10 @@ import {
   Background,
   BackgroundVariant,
   ConnectionMode,
+  Edge,
   MarkerType,
   MiniMap,
+  Node,
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
@@ -46,9 +48,19 @@ interface CanvasState {
   readonly isConnected: boolean;
 }
 
+// Canvas state calculation
+const calculateCanvasState = (nodes: Node[], edges: Edge[]): CanvasState => ({
+  nodesCount: nodes.length,
+  edgesCount: edges.length,
+  selectedNodesCount: nodes.filter(node => node.selected).length,
+  selectedEdgesCount: edges.filter(edge => edge.selected).length,
+  canUndo: false, // TODO: Implement undo functionality
+  canRedo: false, // TODO: Implement redo functionality
+  isConnected: nodes.length > 0 && edges.length > 0,
+});
+
 function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<WorkflowCanvasProps>) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [_isAutoLayouting, setIsAutoLayouting] = useState(false);
   const [isPropertiesModalOpen, setIsPropertiesModalOpen] = useState(false);
   const { screenToFlowPosition, fitView, zoomIn, zoomOut } = useReactFlow();
 
@@ -96,7 +108,7 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
         });
       }, 100);
     }
-  }, [nodes.length, fitView]);
+  }, [nodes.length, fitView, edges.length, nodes, viewport]);
 
   // Listen for zoom commands from toolbar
   useEffect(() => {
@@ -146,79 +158,8 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
     return () => window.removeEventListener('resize', handleResize);
   }, [nodes.length, fitView]);
 
-  // Enhanced Canvas State (unused for now, prepared for future features)
-  // const canvasState: CanvasState = {
-  //   nodesCount: nodes.length,
-  //   edgesCount: edges.length,
-  //   selectedNodesCount: selectedNodes.length,
-  //   selectedEdgesCount: selectedEdges.length,
-  //   canUndo: false, // Future: Implement undo/redo
-  //   canRedo: false, // Future: Implement undo/redo
-  //   isConnected: true, // Future: Check backend connection
-  // };
-
-  // Enhanced Auto Layout Handler
-  const _handleAutoLayout = useCallback(async () => {
-    if (nodes.length === 0) return;
-
-    try {
-      setIsAutoLayouting(true);
-      await autoLayoutNodes('horizontal');
-
-      // Fit view after layout with animation
-      setTimeout(() => {
-        fitView({
-          padding: 0.1,
-          duration: 800,
-          includeHiddenNodes: false,
-        });
-      }, 100);
-    } catch (error) {
-      console.error('Auto layout failed:', error);
-    } finally {
-      setIsAutoLayouting(false);
-    }
-  }, [nodes.length, autoLayoutNodes, fitView]);
-
-  // Enhanced Fit View Handler - Fixed to prevent UI panel disappearance
-  const _handleFitView = useCallback(() => {
-    fitView({
-      padding: 0.15, // Increased padding to avoid panel overlap
-      duration: 800,
-      includeHiddenNodes: false,
-      maxZoom: 1.2, // Reduced max zoom to prevent panel hiding
-      minZoom: 0.1,
-    });
-  }, [fitView]);
-
-  // Save Workflow Handler
-  const _handleSaveWorkflow = useCallback(async () => {
-    try {
-      await saveWorkflow();
-      // Future: Show success notification
-    } catch (error) {
-      console.error('Save workflow failed:', error);
-      // Future: Show error notification
-    }
-  }, [saveWorkflow]);
-
-  // Export Workflow Handler
-  const _handleExportWorkflow = useCallback(() => {
-    try {
-      const data = exportWorkflow('json');
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `workflow-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Export workflow failed:', error);
-    }
-  }, [exportWorkflow]);
+  // Calculate current canvas state for debugging and monitoring
+  const canvasState: CanvasState = calculateCanvasState(nodes, edges);
 
   // Canvas Control Actions moved to WorkflowCanvasOverlays
 

@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils/cn';
 import { HelpCircle } from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
 import { WorkflowHelpModal } from '../workflow/WorkflowHelpModal';
 
@@ -27,9 +28,11 @@ export function Header({ className }: Readonly<HeaderProps>) {
           {/* Background element for logo visibility - wider to show full logo */}
           <div className="absolute inset-0 bg-white/10 rounded-sm border border-white/20" />
           {/* Logo with higher z-index */}
-          <img
+          <Image
             src="/whk-logo.png"
             alt="PLC-GBT Logo"
+            width={24}
+            height={24}
             className="relative w-7 h-5 object-contain z-10"
           />
         </div>

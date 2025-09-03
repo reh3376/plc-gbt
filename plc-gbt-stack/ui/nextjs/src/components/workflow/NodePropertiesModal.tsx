@@ -204,7 +204,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
     };
 
     loadNodeData();
-  }, [selectedNode?.id, selectedNode?.type]); // Trigger when node changes
+  }, [selectedNode?.id, selectedNode?.type, isLoading, selectedNode]); // Complete dependencies
 
   // Cleanup on unmount
   useEffect(() => {
@@ -267,7 +267,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
         setIsValidating(false);
       }
     },
-    [selectedNode?.id, selectedNode?.type, schema?.nodeType] // Only stable dependencies
+    [selectedNode?.id, selectedNode?.type, schema] // Include schema as it's used in validation
   );
 
   // Handle field changes
