@@ -51,7 +51,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_EXISTS: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
-        
+
       - name: Notification Skipped Notice
         if: ${{ always() && env.SLACK_WEBHOOK_EXISTS != 'true' }}
         run: |

@@ -29,6 +29,9 @@ export const IndustrialNodeTypeSchema = z.enum([
   'lstm-model',
   'sindy-identifier',
   'reinforcement-learning',
+  // New ML Classification & Analysis nodes - AI Task Orchestrator Implementation
+  'binary-classification',
+  'multiclass-classification',
   'mpc-controller',
   'kalman-filter',
   'quadratic-programming',
@@ -56,6 +59,7 @@ export const IndustrialNodeTypeSchema = z.enum([
   'time-series-processor',
   'math-function-creator',
   'data-distribution-analyzer',
+  'distribution-analyzer',
   'dashboard-generator',
   'pdf-report-generator',
   'email-notifier',

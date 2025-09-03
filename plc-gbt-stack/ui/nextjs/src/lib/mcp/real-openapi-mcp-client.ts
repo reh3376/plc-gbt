@@ -91,7 +91,7 @@ export class RealOpenAPISchemaMCPClient {
   private maxRetries: number = 3;
   private retryDelay: number = 1000; // 1 second
 
-  constructor(mcpServerUrl: string = 'http://localhost:8811') {
+  constructor(mcpServerUrl: string = 'http://127.0.0.1:3000') {
     this.mcpServerUrl = mcpServerUrl;
   }
 

@@ -21,6 +21,7 @@ import {
   HelpCircle,
   Layout,
   LayoutGrid,
+  LineChart,
   List,
   Maximize2,
   Network,
@@ -246,6 +247,31 @@ const nodePalette: NodePaletteItem[] = [
     color: '#3B82F6',
     category: 'ML Algorithm',
     description: 'DDPG, SAC, TD3 algorithms for adaptive control',
+  },
+  // New ML Classification & Analysis nodes - AI Task Orchestrator Implementation
+  {
+    type: 'binary-classification',
+    label: 'Binary Classification',
+    icon: Brain,
+    color: '#3B82F6',
+    category: 'ML Algorithm',
+    description: 'Binary classification with multiple algorithms and ensemble methods',
+  },
+  {
+    type: 'multiclass-classification',
+    label: 'Multi-Class Classification',
+    icon: Network,
+    color: '#3B82F6',
+    category: 'ML Algorithm',
+    description: 'Multi-category classification with advanced ensemble and balancing',
+  },
+  {
+    type: 'distribution-analyzer',
+    label: 'Distribution Analyzer',
+    icon: LineChart,
+    color: '#06B6D4',
+    category: 'Data Processing',
+    description: 'Statistical distribution analysis with ML-enhanced pattern recognition',
   },
   // MPC nodes (based on MPC-overview.md)
   {

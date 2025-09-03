@@ -115,7 +115,7 @@ export class RealOpenAPISchemaMCPClient {
     // Per AI Task Orchestrator methodology: MCP_Docker is MANDATORY for all API development
     console.log('🔗 Connecting to Docker MCP OpenAPI server...');
     console.log('📡 Server URL:', this.mcpServerUrl);
-    
+
     // Skip connection attempts if we detect common development scenarios without MCP
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
       // In browser, check if this is a development environment
@@ -206,7 +206,7 @@ export class RealOpenAPISchemaMCPClient {
     try {
       // Test if this is an n8n MCP server (different from OpenAPI Schema MCP)
       const serverInfo = await this.makeRequest('/', 'GET');
-      
+
       if (serverInfo.success && serverInfo.description?.includes('n8n Documentation')) {
         console.log('ℹ️ Connected to n8n MCP server - using local schemas for OpenAPI validation');
         // This is an n8n MCP server, not an OpenAPI schema server
