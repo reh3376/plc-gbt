@@ -111,25 +111,23 @@ export class RealOpenAPISchemaMCPClient {
    * Check if we should attempt to connect to MCP server
    */
   private shouldAttemptConnection(): boolean {
-    // DEVELOPMENT MODE: Temporarily disable MCP connections for stable development
-    // This allows fallback mode operation while MCP infrastructure is being configured
-    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV !== 'production') {
-      console.log('🔄 Development mode detected - using fallback validation mode');
-      return false;
-    }
-
+    // Always attempt MCP connection in development when MCP_Docker is required
+    // Per AI Task Orchestrator methodology: MCP_Docker is MANDATORY for all API development
+    console.log('🔗 Connecting to Docker MCP OpenAPI server...');
+    console.log('📡 Server URL:', this.mcpServerUrl);
+    
     // Skip connection attempts if we detect common development scenarios without MCP
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
       // In browser, check if this is a development environment
       const isDevelopment = process.env.NODE_ENV === 'development';
       const hasExplicitMCPConfig = !!process.env.NEXT_PUBLIC_MCP_SERVER_URL;
 
-      // Only attempt connection if explicitly configured or not in development
-      return hasExplicitMCPConfig || !isDevelopment;
+      // Always attempt connection when MCP_Docker is available
+      return true;
     }
 
-    // Server-side always attempts connection in production
-    return process.env.NODE_ENV === 'production';
+    // Server-side always attempts connection
+    return true;
   }
 
   /**
