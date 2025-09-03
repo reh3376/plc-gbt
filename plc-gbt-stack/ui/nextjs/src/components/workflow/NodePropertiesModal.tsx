@@ -690,7 +690,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
         type="button"
         className="fixed inset-0 bg-black/50 backdrop-blur-sm border-0 p-0"
         style={{ zIndex }}
-        onClick={e => {
+        onClick={() => {
           if (isTopModal) {
             if (isDirty) {
               const confirmClose = window.confirm(

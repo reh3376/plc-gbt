@@ -723,7 +723,7 @@ export function WorkflowToolbar() {
     saveWorkflow,
     exportWorkflow,
     importWorkflow,
-    deleteWorkflow,
+    // deleteWorkflow, // TODO: Implement workflow deletion functionality
     fitView,
     zoomIn,
     zoomOut,

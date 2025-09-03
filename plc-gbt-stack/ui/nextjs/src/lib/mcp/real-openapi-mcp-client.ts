@@ -7,14 +7,7 @@
  * @integration Docker MCP server for OpenAPI schema management
  */
 
-import type {
-  CreateFileRequest,
-  DeleteFileRequest,
-  FileItem,
-  MoveFileRequest,
-  RenameFileRequest,
-  UploadFileRequest,
-} from '@/lib/types/file-explorer.types';
+// File operation types - using local validation for development
 
 // Real OpenAPI MCP Schema Types (matching the fake client interface)
 interface OpenAPISchema {

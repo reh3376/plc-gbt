@@ -740,13 +740,24 @@ const NODE_HELP_CONTENT: Record<IndustrialNodeType, NodeHelpContent> = {
   'binary-classification': {
     title: 'Binary Classification',
     description: 'Advanced binary classification with multiple algorithms and ensemble methods',
-    keyParameters: ['Algorithm Type', 'Target Column', 'Feature Columns', 'Validation Split', 'Hyperparameter Tuning'],
-    useCases: ['Process fault detection', 'Quality control', 'Equipment monitoring', 'Safety classification'],
+    keyParameters: [
+      'Algorithm Type',
+      'Target Column',
+      'Feature Columns',
+      'Validation Split',
+      'Hyperparameter Tuning',
+    ],
+    useCases: [
+      'Process fault detection',
+      'Quality control',
+      'Equipment monitoring',
+      'Safety classification',
+    ],
     troubleshooting: [
       'Check target column for binary values (0/1, True/False)',
       'Ensure sufficient training data (100+ samples)',
       'Verify feature-target correlation',
-      'Enable class balancing for imbalanced data'
+      'Enable class balancing for imbalanced data',
     ],
     documentationUrl: '/docs/nodes/binary-classification',
     isCustomPage: true,
@@ -754,13 +765,24 @@ const NODE_HELP_CONTENT: Record<IndustrialNodeType, NodeHelpContent> = {
   'multiclass-classification': {
     title: 'Multi-Class Classification',
     description: 'Multi-category classification with advanced ensemble and balancing',
-    keyParameters: ['Algorithm Types', 'Target Column', 'Class Names', 'Multi-Class Strategy', 'Ensemble Config'],
-    useCases: ['Process state classification', 'Product categorization', 'Equipment health monitoring', 'Safety assessment'],
+    keyParameters: [
+      'Algorithm Types',
+      'Target Column',
+      'Class Names',
+      'Multi-Class Strategy',
+      'Ensemble Config',
+    ],
+    useCases: [
+      'Process state classification',
+      'Product categorization',
+      'Equipment health monitoring',
+      'Safety assessment',
+    ],
     troubleshooting: [
       'Ensure at least 3 classes in target column',
       'Enable class balancing for imbalanced classes',
       'Check for class confusion patterns in confusion matrix',
-      'Use stratified validation for reliable performance'
+      'Use stratified validation for reliable performance',
     ],
     documentationUrl: '/docs/nodes/multiclass-classification',
     isCustomPage: true,
@@ -768,13 +790,24 @@ const NODE_HELP_CONTENT: Record<IndustrialNodeType, NodeHelpContent> = {
   'distribution-analyzer': {
     title: 'Distribution Analyzer',
     description: 'Statistical distribution analysis with ML-enhanced pattern recognition',
-    keyParameters: ['Data Columns', 'Distribution Types', 'Confidence Level', 'Outlier Handling', 'Goodness-of-Fit Tests'],
-    useCases: ['Process characterization', 'Quality control setup', 'Alarm optimization', 'Equipment wear analysis'],
+    keyParameters: [
+      'Data Columns',
+      'Distribution Types',
+      'Confidence Level',
+      'Outlier Handling',
+      'Goodness-of-Fit Tests',
+    ],
+    useCases: [
+      'Process characterization',
+      'Quality control setup',
+      'Alarm optimization',
+      'Equipment wear analysis',
+    ],
     troubleshooting: [
       'Ensure at least 30 data points for analysis',
       'Remove constant-value columns',
       'Check for outliers affecting distribution fits',
-      'Try mixture modeling for multi-modal data'
+      'Try mixture modeling for multi-modal data',
     ],
     documentationUrl: '/docs/nodes/distribution-analyzer',
     isCustomPage: true,

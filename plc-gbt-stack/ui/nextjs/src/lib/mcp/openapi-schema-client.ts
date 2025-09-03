@@ -7,14 +7,7 @@
  * @integration Docker MCP server for OpenAPI schema management
  */
 
-import type {
-  CreateFileRequest,
-  DeleteFileRequest,
-  FileItem,
-  MoveFileRequest,
-  RenameFileRequest,
-  UploadFileRequest,
-} from '@/lib/types/file-explorer.types';
+// File operation types - using local validation for development
 
 // Real OpenAPI MCP Schema Types (matching the fake client interface)
 interface OpenAPISchema {
@@ -118,10 +111,6 @@ export class RealOpenAPISchemaMCPClient {
 
     // Skip connection attempts if we detect common development scenarios without MCP
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      // In browser, check if this is a development environment
-      const isDevelopment = process.env.NODE_ENV === 'development';
-      const hasExplicitMCPConfig = !!process.env.NEXT_PUBLIC_MCP_SERVER_URL;
-
       // Always attempt connection when MCP_Docker is available
       return true;
     }
@@ -207,7 +196,7 @@ export class RealOpenAPISchemaMCPClient {
       // Test if this is an n8n MCP server (different from OpenAPI Schema MCP)
       const serverInfo = await this.makeRequest('/', 'GET');
 
-      if (serverInfo.success && serverInfo.description?.includes('n8n Documentation')) {
+      if (serverInfo.success && (serverInfo.data as Record<string, unknown>)?.description?.toString().includes('n8n Documentation')) {
         console.log('ℹ️ Connected to n8n MCP server - using local schemas for OpenAPI validation');
         // This is an n8n MCP server, not an OpenAPI schema server
         // Use local schemas but maintain MCP connection for n8n tools
