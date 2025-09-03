@@ -14,100 +14,100 @@ on:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        lfs: false
-        fetch-depth: 0
-        
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-        
-    - name: Generate release notes
-      run: |
-        echo "📝 Generating release notes..."
-        
-        # Get version from tag or input
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          VERSION="${{ github.event.inputs.version }}"
-        else
-          VERSION="${{ github.ref_name }}"
-        fi
-        
-        echo "# Release $VERSION" > release-notes.md
-        echo "Generated: $(date)" >> release-notes.md
-        echo "" >> release-notes.md
-        
-        # Count PLC files
-        acd_count=$(find . -name "*.ACD" | wc -l)
-        l5x_count=$(find . -name "*.L5X" | wc -l)
-        
-        echo "## Contents" >> release-notes.md
-        echo "- ACD files: $acd_count" >> release-notes.md
-        echo "- L5X files: $l5x_count" >> release-notes.md
-        echo "" >> release-notes.md
-        
-        echo "## Changes" >> release-notes.md
-        if [ "${{ github.event_name }}" = "push" ]; then
-          # Get commits since last tag
-          LAST_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1)
-          if [ -n "$LAST_TAG" ]; then
-            git log --oneline $LAST_TAG..HEAD >> release-notes.md
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Generate release notes
+        run: |
+          echo "📝 Generating release notes..."
+
+          # Get version from tag or input
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
           else
-            echo "Initial release" >> release-notes.md
+            VERSION="${{ github.ref_name }}"
           fi
-        else
-          echo "Manual release triggered" >> release-notes.md
-        fi
-        
-    - name: Create release archive
-      run: |
-        echo "📦 Creating release archive..."
-        
-        # Create release directory
-        mkdir -p release
-        
-        # Copy PLC files
-        find . -name "*.ACD" -o -name "*.L5X" | while read file; do
-          cp "$file" release/
-        done
-        
-        # Copy documentation
-        if [ -f "README.md" ]; then
-          cp README.md release/
-        fi
-        
-        # Create archive
-        tar -czf plc-files-release.tar.gz -C release .
-        
-    - name: Calculate checksums
-      run: |
-        echo "🔐 Calculating checksums..."
-        sha256sum plc-files-release.tar.gz > checksums.txt
-        md5sum plc-files-release.tar.gz >> checksums.txt
-        
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ github.event.inputs.version || github.ref_name }}
-        name: Release ${{ github.event.inputs.version || github.ref_name }}
-        body_path: release-notes.md
-        files: |
-          plc-files-release.tar.gz
-          checksums.txt
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Upload release artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-artifacts
-        path: |
-          plc-files-release.tar.gz
-          checksums.txt
-          release-notes.md
+
+          echo "# Release $VERSION" > release-notes.md
+          echo "Generated: $(date)" >> release-notes.md
+          echo "" >> release-notes.md
+
+          # Count PLC files
+          acd_count=$(find . -name "*.ACD" | wc -l)
+          l5x_count=$(find . -name "*.L5X" | wc -l)
+
+          echo "## Contents" >> release-notes.md
+          echo "- ACD files: $acd_count" >> release-notes.md
+          echo "- L5X files: $l5x_count" >> release-notes.md
+          echo "" >> release-notes.md
+
+          echo "## Changes" >> release-notes.md
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # Get commits since last tag
+            LAST_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1)
+            if [ -n "$LAST_TAG" ]; then
+              git log --oneline $LAST_TAG..HEAD >> release-notes.md
+            else
+              echo "Initial release" >> release-notes.md
+            fi
+          else
+            echo "Manual release triggered" >> release-notes.md
+          fi
+
+      - name: Create release archive
+        run: |
+          echo "📦 Creating release archive..."
+
+          # Create release directory
+          mkdir -p release
+
+          # Copy PLC files
+          find . -name "*.ACD" -o -name "*.L5X" | while read file; do
+            cp "$file" release/
+          done
+
+          # Copy documentation
+          if [ -f "README.md" ]; then
+            cp README.md release/
+          fi
+
+          # Create archive
+          tar -czf plc-files-release.tar.gz -C release .
+
+      - name: Calculate checksums
+        run: |
+          echo "🔐 Calculating checksums..."
+          sha256sum plc-files-release.tar.gz > checksums.txt
+          md5sum plc-files-release.tar.gz >> checksums.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          name: Release ${{ github.event.inputs.version || github.ref_name }}
+          body_path: release-notes.md
+          files: |
+            plc-files-release.tar.gz
+            checksums.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            plc-files-release.tar.gz
+            checksums.txt
+            release-notes.md
