@@ -1,6 +1,6 @@
 name: PLC Repository Deployment
 
-"on":
+'on':
   release:
     types: [published]
   workflow_dispatch:
@@ -8,35 +8,54 @@ name: PLC Repository Deployment
 jobs:
   deploy-to-production:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        lfs: false
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install deployment tools
+        run: |
+          pip install plc-format-converter
+
+      - name: Validate all PLC files
+        run: |
+          python scripts/deployment/validate_all_repos.py
+
+      - name: Deploy to production
+        if: ${{ env.DEPLOYMENT_KEY_EXISTS == 'true' }}
+        run: |
+          python scripts/deployment/deploy_repositories.py
+        env:
+          DEPLOYMENT_KEY: ${{ secrets.DEPLOYMENT_KEY }}
+          DEPLOYMENT_KEY_EXISTS: ${{ secrets.DEPLOYMENT_KEY != '' }}
+
+      - name: Deployment Skipped Notice
+        if: ${{ env.DEPLOYMENT_KEY_EXISTS != 'true' }}
+        run: |
+          echo "⚠️ Deployment skipped - DEPLOYMENT_KEY secret not configured"
+          echo "To enable deployment, configure DEPLOYMENT_KEY secret in repository settings"
+        env:
+          DEPLOYMENT_KEY_EXISTS: ${{ secrets.DEPLOYMENT_KEY != '' }}
+
+      - name: Notify deployment status
+        uses: 8398a7/action-slack@v3
+        if: ${{ always() && env.SLACK_WEBHOOK_EXISTS == 'true' }}
+        with:
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_EXISTS: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
         
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-        
-    - name: Install deployment tools
-      run: |
-        pip install plc-format-converter
-        
-    - name: Validate all PLC files
-      run: |
-        python scripts/deployment/validate_all_repos.py
-        
-    - name: Deploy to production
-      run: |
-        python scripts/deployment/deploy_repositories.py
-      env:
-        DEPLOYMENT_KEY: ${{ secrets.DEPLOYMENT_KEY }}
-        
-    - name: Notify deployment status
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      if: always()
+      - name: Notification Skipped Notice
+        if: ${{ always() && env.SLACK_WEBHOOK_EXISTS != 'true' }}
+        run: |
+          echo "⚠️ Slack notification skipped - SLACK_WEBHOOK_URL secret not configured"
+          echo "To enable notifications, configure SLACK_WEBHOOK_URL secret in repository settings"
+        env:
+          SLACK_WEBHOOK_EXISTS: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
