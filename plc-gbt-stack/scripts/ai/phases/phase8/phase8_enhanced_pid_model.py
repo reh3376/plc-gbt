@@ -13,10 +13,10 @@ and provides backward compatibility with existing Phase 8 implementations.
 
 import json
 import logging
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Union
-from dataclasses import dataclass, asdict, field
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -73,7 +73,7 @@ class TagDescriptor:
     tagname: str
     data_type: DataType
     description: str
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "tagname": self.tagname,
@@ -90,7 +90,7 @@ class ScalingConfiguration:
     eng_max: float
     units: str
     linearization: str = "linear"
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
@@ -102,7 +102,7 @@ class AlarmLimits:
     low: Optional[float] = None
     low_low: Optional[float] = None
     rate_of_change: Optional[float] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {k: v for k, v in asdict(self).items() if v is not None}
 
@@ -113,7 +113,7 @@ class ProcessVariable:
     tagdesc: TagDescriptor
     scaling: ScalingConfiguration
     alarm_limits: Optional[AlarmLimits] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         result = {
             "variable_id": self.variable_id,
@@ -131,7 +131,7 @@ class FeedforwardConfig:
     gain: float = 1.0
     lead_time: float = 0.0
     lag_time: float = 0.0
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
@@ -142,7 +142,7 @@ class DisturbanceVariable:
     tagdesc: TagDescriptor
     scaling: ScalingConfiguration
     feedforward_config: Optional[FeedforwardConfig] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         result = {
             "variable_id": self.variable_id,
@@ -160,7 +160,7 @@ class ControlLimits:
     max: float
     units: str
     rate_limit: Optional[float] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         result = asdict(self)
         return {k: v for k, v in result.items() if v is not None}
@@ -172,7 +172,7 @@ class ActuatorCharacteristics:
     action: str = "direct"
     feedback: bool = False
     response_time: Optional[float] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         result = asdict(self)
         return {k: v for k, v in result.items() if v is not None}
@@ -184,7 +184,7 @@ class ControlVariable:
     tagname: TagDescriptor
     limits: ControlLimits
     actuator_characteristics: Optional[ActuatorCharacteristics] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         result = {
             "variable_id": self.variable_id,
@@ -203,7 +203,7 @@ class ControlConfiguration:
     instruction_type: InstructionType
     control_mode01: ControlMode = ControlMode.PID
     control_mode02: str = "Standard"
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "loop_id": self.loop_id,
@@ -222,55 +222,55 @@ class EnhancedTuningParameters:
     td: float
     bias: float = 50.0
     setpoint: float = 0.0
-    
+
     # Enhanced configuration parameters
     loop_type: Optional[ProcessType] = None
     control_action: str = "direct"
     loop_control: str = "feedback"
     error_handling: str = "PVEProportional"
-    
+
     # Rockwell-specific parameters
     DSmoothing: bool = False
     DBcrossing: str = "ZCoff"
     OP_mode: str = "Prog"
     casrat_mode: Union[str, bool] = False
-    
+
     # Mode settings
     auto_mode: bool = False
     manual_mode: bool = True
     override_mode: bool = False
-    
+
     # Algorithm settings
     dependIndepend: str = "Independent"
     Update: float = 500.0
     Update_units: str = "milliseconds"
-    
+
     # Control strategy flags
     ff: bool = False
     cascade: bool = False
     ratio: bool = False
     timingmode: str = "Periodic"
     allowcasrat: bool = False
-    
+
     # Loop operation modes
     Loop_modes: List[str] = field(default_factory=lambda: ["CVProg", "CVOper"])
-    
+
     # Rate of change settings
     CVroc: bool = True
     ROCopen: bool = True
     ROCopen_limit: float = 5.0
     ROCclose: bool = False
     ROCclose_limit: float = 0.0
-    
+
     # Windup limits
     windupHin: float = 100.0
     windupLin: float = 0.0
-    
+
     # Multi-PV tag references
     PPV: str = "<tagname>"
     SPV: str = "<tagname>"
     MPV: str = "<tagname>"
-    
+
     def to_dict(self) -> Dict[str, Any]:
         result = asdict(self)
         if self.loop_type:
@@ -283,7 +283,7 @@ class VariableDefinitions:
     process_variables: List[ProcessVariable]
     disturbance_variables: List[DisturbanceVariable] = field(default_factory=list)
     control_variables: List[ControlVariable] = field(default_factory=list)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "process_variables": [pv.to_dict() for pv in self.process_variables],
@@ -301,15 +301,15 @@ class EnhancedPIDConfiguration:
     tuning_parameters: EnhancedTuningParameters = None
     created_timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    
+
     def to_standardized_json(self) -> Dict[str, Any]:
         """Convert to standardized JSON schema format"""
-        
+
         # Calculate variable counts
         pv_count = len(self.variable_definitions.process_variables) if self.variable_definitions else 0
         dv_count = len(self.variable_definitions.disturbance_variables) if self.variable_definitions else 0
         cv_count = len(self.variable_definitions.control_variables) if self.variable_definitions else 0
-        
+
         return {
             "instance_name": self.instance_name,
             "schema_version": self.schema_version,
@@ -359,11 +359,11 @@ class EnhancedPIDConfiguration:
 
 class EnhancedPIDModelFactory:
     """Factory for creating enhanced PID configurations"""
-    
+
     @staticmethod
     def create_sample_configuration() -> EnhancedPIDConfiguration:
         """Create a sample enhanced PID configuration matching training module"""
-        
+
         # Control configuration
         control_config = ControlConfiguration(
             loop_id="STILL01_CONDENSER_TEMP_001",
@@ -372,7 +372,7 @@ class EnhancedPIDModelFactory:
             control_mode01=ControlMode.PID,
             control_mode02="Standard"
         )
-        
+
         # Process variables
         pv01 = ProcessVariable(
             variable_id="pv01",
@@ -380,14 +380,14 @@ class EnhancedPIDModelFactory:
             scaling=ScalingConfiguration(0, 4095, 0.0, 100.0, "°C"),
             alarm_limits=AlarmLimits(95.0, 90.0, 10.0, 5.0)
         )
-        
+
         pv02 = ProcessVariable(
             variable_id="pv02",
             tagdesc=TagDescriptor("TIT_2045", DataType.REAL, "Secondary Process Variable"),
             scaling=ScalingConfiguration(0, 4095, 0.0, 100.0, "°C"),
             alarm_limits=AlarmLimits(95.0, 90.0, 10.0, 5.0)
         )
-        
+
         # Disturbance variables
         dv01 = DisturbanceVariable(
             variable_id="dv01",
@@ -395,14 +395,14 @@ class EnhancedPIDModelFactory:
             scaling=ScalingConfiguration(0, 4095, 0.0, 50.0, "psi"),
             feedforward_config=FeedforwardConfig(True, 0.8, 5.0, 2.0)
         )
-        
+
         dv02 = DisturbanceVariable(
             variable_id="dv02",
             tagdesc=TagDescriptor("TIT_2065", DataType.REAL, "Feed temperature disturbance"),
             scaling=ScalingConfiguration(0, 4095, 32.0, 212.0, "°F"),
             feedforward_config=FeedforwardConfig(True, 1.2, 3.0, 1.0)
         )
-        
+
         # Control variable
         cv01 = ControlVariable(
             variable_id="cv01",
@@ -410,14 +410,14 @@ class EnhancedPIDModelFactory:
             limits=ControlLimits(0.0, 100.0, "%", 5.0),
             actuator_characteristics=ActuatorCharacteristics("Control Valve", "reverse", True, 2.5)
         )
-        
+
         # Variable definitions
         var_defs = VariableDefinitions(
             process_variables=[pv01, pv02],
             disturbance_variables=[dv01, dv02],
             control_variables=[cv01]
         )
-        
+
         # Enhanced tuning parameters
         tuning_params = EnhancedTuningParameters(
             kc=1.5,
@@ -456,14 +456,14 @@ class EnhancedPIDModelFactory:
             SPV="<tagname>",
             MPV="<tagname>"
         )
-        
+
         return EnhancedPIDConfiguration(
             instance_name="STILL01_CONDENSER_TEMP_CONTROL_001",
             control_configuration=control_config,
             variable_definitions=var_defs,
             tuning_parameters=tuning_params
         )
-    
+
     @staticmethod
     def validate_configuration(config: EnhancedPIDConfiguration) -> Dict[str, Any]:
         """Validate enhanced PID configuration"""
@@ -473,82 +473,82 @@ class EnhancedPIDModelFactory:
             "warnings": [],
             "score": 1.0
         }
-        
+
         try:
             # Generate standardized JSON
             json_output = config.to_standardized_json()
-            
+
             # Basic validation checks
             if not config.control_configuration:
                 validation_results["errors"].append("Missing control configuration")
                 validation_results["valid"] = False
-            
+
             if not config.variable_definitions:
                 validation_results["errors"].append("Missing variable definitions")
                 validation_results["valid"] = False
-            
+
             if not config.tuning_parameters:
                 validation_results["errors"].append("Missing tuning parameters")
                 validation_results["valid"] = False
-                
+
             # Check required process variables
             if config.variable_definitions and len(config.variable_definitions.process_variables) == 0:
                 validation_results["errors"].append("At least one process variable required")
                 validation_results["valid"] = False
-                
+
             # Check required control variables
             if config.variable_definitions and len(config.variable_definitions.control_variables) == 0:
                 validation_results["errors"].append("At least one control variable required")
                 validation_results["valid"] = False
-            
+
             # Calculate validation score
             if validation_results["errors"]:
                 validation_results["score"] = 0.0
             elif validation_results["warnings"]:
                 validation_results["score"] = 0.8
-            
+
             validation_results["json_size"] = len(json.dumps(json_output))
             validation_results["field_count"] = len(str(json_output).split(','))
-            
+
         except Exception as e:
             validation_results["valid"] = False
             validation_results["errors"].append(f"Validation exception: {str(e)}")
             validation_results["score"] = 0.0
-            
+
         return validation_results
 
 def main():
     """Main demonstration of enhanced PID model"""
     logger.info("🚀 Enhanced PID Model Demonstration")
-    
+
     # Create sample configuration
     sample_config = EnhancedPIDModelFactory.create_sample_configuration()
-    
+
     # Validate configuration
     validation = EnhancedPIDModelFactory.validate_configuration(sample_config)
-    
+
     logger.info(f"✅ Configuration validation: {validation['valid']}")
     logger.info(f"📊 Validation score: {validation['score']}")
-    
+
     if validation["errors"]:
         logger.error(f"❌ Validation errors: {validation['errors']}")
-    
+
     if validation["warnings"]:
         logger.warning(f"⚠️ Validation warnings: {validation['warnings']}")
-    
+
     # Generate standardized JSON
     standardized_json = sample_config.to_standardized_json()
-    
+
     logger.info(f"📋 Generated JSON with {validation.get('field_count', 0)} fields")
     logger.info(f"💾 JSON size: {validation.get('json_size', 0)} bytes")
-    
+
     # Save sample configuration
     output_file = "enhanced_pid_sample_config.json"
     with open(output_file, 'w') as f:
         json.dump(standardized_json, f, indent=2)
-    
+
     logger.info(f"💾 Sample configuration saved to {output_file}")
-    
+
     return {
         "enhanced_model_created": True,
         "validation_passed": validation["valid"],
@@ -572,4 +572,4 @@ def main():
 
 if __name__ == "__main__":
     results = main()
-    print(json.dumps(results, indent=2)) 
+    print(json.dumps(results, indent=2))

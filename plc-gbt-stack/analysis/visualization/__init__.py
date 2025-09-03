@@ -25,7 +25,7 @@ VISUALIZATION_CONFIG = {
     "supported_libraries": [
         "matplotlib",
         "plotly",
-        "bokeh", 
+        "bokeh",
         "seaborn",
         "altair",
         "pygal"
@@ -40,7 +40,7 @@ VISUALIZATION_CONFIG = {
         },
         "statistical": {
             "histogram": "Distribution analysis",
-            "box_plot": "Statistical summary visualization", 
+            "box_plot": "Statistical summary visualization",
             "violin_plot": "Distribution shape analysis",
             "qq_plot": "Normality assessment",
             "correlation_matrix": "Variable relationship heatmap"
@@ -77,13 +77,15 @@ VISUALIZATION_CONFIG = {
 }
 
 # Visualization types and enums
-from enum import Enum
-from typing import Dict, List, Any, Optional, Union, Tuple, Callable
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
 import numpy as np
 import pandas as pd
-import logging
+
 
 class ChartType(Enum):
     """Chart type enumeration"""
@@ -128,23 +130,23 @@ class VisualizationConfiguration:
     title: str
     chart_type: ChartType
     library: VisualizationLibrary = VisualizationLibrary.PLOTLY
-    
+
     # Styling
     theme: ThemeStyle = ThemeStyle.DEFAULT
     width: int = 800
     height: int = 600
-    
+
     # Interactivity
     interactive: bool = True
     show_toolbar: bool = True
     enable_zoom: bool = True
     enable_pan: bool = True
-    
+
     # Data display
     show_legend: bool = True
     show_grid: bool = True
     show_tooltips: bool = True
-    
+
     # Export options
     export_formats: List[str] = field(default_factory=lambda: ["png", "html", "svg"])
 
@@ -153,21 +155,21 @@ class TimeSeriesPlotConfig:
     """Configuration for time-series plots"""
     x_column: str = "timestamp"
     y_columns: List[str] = field(default_factory=list)
-    
+
     # Annotations
     annotations: List[Dict[str, Any]] = field(default_factory=list)
     event_markers: List[Dict[str, Any]] = field(default_factory=list)
     setpoint_lines: List[Dict[str, Any]] = field(default_factory=list)
-    
+
     # Styling
     line_styles: Dict[str, str] = field(default_factory=dict)
     colors: Dict[str, str] = field(default_factory=dict)
-    
+
     # Axes
     x_axis_label: str = "Time"
     y_axis_label: str = "Value"
     secondary_y_columns: List[str] = field(default_factory=list)
-    
+
     # Features
     show_moving_average: bool = False
     moving_average_window: int = 10
@@ -180,21 +182,21 @@ class Surface3DConfig:
     x_parameter: str
     y_parameter: str
     z_response: str
-    
+
     # Grid settings
     x_range: Tuple[float, float] = (0, 10)
     y_range: Tuple[float, float] = (0, 10)
     grid_resolution: int = 50
-    
+
     # Visualization options
     show_contour: bool = True
     contour_levels: int = 20
     colormap: str = "viridis"
-    
+
     # Interaction
     enable_rotation: bool = True
     show_colorbar: bool = True
-    
+
     # Optimization markers
     optimal_points: List[Tuple[float, float, float]] = field(default_factory=list)
     constraint_regions: List[Dict[str, Any]] = field(default_factory=list)
@@ -205,19 +207,19 @@ class DashboardConfig:
     dashboard_id: str
     title: str
     layout: str = "grid"  # "grid", "tabs", "sidebar"
-    
+
     # Grid layout settings
     columns: int = 2
     row_height: int = 300
-    
+
     # Charts to include
     chart_configurations: List[VisualizationConfiguration] = field(default_factory=list)
-    
+
     # Dashboard features
     auto_refresh: bool = False
     refresh_interval: int = 30  # seconds
     enable_filtering: bool = True
-    
+
     # Export options
     export_dashboard: bool = True
     dashboard_formats: List[str] = field(default_factory=lambda: ["html", "pdf"])
@@ -228,35 +230,35 @@ class VisualizationResult:
     success: bool
     chart_id: str
     output_path: Optional[str] = None
-    
+
     # Generation details
     generation_time: float = 0.0
     library_used: str = ""
     chart_type: str = ""
-    
+
     # Output information
     width: int = 0
     height: int = 0
     file_size: int = 0
-    
+
     # Interactive features
     interactive_elements: List[str] = field(default_factory=list)
     export_formats: List[str] = field(default_factory=list)
-    
+
     # Quality metrics
     data_points_plotted: int = 0
     rendering_quality: float = 1.0
-    
+
     # Error information
     warnings: List[str] = field(default_factory=list)
     errors: List[str] = field(default_factory=list)
 
 # Import visualization modules
 try:
-    from .time_series_plotter import TimeSeriesPlotter
-    from .surface_3d_plotter import Surface3DPlotter
     from .dashboard_builder import DashboardBuilder
     from .interactive_charts import InteractiveChartBuilder
+    from .surface_3d_plotter import Surface3DPlotter
+    from .time_series_plotter import TimeSeriesPlotter
     VISUALIZATION_MODULES_AVAILABLE = True
 except ImportError:
     VISUALIZATION_MODULES_AVAILABLE = False
@@ -272,31 +274,31 @@ AVAILABILITY_STATUS = {
 def get_available_libraries():
     """Get list of available visualization libraries"""
     available = []
-    
+
     try:
         import matplotlib
         available.append("matplotlib")
     except ImportError:
         pass
-    
+
     try:
         import plotly
         available.append("plotly")
     except ImportError:
         pass
-    
+
     try:
         import bokeh
         available.append("bokeh")
     except ImportError:
         pass
-    
+
     try:
         import seaborn
         available.append("seaborn")
     except ImportError:
         pass
-    
+
     return available
 
 def get_library_info(library: str):
@@ -337,10 +339,10 @@ def get_library_info(library: str):
     }
     return info.get(library, {"description": "Unknown library"})
 
-def create_time_series_plot(data: pd.DataFrame, config: TimeSeriesPlotConfig, 
+def create_time_series_plot(data: pd.DataFrame, config: TimeSeriesPlotConfig,
                            viz_config: VisualizationConfiguration) -> VisualizationResult:
     """Create time-series plot with annotations and interactivity"""
-    
+
     start_time = datetime.now()
     result = VisualizationResult(
         success=False,
@@ -348,7 +350,7 @@ def create_time_series_plot(data: pd.DataFrame, config: TimeSeriesPlotConfig,
         library_used=viz_config.library.value,
         chart_type="time_series"
     )
-    
+
     try:
         if viz_config.library == VisualizationLibrary.PLOTLY:
             result = _create_plotly_timeseries(data, config, viz_config)
@@ -357,72 +359,72 @@ def create_time_series_plot(data: pd.DataFrame, config: TimeSeriesPlotConfig,
         else:
             result.errors.append(f"Library {viz_config.library.value} not implemented for time series")
             return result
-        
+
         result.generation_time = (datetime.now() - start_time).total_seconds()
         result.success = True
-        
+
     except Exception as e:
         result.errors.append(f"Time series plot generation failed: {e}")
         result.generation_time = (datetime.now() - start_time).total_seconds()
-    
+
     return result
 
-def _create_plotly_timeseries(data: pd.DataFrame, config: TimeSeriesPlotConfig, 
+def _create_plotly_timeseries(data: pd.DataFrame, config: TimeSeriesPlotConfig,
                              viz_config: VisualizationConfiguration) -> VisualizationResult:
     """Create time series plot using Plotly"""
-    
+
     result = VisualizationResult(
         success=True,
         chart_id=viz_config.chart_id,
         library_used="plotly",
         chart_type="time_series"
     )
-    
+
     # Simulate Plotly chart creation
     result.data_points_plotted = len(data)
     result.width = viz_config.width
     result.height = viz_config.height
     result.interactive_elements = ["zoom", "pan", "hover", "legend_toggle"]
-    
+
     if viz_config.interactive:
         result.export_formats = ["html", "png", "svg", "pdf"]
     else:
         result.export_formats = ["png", "svg", "pdf"]
-    
+
     # Add annotations if specified
     if config.annotations:
         result.interactive_elements.append("annotations")
-    
+
     # Add event markers
     if config.event_markers:
         result.interactive_elements.append("event_markers")
-    
+
     return result
 
 def _create_matplotlib_timeseries(data: pd.DataFrame, config: TimeSeriesPlotConfig,
                                  viz_config: VisualizationConfiguration) -> VisualizationResult:
     """Create time series plot using Matplotlib"""
-    
+
     result = VisualizationResult(
         success=True,
         chart_id=viz_config.chart_id,
         library_used="matplotlib",
         chart_type="time_series"
     )
-    
+
     # Simulate Matplotlib chart creation
     result.data_points_plotted = len(data)
     result.width = viz_config.width
     result.height = viz_config.height
     result.interactive_elements = []  # Matplotlib is primarily static
     result.export_formats = ["png", "svg", "pdf", "eps"]
-    
+
     return result
 
 def create_3d_surface(data: pd.DataFrame, config: Surface3DConfig,
                      viz_config: VisualizationConfiguration) -> VisualizationResult:
     """Create 3D surface plot for response surface analysis"""
-    
+
     start_time = datetime.now()
     result = VisualizationResult(
         success=False,
@@ -430,41 +432,41 @@ def create_3d_surface(data: pd.DataFrame, config: Surface3DConfig,
         library_used=viz_config.library.value,
         chart_type="surface_3d"
     )
-    
+
     try:
         # Generate surface data
         x_data = np.linspace(config.x_range[0], config.x_range[1], config.grid_resolution)
         y_data = np.linspace(config.y_range[0], config.y_range[1], config.grid_resolution)
         X, Y = np.meshgrid(x_data, y_data)
-        
+
         # Simulate surface calculation (would normally use model)
-        Z = np.sin(X) * np.cos(Y) + np.random.normal(0, 0.1, X.shape)
-        
+        np.sin(X) * np.cos(Y) + np.random.normal(0, 0.1, X.shape)
+
         result.data_points_plotted = config.grid_resolution ** 2
         result.width = viz_config.width
         result.height = viz_config.height
         result.interactive_elements = ["rotation", "zoom", "colorbar"]
-        
+
         if config.show_contour:
             result.interactive_elements.append("contour_lines")
-        
+
         if config.optimal_points:
             result.interactive_elements.append("optimal_markers")
-        
+
         result.export_formats = viz_config.export_formats
         result.generation_time = (datetime.now() - start_time).total_seconds()
         result.success = True
-        
+
     except Exception as e:
         result.errors.append(f"3D surface plot generation failed: {e}")
         result.generation_time = (datetime.now() - start_time).total_seconds()
-    
+
     return result
 
-def create_comparison_dashboard(datasets: Dict[str, pd.DataFrame], 
+def create_comparison_dashboard(datasets: Dict[str, pd.DataFrame],
                               config: DashboardConfig) -> VisualizationResult:
     """Create comparative analysis dashboard"""
-    
+
     start_time = datetime.now()
     result = VisualizationResult(
         success=False,
@@ -472,11 +474,11 @@ def create_comparison_dashboard(datasets: Dict[str, pd.DataFrame],
         library_used="plotly",
         chart_type="dashboard"
     )
-    
+
     try:
-        total_charts = len(config.chart_configurations)
+        len(config.chart_configurations)
         total_data_points = sum(len(df) for df in datasets.values())
-        
+
         result.data_points_plotted = total_data_points
         result.interactive_elements = [
             "chart_linking",
@@ -484,27 +486,27 @@ def create_comparison_dashboard(datasets: Dict[str, pd.DataFrame],
             "hover_sync",
             "zoom_sync"
         ]
-        
+
         if config.enable_filtering:
             result.interactive_elements.append("data_filtering")
-        
+
         if config.auto_refresh:
             result.interactive_elements.append("auto_refresh")
-        
+
         result.export_formats = config.dashboard_formats
         result.generation_time = (datetime.now() - start_time).total_seconds()
         result.success = True
-        
+
     except Exception as e:
         result.errors.append(f"Dashboard generation failed: {e}")
         result.generation_time = (datetime.now() - start_time).total_seconds()
-    
+
     return result
 
-def create_tuning_exploration_chart(tuning_data: Dict[str, Any], 
+def create_tuning_exploration_chart(tuning_data: Dict[str, Any],
                                    config: VisualizationConfiguration) -> VisualizationResult:
     """Create interactive tuning parameter exploration chart"""
-    
+
     start_time = datetime.now()
     result = VisualizationResult(
         success=False,
@@ -512,16 +514,16 @@ def create_tuning_exploration_chart(tuning_data: Dict[str, Any],
         library_used=config.library.value,
         chart_type="tuning_exploration"
     )
-    
+
     try:
         # Simulate tuning exploration chart
         parameter_count = len(tuning_data.get("parameters", []))
         response_count = len(tuning_data.get("responses", []))
-        
+
         result.data_points_plotted = parameter_count * response_count
         result.width = config.width
         result.height = config.height
-        
+
         result.interactive_elements = [
             "parameter_sliders",
             "response_surface",
@@ -529,31 +531,31 @@ def create_tuning_exploration_chart(tuning_data: Dict[str, Any],
             "constraint_visualization",
             "performance_metrics"
         ]
-        
+
         if config.interactive:
             result.interactive_elements.extend([
                 "real_time_update",
                 "parameter_linking",
                 "what_if_analysis"
             ])
-        
+
         result.export_formats = config.export_formats
         result.generation_time = (datetime.now() - start_time).total_seconds()
         result.success = True
-        
+
     except Exception as e:
         result.errors.append(f"Tuning exploration chart generation failed: {e}")
         result.generation_time = (datetime.now() - start_time).total_seconds()
-    
+
     return result
 
 def get_chart_recommendations(data: pd.DataFrame, analysis_type: str) -> List[Dict[str, Any]]:
     """Get chart type recommendations based on data and analysis type"""
-    
+
     recommendations = []
     data_size = len(data)
-    num_columns = len(data.columns)
-    
+    len(data.columns)
+
     if analysis_type == "time_series":
         recommendations.append({
             "chart_type": ChartType.LINE_CHART,
@@ -561,7 +563,7 @@ def get_chart_recommendations(data: pd.DataFrame, analysis_type: str) -> List[Di
             "reason": "Optimal for time-series data with interactivity",
             "confidence": 0.9
         })
-        
+
         if data_size > 10000:
             recommendations.append({
                 "chart_type": ChartType.LINE_CHART,
@@ -569,7 +571,7 @@ def get_chart_recommendations(data: pd.DataFrame, analysis_type: str) -> List[Di
                 "reason": "Better performance for large datasets",
                 "confidence": 0.8
             })
-    
+
     elif analysis_type == "distribution":
         recommendations.append({
             "chart_type": ChartType.HISTOGRAM,
@@ -577,7 +579,7 @@ def get_chart_recommendations(data: pd.DataFrame, analysis_type: str) -> List[Di
             "reason": "Excellent for statistical distribution analysis",
             "confidence": 0.85
         })
-    
+
     elif analysis_type == "correlation":
         recommendations.append({
             "chart_type": ChartType.HEATMAP,
@@ -585,7 +587,7 @@ def get_chart_recommendations(data: pd.DataFrame, analysis_type: str) -> List[Di
             "reason": "Clear correlation matrix visualization",
             "confidence": 0.9
         })
-    
+
     elif analysis_type == "3d_response":
         recommendations.append({
             "chart_type": ChartType.SURFACE_3D,
@@ -593,42 +595,42 @@ def get_chart_recommendations(data: pd.DataFrame, analysis_type: str) -> List[Di
             "reason": "Best 3D visualization with interactivity",
             "confidence": 0.95
         })
-    
+
     return recommendations
 
 def validate_visualization_data(data: pd.DataFrame, config: VisualizationConfiguration) -> Dict[str, Any]:
     """Validate data for visualization requirements"""
-    
+
     validation = {
         "valid": True,
         "errors": [],
         "warnings": [],
         "data_quality": 1.0
     }
-    
+
     # Check data size
     if len(data) == 0:
         validation["errors"].append("No data provided for visualization")
         validation["valid"] = False
         return validation
-    
+
     # Check for missing values
     missing_ratio = data.isnull().sum().sum() / (len(data) * len(data.columns))
     if missing_ratio > 0.1:
         validation["warnings"].append(f"High missing data ratio: {missing_ratio:.2f}")
         validation["data_quality"] -= missing_ratio * 0.5
-    
+
     # Check data types
     numeric_columns = data.select_dtypes(include=[np.number]).columns
     if len(numeric_columns) == 0 and config.chart_type in [ChartType.LINE_CHART, ChartType.SCATTER_PLOT]:
         validation["warnings"].append("No numeric columns found for numeric chart type")
-    
+
     # Check data size for chart type
     if config.chart_type == ChartType.SURFACE_3D and len(data) < 100:
         validation["warnings"].append("Limited data points for 3D surface visualization")
-    
+
     validation["data_quality"] = max(0.0, validation["data_quality"])
-    
+
     return validation
 
 # Export configuration for external use
@@ -636,20 +638,20 @@ __all__ = [
     # Configuration
     "VISUALIZATION_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Data classes
     "VisualizationConfiguration",
     "TimeSeriesPlotConfig",
     "Surface3DConfig",
     "DashboardConfig",
     "VisualizationResult",
-    
+
     # Enums
     "ChartType",
     "VisualizationLibrary",
     "InteractionMode",
     "ThemeStyle",
-    
+
     # Utility functions
     "get_available_libraries",
     "get_library_info",
@@ -659,7 +661,7 @@ __all__ = [
     "create_tuning_exploration_chart",
     "get_chart_recommendations",
     "validate_visualization_data",
-    
+
     # Classes (if available)
 ]
 
@@ -667,7 +669,7 @@ __all__ = [
 if VISUALIZATION_MODULES_AVAILABLE:
     __all__.extend([
         "TimeSeriesPlotter",
-        "Surface3DPlotter", 
+        "Surface3DPlotter",
         "DashboardBuilder",
         "InteractiveChartBuilder"
     ])
@@ -676,7 +678,7 @@ if VISUALIZATION_MODULES_AVAILABLE:
 def get_package_info():
     """Get comprehensive package information"""
     available_libs = get_available_libraries()
-    
+
     return {
         "version": __version__,
         "phase": __phase__,
@@ -688,4 +690,4 @@ def get_package_info():
         "total_modules": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "implementation_status": AVAILABILITY_STATUS
-    } 
+    }

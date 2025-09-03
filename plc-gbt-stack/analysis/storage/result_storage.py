@@ -11,21 +11,23 @@ Date: January 18, 2025
 Methodology: AI Task Orchestrator Guide
 """
 
-import json
 import hashlib
+import json
 import logging
-from typing import Dict, List, Any, Optional, Union, Tuple
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
 import uuid
-import sqlalchemy as sa
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import IntegrityError
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
 import redis
+import sqlalchemy as sa
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import sessionmaker
 
 from .database_schema import (
-    DatabaseSchemaManager, AnalysisResultSchema, AnalysisType, 
-    StorageStatus, StorageMetrics
+    AnalysisResultSchema,
+    AnalysisType,
+    DatabaseSchemaManager,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,74 +58,74 @@ class QueryBuilder:
     """
     SQL query builder for analysis results
     """
-    
+
     def __init__(self, schema_manager: DatabaseSchemaManager):
         self.schema_manager = schema_manager
         self.table = schema_manager.tables['analysis_results']
-    
+
     def build_select_query(self, filters: QueryFilter) -> sa.sql.Select:
         """Build SELECT query with filters"""
         query = sa.select(self.table)
-        
+
         # Apply filters
         if filters.analysis_type:
             query = query.where(self.table.c.analysis_type == filters.analysis_type.value)
-        
+
         if filters.algorithm_name:
             query = query.where(self.table.c.algorithm_name == filters.algorithm_name)
-        
+
         if filters.success_only:
-            query = query.where(self.table.c.success == True)
-        
+            query = query.where(self.table.c.success)
+
         if filters.start_date:
             query = query.where(self.table.c.created_at >= filters.start_date)
-        
+
         if filters.end_date:
             query = query.where(self.table.c.created_at <= filters.end_date)
-        
+
         if filters.tags:
             # JSONB array contains filter
             for tag in filters.tags:
                 query = query.where(self.table.c.tags.op('?')(tag))
-        
+
         # Order by creation date (newest first)
         query = query.order_by(self.table.c.created_at.desc())
-        
+
         # Apply limit and offset
         if filters.limit > 0:
             query = query.limit(filters.limit)
-        
+
         if filters.offset > 0:
             query = query.offset(filters.offset)
-        
+
         return query
-    
+
     def build_count_query(self, filters: QueryFilter) -> sa.sql.Select:
         """Build COUNT query with filters"""
         query = sa.select(sa.func.count(self.table.c.id))
-        
+
         # Apply same filters as select query (without limit/offset)
         if filters.analysis_type:
             query = query.where(self.table.c.analysis_type == filters.analysis_type.value)
-        
+
         if filters.algorithm_name:
             query = query.where(self.table.c.algorithm_name == filters.algorithm_name)
-        
+
         if filters.success_only:
-            query = query.where(self.table.c.success == True)
-        
+            query = query.where(self.table.c.success)
+
         if filters.start_date:
             query = query.where(self.table.c.created_at >= filters.start_date)
-        
+
         if filters.end_date:
             query = query.where(self.table.c.created_at <= filters.end_date)
-        
+
         if filters.tags:
             for tag in filters.tags:
                 query = query.where(self.table.c.tags.op('?')(tag))
-        
+
         return query
-    
+
     def build_aggregation_query(self, group_by: str, filters: QueryFilter) -> sa.sql.Select:
         """Build aggregation query"""
         if group_by == 'analysis_type':
@@ -134,51 +136,51 @@ class QueryBuilder:
             group_column = sa.func.date_trunc('day', self.table.c.created_at)
         else:
             raise ValueError(f"Unsupported group_by: {group_by}")
-        
+
         query = sa.select(
             group_column.label('group_key'),
             sa.func.count().label('total_count'),
-            sa.func.count(sa.case((self.table.c.success == True, 1))).label('success_count'),
+            sa.func.count(sa.case((self.table.c.success, 1))).label('success_count'),
             sa.func.avg(self.table.c.execution_time).label('avg_execution_time'),
             sa.func.min(self.table.c.created_at).label('first_execution'),
             sa.func.max(self.table.c.created_at).label('last_execution')
         )
-        
+
         # Apply filters
         if filters.analysis_type and group_by != 'analysis_type':
             query = query.where(self.table.c.analysis_type == filters.analysis_type.value)
-        
+
         if filters.algorithm_name and group_by != 'algorithm_name':
             query = query.where(self.table.c.algorithm_name == filters.algorithm_name)
-        
+
         if filters.start_date:
             query = query.where(self.table.c.created_at >= filters.start_date)
-        
+
         if filters.end_date:
             query = query.where(self.table.c.created_at <= filters.end_date)
-        
+
         query = query.group_by(group_column).order_by(group_column)
-        
+
         return query
 
 class AnalysisResultStorage:
     """
     Comprehensive storage system for analysis results
     """
-    
-    def __init__(self, schema_manager: DatabaseSchemaManager, 
+
+    def __init__(self, schema_manager: DatabaseSchemaManager,
                  redis_client: Optional[redis.Redis] = None,
                  cache_ttl: int = 3600):
         self.schema_manager = schema_manager
         self.redis_client = redis_client
         self.cache_ttl = cache_ttl
         self.query_builder = QueryBuilder(schema_manager)
-        
+
         # Create session factory
         self.Session = sessionmaker(bind=schema_manager.engine)
-        
+
         self.logger = logging.getLogger(__name__ + '.ResultStorage')
-        
+
         # Performance tracking
         self._storage_stats = {
             'total_stores': 0,
@@ -187,7 +189,7 @@ class AnalysisResultStorage:
             'total_queries': 0,
             'total_storage_time': 0.0
         }
-    
+
     def store_result(self, algorithm_name: str, analysis_type: AnalysisType,
                     input_data: Dict[str, Any], result_data: Dict[str, Any],
                     execution_time: float, success: bool,
@@ -196,14 +198,14 @@ class AnalysisResultStorage:
                     metadata: Dict[str, Any] = None) -> StorageResult:
         """Store analysis result with caching"""
         start_time = datetime.now()
-        
+
         try:
             # Generate unique result ID
             result_id = str(uuid.uuid4())
-            
+
             # Generate input data hash for deduplication
             input_hash = self._generate_input_hash(input_data)
-            
+
             # Check cache first
             if self.redis_client and success:
                 cached_result = self._check_cache(input_hash, algorithm_name)
@@ -216,7 +218,7 @@ class AnalysisResultStorage:
                         cached=True,
                         metadata={'source': 'cache'}
                     )
-            
+
             # Create analysis result schema
             analysis_result = AnalysisResultSchema(
                 result_id=result_id,
@@ -232,20 +234,20 @@ class AnalysisResultStorage:
                 tags=tags or [],
                 metadata=metadata or {}
             )
-            
+
             # Store in database
             storage_time = self._store_to_database(analysis_result)
-            
+
             # Cache successful results
             if self.redis_client and success:
                 self._cache_result(input_hash, algorithm_name, result_id, result_data)
-            
+
             # Update statistics
             self._storage_stats['total_stores'] += 1
             self._storage_stats['total_storage_time'] += storage_time
             if not success or not cached_result:
                 self._storage_stats['cache_misses'] += 1
-            
+
             return StorageResult(
                 success=True,
                 result_id=result_id,
@@ -253,7 +255,7 @@ class AnalysisResultStorage:
                 cached=False,
                 metadata={'database_stored': True}
             )
-            
+
         except Exception as e:
             self.logger.error(f"Failed to store result: {e}")
             return StorageResult(
@@ -263,11 +265,11 @@ class AnalysisResultStorage:
                 cached=False,
                 error_message=str(e)
             )
-    
+
     def _store_to_database(self, result: AnalysisResultSchema) -> float:
         """Store result to PostgreSQL database"""
         start_time = datetime.now()
-        
+
         with self.Session() as session:
             try:
                 # Insert into analysis_results table
@@ -286,16 +288,16 @@ class AnalysisResultStorage:
                     metadata=result.metadata,
                     version=result.version
                 )
-                
+
                 session.execute(insert_query)
                 session.commit()
-                
+
                 storage_time = (datetime.now() - start_time).total_seconds()
                 self.logger.debug(f"Stored result {result.result_id} in {storage_time:.3f}s")
-                
+
                 return storage_time
-                
-            except IntegrityError as e:
+
+            except IntegrityError:
                 session.rollback()
                 self.logger.warning(f"Duplicate result ID: {result.result_id}")
                 raise
@@ -303,21 +305,21 @@ class AnalysisResultStorage:
                 session.rollback()
                 self.logger.error(f"Database storage failed: {e}")
                 raise
-    
+
     def retrieve_results(self, filters: QueryFilter) -> Tuple[List[Dict[str, Any]], int]:
         """Retrieve analysis results with filtering"""
         start_time = datetime.now()
-        
+
         try:
             with self.Session() as session:
                 # Build and execute count query
                 count_query = self.query_builder.build_count_query(filters)
                 total_count = session.execute(count_query).scalar()
-                
+
                 # Build and execute select query
                 select_query = self.query_builder.build_select_query(filters)
                 results = session.execute(select_query).fetchall()
-                
+
                 # Convert to dictionaries
                 result_list = []
                 for row in results:
@@ -325,18 +327,18 @@ class AnalysisResultStorage:
                     # Convert UUID to string
                     result_dict['id'] = str(result_dict['id'])
                     result_list.append(result_dict)
-                
+
                 query_time = (datetime.now() - start_time).total_seconds()
                 self._storage_stats['total_queries'] += 1
-                
+
                 self.logger.debug(f"Retrieved {len(result_list)} results in {query_time:.3f}s")
-                
+
                 return result_list, total_count
-                
+
         except Exception as e:
             self.logger.error(f"Failed to retrieve results: {e}")
             raise
-    
+
     def get_result_by_id(self, result_id: str) -> Optional[Dict[str, Any]]:
         """Get specific result by ID"""
         try:
@@ -344,27 +346,27 @@ class AnalysisResultStorage:
                 query = sa.select(self.schema_manager.tables['analysis_results']).where(
                     self.schema_manager.tables['analysis_results'].c.result_id == result_id
                 )
-                
+
                 result = session.execute(query).fetchone()
-                
+
                 if result:
                     result_dict = dict(result._mapping)
                     result_dict['id'] = str(result_dict['id'])
                     return result_dict
                 else:
                     return None
-                    
+
         except Exception as e:
             self.logger.error(f"Failed to get result by ID: {e}")
             raise
-    
+
     def get_aggregated_stats(self, group_by: str, filters: QueryFilter) -> List[Dict[str, Any]]:
         """Get aggregated statistics"""
         try:
             with self.Session() as session:
                 query = self.query_builder.build_aggregation_query(group_by, filters)
                 results = session.execute(query).fetchall()
-                
+
                 stats_list = []
                 for row in results:
                     stats_dict = dict(row._mapping)
@@ -373,84 +375,84 @@ class AnalysisResultStorage:
                         stats_dict['success_rate'] = stats_dict['success_count'] / stats_dict['total_count']
                     else:
                         stats_dict['success_rate'] = 0.0
-                    
+
                     stats_list.append(stats_dict)
-                
+
                 return stats_list
-                
+
         except Exception as e:
             self.logger.error(f"Failed to get aggregated stats: {e}")
             raise
-    
+
     def delete_results(self, filters: QueryFilter) -> int:
         """Delete results matching filters"""
         try:
             with self.Session() as session:
                 # Build delete query using same filter logic
                 delete_query = sa.delete(self.schema_manager.tables['analysis_results'])
-                
+
                 if filters.analysis_type:
                     delete_query = delete_query.where(
                         self.schema_manager.tables['analysis_results'].c.analysis_type == filters.analysis_type.value
                     )
-                
+
                 if filters.algorithm_name:
                     delete_query = delete_query.where(
                         self.schema_manager.tables['analysis_results'].c.algorithm_name == filters.algorithm_name
                     )
-                
+
                 if filters.start_date:
                     delete_query = delete_query.where(
                         self.schema_manager.tables['analysis_results'].c.created_at >= filters.start_date
                     )
-                
+
                 if filters.end_date:
                     delete_query = delete_query.where(
                         self.schema_manager.tables['analysis_results'].c.created_at <= filters.end_date
                     )
-                
+
                 result = session.execute(delete_query)
                 deleted_count = result.rowcount
                 session.commit()
-                
+
                 self.logger.info(f"Deleted {deleted_count} results")
                 return deleted_count
-                
+
         except Exception as e:
             self.logger.error(f"Failed to delete results: {e}")
             session.rollback()
             raise
-    
+
     def _generate_input_hash(self, input_data: Dict[str, Any]) -> str:
         """Generate hash for input data deduplication"""
         # Create deterministic JSON string
         json_str = json.dumps(input_data, sort_keys=True, default=str)
         return hashlib.sha256(json_str.encode()).hexdigest()
-    
+
     def _check_cache(self, input_hash: str, algorithm_name: str) -> Optional[Dict[str, Any]]:
         """Check Redis cache for existing result"""
         if not self.redis_client:
             return None
-        
+
         try:
             cache_key = f"analysis_result:{algorithm_name}:{input_hash}"
             cached_data = self.redis_client.get(cache_key)
-            
+
             if cached_data:
                 return json.loads(cached_data)
             else:
                 return None
-                
+
         except Exception as e:
             self.logger.warning(f"Cache check failed: {e}")
             return None
-    
-    def _cache_result(self, input_hash: str, algorithm_name: str, 
+
+    def _cache_result(self, input_hash: str, algorithm_name: str,
                      result_id: str, result_data: Dict[str, Any]):
         """Cache result in Redis"""
         if not self.redis_client:
             return
-        
+
         try:
             cache_key = f"analysis_result:{algorithm_name}:{input_hash}"
             cache_data = {
@@ -458,38 +460,38 @@ class AnalysisResultStorage:
                 'result_data': result_data,
                 'cached_at': datetime.utcnow().isoformat()
             }
-            
+
             self.redis_client.setex(
                 cache_key,
                 self.cache_ttl,
                 json.dumps(cache_data, default=str)
             )
-            
+
         except Exception as e:
             self.logger.warning(f"Cache storage failed: {e}")
-    
+
     def get_storage_statistics(self) -> Dict[str, Any]:
         """Get storage performance statistics"""
         stats = self._storage_stats.copy()
-        
+
         # Calculate derived metrics
         if stats['total_queries'] > 0:
             stats['cache_hit_rate'] = stats['cache_hits'] / (stats['cache_hits'] + stats['cache_misses'])
         else:
             stats['cache_hit_rate'] = 0.0
-        
+
         if stats['total_stores'] > 0:
             stats['average_storage_time'] = stats['total_storage_time'] / stats['total_stores']
         else:
             stats['average_storage_time'] = 0.0
-        
+
         return stats
-    
+
     def clear_cache(self, pattern: str = "analysis_result:*"):
         """Clear cached results"""
         if not self.redis_client:
             return 0
-        
+
         try:
             keys = self.redis_client.keys(pattern)
             if keys:
@@ -498,7 +500,7 @@ class AnalysisResultStorage:
                 return deleted_count
             else:
                 return 0
-                
+
         except Exception as e:
             self.logger.error(f"Failed to clear cache: {e}")
             return 0
@@ -509,4 +511,4 @@ __all__ = [
     'QueryBuilder',
     'StorageResult',
     'QueryFilter'
-] 
+]

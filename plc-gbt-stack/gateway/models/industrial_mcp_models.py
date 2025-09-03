@@ -3,8 +3,10 @@ Industrial MCP Pydantic Models
 Extracted from industrial_automation_mcp_proxy.py to reduce complexity
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
+
 
 class ControlLoopRequest(BaseModel):
     name: str = Field(..., description="Control loop name")
@@ -81,4 +83,4 @@ class IndustrialKnowledgeResponse(BaseModel):
     results: List[Dict[str, Any]] = Field(..., description="Knowledge search results")
     total_found: int = Field(..., description="Total results found")
     search_time_ms: float = Field(..., description="Search execution time")
-    knowledge_domains: List[str] = Field(default_factory=list, description="Available knowledge domains") 
+    knowledge_domains: List[str] = Field(default_factory=list, description="Available knowledge domains")

@@ -12,26 +12,25 @@ Based on Step 3 findings:
 - Total actual file sizes: ~36MB across all repositories
 """
 
-import os
-import sys
 import json
 import subprocess
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any
+from pathlib import Path
+from typing import Any, Dict
+
 
 class GitLFSDownloader:
     """Download Git LFS files from PLC repositories"""
-    
+
     def __init__(self):
         self.base_path = Path("/Users/reh3376/repos")
         self.repository_numbers = [100, 200, 300, 400, 500, 600]
         self.download_results = {}
-        
+
     def check_git_lfs_availability(self) -> bool:
         """Check if Git LFS is available"""
         try:
-            result = subprocess.run(['git', 'lfs', 'version'], 
+            result = subprocess.run(['git', 'lfs', 'version'],
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
                 print(f"✅ Git LFS available: {result.stdout.strip()}")
@@ -42,15 +41,15 @@ class GitLFSDownloader:
         except Exception as e:
             print(f"❌ Error checking Git LFS: {e}")
             return False
-    
+
     def download_repository_lfs(self, repo_num: int) -> Dict[str, Any]:
         """Download Git LFS files for a specific repository"""
         repo_name = f"plc-{repo_num}"
         repo_path = self.base_path / repo_name
-        
+
         print(f"\n🔄 Processing {repo_name}")
         print(f"   Path: {repo_path}")
-        
+
         result = {
             'repository': repo_name,
             'path': str(repo_path),
@@ -61,45 +60,45 @@ class GitLFSDownloader:
             'files_downloaded': [],
             'errors': []
         }
-        
+
         if not repo_path.exists():
             result['errors'].append('Repository directory does not exist')
             return result
-        
+
         if not (repo_path / '.git').exists():
             result['errors'].append('Not a Git repository')
             return result
-        
+
         try:
             # Check LFS status
-            print(f"   🔍 Checking LFS status...")
-            lfs_ls_result = subprocess.run(['git', 'lfs', 'ls-files'], 
+            print("   🔍 Checking LFS status...")
+            lfs_ls_result = subprocess.run(['git', 'lfs', 'ls-files'],
                                          cwd=repo_path, capture_output=True, text=True, timeout=30)
-            
+
             if lfs_ls_result.returncode == 0:
                 lfs_files = lfs_ls_result.stdout.strip().split('\n') if lfs_ls_result.stdout.strip() else []
                 lfs_files = [f for f in lfs_files if f.strip()]  # Remove empty lines
-                
+
                 if lfs_files:
                     print(f"   📄 Found {len(lfs_files)} LFS files:")
                     for lfs_file in lfs_files:
                         print(f"      - {lfs_file}")
-                    
+
                     result['lfs_status'] = 'has_lfs_files'
                     result['lfs_files'] = lfs_files
-                    
+
                     # Attempt to download LFS files
-                    print(f"   ⬇️  Downloading LFS files...")
+                    print("   ⬇️  Downloading LFS files...")
                     result['download_attempted'] = True
-                    
-                    lfs_pull_result = subprocess.run(['git', 'lfs', 'pull'], 
+
+                    lfs_pull_result = subprocess.run(['git', 'lfs', 'pull'],
                                                    cwd=repo_path, capture_output=True, text=True, timeout=300)
-                    
+
                     if lfs_pull_result.returncode == 0:
-                        print(f"   ✅ LFS download successful")
+                        print("   ✅ LFS download successful")
                         result['download_successful'] = True
                         result['download_output'] = lfs_pull_result.stdout
-                        
+
                         # Verify files were downloaded
                         plc_path = repo_path / 'plc'
                         if plc_path.exists():
@@ -120,29 +119,29 @@ class GitLFSDownloader:
                     else:
                         print(f"   ❌ LFS download failed: {lfs_pull_result.stderr}")
                         result['errors'].append(f"LFS pull failed: {lfs_pull_result.stderr}")
-                        
+
                 else:
-                    print(f"   ℹ️  No LFS files found")
+                    print("   ℹ️  No LFS files found")
                     result['lfs_status'] = 'no_lfs_files'
-                    
+
             else:
                 print(f"   ❌ Error checking LFS status: {lfs_ls_result.stderr}")
                 result['errors'].append(f"LFS ls-files failed: {lfs_ls_result.stderr}")
-                
+
         except subprocess.TimeoutExpired:
             result['errors'].append('Git LFS operation timed out')
-            print(f"   ❌ Operation timed out")
+            print("   ❌ Operation timed out")
         except Exception as e:
             result['errors'].append(f'Unexpected error: {str(e)}')
             print(f"   ❌ Unexpected error: {e}")
-        
+
         return result
-    
+
     def download_all_repositories(self) -> Dict[str, Any]:
         """Download Git LFS files from all repositories"""
         print("🔄 Git LFS Download for All PLC Repositories")
         print("=" * 60)
-        
+
         # Check Git LFS availability
         if not self.check_git_lfs_availability():
             return {
@@ -150,7 +149,7 @@ class GitLFSDownloader:
                 'timestamp': datetime.now().isoformat(),
                 'repositories': {}
             }
-        
+
         all_results = {
             'timestamp': datetime.now().isoformat(),
             'git_lfs_available': True,
@@ -165,18 +164,18 @@ class GitLFSDownloader:
                 'total_mb_downloaded': 0
             }
         }
-        
+
         # Process each repository
         for repo_num in self.repository_numbers:
             repo_result = self.download_repository_lfs(repo_num)
             all_results['repositories'][f"plc-{repo_num}"] = repo_result
-            
+
             # Update summary
             all_results['summary']['repositories_processed'] += 1
-            
+
             if repo_result['lfs_status'] == 'has_lfs_files':
                 all_results['summary']['repositories_with_lfs'] += 1
-                
+
             if repo_result['download_successful']:
                 all_results['summary']['successful_downloads'] += 1
                 all_results['summary']['total_files_downloaded'] += len(repo_result['files_downloaded'])
@@ -185,9 +184,9 @@ class GitLFSDownloader:
                 )
             elif repo_result['download_attempted']:
                 all_results['summary']['failed_downloads'] += 1
-        
+
         # Print summary
-        print(f"\n📊 Download Summary")
+        print("\n📊 Download Summary")
         print("=" * 40)
         summary = all_results['summary']
         print(f"Total repositories: {summary['total_repositories']}")
@@ -196,20 +195,20 @@ class GitLFSDownloader:
         print(f"Failed downloads: {summary['failed_downloads']}")
         print(f"Total files downloaded: {summary['total_files_downloaded']}")
         print(f"Total MB downloaded: {summary['total_mb_downloaded']:.2f} MB")
-        
+
         if summary['successful_downloads'] == summary['repositories_with_lfs']:
-            print(f"\n✅ All Git LFS downloads completed successfully!")
+            print("\n✅ All Git LFS downloads completed successfully!")
         else:
-            print(f"\n⚠️  Some downloads failed - check individual repository results")
-        
+            print("\n⚠️  Some downloads failed - check individual repository results")
+
         self.download_results = all_results
         return all_results
-    
+
     def generate_download_report(self) -> Dict[str, Any]:
         """Generate comprehensive download report"""
-        print(f"\n📊 Download Report Generation")
+        print("\n📊 Download Report Generation")
         print("=" * 40)
-        
+
         report = {
             'timestamp': datetime.now().isoformat(),
             'operation': 'Git LFS Download for PLC Repositories',
@@ -218,38 +217,38 @@ class GitLFSDownloader:
             'next_steps': [],
             'recommendations': []
         }
-        
+
         summary = self.download_results.get('summary', {})
-        
+
         # Generate next steps based on results
         if summary.get('successful_downloads', 0) > 0:
             report['next_steps'].append("Proceed with ACD file processing using actual file content")
             report['next_steps'].append("Run Step 4: Batch Repository Processing")
             report['recommendations'].append("Verify file integrity before processing")
-        
+
         if summary.get('failed_downloads', 0) > 0:
             report['next_steps'].append("Investigate failed downloads")
             report['recommendations'].append("Check Git LFS configuration and network connectivity")
-        
+
         if summary.get('total_files_downloaded', 0) > 0:
             report['recommendations'].append("Use enhanced PLCConverter for comprehensive ACD analysis")
             report['recommendations'].append("Implement automated processing workflows")
-        
-        print(f"📋 Next Steps:")
+
+        print("📋 Next Steps:")
         for step in report['next_steps']:
             print(f"   - {step}")
-        
-        print(f"\n🔧 Recommendations:")
+
+        print("\n🔧 Recommendations:")
         for rec in report['recommendations']:
             print(f"   - {rec}")
-        
+
         # Save report
         report_file = f"git_lfs_download_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
-        
+
         print(f"\n💾 Download report saved: {report_file}")
-        
+
         return report
 
 def main():
@@ -257,26 +256,26 @@ def main():
     print("🚀 Git LFS Download Script for PLC Repositories")
     print("=" * 60)
     print(f"Download started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    
+
     downloader = GitLFSDownloader()
-    
+
     try:
         # Download all repositories
         download_results = downloader.download_all_repositories()
-        
+
         # Generate report
         report = downloader.generate_download_report()
-        
-        print(f"\n✅ Git LFS Download Process Complete!")
-        
+
+        print("\n✅ Git LFS Download Process Complete!")
+
         summary = download_results.get('summary', {})
         if summary.get('successful_downloads', 0) > 0:
-            print(f"🚀 Ready for ACD file processing with actual content")
+            print("🚀 Ready for ACD file processing with actual content")
         else:
-            print(f"⚠️  No files downloaded - check results and retry if needed")
-        
+            print("⚠️  No files downloaded - check results and retry if needed")
+
         return report
-        
+
     except Exception as e:
         print(f"\n❌ Download process failed: {str(e)}")
         import traceback
@@ -284,4 +283,4 @@ def main():
         return None
 
 if __name__ == "__main__":
-    main() 
+    main()

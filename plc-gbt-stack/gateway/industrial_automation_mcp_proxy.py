@@ -3,11 +3,11 @@
 Industrial Automation MCP Proxy Gateway
 Phase 26.8: Fine-tuned LLM Integration with Industrial Automation MCP
 
-Provides HTTP proxy endpoints that allow the fine-tuned OpenAI LLM 
-(ft:gpt-4o:industrial-control:20250117) to access industrial automation MCP 
+Provides HTTP proxy endpoints that allow the fine-tuned OpenAI LLM
+(ft:gpt-4o:industrial-control:20250117) to access industrial automation MCP
 functionality through the existing PLC-GBT Gateway API architecture.
 
-This enables the LLM to create control loops, tune PID controllers, 
+This enables the LLM to create control loops, tune PID controllers,
 connect to PLCs, validate safety systems, and access industrial expertise.
 
 Author: AI Task Orchestrator
@@ -17,15 +17,13 @@ Phase: 26.8 - Industrial Automation MCP Integration
 
 import asyncio
 import json
-import logging
 import os
-import subprocess
 import time
-from typing import Dict, List, Any, Optional, Union
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException, Depends, Query, Body, Path
+from fastapi import APIRouter, Body, HTTPException, Query
 from pydantic import BaseModel, Field
 
 # Configure logging
@@ -125,29 +123,29 @@ class IndustrialKnowledgeResponse(BaseModel):
 # Industrial Automation MCP Client
 class IndustrialMCPClient:
     """Client for communicating with industrial automation MCP server"""
-    
+
     def __init__(self):
         self.mcp_directory = INDUSTRIAL_MCP_CONFIG["mcp_directory"]
         self.server_script = INDUSTRIAL_MCP_CONFIG["server_script"]
         self.timeout = INDUSTRIAL_MCP_CONFIG["timeout"]
         self.max_retries = INDUSTRIAL_MCP_CONFIG["max_retries"]
-    
+
     async def execute_mcp_tool(
-        self, 
-        tool_name: str, 
+        self,
+        tool_name: str,
         parameters: Dict[str, Any] = None
     ) -> Dict[str, Any]:
         """Execute an MCP tool via subprocess call"""
         if parameters is None:
             parameters = {}
-        
+
         # Construct MCP tool call
         mcp_request = {
             "tool": tool_name,
             "parameters": parameters,
             "session_id": f"gateway_proxy_{int(time.time())}"
         }
-        
+
         retries = 0
         while retries <= self.max_retries:
             try:
@@ -163,13 +161,13 @@ class IndustrialMCPClient:
                         "PLC_GBT_API_URL": INDUSTRIAL_MCP_CONFIG["api_base_url"]
                     }
                 )
-                
+
                 # Wait for completion with timeout
                 stdout, stderr = await asyncio.wait_for(
-                    process.communicate(), 
+                    process.communicate(),
                     timeout=self.timeout
                 )
-                
+
                 if process.returncode == 0:
                     # Parse successful response
                     response_text = stdout.decode('utf-8').strip()
@@ -184,8 +182,8 @@ class IndustrialMCPClient:
                 else:
                     # Handle error response
                     error_text = stderr.decode('utf-8').strip()
-                    logger.warning(f"MCP tool failed", tool=tool_name, error=error_text)
-                    
+                    logger.warning("MCP tool failed", tool=tool_name, error=error_text)
+
                     if retries < self.max_retries:
                         retries += 1
                         await asyncio.sleep(2 ** retries)  # Exponential backoff
@@ -196,11 +194,11 @@ class IndustrialMCPClient:
                             "error": f"Tool execution failed: {error_text}",
                             "tool": tool_name
                         }
-                        
+
             except asyncio.TimeoutError:
                 retries += 1
-                logger.warning(f"MCP tool timeout", tool=tool_name, attempt=retries)
-                
+                logger.warning("MCP tool timeout", tool=tool_name, attempt=retries)
+
                 if retries <= self.max_retries:
                     await asyncio.sleep(2 ** retries)
                     continue
@@ -210,15 +208,15 @@ class IndustrialMCPClient:
                         "error": f"Tool execution timeout after {self.timeout}s",
                         "tool": tool_name
                     }
-                    
+
             except Exception as e:
-                logger.error(f"MCP tool execution error", tool=tool_name, error=str(e))
+                logger.error("MCP tool execution error", tool=tool_name, error=str(e))
                 return {
                     "success": False,
                     "error": f"Execution error: {str(e)}",
                     "tool": tool_name
                 }
-    
+
     async def get_server_info(self) -> Dict[str, Any]:
         """Get MCP server information and capabilities"""
         try:
@@ -232,12 +230,12 @@ class IndustrialMCPClient:
                     "PYTHONPATH": f"{self.mcp_directory}:../plc-gbt-stack"
                 }
             )
-            
+
             stdout, stderr = await asyncio.wait_for(
-                process.communicate(), 
+                process.communicate(),
                 timeout=10
             )
-            
+
             if process.returncode == 0:
                 info_text = stdout.decode('utf-8').strip()
                 try:
@@ -255,7 +253,7 @@ class IndustrialMCPClient:
                     "status": "error",
                     "error": stderr.decode('utf-8').strip()
                 }
-                
+
         except Exception as e:
             return {
                 "server_name": INDUSTRIAL_MCP_CONFIG["server_name"],
@@ -277,25 +275,25 @@ async def get_industrial_mcp_client() -> IndustrialMCPClient:
 # INDUSTRIAL AUTOMATION MCP PROXY ENDPOINTS
 # =============================================================================
 
-@router.get("/health", 
+@router.get("/health",
            summary="Check industrial automation MCP health",
            description="Verify that the industrial automation MCP server is accessible")
 async def check_industrial_mcp_health():
     """Check industrial automation MCP server health"""
     start_time = time.time()
     client = await get_industrial_mcp_client()
-    
+
     try:
         server_info = await client.get_server_info()
         response_time = (time.time() - start_time) * 1000
-        
+
         return {
             "status": "healthy" if server_info.get("status") != "error" else "unhealthy",
             "server_info": server_info,
             "response_time_ms": response_time,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("Industrial MCP health check failed", error=str(e))
         raise HTTPException(
@@ -309,10 +307,10 @@ async def check_industrial_mcp_health():
 async def get_industrial_tools():
     """Get available industrial automation tools"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         result = await client.execute_mcp_tool("list_tools")
-        
+
         if result.get("success"):
             return {
                 "tools": result.get("tools", []),
@@ -324,7 +322,7 @@ async def get_industrial_tools():
             # Return static tool list if MCP unavailable
             static_tools = [
                 "create_control_loop", "system_status", "list_control_schemas",
-                "memory_search", "plc_connect", "tune_pid_controller", 
+                "memory_search", "plc_connect", "tune_pid_controller",
                 "create_workflow", "validate_safety_system"
             ]
             return {
@@ -334,7 +332,7 @@ async def get_industrial_tools():
                 "source": "static_fallback",
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
-            
+
     except Exception as e:
         logger.error("Failed to get industrial tools", error=str(e))
         raise HTTPException(
@@ -349,7 +347,7 @@ async def get_industrial_tools():
 async def create_control_loop(request: ControlLoopRequest):
     """Create industrial control loop using MCP"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         parameters = {
             "name": request.name,
@@ -358,14 +356,14 @@ async def create_control_loop(request: ControlLoopRequest):
             "process_variable": request.process_variable,
             "output_variable": request.output_variable
         }
-        
+
         if request.tuning_params:
             parameters["tuning"] = request.tuning_params
         if request.safety_limits:
             parameters["safety_limits"] = request.safety_limits
-        
+
         result = await client.execute_mcp_tool("create_control_loop", parameters)
-        
+
         if result.get("success"):
             return ControlLoopResponse(
                 success=True,
@@ -384,7 +382,7 @@ async def create_control_loop(request: ControlLoopRequest):
                 validation_score=0.0,
                 recommendations=[f"Error: {result.get('error', 'Unknown error')}"]
             )
-            
+
     except Exception as e:
         logger.error("Control loop creation failed", error=str(e))
         raise HTTPException(
@@ -399,19 +397,19 @@ async def create_control_loop(request: ControlLoopRequest):
 async def tune_pid_controller(request: PIDTuningRequest):
     """Tune PID controller using industrial automation MCP"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         parameters = {
             "control_loop_id": request.control_loop_id,
             "method": request.tuning_method,
             "criteria": request.performance_criteria
         }
-        
+
         if request.process_data:
             parameters["process_data"] = request.process_data
-        
+
         result = await client.execute_mcp_tool("tune_pid_controller", parameters)
-        
+
         if result.get("success"):
             return PIDTuningResponse(
                 success=True,
@@ -428,7 +426,7 @@ async def tune_pid_controller(request: PIDTuningRequest):
                 tuning_method_used="",
                 recommendations=[f"Error: {result.get('error', 'Tuning failed')}"]
             )
-            
+
     except Exception as e:
         logger.error("PID tuning failed", error=str(e))
         raise HTTPException(
@@ -443,7 +441,7 @@ async def tune_pid_controller(request: PIDTuningRequest):
 async def connect_to_plc(request: PLCConnectionRequest):
     """Connect to PLC using industrial automation MCP"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         parameters = {
             "address": request.plc_address,
@@ -452,9 +450,9 @@ async def connect_to_plc(request: PLCConnectionRequest):
             "timeout": request.timeout,
             "protocol": request.protocol
         }
-        
+
         result = await client.execute_mcp_tool("plc_connect", parameters)
-        
+
         if result.get("success"):
             return PLCConnectionResponse(
                 success=True,
@@ -471,7 +469,7 @@ async def connect_to_plc(request: PLCConnectionRequest):
                 available_tags=[],
                 connection_status=f"Failed: {result.get('error', 'Connection failed')}"
             )
-            
+
     except Exception as e:
         logger.error("PLC connection failed", error=str(e))
         raise HTTPException(
@@ -486,7 +484,7 @@ async def connect_to_plc(request: PLCConnectionRequest):
 async def validate_safety_system(request: SafetySystemRequest):
     """Validate safety system using industrial automation MCP"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         parameters = {
             "name": request.safety_system_name,
@@ -495,9 +493,9 @@ async def validate_safety_system(request: SafetySystemRequest):
             "fail_safe_actions": request.fail_safe_actions,
             "sil_level": request.sil_level
         }
-        
+
         result = await client.execute_mcp_tool("validate_safety_system", parameters)
-        
+
         if result.get("success"):
             return SafetySystemResponse(
                 validation_passed=result.get("validation_passed", False),
@@ -514,7 +512,7 @@ async def validate_safety_system(request: SafetySystemRequest):
                 compliance_issues=[f"Validation error: {result.get('error', 'Unknown error')}"],
                 recommendations=["Review safety system configuration"]
             )
-            
+
     except Exception as e:
         logger.error("Safety validation failed", error=str(e))
         raise HTTPException(
@@ -529,10 +527,10 @@ async def validate_safety_system(request: SafetySystemRequest):
 async def get_system_status():
     """Get system status using industrial automation MCP"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         result = await client.execute_mcp_tool("system_status")
-        
+
         if result.get("success"):
             status_data = result.get("status", {})
             return SystemStatusResponse(
@@ -552,7 +550,7 @@ async def get_system_status():
                 performance_metrics={"error": "Metrics unavailable"},
                 alerts=[f"System status error: {result.get('error', 'Unknown error')}"]
             )
-            
+
     except Exception as e:
         logger.error("System status check failed", error=str(e))
         raise HTTPException(
@@ -571,18 +569,18 @@ async def search_industrial_knowledge(
 ):
     """Search industrial knowledge using MCP"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         parameters = {
             "query": query,
             "limit": limit
         }
-        
+
         if domain:
             parameters["domain"] = domain
-        
+
         result = await client.execute_mcp_tool("memory_search", parameters)
-        
+
         if result.get("success"):
             return IndustrialKnowledgeResponse(
                 results=result.get("results", []),
@@ -597,7 +595,7 @@ async def search_industrial_knowledge(
                 search_time_ms=0.0,
                 knowledge_domains=["Control Theory", "PLC Programming", "Safety Systems"]
             )
-            
+
     except Exception as e:
         logger.error("Knowledge search failed", error=str(e))
         raise HTTPException(
@@ -611,10 +609,10 @@ async def search_industrial_knowledge(
 async def list_control_schemas():
     """List available control loop schemas"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         result = await client.execute_mcp_tool("list_control_schemas")
-        
+
         if result.get("success"):
             return {
                 "schemas": result.get("schemas", []),
@@ -636,7 +634,7 @@ async def list_control_schemas():
                 "source": "static_fallback",
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
-            
+
     except Exception as e:
         logger.error("Schema listing failed", error=str(e))
         raise HTTPException(
@@ -650,16 +648,16 @@ async def list_control_schemas():
 async def get_integration_status():
     """Get comprehensive industrial automation integration status"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         # Check multiple MCP capabilities
         server_info = await client.get_server_info()
         tools_result = await client.execute_mcp_tool("list_tools")
-        
+
         # Determine integration health
         mcp_healthy = server_info.get("status") not in ["error", "unavailable"]
         tools_available = len(tools_result.get("tools", [])) if tools_result.get("success") else 0
-        
+
         return {
             "integration_status": "active" if mcp_healthy else "degraded",
             "mcp_server_healthy": mcp_healthy,
@@ -667,7 +665,7 @@ async def get_integration_status():
             "server_info": server_info,
             "capabilities": [
                 "Control Loop Management",
-                "PID Auto-Tuning", 
+                "PID Auto-Tuning",
                 "PLC Integration",
                 "Safety System Validation",
                 "Industrial Knowledge Search"
@@ -678,7 +676,7 @@ async def get_integration_status():
             "mcp_directory": INDUSTRIAL_MCP_CONFIG["mcp_directory"],
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("Integration status check failed", error=str(e))
         return {
@@ -702,16 +700,16 @@ async def get_control_guidance(
 ):
     """Get expert control guidance using industrial automation MCP"""
     client = await get_industrial_mcp_client()
-    
+
     try:
         parameters = {
             "problem": problem_description,
             "system_type": system_type,
             "prompt_type": "industrial_control_expert"
         }
-        
+
         result = await client.execute_mcp_tool("get_expert_guidance", parameters)
-        
+
         return {
             "guidance": result.get("guidance", "Expert guidance unavailable"),
             "recommendations": result.get("recommendations", []),
@@ -719,7 +717,7 @@ async def get_control_guidance(
             "expert_level": "Senior Industrial Control Engineer",
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("Expert guidance failed", error=str(e))
         raise HTTPException(
@@ -734,24 +732,24 @@ async def get_control_guidance(
 async def startup_industrial_mcp_proxy():
     """Initialize industrial automation MCP proxy on startup"""
     logger.info("Initializing industrial automation MCP proxy integration")
-    
+
     try:
         client = await get_industrial_mcp_client()
         server_info = await client.get_server_info()
-        
-        logger.info("Industrial automation MCP proxy integration ready", 
+
+        logger.info("Industrial automation MCP proxy integration ready",
                    status=server_info.get("status"))
-                   
+
     except Exception as e:
-        logger.warning("Industrial automation MCP server not immediately available", 
+        logger.warning("Industrial automation MCP server not immediately available",
                       error=str(e))
 
 async def shutdown_industrial_mcp_proxy():
     """Clean up industrial automation MCP proxy on shutdown"""
     global _industrial_mcp_client
-    
+
     _industrial_mcp_client = None
     logger.info("Industrial automation MCP proxy integration shut down")
 
 # Export router and handlers for main gateway application
-__all__ = ["router", "startup_industrial_mcp_proxy", "shutdown_industrial_mcp_proxy"] 
+__all__ = ["router", "startup_industrial_mcp_proxy", "shutdown_industrial_mcp_proxy"]

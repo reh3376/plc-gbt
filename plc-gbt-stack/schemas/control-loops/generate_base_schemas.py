@@ -12,9 +12,10 @@ Creates the 4 main types of control loop schemas:
 Following AI Task Orchestrator methodology.
 """
 
-from .schema_manager import ControlLoopSchemaManager, SchemaMetadata
-from datetime import datetime
 import logging
+from datetime import datetime
+
+from .schema_manager import ControlLoopSchemaManager, SchemaMetadata
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,10 +30,10 @@ def generate_standard_pid_schema(manager: ControlLoopSchemaManager) -> None:
         schema_type="standard-pid",
         description="Schema for configuring a standard Ladder Logic PID loop (positional form PID) in Studio 5000"
     )
-    
+
     # Base schema is created by the manager
     schema = manager.create_base_schema("standard-pid", metadata)
-    
+
     # Add standard PID specific properties
     additional_properties = {
         "SO": {
@@ -92,11 +93,11 @@ def generate_standard_pid_schema(manager: ControlLoopSchemaManager) -> None:
             "default": True
         }
     }
-    
+
     # Update schema with additional properties
     schema["properties"].update(additional_properties)
     schema["required"].extend(["SO", "PE", "CA", "UPD"])
-    
+
     # Save updated schema
     manager._save_schema(schema, manager.base_schemas_path / "standard-pid.json")
     logger.info("Generated Ladder Logic Standard PID schema")
@@ -111,9 +112,9 @@ def generate_advanced_pid_schema(manager: ControlLoopSchemaManager) -> None:
         schema_type="advanced-pid",
         description="Schema for configuring an advanced Ladder Logic PID loop with enhanced features"
     )
-    
+
     schema = manager.create_base_schema("advanced-pid", metadata)
-    
+
     # Add advanced PID specific properties
     additional_properties = {
         "SO": {
@@ -206,10 +207,10 @@ def generate_advanced_pid_schema(manager: ControlLoopSchemaManager) -> None:
             "default": 0.0
         }
     }
-    
+
     schema["properties"].update(additional_properties)
     schema["required"].extend(["SO", "PE", "CA", "UPD"])
-    
+
     manager._save_schema(schema, manager.base_schemas_path / "advanced-pid.json")
     logger.info("Generated Ladder Logic Advanced PID schema")
 
@@ -218,4 +219,4 @@ def generate_all_base_schemas(manager: ControlLoopSchemaManager) -> None:
     logger.info("Generating all base schemas...")
     generate_standard_pid_schema(manager)
     generate_advanced_pid_schema(manager)
-    logger.info("All base schemas generated successfully") 
+    logger.info("All base schemas generated successfully")

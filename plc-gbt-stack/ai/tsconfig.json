@@ -25,6 +25,8 @@
     "declarationMap": true,
     "sourceMap": true,
     "moduleResolution": "node",
+    "composite": true,
+    "incremental": true,
     "baseUrl": ".",
     "paths": {
       "*": ["./node_modules/@types/*", "./node_modules/*"]

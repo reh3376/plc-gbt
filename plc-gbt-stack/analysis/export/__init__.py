@@ -85,16 +85,18 @@ EXPORT_CONFIG = {
 }
 
 # Export types and enums
-from enum import Enum
-from typing import Dict, List, Any, Optional, Union, Callable
+import asyncio
+import json
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-import asyncio
-import logging
-import json
-import pandas as pd
-import numpy as np
+from enum import Enum
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
+
+import numpy as np
+import pandas as pd
+
 
 class ExportFormat(Enum):
     """Supported export formats"""
@@ -146,26 +148,26 @@ class ExportConfiguration:
     export_id: str
     title: str
     format: ExportFormat
-    
+
     # Data selection
     data_sources: List[str] = field(default_factory=list)
     date_range: Optional[tuple] = None
     filters: Dict[str, Any] = field(default_factory=dict)
-    
+
     # Format-specific options
     csv_options: Dict[str, Any] = field(default_factory=dict)
     excel_options: Dict[str, Any] = field(default_factory=dict)
     json_options: Dict[str, Any] = field(default_factory=dict)
-    
+
     # Compression
     compression: CompressionType = CompressionType.NONE
     compression_level: int = 6
-    
+
     # Output options
     output_path: Optional[str] = None
     filename_template: str = "{export_id}_{timestamp}"
     include_metadata: bool = True
-    
+
     # Quality settings
     validate_data: bool = True
     remove_duplicates: bool = False
@@ -177,22 +179,22 @@ class BIIntegrationConfig:
     integration_id: str
     bi_tool: BITool
     connection_string: str
-    
+
     # Authentication
     username: Optional[str] = None
     password: Optional[str] = None
     api_key: Optional[str] = None
     token: Optional[str] = None
-    
+
     # Data mapping
     table_mappings: Dict[str, str] = field(default_factory=dict)
     column_mappings: Dict[str, str] = field(default_factory=dict)
-    
+
     # Sync settings
     sync_mode: str = "full"  # "full", "incremental", "delta"
     batch_size: int = 10000
     max_retries: int = 3
-    
+
     # Scheduling
     auto_sync: bool = False
     sync_schedule: Optional[str] = None
@@ -202,24 +204,24 @@ class ScheduledExport:
     """Configuration for scheduled exports"""
     schedule_id: str
     export_config: ExportConfiguration
-    
+
     # Schedule settings
     interval: ScheduleInterval
     custom_cron: Optional[str] = None
     start_date: datetime = field(default_factory=datetime.now)
     end_date: Optional[datetime] = None
-    
+
     # Execution settings
     enabled: bool = True
     max_concurrent: int = 1
     timeout_minutes: int = 60
-    
+
     # Notifications
     notify_on_success: bool = False
     notify_on_failure: bool = True
     notification_emails: List[str] = field(default_factory=list)
     webhook_url: Optional[str] = None
-    
+
     # Retention
     keep_files: int = 10
     archive_after_days: int = 30
@@ -230,24 +232,24 @@ class ExportResult:
     success: bool
     export_id: str
     output_path: str
-    
+
     # Export metadata
     format: str
     file_size: int
     record_count: int
     column_count: int
-    
+
     # Performance metrics
     execution_time: float
     data_preparation_time: float
     serialization_time: float
     compression_time: float
-    
+
     # Quality metrics
     data_quality_score: float
     validation_errors: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
-    
+
     # Additional information
     metadata: Dict[str, Any] = field(default_factory=dict)
     checksum: Optional[str] = None
@@ -258,25 +260,25 @@ class APIExportRequest:
     data_query: Dict[str, Any]
     export_format: str
     options: Dict[str, Any] = field(default_factory=dict)
-    
+
     # Authentication
     api_key: Optional[str] = None
     user_id: Optional[str] = None
-    
+
     # Request metadata
     request_id: Optional[str] = None
     client_info: Dict[str, str] = field(default_factory=dict)
-    
+
     # Delivery options
     delivery_method: str = "download"  # "download", "email", "ftp", "s3"
     delivery_config: Dict[str, Any] = field(default_factory=dict)
 
 # Import export modules
 try:
-    from .export_manager import ExportManager
-    from .bi_integrator import BIIntegrator
-    from .scheduler import ExportScheduler
     from .api_handler import APIExportHandler
+    from .bi_integrator import BIIntegrator
+    from .export_manager import ExportManager
+    from .scheduler import ExportScheduler
     EXPORT_MODULES_AVAILABLE = True
 except ImportError:
     EXPORT_MODULES_AVAILABLE = False
@@ -350,9 +352,9 @@ def get_bi_tool_info(tool: str):
 
 def export_data(data: pd.DataFrame, config: ExportConfiguration) -> ExportResult:
     """Export data to specified format"""
-    
+
     start_time = datetime.now()
-    
+
     # Validate configuration
     if not config.export_id:
         return ExportResult(
@@ -370,29 +372,29 @@ def export_data(data: pd.DataFrame, config: ExportConfiguration) -> ExportResult
             data_quality_score=0.0,
             validation_errors=["Missing export_id in configuration"]
         )
-    
+
     # Data preparation
     prep_start = datetime.now()
     prepared_data = _prepare_data(data, config)
     prep_time = (datetime.now() - prep_start).total_seconds()
-    
+
     # Serialization
     serial_start = datetime.now()
     output_path = _serialize_data(prepared_data, config)
     serial_time = (datetime.now() - serial_start).total_seconds()
-    
+
     # Compression (if enabled)
     compress_start = datetime.now()
     if config.compression != CompressionType.NONE:
         output_path = _compress_file(output_path, config)
     compress_time = (datetime.now() - compress_start).total_seconds()
-    
+
     # Calculate file size
     file_size = Path(output_path).stat().st_size if Path(output_path).exists() else 0
-    
+
     # Generate result
     total_time = (datetime.now() - start_time).total_seconds()
-    
+
     return ExportResult(
         success=True,
         export_id=config.export_id,
@@ -416,9 +418,9 @@ def export_data(data: pd.DataFrame, config: ExportConfiguration) -> ExportResult
 
 def _prepare_data(data: pd.DataFrame, config: ExportConfiguration) -> pd.DataFrame:
     """Prepare data for export based on configuration"""
-    
+
     prepared = data.copy()
-    
+
     # Apply filters
     if config.filters:
         for column, filter_value in config.filters.items():
@@ -432,47 +434,47 @@ def _prepare_data(data: pd.DataFrame, config: ExportConfiguration) -> pd.DataFra
                 else:
                     # Exact match filter
                     prepared = prepared[prepared[column] == filter_value]
-    
+
     # Handle date range
     if config.date_range and "timestamp" in prepared.columns:
         start_date, end_date = config.date_range
         prepared = prepared[
-            (prepared["timestamp"] >= start_date) & 
+            (prepared["timestamp"] >= start_date) &
             (prepared["timestamp"] <= end_date)
         ]
-    
+
     # Handle duplicates
     if config.remove_duplicates:
         prepared = prepared.drop_duplicates()
-    
+
     # Handle null values
     if config.handle_nulls == "remove":
         prepared = prepared.dropna()
     elif config.handle_nulls == "fill":
         # Simple forward fill strategy
         prepared = prepared.fillna(method="ffill")
-    
+
     return prepared
 
 def _serialize_data(data: pd.DataFrame, config: ExportConfiguration) -> str:
     """Serialize data to specified format"""
-    
+
     # Generate filename
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = config.filename_template.format(
         export_id=config.export_id,
         timestamp=timestamp
     )
-    
+
     # Determine output path
     if config.output_path:
         output_path = Path(config.output_path) / f"{filename}.{config.format.value}"
     else:
         output_path = Path(f"{filename}.{config.format.value}")
-    
+
     # Create directory if needed
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Export based on format
     if config.format == ExportFormat.CSV:
         csv_opts = {
@@ -481,7 +483,7 @@ def _serialize_data(data: pd.DataFrame, config: ExportConfiguration) -> str:
             **config.csv_options
         }
         data.to_csv(output_path, **csv_opts)
-    
+
     elif config.format == ExportFormat.EXCEL:
         excel_opts = {
             "index": False,
@@ -489,7 +491,7 @@ def _serialize_data(data: pd.DataFrame, config: ExportConfiguration) -> str:
             **config.excel_options
         }
         data.to_excel(output_path, **excel_opts)
-    
+
     elif config.format == ExportFormat.JSON:
         json_opts = {
             "orient": "records",
@@ -497,95 +499,95 @@ def _serialize_data(data: pd.DataFrame, config: ExportConfiguration) -> str:
             **config.json_options
         }
         data.to_json(output_path, **json_opts)
-    
+
     elif config.format == ExportFormat.PARQUET:
         data.to_parquet(output_path, index=False, compression="snappy")
-    
+
     elif config.format == ExportFormat.PICKLE:
         data.to_pickle(output_path)
-    
+
     else:
         # Fallback to CSV
         data.to_csv(output_path, index=False)
-    
+
     return str(output_path)
 
 def _compress_file(file_path: str, config: ExportConfiguration) -> str:
     """Compress exported file"""
-    
-    import gzip
+
     import bz2
+    import gzip
     import lzma
     import zipfile
-    
+
     input_path = Path(file_path)
-    
+
     if config.compression == CompressionType.GZIP:
         output_path = input_path.with_suffix(input_path.suffix + ".gz")
         with open(input_path, 'rb') as f_in:
             with gzip.open(output_path, 'wb', compresslevel=config.compression_level) as f_out:
                 f_out.writelines(f_in)
-    
+
     elif config.compression == CompressionType.BZIP2:
         output_path = input_path.with_suffix(input_path.suffix + ".bz2")
         with open(input_path, 'rb') as f_in:
             with bz2.open(output_path, 'wb', compresslevel=config.compression_level) as f_out:
                 f_out.writelines(f_in)
-    
+
     elif config.compression == CompressionType.ZIP:
         output_path = input_path.with_suffix(".zip")
         with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=config.compression_level) as zf:
             zf.write(input_path, input_path.name)
-    
+
     else:
         return file_path
-    
+
     # Remove original file
     input_path.unlink()
-    
+
     return str(output_path)
 
 def _calculate_data_quality(data: pd.DataFrame) -> float:
     """Calculate data quality score"""
-    
+
     if len(data) == 0:
         return 0.0
-    
+
     total_cells = len(data) * len(data.columns)
     missing_cells = data.isnull().sum().sum()
-    
+
     # Base quality from completeness
     completeness = 1.0 - (missing_cells / total_cells)
-    
+
     # Adjust for data consistency (simplified)
     consistency = 1.0
     for column in data.select_dtypes(include=[np.number]).columns:
         if data[column].std() == 0:  # All same values
             consistency -= 0.1
-    
+
     quality_score = (completeness * 0.7) + (consistency * 0.3)
     return max(0.0, min(1.0, quality_score))
 
 def create_export_api_response(request: APIExportRequest, data: pd.DataFrame) -> Dict[str, Any]:
     """Create API response for export request"""
-    
+
     # Create export configuration from API request
     config = ExportConfiguration(
         export_id=request.request_id or f"api_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
         title=f"API Export {datetime.now().isoformat()}",
         format=ExportFormat(request.export_format)
     )
-    
+
     # Apply request options
     if "filters" in request.options:
         config.filters = request.options["filters"]
-    
+
     if "compression" in request.options:
         config.compression = CompressionType(request.options["compression"])
-    
+
     # Execute export
     result = export_data(data, config)
-    
+
     # Create API response
     api_response = {
         "success": result.success,
@@ -598,28 +600,28 @@ def create_export_api_response(request: APIExportRequest, data: pd.DataFrame) ->
         "data_quality": result.data_quality_score,
         "expires_at": (datetime.now() + timedelta(hours=24)).isoformat()
     }
-    
+
     if not result.success:
         api_response["errors"] = result.validation_errors
-    
+
     if result.warnings:
         api_response["warnings"] = result.warnings
-    
+
     return api_response
 
 def schedule_export(export_config: ExportConfiguration, schedule_config: ScheduledExport) -> Dict[str, Any]:
     """Schedule a recurring export job"""
-    
+
     schedule_result = {
         "success": True,
         "schedule_id": schedule_config.schedule_id,
         "next_execution": None,
         "status": "scheduled"
     }
-    
+
     # Calculate next execution time
     now = datetime.now()
-    
+
     if schedule_config.interval == ScheduleInterval.HOURLY:
         next_exec = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
     elif schedule_config.interval == ScheduleInterval.DAILY:
@@ -635,40 +637,40 @@ def schedule_export(export_config: ExportConfiguration, schedule_config: Schedul
     else:
         # Custom cron-like scheduling would be implemented here
         next_exec = now + timedelta(hours=1)  # Default fallback
-    
+
     schedule_result["next_execution"] = next_exec.isoformat()
-    
+
     return schedule_result
 
 def validate_export_request(request: APIExportRequest) -> Dict[str, Any]:
     """Validate API export request"""
-    
+
     validation = {
         "valid": True,
         "errors": [],
         "warnings": []
     }
-    
+
     # Check required fields
     if not request.export_format:
         validation["errors"].append("export_format is required")
         validation["valid"] = False
-    
+
     if not request.data_query:
         validation["errors"].append("data_query is required")
         validation["valid"] = False
-    
+
     # Validate format
     try:
         ExportFormat(request.export_format)
     except ValueError:
         validation["errors"].append(f"Unsupported export format: {request.export_format}")
         validation["valid"] = False
-    
+
     # Check authentication if required
     if not request.api_key and not request.user_id:
         validation["warnings"].append("No authentication provided")
-    
+
     return validation
 
 # Export configuration for external use
@@ -676,21 +678,21 @@ __all__ = [
     # Configuration
     "EXPORT_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Data classes
     "ExportConfiguration",
     "BIIntegrationConfig",
     "ScheduledExport",
     "ExportResult",
     "APIExportRequest",
-    
+
     # Enums
     "ExportFormat",
     "CompressionType",
     "ScheduleInterval",
     "ExportStatus",
     "BITool",
-    
+
     # Utility functions
     "get_available_formats",
     "get_format_info",
@@ -699,7 +701,7 @@ __all__ = [
     "create_export_api_response",
     "schedule_export",
     "validate_export_request",
-    
+
     # Classes (if available)
 ]
 
@@ -726,4 +728,4 @@ def get_package_info():
         "total_modules": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "implementation_status": AVAILABILITY_STATUS
-    } 
+    }

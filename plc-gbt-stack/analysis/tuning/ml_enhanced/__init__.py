@@ -69,6 +69,7 @@ ML_TUNING_CONFIG = {
 # ML framework types and algorithms
 from enum import Enum
 
+
 class MLTuningType(Enum):
     """ML tuning algorithm types"""
     NEURAL_NETWORK = "neural_network"
@@ -103,55 +104,40 @@ class TransferStrategy(Enum):
 # Import ML tuning implementations
 try:
     from .neural_tuning import (
-        NeuralNetworkTuner,
         FeedforwardTuner,
+        NeuralNetworkTuner,
         RecurrentTuner,
-        TransformerTuner
+        TransformerTuner,
     )
     NEURAL_AVAILABLE = True
 except ImportError:
     NEURAL_AVAILABLE = False
 
 try:
-    from .reinforcement_tuning import (
-        ReinforcementTuner,
-        DDPGTuner,
-        TD3Tuner,
-        SACTuner,
-        PPOTuner
-    )
+    from .reinforcement_tuning import DDPGTuner, PPOTuner, ReinforcementTuner, SACTuner, TD3Tuner
     RL_AVAILABLE = True
 except ImportError:
     RL_AVAILABLE = False
 
 try:
     from .transfer_tuning import (
-        TransferLearningTuner,
+        DomainAdaptationTuner,
         FeatureExtractionTuner,
         FineTuningTuner,
-        DomainAdaptationTuner
+        TransferLearningTuner,
     )
     TRANSFER_AVAILABLE = True
 except ImportError:
     TRANSFER_AVAILABLE = False
 
 try:
-    from .ensemble_tuning import (
-        EnsembleTuner,
-        VotingTuner,
-        StackingTuner,
-        BaggingTuner
-    )
+    from .ensemble_tuning import BaggingTuner, EnsembleTuner, StackingTuner, VotingTuner
     ENSEMBLE_AVAILABLE = True
 except ImportError:
     ENSEMBLE_AVAILABLE = False
 
 try:
-    from .meta_learning import (
-        MetaLearningTuner,
-        MAMLTuner,
-        PrototypicalTuner
-    )
+    from .meta_learning import MAMLTuner, MetaLearningTuner, PrototypicalTuner
     META_AVAILABLE = True
 except ImportError:
     META_AVAILABLE = False
@@ -237,43 +223,43 @@ def check_ml_dependencies():
         "gym": False,
         "stable_baselines3": False
     }
-    
+
     try:
         import tensorflow as tf
         dependencies["tensorflow"] = True
     except ImportError:
         pass
-    
+
     try:
         import torch
         dependencies["torch"] = True
     except ImportError:
         pass
-    
+
     try:
         import sklearn
         dependencies["sklearn"] = True
     except ImportError:
         pass
-    
+
     try:
         import gym
         dependencies["gym"] = True
     except ImportError:
         pass
-    
+
     try:
         import stable_baselines3
         dependencies["stable_baselines3"] = True
     except ImportError:
         pass
-    
+
     return dependencies
 
 def get_recommended_framework():
     """Get recommended ML framework based on available dependencies"""
     deps = check_ml_dependencies()
-    
+
     if deps["tensorflow"] and deps["sklearn"]:
         return "tensorflow"
     elif deps["torch"] and deps["sklearn"]:
@@ -288,19 +274,19 @@ __all__ = [
     # Configuration
     "ML_TUNING_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Enums
     "MLTuningType",
     "NetworkArchitecture",
     "RLAlgorithm",
     "TransferStrategy",
-    
+
     # Utility functions
     "get_available_ml_methods",
     "get_ml_method_info",
     "check_ml_dependencies",
     "get_recommended_framework",
-    
+
     # Classes (if available)
 ]
 
@@ -361,4 +347,4 @@ def get_package_info():
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "dependencies": check_ml_dependencies(),
         "recommended_framework": get_recommended_framework()
-    } 
+    }

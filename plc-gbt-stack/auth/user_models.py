@@ -4,9 +4,11 @@ User Models for PLC-GPT Enterprise Authentication
 Phase 3 Days 6-7: Enterprise Features
 """
 
-from typing import Optional, List, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, EmailStr, Field, validator
+
 from .rbac import Role
 
 
@@ -17,7 +19,7 @@ class UserBase(BaseModel):
     full_name: Optional[str] = Field(None, description="User's full name")
     is_active: bool = Field(True, description="Whether user is active")
     role: Role = Field(Role.USER, description="User's role")
-    
+
     class Config:
         use_enum_values = True
 
@@ -26,31 +28,31 @@ class UserCreate(UserBase):
     """User creation model."""
     password: str = Field(..., min_length=8, description="User's password")
     confirm_password: str = Field(..., description="Password confirmation")
-    
+
     @validator('confirm_password')
     def passwords_match(cls, v, values, **kwargs):
         if 'password' in values and v != values['password']:
             raise ValueError('Passwords do not match')
         return v
-    
+
     @validator('password')
     def validate_password(cls, v):
         """Validate password strength."""
         if len(v) < 8:
             raise ValueError('Password must be at least 8 characters long')
-        
+
         if not any(c.isupper() for c in v):
             raise ValueError('Password must contain at least one uppercase letter')
-        
+
         if not any(c.islower() for c in v):
             raise ValueError('Password must contain at least one lowercase letter')
-        
+
         if not any(c.isdigit() for c in v):
             raise ValueError('Password must contain at least one digit')
-        
+
         if not any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?' for c in v):
             raise ValueError('Password must contain at least one special character')
-        
+
         return v
 
 
@@ -61,7 +63,7 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     is_active: Optional[bool] = None
     role: Optional[Role] = None
-    
+
     class Config:
         use_enum_values = True
 
@@ -76,7 +78,7 @@ class UserInDB(UserBase):
     login_count: int = Field(0, description="Number of logins")
     failed_login_attempts: int = Field(0, description="Failed login attempts")
     locked_until: Optional[datetime] = Field(None, description="Account locked until timestamp")
-    
+
     class Config:
         use_enum_values = True
 
@@ -89,7 +91,7 @@ class User(UserBase):
     last_login: Optional[datetime] = Field(None, description="Last login timestamp")
     login_count: int = Field(0, description="Number of logins")
     permissions: List[str] = Field(default_factory=list, description="User's permissions")
-    
+
     class Config:
         use_enum_values = True
 
@@ -127,31 +129,31 @@ class ChangePasswordRequest(BaseModel):
     current_password: str = Field(..., description="Current password")
     new_password: str = Field(..., min_length=8, description="New password")
     confirm_password: str = Field(..., description="Password confirmation")
-    
+
     @validator('confirm_password')
     def passwords_match(cls, v, values, **kwargs):
         if 'new_password' in values and v != values['new_password']:
             raise ValueError('Passwords do not match')
         return v
-    
+
     @validator('new_password')
     def validate_password(cls, v):
         """Validate password strength."""
         if len(v) < 8:
             raise ValueError('Password must be at least 8 characters long')
-        
+
         if not any(c.isupper() for c in v):
             raise ValueError('Password must contain at least one uppercase letter')
-        
+
         if not any(c.islower() for c in v):
             raise ValueError('Password must contain at least one lowercase letter')
-        
+
         if not any(c.isdigit() for c in v):
             raise ValueError('Password must contain at least one digit')
-        
+
         if not any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?' for c in v):
             raise ValueError('Password must contain at least one special character')
-        
+
         return v
 
 
@@ -165,7 +167,7 @@ class ResetPasswordConfirm(BaseModel):
     token: str = Field(..., description="Password reset token")
     new_password: str = Field(..., min_length=8, description="New password")
     confirm_password: str = Field(..., description="Password confirmation")
-    
+
     @validator('confirm_password')
     def passwords_match(cls, v, values, **kwargs):
         if 'new_password' in values and v != values['new_password']:
@@ -291,4 +293,4 @@ class ErrorResponse(BaseModel):
     error: str = Field(..., description="Error message")
     error_code: Optional[str] = Field(None, description="Error code")
     details: Optional[Dict[str, Any]] = Field(None, description="Error details")
-    success: bool = Field(False, description="Always false for errors") 
+    success: bool = Field(False, description="Always false for errors")

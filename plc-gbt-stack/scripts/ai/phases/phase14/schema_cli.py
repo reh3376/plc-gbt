@@ -8,7 +8,7 @@ Following AI Task Orchestrator methodology for systematic CLI operations.
 
 Features:
 - Complete schema registry management commands
-- Compliance monitoring and reporting commands  
+- Compliance monitoring and reporting commands
 - Multi-database integration and synchronization
 - Interactive schema validation and testing
 - Automated schema deployment and migration
@@ -21,16 +21,15 @@ Phase: 14.3.4 - JSON Schema Governance Framework
 Dependencies: All Phase 14.3 components
 """
 
-import os
-import sys
 import json
-import click
-import asyncio
-from pathlib import Path
-from typing import Dict, List, Any, Optional
+import sys
 from datetime import datetime
-import yaml
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import click
 import tabulate
+import yaml
 
 # Add modules to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent / "modules"))
@@ -38,30 +37,30 @@ from core import BaseOrchestrator, TaskAnalysis
 
 # Import all Phase 14.3 components
 try:
-    from .schema_registry import SchemaRegistry
     from .compliance_engine import ComplianceEngine
     from .multi_db_schema_integration import MultiDBSchemaIntegration
+    from .schema_registry import SchemaRegistry
 except ImportError:
-    from schema_registry import SchemaRegistry
     from compliance_engine import ComplianceEngine
     from multi_db_schema_integration import MultiDBSchemaIntegration
+    from schema_registry import SchemaRegistry
 
 class SchemaCLI(BaseOrchestrator):
     """
     Comprehensive command-line interface for JSON schema governance.
-    
+
     Provides unified access to all schema management capabilities including
     registry operations, compliance monitoring, and multi-database integration.
     """
 
     def __init__(self, task_id: str = "schema_cli", config_file: Optional[str] = None):
         super().__init__(task_id, config_file)
-        
+
         # Initialize core components
         self.schema_registry = SchemaRegistry()
         self.compliance_engine = ComplianceEngine(self.schema_registry)
         self.multi_db_integration = MultiDBSchemaIntegration(self.schema_registry)
-        
+
         # CLI configuration
         self.cli_config = {
             "output_format": "table",  # table, json, yaml
@@ -106,23 +105,23 @@ class SchemaCLI(BaseOrchestrator):
     def execute(self) -> Dict[str, Any]:
         """Execute CLI demonstration and setup"""
         self.log_execution_step("Schema CLI Setup", "started")
-        
+
         try:
             # Validate requirements
             if not self.validate_requirements():
                 return {"status": "failed", "error": "Requirements validation failed"}
-            
+
             # Initialize CLI environment
             self.log_execution_step("CLI Environment Setup", "started")
             self._setup_cli_environment()
             self.log_execution_step("CLI Environment Setup", "completed")
-            
+
             # Demonstrate CLI capabilities
             demo_results = self._demonstrate_cli_capabilities()
-            
+
             # Generate CLI usage statistics
             usage_stats = self._generate_usage_statistics()
-            
+
             # Prepare results
             results = {
                 "cli_status": "operational",
@@ -135,14 +134,14 @@ class SchemaCLI(BaseOrchestrator):
                     "configuration": self.cli_config
                 }
             }
-            
+
             self.log_execution_step("Schema CLI Setup", "completed", {
                 "commands_available": len(results["available_commands"]),
                 "demo_operations": len(demo_results)
             })
-            
+
             return results
-            
+
         except Exception as e:
             self.log_error("Schema CLI setup failed", e)
             return {"status": "failed", "error": str(e)}
@@ -153,13 +152,13 @@ class SchemaCLI(BaseOrchestrator):
             # Create report directory
             report_dir = Path(self.cli_config["report_directory"])
             report_dir.mkdir(exist_ok=True)
-            
+
             # Initialize component connections (simulated)
             self.logger.info("Initializing schema registry...")
             self.logger.info("Initializing compliance engine...")
             self.logger.info("Initializing multi-database integration...")
             self.logger.info("✅ CLI environment setup complete")
-            
+
         except Exception as e:
             self.log_error("Failed to setup CLI environment", e)
             raise
@@ -167,7 +166,7 @@ class SchemaCLI(BaseOrchestrator):
     def _demonstrate_cli_capabilities(self) -> List[Dict[str, Any]]:
         """Demonstrate CLI capabilities"""
         demo_results = []
-        
+
         # Demo 1: Schema registration
         try:
             sample_schema = {
@@ -180,7 +179,7 @@ class SchemaCLI(BaseOrchestrator):
                 },
                 "required": ["id", "name"]
             }
-            
+
             result = self.register_schema_command(
                 schema_name="demo_schema",
                 schema_file=None,
@@ -188,20 +187,20 @@ class SchemaCLI(BaseOrchestrator):
                 description="Demo schema for CLI testing",
                 schema_data=sample_schema
             )
-            
+
             demo_results.append({
                 "operation": "register_schema",
                 "success": result["success"],
                 "details": result
             })
-            
+
         except Exception as e:
             demo_results.append({
                 "operation": "register_schema",
                 "success": False,
                 "error": str(e)
             })
-        
+
         # Demo 2: Compliance scan
         try:
             result = self.scan_compliance_command(
@@ -209,58 +208,58 @@ class SchemaCLI(BaseOrchestrator):
                 output_format="json",
                 save_report=False
             )
-            
+
             demo_results.append({
                 "operation": "compliance_scan",
                 "success": result["success"],
                 "details": result
             })
-            
+
         except Exception as e:
             demo_results.append({
-                "operation": "compliance_scan", 
+                "operation": "compliance_scan",
                 "success": False,
                 "error": str(e)
             })
-        
+
         # Demo 3: Database consistency check
         try:
             result = self.check_db_consistency_command(
                 output_format="json",
                 save_report=False
             )
-            
+
             demo_results.append({
                 "operation": "db_consistency_check",
                 "success": result["success"],
                 "details": result
             })
-            
+
         except Exception as e:
             demo_results.append({
                 "operation": "db_consistency_check",
                 "success": False,
                 "error": str(e)
             })
-        
+
         return demo_results
 
     # CLI Command Implementations
-    
-    def register_schema_command(self, schema_name: str, schema_file: Optional[str], 
-                              version: str, description: str = "", 
+
+    def register_schema_command(self, schema_name: str, schema_file: Optional[str],
+                              version: str, description: str = "",
                               schema_data: Optional[dict] = None) -> Dict[str, Any]:
         """CLI command: Register a new schema"""
         try:
             # Load schema from file or use provided data
             if schema_file:
-                with open(schema_file, 'r') as f:
+                with open(schema_file) as f:
                     schema_content = json.load(f)
             elif schema_data:
                 schema_content = schema_data
             else:
                 return {"success": False, "error": "No schema file or data provided"}
-            
+
             # Register schema
             result = self.schema_registry.register_schema(
                 schema_name=schema_name,
@@ -269,7 +268,7 @@ class SchemaCLI(BaseOrchestrator):
                 description=description,
                 created_by="cli_user"
             )
-            
+
             return {
                 "success": result.success,
                 "message": f"Schema '{schema_name}' version {version} registered successfully" if result.success else "Registration failed",
@@ -277,25 +276,25 @@ class SchemaCLI(BaseOrchestrator):
                 "conflicts": result.conflicts,
                 "warnings": result.warnings
             }
-            
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def validate_json_command(self, json_file: str, schema_name: str, 
+    def validate_json_command(self, json_file: str, schema_name: str,
                             version: str = "latest") -> Dict[str, Any]:
         """CLI command: Validate JSON against schema"""
         try:
             # Load JSON data
-            with open(json_file, 'r') as f:
+            with open(json_file) as f:
                 json_data = json.load(f)
-            
+
             # Validate against schema
             result = self.schema_registry.validate_json_against_schema(
                 json_data=json_data,
                 schema_name=schema_name,
                 version=version
             )
-            
+
             return {
                 "success": result.is_valid,
                 "message": "Validation passed" if result.is_valid else "Validation failed",
@@ -303,7 +302,7 @@ class SchemaCLI(BaseOrchestrator):
                 "validation_warnings": result.validation_warnings,
                 "performance_metrics": result.performance_metrics
             }
-            
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -313,7 +312,7 @@ class SchemaCLI(BaseOrchestrator):
             # Load schemas from registry
             self.schema_registry._load_schema_cache()
             schemas = list(self.schema_registry.schema_cache.values())
-            
+
             if output_format == "table":
                 headers = ["Name", "Version", "Created", "Description"]
                 rows = []
@@ -324,10 +323,10 @@ class SchemaCLI(BaseOrchestrator):
                         schema.created_at[:10],  # Date only
                         schema.description[:50] + "..." if len(schema.description) > 50 else schema.description
                     ])
-                
+
                 table_output = tabulate.tabulate(rows, headers=headers, tablefmt="grid")
                 return {"success": True, "output": table_output}
-            
+
             elif output_format == "json":
                 schema_list = []
                 for schema in schemas:
@@ -339,21 +338,21 @@ class SchemaCLI(BaseOrchestrator):
                         "tags": schema.tags
                     })
                 return {"success": True, "schemas": schema_list}
-            
+
             else:
                 return {"success": False, "error": f"Unsupported output format: {output_format}"}
-            
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def scan_compliance_command(self, directory: str, output_format: str = "table", 
+    def scan_compliance_command(self, directory: str, output_format: str = "table",
                               save_report: bool = True) -> Dict[str, Any]:
         """CLI command: Scan codebase for compliance"""
         try:
             # Perform compliance scan
-            scan_results = self.compliance_engine.scan_codebase_for_json(directory)
+            self.compliance_engine.scan_codebase_for_json(directory)
             report = self.compliance_engine.generate_compliance_report()
-            
+
             # Format output
             if output_format == "table":
                 # Summary table
@@ -365,9 +364,9 @@ class SchemaCLI(BaseOrchestrator):
                     ["Compliance Score", f"{report.compliance_score:.1%}"],
                     ["Violations", len(report.violations)]
                 ]
-                
+
                 table_output = tabulate.tabulate(summary_data, headers=["Metric", "Value"], tablefmt="grid")
-                
+
                 # Top violations table
                 if report.violations:
                     violation_headers = ["Type", "Severity", "Count"]
@@ -375,16 +374,16 @@ class SchemaCLI(BaseOrchestrator):
                     for violation in report.violations:
                         key = (violation.violation_type, violation.severity)
                         violation_counts[key] = violation_counts.get(key, 0) + 1
-                    
+
                     violation_rows = []
                     for (v_type, severity), count in sorted(violation_counts.items(), key=lambda x: x[1], reverse=True)[:5]:
                         violation_rows.append([v_type, severity, count])
-                    
+
                     violations_table = tabulate.tabulate(violation_rows, headers=violation_headers, tablefmt="grid")
                     table_output += "\n\nTop Violations:\n" + violations_table
-                
+
                 output_data = table_output
-            
+
             elif output_format == "json":
                 output_data = {
                     "report_summary": {
@@ -404,10 +403,10 @@ class SchemaCLI(BaseOrchestrator):
                     ],
                     "recommendations": report.recommendations
                 }
-            
+
             else:
                 return {"success": False, "error": f"Unsupported output format: {output_format}"}
-            
+
             # Save report if requested
             if save_report:
                 report_file = Path(self.cli_config["report_directory"]) / f"compliance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
@@ -419,24 +418,24 @@ class SchemaCLI(BaseOrchestrator):
                         "violations": [v.__dict__ for v in report.violations],
                         "recommendations": report.recommendations
                     }, f, indent=2, default=str)
-            
+
             return {
                 "success": True,
                 "output": output_data,
                 "report_file": str(report_file) if save_report else None,
                 "compliance_score": report.compliance_score
             }
-            
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def check_db_consistency_command(self, output_format: str = "table", 
+    def check_db_consistency_command(self, output_format: str = "table",
                                    save_report: bool = True) -> Dict[str, Any]:
         """CLI command: Check database consistency"""
         try:
             # Perform consistency check
             consistency_report = self.multi_db_integration.validate_database_consistency()
-            
+
             # Format output
             if output_format == "table":
                 # Summary table
@@ -447,9 +446,9 @@ class SchemaCLI(BaseOrchestrator):
                     ["Inconsistencies", len(consistency_report.inconsistencies)],
                     ["Check Time", consistency_report.check_timestamp[:19]]
                 ]
-                
+
                 table_output = tabulate.tabulate(summary_data, headers=["Metric", "Value"], tablefmt="grid")
-                
+
                 # Inconsistencies table
                 if consistency_report.inconsistencies:
                     inconsistency_headers = ["Type", "Schema", "Details"]
@@ -461,12 +460,12 @@ class SchemaCLI(BaseOrchestrator):
                             inconsistency["schema_name"],
                             str(details)[:50] + "..." if len(str(details)) > 50 else str(details)
                         ])
-                    
+
                     inconsistencies_table = tabulate.tabulate(inconsistency_rows, headers=inconsistency_headers, tablefmt="grid")
                     table_output += "\n\nTop Inconsistencies:\n" + inconsistencies_table
-                
+
                 output_data = table_output
-            
+
             elif output_format == "json":
                 output_data = {
                     "consistency_summary": {
@@ -478,10 +477,10 @@ class SchemaCLI(BaseOrchestrator):
                     "inconsistencies": consistency_report.inconsistencies,
                     "recommendations": consistency_report.recommendations
                 }
-            
+
             else:
                 return {"success": False, "error": f"Unsupported output format: {output_format}"}
-            
+
             # Save report if requested
             if save_report:
                 report_file = Path(self.cli_config["report_directory"]) / f"consistency_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
@@ -493,32 +492,32 @@ class SchemaCLI(BaseOrchestrator):
                         "inconsistencies": consistency_report.inconsistencies,
                         "recommendations": consistency_report.recommendations
                     }, f, indent=2)
-            
+
             return {
                 "success": True,
                 "output": output_data,
                 "report_file": str(report_file) if save_report else None,
                 "consistency_score": consistency_report.consistency_score
             }
-            
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def sync_databases_command(self, force: bool = False, 
+    def sync_databases_command(self, force: bool = False,
                              backup: bool = True) -> Dict[str, Any]:
         """CLI command: Synchronize schemas across databases"""
         try:
             if backup:
                 self.logger.info("Creating backup before synchronization...")
-            
+
             # Perform database synchronization
             sync_results = self.multi_db_integration.sync_schemas_across_databases()
-            
+
             # Calculate success rate
             successful_syncs = len([r for r in sync_results if r.success])
             total_syncs = len(sync_results)
             success_rate = successful_syncs / max(total_syncs, 1)
-            
+
             # Format results
             sync_summary = []
             for result in sync_results:
@@ -530,7 +529,7 @@ class SchemaCLI(BaseOrchestrator):
                     "duration": f"{result.sync_duration:.2f}s",
                     "error": result.error_message
                 })
-            
+
             return {
                 "success": success_rate > 0.5,  # Majority success
                 "message": f"Synchronization completed: {successful_syncs}/{total_syncs} databases successful",
@@ -538,11 +537,11 @@ class SchemaCLI(BaseOrchestrator):
                 "success_rate": success_rate,
                 "total_schemas_synced": sum(r.schemas_synced for r in sync_results if r.success)
             }
-            
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def generate_report_command(self, report_type: str, output_format: str = "json", 
+    def generate_report_command(self, report_type: str, output_format: str = "json",
                               output_file: Optional[str] = None) -> Dict[str, Any]:
         """CLI command: Generate comprehensive reports"""
         try:
@@ -551,7 +550,7 @@ class SchemaCLI(BaseOrchestrator):
                 registry_stats = self.schema_registry._generate_registry_statistics()
                 compliance_report = self.compliance_engine.generate_compliance_report()
                 consistency_report = self.multi_db_integration.validate_database_consistency()
-                
+
                 full_report = {
                     "report_timestamp": datetime.now().isoformat(),
                     "report_type": "full_system_report",
@@ -567,20 +566,20 @@ class SchemaCLI(BaseOrchestrator):
                         "inconsistencies_count": len(consistency_report.inconsistencies)
                     },
                     "recommendations": list(set(
-                        compliance_report.recommendations + 
+                        compliance_report.recommendations +
                         consistency_report.recommendations
                     ))
                 }
-                
+
             elif report_type == "compliance":
                 full_report = self.compliance_engine.generate_compliance_report().__dict__
-                
+
             elif report_type == "consistency":
                 full_report = self.multi_db_integration.validate_database_consistency().__dict__
-                
+
             else:
                 return {"success": False, "error": f"Unknown report type: {report_type}"}
-            
+
             # Format output
             if output_format == "json":
                 report_content = json.dumps(full_report, indent=2, default=str)
@@ -588,7 +587,7 @@ class SchemaCLI(BaseOrchestrator):
                 report_content = yaml.dump(full_report, default_flow_style=False)
             else:
                 return {"success": False, "error": f"Unsupported output format: {output_format}"}
-            
+
             # Save to file if specified
             if output_file:
                 with open(output_file, 'w') as f:
@@ -603,7 +602,7 @@ class SchemaCLI(BaseOrchestrator):
                     "success": True,
                     "report_content": report_content
                 }
-                
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -660,7 +659,7 @@ def register_schema(ctx, schema_name, schema_file, version, description):
     result = ctx.obj['schema_cli'].register_schema_command(
         schema_name, schema_file, version, description
     )
-    
+
     if result['success']:
         click.echo(f"✅ {result['message']}")
     else:
@@ -672,7 +671,7 @@ def register_schema(ctx, schema_name, schema_file, version, description):
 def list_schemas(ctx, output_format):
     """List all registered schemas"""
     result = ctx.obj['schema_cli'].list_schemas_command(output_format)
-    
+
     if result['success']:
         if 'output' in result:
             click.echo(result['output'])
@@ -689,7 +688,7 @@ def list_schemas(ctx, output_format):
 def scan_compliance(ctx, directory, output_format, save):
     """Scan codebase for compliance violations"""
     result = ctx.obj['schema_cli'].scan_compliance_command(directory, output_format, save)
-    
+
     if result['success']:
         click.echo(result['output'])
         if result.get('report_file'):
@@ -698,4 +697,4 @@ def scan_compliance(ctx, directory, output_format, save):
         click.echo(f"❌ Error: {result['error']}")
 
 if __name__ == '__main__':
-    cli() 
+    cli()

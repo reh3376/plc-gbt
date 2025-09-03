@@ -3,16 +3,15 @@ Pytest Configuration for Phase 32.1 Multi-System Integration Tests
 AI Task Orchestrator Implementation
 """
 
-import pytest
 import asyncio
-import pytest_asyncio
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
+
 import psycopg
+import pytest
+import pytest_asyncio
 import redis.asyncio as redis
 from neo4j import AsyncGraphDatabase
 from qdrant_client import AsyncQdrantClient
-
 
 # Configure pytest-asyncio
 pytest_asyncio.auto_mode = True
@@ -30,7 +29,7 @@ def event_loop():
 async def mock_postgres():
     """Mock PostgreSQL connection with common methods."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
-    
+
     # Mock cursor with common database operations
     mock_cursor = AsyncMock()
     mock_cursor.execute.return_value = None
@@ -38,10 +37,10 @@ async def mock_postgres():
     mock_cursor.fetchall.return_value = []
     mock_cursor.fetchmany.return_value = []
     mock_cursor.rowcount = 0
-    
+
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
     mock_conn.cursor.return_value.__aexit__.return_value = None
-    
+
     return mock_conn
 
 
@@ -49,7 +48,7 @@ async def mock_postgres():
 async def mock_redis():
     """Mock Redis connection with common methods."""
     mock_redis = AsyncMock(spec=redis.Redis)
-    
+
     # Mock common Redis operations
     mock_redis.get.return_value = None
     mock_redis.set.return_value = True
@@ -66,7 +65,7 @@ async def mock_redis():
     mock_redis.xread.return_value = []
     mock_redis.publish.return_value = 0
     mock_redis.ping.return_value = True
-    
+
     return mock_redis
 
 
@@ -74,22 +73,22 @@ async def mock_redis():
 async def mock_neo4j():
     """Mock Neo4j driver with common methods."""
     mock_driver = AsyncMock(spec=AsyncGraphDatabase.driver)
-    
+
     # Mock session and result
     mock_session = AsyncMock()
     mock_result = AsyncMock()
     mock_result.data.return_value = []
     mock_result.single.return_value = None
     mock_result.consume.return_value = None
-    
+
     mock_session.run.return_value = mock_result
     mock_session.close.return_value = None
-    
+
     mock_driver.session.return_value.__aenter__.return_value = mock_session
     mock_driver.session.return_value.__aexit__.return_value = None
     mock_driver.close.return_value = None
     mock_driver.verify_connectivity.return_value = None
-    
+
     return mock_driver
 
 
@@ -97,23 +96,23 @@ async def mock_neo4j():
 async def mock_qdrant():
     """Mock Qdrant client with common methods."""
     mock_client = AsyncMock(spec=AsyncQdrantClient)
-    
+
     # Mock collection operations
     mock_client.get_collections.return_value = []
     mock_client.create_collection.return_value = True
     mock_client.delete_collection.return_value = True
     mock_client.collection_exists.return_value = False
-    
+
     # Mock vector operations
     mock_client.upsert.return_value = True
     mock_client.search.return_value = []
     mock_client.retrieve.return_value = []
     mock_client.delete.return_value = True
     mock_client.count.return_value = 0
-    
+
     # Mock health check
     mock_client.get_cluster_info.return_value = {"status": "green"}
-    
+
     return mock_client
 
 
@@ -326,14 +325,14 @@ def pytest_runtest_makereport(item, call):
     """Create test report with additional information."""
     outcome = yield
     rep = outcome.get_result()
-    
+
     # Add test metadata
     if rep.when == "call":
         if hasattr(item, 'function'):
             # Add function docstring as test description
             if item.function.__doc__:
                 rep.description = item.function.__doc__.strip()
-        
+
         # Add markers information
         if item.get_closest_marker("slow"):
             rep.test_type = "slow"
@@ -351,14 +350,14 @@ performance_data = {}
 def track_performance(request):
     """Track test performance metrics."""
     import time
-    
+
     start_time = time.time()
     yield
     end_time = time.time()
-    
+
     duration = end_time - start_time
     test_name = request.node.name
-    
+
     performance_data[test_name] = {
         "duration": duration,
         "markers": [marker.name for marker in request.node.iter_markers()]
@@ -371,36 +370,36 @@ def pytest_sessionfinish(session, exitstatus):
         print("\n" + "="*80)
         print("PERFORMANCE SUMMARY")
         print("="*80)
-        
+
         # Sort by duration
         sorted_tests = sorted(
-            performance_data.items(), 
-            key=lambda x: x[1]["duration"], 
+            performance_data.items(),
+            key=lambda x: x[1]["duration"],
             reverse=True
         )
-        
+
         print(f"{'Test Name':<50} {'Duration (s)':<12} {'Type':<15}")
         print("-" * 77)
-        
+
         for test_name, data in sorted_tests[:10]:  # Top 10 slowest
             test_type = "integration" if "integration" in data["markers"] else "unit"
             print(f"{test_name:<50} {data['duration']:<12.3f} {test_type:<15}")
-        
+
         # Summary stats
         total_duration = sum(data["duration"] for data in performance_data.values())
         avg_duration = total_duration / len(performance_data)
-        
+
         print("-" * 77)
         print(f"Total tests: {len(performance_data)}")
         print(f"Total duration: {total_duration:.3f}s")
         print(f"Average duration: {avg_duration:.3f}s")
-        
+
         # Slow test warnings
         slow_tests = [
-            name for name, data in performance_data.items() 
+            name for name, data in performance_data.items()
             if data["duration"] > 5.0 and "slow" not in data["markers"]
         ]
-        
+
         if slow_tests:
             print(f"\nWarning: {len(slow_tests)} tests took >5s but not marked as @pytest.mark.slow:")
             for test in slow_tests[:5]:
@@ -426,9 +425,9 @@ async def handle_async_exceptions():
 async def cleanup_resources():
     """Clean up resources after test session."""
     yield
-    
+
     # Close any remaining async connections
     await asyncio.sleep(0.1)  # Allow pending operations to complete
-    
+
     # Clear performance data
-    performance_data.clear() 
+    performance_data.clear()

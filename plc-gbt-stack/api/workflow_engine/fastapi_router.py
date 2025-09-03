@@ -18,28 +18,25 @@ Date: December 22, 2024
 Phase: 1.3 - Core Engine Integration
 """
 
-import asyncio
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
-import os
+from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Path as PathParam
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import Path as PathParam
+from fastapi.responses import JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 # Import workflow engine
 from .config import get_config
 from .n8n_integration import (
+    IndustrialSafetyLevel,
     PLCGBTWorkflowEngine,
     WorkflowDefinition,
     WorkflowExecutionRequest,
     WorkflowExecutionResult,
-    WorkflowStatus,
-    WorkflowExecutionMode,
-    IndustrialSafetyLevel
 )
 
 # Configure logging
@@ -76,24 +73,24 @@ _workflow_engine: Optional[PLCGBTWorkflowEngine] = None
 async def get_workflow_engine() -> PLCGBTWorkflowEngine:
     """
     Dependency to get workflow engine instance with lazy initialization.
-    
+
     Following singleton pattern for resource efficiency and connection pooling.
     """
     global _workflow_engine
-    
+
     if _workflow_engine is None:
         # Initialize engine with configuration from environment
         config = get_config()
-        
+
         _workflow_engine = PLCGBTWorkflowEngine(
             database_url=config.database_url,
             redis_url=config.redis_url
         )
-        
+
         # Initialize engine components
         await _workflow_engine.initialize()
         logger.info("✅ Workflow engine initialized for API requests")
-    
+
     return _workflow_engine
 
 
@@ -106,7 +103,7 @@ def get_current_user(
 ) -> Dict[str, Any]:
     """
     Extract current user from JWT token.
-    
+
     In production, this would integrate with the existing PLC-GBT
     authentication system. For Phase 1.3, we'll use a simplified approach.
     """
@@ -114,21 +111,21 @@ def get_current_user(
         # This would normally decode and validate JWT token
         # For Phase 1.3, we'll accept any valid Bearer token format
         token = credentials.credentials
-        
+
         if not token or len(token) < 10:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid authentication token",
                 headers={"WWW-Authenticate": "Bearer"}
             )
-        
+
         # Simplified user extraction for Phase 1.3
         return {
             "user_id": "system_user",  # Would come from JWT payload
             "role": "workflow_operator",
             "permissions": [PERMISSION_WORKFLOW_READ, PERMISSION_WORKFLOW_EXECUTE, PERMISSION_WORKFLOW_CREATE]
         }
-        
+
     except Exception as e:
         logger.error(f"❌ Authentication failed: {e}")
         raise HTTPException(
@@ -140,21 +137,21 @@ def get_current_user(
 
 def require_permission(permission: str):
     """Dependency factory for permission-based authorization."""
-    
+
     def permission_checker(
         current_user: Dict[str, Any] = Depends(get_current_user)
     ) -> Dict[str, Any]:
-        
+
         user_permissions = current_user.get("permissions", [])
-        
+
         if permission not in user_permissions:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Permission '{permission}' required"
             )
-        
+
         return current_user
-    
+
     return permission_checker
 
 
@@ -164,13 +161,13 @@ def require_permission(permission: str):
 
 class WorkflowCreationRequest(BaseModel):
     """Request model for creating new workflows."""
-    
+
     name: str = Field(..., min_length=1, max_length=255, description="Workflow name")
     description: Optional[str] = Field(None, description="Workflow description")
     nodes: List[Dict[str, Any]] = Field(..., description="N8N workflow nodes")
     connections: Dict[str, Any] = Field(default_factory=dict, description="Node connections")
     settings: Dict[str, Any] = Field(default_factory=dict, description="Workflow settings")
-    
+
     # Industrial extensions
     industrial_category: str = Field(default="general", description="Industrial category")
     safety_level: IndustrialSafetyLevel = Field(default=IndustrialSafetyLevel.SIL0)
@@ -180,7 +177,7 @@ class WorkflowCreationRequest(BaseModel):
 
 class WorkflowCreationResponse(BaseModel):
     """Response model for workflow creation."""
-    
+
     workflow_id: str = Field(..., description="Created workflow ID")
     name: str = Field(..., description="Workflow name")
     status: str = Field(..., description="Creation status")
@@ -189,7 +186,7 @@ class WorkflowCreationResponse(BaseModel):
 
 class WorkflowListResponse(BaseModel):
     """Response model for workflow listing."""
-    
+
     workflows: List[Dict[str, Any]] = Field(..., description="List of workflows")
     total_count: int = Field(..., description="Total workflow count")
     page: int = Field(..., description="Current page number")
@@ -198,7 +195,7 @@ class WorkflowListResponse(BaseModel):
 
 class EngineHealthResponse(BaseModel):
     """Response model for engine health check."""
-    
+
     engine_status: str = Field(..., description="Overall engine status")
     database_healthy: bool = Field(..., description="Database health status")
     redis_healthy: bool = Field(..., description="Redis health status")
@@ -211,7 +208,7 @@ class EngineHealthResponse(BaseModel):
 
 class ExecutionHistoryResponse(BaseModel):
     """Response model for execution history."""
-    
+
     executions: List[Dict[str, Any]] = Field(..., description="List of executions")
     total_count: int = Field(..., description="Total execution count")
     success_rate: float = Field(..., description="Success rate percentage")
@@ -230,7 +227,7 @@ async def create_workflow(
 ):
     """
     Create a new N8N workflow definition.
-    
+
     This endpoint allows creating industrial workflow definitions with:
     - N8N-compatible node and connection structure
     - Industrial safety level classification
@@ -239,7 +236,7 @@ async def create_workflow(
     """
     try:
         logger.info(f"📝 Creating workflow: {request.name}")
-        
+
         # Convert request to workflow definition
         workflow_definition = WorkflowDefinition(
             name=request.name,
@@ -252,20 +249,20 @@ async def create_workflow(
             compliance_requirements=request.compliance_requirements,
             performance_profile=request.performance_profile
         )
-        
+
         # Create workflow
         workflow_id = await engine.create_workflow(
             workflow_definition,
             created_by=current_user["user_id"]
         )
-        
+
         return WorkflowCreationResponse(
             workflow_id=workflow_id,
             name=request.name,
             status="created",
             created_at=datetime.now(timezone.utc)
         )
-        
+
     except Exception as e:
         logger.error(f"❌ Workflow creation failed: {e}")
         raise HTTPException(
@@ -285,52 +282,52 @@ async def list_workflows(
 ):
     """
     List all active workflows with filtering and pagination.
-    
+
     Supports filtering by:
     - Industrial category (control, monitoring, data_acquisition, etc.)
     - Safety integrity level (SIL0, SIL1, SIL2, SIL3)
     """
     try:
         logger.info(f"📋 Listing workflows (page={page}, size={page_size})")
-        
+
         # Build query conditions
         conditions = ["status = 'active'"]
         params = []
         param_count = 0
-        
+
         if category:
             param_count += 1
             conditions.append(f"industrial_category = ${param_count}")
             params.append(category)
-        
+
         if safety_level:
             param_count += 1
             conditions.append(f"compliance_level = ${param_count}")
             params.append(safety_level)
-        
+
         where_clause = " AND ".join(conditions)
         offset = (page - 1) * page_size
-        
+
         async with engine.db_pool.acquire() as conn:
             # Get total count
             total_count = await conn.fetchval(
                 f"SELECT COUNT(*) FROM plc_workflows.workflow_definitions WHERE {where_clause}",
                 *params
             )
-            
+
             # Get workflows
             rows = await conn.fetch(
                 f"""
                 SELECT id, name, description, industrial_category, compliance_level,
                        created_at, updated_at
-                FROM plc_workflows.workflow_definitions 
+                FROM plc_workflows.workflow_definitions
                 WHERE {where_clause}
                 ORDER BY updated_at DESC
                 LIMIT {page_size} OFFSET {offset}
                 """,
                 *params
             )
-            
+
             workflows = [
                 {
                     "id": row["id"],
@@ -343,14 +340,14 @@ async def list_workflows(
                 }
                 for row in rows
             ]
-            
+
             return WorkflowListResponse(
                 workflows=workflows,
                 total_count=total_count,
                 page=page,
                 page_size=page_size
             )
-            
+
     except Exception as e:
         logger.error(f"❌ Workflow listing failed: {e}")
         raise HTTPException(
@@ -370,15 +367,15 @@ async def get_workflow_details(
     """
     try:
         workflow = await engine.get_workflow(workflow_id)
-        
+
         if not workflow:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Workflow not found: {workflow_id}"
             )
-        
+
         return workflow.dict()
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -402,7 +399,7 @@ async def execute_workflow(
 ):
     """
     Execute a workflow with industrial-grade performance monitoring.
-    
+
     Supports various execution modes:
     - manual: Manual execution (default)
     - real_time: Real-time execution with <10s timeout
@@ -411,22 +408,22 @@ async def execute_workflow(
     """
     try:
         logger.info(f"⚡ Executing workflow: {workflow_id}")
-        
+
         # Use provided request or create default
         if request is None:
             request = WorkflowExecutionRequest(workflow_id=workflow_id)
         else:
             # Override workflow_id from path parameter
             request.workflow_id = workflow_id
-        
+
         # Execute workflow
         result = await engine.execute_workflow(
             request,
             user_id=current_user["user_id"]
         )
-        
+
         return result
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -450,18 +447,18 @@ async def get_execution_history(
     """
     try:
         logger.info(f"📊 Getting execution history: {workflow_id}")
-        
+
         async with engine.db_pool.acquire() as conn:
             # Build query conditions
             conditions = ["workflow_id = $1"]
             params = [workflow_id]
-            
+
             if status_filter:
                 conditions.append("status = $2")
                 params.append(status_filter)
-            
+
             where_clause = " AND ".join(conditions)
-            
+
             # Get executions
             rows = await conn.fetch(
                 f"""
@@ -474,23 +471,23 @@ async def get_execution_history(
                 """,
                 *params
             )
-            
+
             # Get statistics
             stats = await conn.fetchrow(
                 f"""
-                SELECT 
+                SELECT
                     COUNT(*) as total_count,
                     COUNT(CASE WHEN status = 'completed' THEN 1 END) as successful_count,
-                    AVG(CASE 
-                        WHEN finished_at IS NOT NULL 
-                        THEN EXTRACT(EPOCH FROM (finished_at - started_at)) * 1000 
+                    AVG(CASE
+                        WHEN finished_at IS NOT NULL
+                        THEN EXTRACT(EPOCH FROM (finished_at - started_at)) * 1000
                     END) as avg_execution_time
                 FROM plc_workflows.workflow_executions
                 WHERE {where_clause}
                 """,
                 *params
             )
-            
+
             executions = []
             for row in rows:
                 execution = {
@@ -504,20 +501,20 @@ async def get_execution_history(
                     "performance_metrics": json.loads(row["performance_metrics"]) if row["performance_metrics"] else {}
                 }
                 executions.append(execution)
-            
+
             # Calculate success rate
             total_count = stats["total_count"] or 0
             successful_count = stats["successful_count"] or 0
             success_rate = (successful_count / total_count * 100) if total_count > 0 else 0.0
             avg_execution_time = float(stats["avg_execution_time"] or 0.0)
-            
+
             return ExecutionHistoryResponse(
                 executions=executions,
                 total_count=total_count,
                 success_rate=success_rate,
                 average_execution_time=avg_execution_time
             )
-            
+
     except Exception as e:
         logger.error(f"❌ Execution history retrieval failed: {e}")
         raise HTTPException(
@@ -537,7 +534,7 @@ async def get_engine_health(
 ):
     """
     Get comprehensive workflow engine health status and statistics.
-    
+
     Returns:
     - Engine component health (database, Redis, N8N framework)
     - Execution statistics and performance metrics
@@ -546,7 +543,7 @@ async def get_engine_health(
     """
     try:
         health_status = await engine.get_engine_health()
-        
+
         return EngineHealthResponse(
             engine_status=health_status["engine_status"],
             database_healthy=health_status["database_healthy"],
@@ -557,7 +554,7 @@ async def get_engine_health(
             timestamp=health_status["timestamp"],
             version=health_status["version"]
         )
-        
+
     except Exception as e:
         logger.error(f"❌ Health check failed: {e}")
         raise HTTPException(
@@ -578,14 +575,14 @@ async def get_engine_statistics(
         async with engine.db_pool.acquire() as conn:
             # Get comprehensive statistics
             stats = await conn.fetchrow("""
-                SELECT 
+                SELECT
                     COUNT(DISTINCT wd.id) as total_workflows,
                     COUNT(we.id) as total_executions,
                     COUNT(CASE WHEN we.status = 'completed' THEN 1 END) as successful_executions,
                     COUNT(CASE WHEN we.status = 'failed' THEN 1 END) as failed_executions,
-                    AVG(CASE 
-                        WHEN we.finished_at IS NOT NULL 
-                        THEN EXTRACT(EPOCH FROM (we.finished_at - we.started_at)) * 1000 
+                    AVG(CASE
+                        WHEN we.finished_at IS NOT NULL
+                        THEN EXTRACT(EPOCH FROM (we.finished_at - we.started_at)) * 1000
                     END) as avg_execution_time_ms,
                     COUNT(CASE WHEN we.started_at > NOW() - INTERVAL '24 hours' THEN 1 END) as executions_24h,
                     COUNT(CASE WHEN wd.industrial_category = 'control' THEN 1 END) as control_workflows,
@@ -597,12 +594,12 @@ async def get_engine_statistics(
                 LEFT JOIN plc_workflows.workflow_executions we ON wd.id = we.workflow_id
                 WHERE wd.status = 'active'
             """)
-            
+
             # Calculate performance metrics
             total_executions = stats["total_executions"] or 0
             successful_executions = stats["successful_executions"] or 0
             success_rate = (successful_executions / total_executions * 100) if total_executions > 0 else 0.0
-            
+
             return {
                 "overview": {
                     "total_workflows": stats["total_workflows"] or 0,
@@ -634,7 +631,7 @@ async def get_engine_statistics(
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             }
-            
+
     except Exception as e:
         logger.error(f"❌ Statistics retrieval failed: {e}")
         raise HTTPException(
@@ -661,7 +658,7 @@ async def startup_workflow_engine():
 async def shutdown_workflow_engine():
     """Gracefully shutdown workflow engine on application shutdown."""
     global _workflow_engine
-    
+
     if _workflow_engine:
         try:
             logger.info("⏹️ Shutting down workflow engine...")
@@ -681,7 +678,7 @@ async def shutdown_workflow_engine():
 async def handle_workflow_http_exception(request, exc: HTTPException):
     """Custom HTTP exception handler for workflow endpoints."""
     logger.warning(f"Workflow API HTTP {exc.status_code}: {exc.detail}")
-    
+
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -697,14 +694,14 @@ async def handle_workflow_http_exception(request, exc: HTTPException):
 async def handle_workflow_general_exception(request, exc: Exception):
     """General exception handler for unhandled workflow errors."""
     logger.error(f"Workflow API unhandled exception: {exc}", exc_info=True)
-    
+
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "error": "Workflow engine internal error",
             "message": str(exc),
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "component": "workflow_engine", 
+            "component": "workflow_engine",
             "phase": "1.3"
         }
     )

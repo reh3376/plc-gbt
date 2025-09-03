@@ -17,11 +17,11 @@ sys.path.append(str(Path(__file__).parent / "scripts"))
 def get_available_ai_resources() -> Dict[str, Any]:
     """
     Discover all AI resources available in the PLC-GPT project.
-    
+
     This function provides a complete overview of knowledge and tools
     available to AI agents, including the knowledge graph, documentation,
     and specialized tools.
-    
+
     Returns:
         Dictionary containing all available AI resources
     """
@@ -88,7 +88,7 @@ def get_available_ai_resources() -> Dict[str, Any]:
 def check_plc_knowledge_available() -> bool:
     """
     Quick check if PLC knowledge graph is available.
-    
+
     Returns:
         True if knowledge graph is accessible, False otherwise
     """
@@ -103,11 +103,11 @@ def check_plc_knowledge_available() -> bool:
 def get_plc_repositories(language: str = None, min_stars: int = 0) -> List[Dict[str, Any]]:
     """
     Get PLC repositories from knowledge graph.
-    
+
     Args:
         language: Programming language filter
         min_stars: Minimum star count
-        
+
     Returns:
         List of repository information
     """
@@ -123,10 +123,10 @@ def get_plc_repositories(language: str = None, min_stars: int = 0) -> List[Dict[
 def search_plc_knowledge(query: str) -> Dict[str, List[Dict]]:
     """
     Search across all PLC knowledge.
-    
+
     Args:
         query: Search term
-        
+
     Returns:
         Categorized search results
     """
@@ -142,10 +142,10 @@ def search_plc_knowledge(query: str) -> Dict[str, List[Dict]]:
 def get_tool_recommendations(task_description: str) -> Dict[str, Any]:
     """
     Get tool recommendations for a specific PLC task.
-    
+
     Args:
         task_description: Description of the task
-        
+
     Returns:
         Recommended tools and resources
     """

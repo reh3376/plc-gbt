@@ -17,11 +17,11 @@ def main():
     print("🎉 Enhanced PLC Format Converter Demonstration")
     print("=" * 60)
     
-    try:
+        try:
         # Use import utility
-from plc_converter_import import import_plc_converter
-PLCConverter = import_plc_converter()
-        
+        from plc_converter_import import import_plc_converter
+        PLCConverter = import_plc_converter()
+
         # Create converter - notice the enhanced logging
         print("🔧 Initializing PLCConverter...")
         converter = PLCConverter()

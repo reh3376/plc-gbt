@@ -18,10 +18,9 @@ Date: January 3, 2025
 import json
 import os
 import sys
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
-from enum import Enum
+from typing import Any, Dict, List, Tuple
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -50,11 +49,11 @@ class ParameterMappingSystem:
     """
     Parameter Mapping System for Rockwell PID parameters
     """
-    
+
     def __init__(self):
         self.parameter_mappings = self._initialize_parameter_mappings()
         self.controller_capabilities = self._initialize_controller_capabilities()
-        
+
     def _initialize_parameter_mappings(self) -> Dict[str, Dict[str, Any]]:
         """Initialize Rockwell-specific parameter mappings"""
         return {
@@ -67,7 +66,7 @@ class ParameterMappingSystem:
                 "rockwell_tag": "PGain"
             },
             "IGain": {
-                "standard_name": "Ki", 
+                "standard_name": "Ki",
                 "description": "Integral Gain",
                 "unit": "1/min",
                 "min_value": 0.0,
@@ -76,7 +75,7 @@ class ParameterMappingSystem:
             },
             "DGain": {
                 "standard_name": "Kd",
-                "description": "Derivative Gain", 
+                "description": "Derivative Gain",
                 "unit": "min",
                 "min_value": 0.0,
                 "max_value": 32767.0,
@@ -115,7 +114,7 @@ class ParameterMappingSystem:
                 "rockwell_tag": "CVLowLimit"
             }
         }
-    
+
     def _initialize_controller_capabilities(self) -> Dict[str, Dict[str, Any]]:
         """Initialize controller-specific capabilities"""
         return {
@@ -138,7 +137,7 @@ class ParameterMappingSystem:
                 "parameter_precision": 3
             }
         }
-    
+
     def map_standard_to_rockwell(self, standard_param: str, value: float) -> RockwellParameter:
         """Map standard parameter to Rockwell format"""
         mapping = None
@@ -146,10 +145,10 @@ class ParameterMappingSystem:
             if mapping_info["standard_name"] == standard_param:
                 mapping = mapping_info
                 break
-        
+
         if not mapping:
             raise ValueError(f"No mapping found for standard parameter: {standard_param}")
-        
+
         return RockwellParameter(
             name=rockwell_name,
             value=value,
@@ -159,45 +158,45 @@ class ParameterMappingSystem:
             description=mapping["description"],
             rockwell_tag=mapping["rockwell_tag"]
         )
-    
+
     def validate_parameter_range(self, parameter: RockwellParameter, controller_type: str) -> bool:
         """Validate parameter is within acceptable range for controller"""
         if controller_type not in self.controller_capabilities:
             return False
-        
+
         capabilities = self.controller_capabilities[controller_type]
-        
+
         # Check value range
         if not (parameter.min_value <= parameter.value <= parameter.max_value):
             return False
-        
+
         # Check precision
         precision = capabilities["parameter_precision"]
         if len(str(parameter.value).split('.')[-1]) > precision:
             return False
-        
+
         return True
 
 class L5XPIDProcessor:
     """
     Enhanced L5X processor with PID parameter support
     """
-    
+
     def __init__(self):
         self.parameter_mapper = ParameterMappingSystem()
         self.supported_instructions = ["PID", "PIDE", "PIDD"]
-        
+
     def extract_pid_parameters(self, l5x_content: str) -> List[PIDInstruction]:
         """Extract PID parameters from L5X content"""
         pid_instructions = []
-        
+
         # Parse L5X content (simplified - in real implementation would use XML parser)
         lines = l5x_content.split('\n')
-        
+
         current_instruction = None
         for line in lines:
             line = line.strip()
-            
+
             # Look for PID instruction start
             if any(instr in line for instr in self.supported_instructions):
                 if "Name=" in line:
@@ -209,31 +208,31 @@ class L5XPIDProcessor:
                         "controller_type": "ControlLogix",  # Default
                         "version": "1.0"
                     }
-            
+
             # Extract parameters
             if current_instruction and self._is_parameter_line(line):
                 param_name, param_value = self._extract_parameter(line)
                 if param_name in self.parameter_mapper.parameter_mappings:
                     current_instruction["parameters"][param_name] = param_value
-            
+
             # End of instruction
             if current_instruction and "</Instruction>" in line:
                 pid_instructions.append(PIDInstruction(**current_instruction))
                 current_instruction = None
-        
+
         return pid_instructions
-    
+
     def _extract_instruction_type(self, line: str) -> str:
         """Extract instruction type from L5X line"""
         for instr in self.supported_instructions:
             if instr in line:
                 return instr
         return "PID"
-    
+
     def _is_parameter_line(self, line: str) -> bool:
         """Check if line contains PID parameter"""
         return any(param in line for param in self.parameter_mapper.parameter_mappings.keys())
-    
+
     def _extract_parameter(self, line: str) -> Tuple[str, float]:
         """Extract parameter name and value from line"""
         # Simplified extraction - real implementation would use XML parsing
@@ -249,11 +248,11 @@ class L5XPIDProcessor:
                 except ValueError:
                     return param_name, 0.0
         return "", 0.0
-    
+
     def inject_pid_parameters(self, l5x_content: str, pid_parameters: Dict[str, float]) -> str:
         """Inject PID parameters into L5X content"""
         modified_content = l5x_content
-        
+
         for param_name, value in pid_parameters.items():
             # Find and replace parameter values
             # This is a simplified approach - real implementation would use XML manipulation
@@ -263,18 +262,18 @@ class L5XPIDProcessor:
                 pattern = f'({param_name}.*?Value=")([^"]*)(")'
                 replacement = f'\\g<1>{value}\\g<3>'
                 modified_content = re.sub(pattern, replacement, modified_content)
-        
+
         return modified_content
 
 class Studio5000Integration:
     """
     Enhanced Studio 5000 integration with PID parameter support
     """
-    
+
     def __init__(self):
         self.l5x_processor = L5XPIDProcessor()
         self.backup_manager = BackupManager()
-        
+
     def deploy_pid_parameters(self, project_path: str, pid_parameters: Dict[str, float]) -> Dict[str, Any]:
         """Deploy PID parameters to Studio 5000 project"""
         deployment_result = {
@@ -284,30 +283,30 @@ class Studio5000Integration:
             "validation_passed": True,
             "errors": []
         }
-        
+
         try:
             # Create backup before deployment
             backup_path = self.backup_manager.create_backup(project_path)
             deployment_result["backup_created"] = True
             deployment_result["backup_path"] = backup_path
-            
+
             # Validate parameters
             validation_result = self.validate_parameters(pid_parameters)
             if not validation_result["valid"]:
                 deployment_result["validation_passed"] = False
                 deployment_result["errors"].extend(validation_result["errors"])
                 return deployment_result
-            
+
             # Deploy parameters
             deployed_count = self._deploy_parameters_to_project(project_path, pid_parameters)
             deployment_result["parameters_deployed"] = deployed_count
-            
+
         except Exception as e:
             deployment_result["status"] = "error"
             deployment_result["errors"].append(str(e))
-        
+
         return deployment_result
-    
+
     def validate_parameters(self, pid_parameters: Dict[str, float]) -> Dict[str, Any]:
         """Validate PID parameters against controller capabilities"""
         validation_result = {
@@ -315,55 +314,55 @@ class Studio5000Integration:
             "errors": [],
             "warnings": []
         }
-        
+
         for param_name, value in pid_parameters.items():
             try:
                 # Map to Rockwell parameter
                 rockwell_param = self.l5x_processor.parameter_mapper.map_standard_to_rockwell(param_name, value)
-                
+
                 # Validate range
                 if not self.l5x_processor.parameter_mapper.validate_parameter_range(rockwell_param, "ControlLogix"):
                     validation_result["valid"] = False
                     validation_result["errors"].append(f"Parameter {param_name} value {value} out of range")
-                
+
             except ValueError as e:
                 validation_result["valid"] = False
                 validation_result["errors"].append(str(e))
-        
+
         return validation_result
-    
+
     def _deploy_parameters_to_project(self, project_path: str, pid_parameters: Dict[str, float]) -> int:
         """Deploy parameters to Studio 5000 project (simulation)"""
         # In real implementation, this would use COM automation
         # For now, simulate deployment
         deployed_count = 0
-        
+
         for param_name, value in pid_parameters.items():
             # Simulate parameter deployment
             print(f"Deploying {param_name} = {value}")
             deployed_count += 1
-        
+
         return deployed_count
 
 class BackupManager:
     """
     Backup and rollback manager for PID parameter changes
     """
-    
+
     def __init__(self):
         self.backup_directory = "backups/pid_parameters"
         self._ensure_backup_directory()
-    
+
     def _ensure_backup_directory(self):
         """Ensure backup directory exists"""
         os.makedirs(self.backup_directory, exist_ok=True)
-    
+
     def create_backup(self, project_path: str) -> str:
         """Create backup of current project state"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_filename = f"pid_backup_{timestamp}.json"
         backup_path = os.path.join(self.backup_directory, backup_filename)
-        
+
         # Simulate backup creation
         backup_data = {
             "project_path": project_path,
@@ -374,12 +373,12 @@ class BackupManager:
                 "DGain": 0.1
             }
         }
-        
+
         with open(backup_path, 'w') as f:
             json.dump(backup_data, f, indent=2)
-        
+
         return backup_path
-    
+
     def rollback_parameters(self, backup_path: str) -> Dict[str, Any]:
         """Rollback parameters from backup"""
         rollback_result = {
@@ -387,30 +386,30 @@ class BackupManager:
             "parameters_restored": 0,
             "errors": []
         }
-        
+
         try:
-            with open(backup_path, 'r') as f:
+            with open(backup_path) as f:
                 backup_data = json.load(f)
-            
+
             # Restore parameters
             parameters = backup_data.get("parameters", {})
             rollback_result["parameters_restored"] = len(parameters)
-            
+
         except Exception as e:
             rollback_result["status"] = "error"
             rollback_result["errors"].append(str(e))
-        
+
         return rollback_result
 
 class FormatCompatibilityChecker:
     """
     Enhanced format compatibility checker with PID validation
     """
-    
+
     def __init__(self):
         self.compatibility_matrix = self._initialize_compatibility_matrix()
         self.parameter_mapper = ParameterMappingSystem()
-    
+
     def _initialize_compatibility_matrix(self) -> Dict[str, Dict[str, bool]]:
         """Initialize PID instruction compatibility matrix"""
         return {
@@ -430,7 +429,7 @@ class FormatCompatibilityChecker:
                 "PIDD": False
             }
         }
-    
+
     def validate_pid_compatibility(self, controller_type: str, instruction_type: str, parameters: Dict[str, float]) -> Dict[str, Any]:
         """Validate PID instruction compatibility"""
         validation_result = {
@@ -439,17 +438,17 @@ class FormatCompatibilityChecker:
             "errors": [],
             "recommendations": []
         }
-        
+
         # Check instruction compatibility
         if controller_type not in self.compatibility_matrix:
             validation_result["compatible"] = False
             validation_result["errors"].append(f"Unknown controller type: {controller_type}")
             return validation_result
-        
+
         if not self.compatibility_matrix[controller_type].get(instruction_type, False):
             validation_result["compatible"] = False
             validation_result["errors"].append(f"{instruction_type} not supported on {controller_type}")
-        
+
         # Check parameter ranges
         for param_name, value in parameters.items():
             try:
@@ -458,25 +457,25 @@ class FormatCompatibilityChecker:
                     validation_result["warnings"].append(f"Parameter {param_name} may be out of optimal range")
             except ValueError:
                 validation_result["warnings"].append(f"Unknown parameter: {param_name}")
-        
+
         # Add recommendations
         if controller_type == "MicroLogix":
             validation_result["recommendations"].append("Consider upgrading to CompactLogix for enhanced PID features")
-        
+
         return validation_result
 
 class Phase8Day3Orchestrator:
     """
     Main orchestrator for Phase 8 Day 3 implementation
     """
-    
+
     def __init__(self):
         self.task_id = f"phase8_day3_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.timestamp = datetime.now().isoformat()
         self.l5x_processor = L5XPIDProcessor()
         self.studio5000_integration = Studio5000Integration()
         self.compatibility_checker = FormatCompatibilityChecker()
-        
+
     def analyze_task(self) -> Dict[str, Any]:
         """Analyze Phase 8 Day 3 task using AI Task Orchestrator methodology"""
         return {
@@ -517,7 +516,7 @@ class Phase8Day3Orchestrator:
                 "tools": ["l5x_processor", "studio5000_integration", "format_compatibility_checker"]
             }
         }
-    
+
     def execute_implementation(self) -> Dict[str, Any]:
         """Execute Phase 8 Day 3 implementation"""
         implementation_result = {
@@ -528,7 +527,7 @@ class Phase8Day3Orchestrator:
             "demonstration_results": {},
             "next_steps": []
         }
-        
+
         # 1. Parameter Mapping System
         print("🔧 Implementing Parameter Mapping System...")
         parameter_system_result = self._implement_parameter_mapping_system()
@@ -537,16 +536,16 @@ class Phase8Day3Orchestrator:
             "status": "completed",
             "details": parameter_system_result
         })
-        
+
         # 2. Studio 5000 Integration Enhancement
         print("🏭 Enhancing Studio 5000 Integration...")
         studio_integration_result = self._enhance_studio5000_integration()
         implementation_result["components_implemented"].append({
             "component": "Studio 5000 Integration Enhancement",
-            "status": "completed", 
+            "status": "completed",
             "details": studio_integration_result
         })
-        
+
         # 3. Format Compatibility Enhancement
         print("🔍 Enhancing Format Compatibility...")
         compatibility_result = self._enhance_format_compatibility()
@@ -555,17 +554,17 @@ class Phase8Day3Orchestrator:
             "status": "completed",
             "details": compatibility_result
         })
-        
+
         # 4. Validation and Testing
         print("🧪 Running Validation Tests...")
         validation_result = self._run_validation_tests()
         implementation_result["validation_results"] = validation_result
-        
+
         # 5. Demonstration
         print("🎯 Running Demonstration...")
         demo_result = self._run_demonstration()
         implementation_result["demonstration_results"] = demo_result
-        
+
         # Calculate overall success
         validation_score = validation_result.get("overall_score", 0)
         if validation_score >= 90:
@@ -574,15 +573,15 @@ class Phase8Day3Orchestrator:
             implementation_result["implementation_status"] = "completed_with_warnings"
         else:
             implementation_result["implementation_status"] = "needs_improvement"
-        
+
         implementation_result["next_steps"] = [
             "Proceed with Phase 8 Day 4: Automated Tuning Procedure Engine",
             "Integrate with existing PLC-GPT infrastructure",
             "Update documentation with new PID parameter capabilities"
         ]
-        
+
         return implementation_result
-    
+
     def _implement_parameter_mapping_system(self) -> Dict[str, Any]:
         """Implement Parameter Mapping System"""
         return {
@@ -595,7 +594,7 @@ class Phase8Day3Orchestrator:
                 "Precision validation"
             ]
         }
-    
+
     def _enhance_studio5000_integration(self) -> Dict[str, Any]:
         """Enhance Studio 5000 Integration"""
         return {
@@ -608,7 +607,7 @@ class Phase8Day3Orchestrator:
             "backup_system": "implemented",
             "validation_system": "implemented"
         }
-    
+
     def _enhance_format_compatibility(self) -> Dict[str, Any]:
         """Enhance Format Compatibility"""
         return {
@@ -621,7 +620,7 @@ class Phase8Day3Orchestrator:
                 "Controller-specific recommendations"
             ]
         }
-    
+
     def _run_validation_tests(self) -> Dict[str, Any]:
         """Run comprehensive validation tests"""
         validation_tests = {
@@ -630,29 +629,29 @@ class Phase8Day3Orchestrator:
             "studio5000_integration_test": self._test_studio5000_integration(),
             "compatibility_test": self._test_compatibility_checker()
         }
-        
+
         # Calculate overall score
         scores = [test["score"] for test in validation_tests.values()]
         overall_score = sum(scores) / len(scores)
-        
+
         return {
             "tests": validation_tests,
             "overall_score": overall_score,
             "passed": overall_score >= 80,
             "summary": f"Validation completed with {overall_score:.1f}% success rate"
         }
-    
+
     def _test_parameter_mapping(self) -> Dict[str, Any]:
         """Test parameter mapping functionality"""
         try:
             # Test standard to Rockwell mapping
             rockwell_param = self.l5x_processor.parameter_mapper.map_standard_to_rockwell("Kc", 2.5)
-            
+
             # Test validation
             validation_result = self.l5x_processor.parameter_mapper.validate_parameter_range(
                 rockwell_param, "ControlLogix"
             )
-            
+
             return {
                 "score": 95,
                 "status": "passed",
@@ -668,7 +667,7 @@ class Phase8Day3Orchestrator:
                 "status": "failed",
                 "error": str(e)
             }
-    
+
     def _test_l5x_processing(self) -> Dict[str, Any]:
         """Test L5X processing functionality"""
         try:
@@ -680,13 +679,13 @@ class Phase8Day3Orchestrator:
                 <Parameter Name="DGain" Value="0.1"/>
             </Instruction>
             '''
-            
+
             pid_instructions = self.l5x_processor.extract_pid_parameters(sample_l5x)
-            
+
             # Test parameter injection
             new_params = {"PGain": 3.0, "IGain": 0.6}
             modified_l5x = self.l5x_processor.inject_pid_parameters(sample_l5x, new_params)
-            
+
             return {
                 "score": 90,
                 "status": "passed",
@@ -702,7 +701,7 @@ class Phase8Day3Orchestrator:
                 "status": "failed",
                 "error": str(e)
             }
-    
+
     def _test_studio5000_integration(self) -> Dict[str, Any]:
         """Test Studio 5000 integration"""
         try:
@@ -711,7 +710,7 @@ class Phase8Day3Orchestrator:
             deployment_result = self.studio5000_integration.deploy_pid_parameters(
                 "/test/project.ACD", test_params
             )
-            
+
             return {
                 "score": 85,
                 "status": "passed",
@@ -723,7 +722,7 @@ class Phase8Day3Orchestrator:
                 "status": "failed",
                 "error": str(e)
             }
-    
+
     def _test_compatibility_checker(self) -> Dict[str, Any]:
         """Test compatibility checker"""
         try:
@@ -731,7 +730,7 @@ class Phase8Day3Orchestrator:
             compatibility_result = self.compatibility_checker.validate_pid_compatibility(
                 "ControlLogix", "PIDE", {"PGain": 2.5, "IGain": 0.5}
             )
-            
+
             return {
                 "score": 88,
                 "status": "passed",
@@ -743,7 +742,7 @@ class Phase8Day3Orchestrator:
                 "status": "failed",
                 "error": str(e)
             }
-    
+
     def _run_demonstration(self) -> Dict[str, Any]:
         """Run comprehensive demonstration"""
         demo_results = {
@@ -751,7 +750,7 @@ class Phase8Day3Orchestrator:
             "timestamp": datetime.now().isoformat(),
             "steps": []
         }
-        
+
         # Step 1: Parameter Mapping
         demo_results["steps"].append({
             "step": 1,
@@ -759,7 +758,7 @@ class Phase8Day3Orchestrator:
             "action": "Map standard PID parameters to Rockwell format",
             "result": "Successfully mapped Kc=2.5 to PGain=2.5"
         })
-        
+
         # Step 2: L5X Processing
         demo_results["steps"].append({
             "step": 2,
@@ -767,7 +766,7 @@ class Phase8Day3Orchestrator:
             "action": "Extract and inject PID parameters in L5X format",
             "result": "Successfully processed L5X with 3 PID parameters"
         })
-        
+
         # Step 3: Studio 5000 Integration
         demo_results["steps"].append({
             "step": 3,
@@ -775,7 +774,7 @@ class Phase8Day3Orchestrator:
             "action": "Deploy parameters with backup and validation",
             "result": "Successfully deployed 3 parameters with backup created"
         })
-        
+
         # Step 4: Compatibility Validation
         demo_results["steps"].append({
             "step": 4,
@@ -783,19 +782,19 @@ class Phase8Day3Orchestrator:
             "action": "Validate PID instruction compatibility",
             "result": "ControlLogix PIDE instruction validated successfully"
         })
-        
+
         demo_results["overall_success"] = True
         demo_results["completion_percentage"] = 100
-        
+
         return demo_results
-    
+
     def save_results(self, output_file: str = "phase8_day3_results.json") -> Dict[str, Any]:
         """Save implementation results"""
         results = self.execute_implementation()
-        
+
         with open(output_file, 'w') as f:
             json.dump(results, f, indent=2)
-        
+
         print(f"Phase 8 Day 3 results saved to {output_file}")
         return results
 
@@ -803,48 +802,48 @@ def main():
     """Main orchestrator execution"""
     print("🚀 Phase 8 Day 3 Orchestrator - Rockwell Parameter Integration & L5X Enhancement")
     print("=" * 80)
-    
+
     orchestrator = Phase8Day3Orchestrator()
-    
+
     # Execute implementation
     results = orchestrator.execute_implementation()
-    
+
     # Display results
-    print(f"\n📊 Task Analysis:")
+    print("\n📊 Task Analysis:")
     task_analysis = results["task_analysis"]
     print(f"  Task ID: {task_analysis['task_id']}")
     print(f"  Complexity: {task_analysis['complexity']}")
     print(f"  Estimated Effort: {task_analysis['estimated_effort']['time']}")
-    
-    print(f"\n🔧 Components Implemented:")
+
+    print("\n🔧 Components Implemented:")
     for component in results["components_implemented"]:
         print(f"  ✅ {component['component']}: {component['status']}")
-    
-    print(f"\n🧪 Validation Results:")
+
+    print("\n🧪 Validation Results:")
     validation = results["validation_results"]
     print(f"  Overall Score: {validation['overall_score']:.1f}%")
     print(f"  Status: {'✅ PASSED' if validation['passed'] else '❌ FAILED'}")
-    
-    print(f"\n🎯 Demonstration Results:")
+
+    print("\n🎯 Demonstration Results:")
     demo = results["demonstration_results"]
     print(f"  Scenario: {demo['scenario']}")
     print(f"  Steps Completed: {len(demo['steps'])}")
     print(f"  Success Rate: {demo['completion_percentage']}%")
-    
+
     print(f"\n📋 Implementation Status: {results['implementation_status'].upper()}")
-    
-    print(f"\n🔄 Next Steps:")
+
+    print("\n🔄 Next Steps:")
     for step in results["next_steps"]:
         print(f"  - {step}")
-    
+
     # Save results
     orchestrator.save_results()
-    
-    print(f"\n✅ Phase 8 Day 3 implementation completed successfully!")
+
+    print("\n✅ Phase 8 Day 3 implementation completed successfully!")
     print(f"   Task ID: {orchestrator.task_id}")
     print(f"   Validation Score: {validation['overall_score']:.1f}%")
-    
+
     return results
 
 if __name__ == "__main__":
-    main() 
+    main()

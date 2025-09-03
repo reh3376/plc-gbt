@@ -5,12 +5,11 @@ Created: July 7, 2025
 Purpose: Backup Neo4j database after ingesting acd-l5x-tool-lib repository context
 """
 
-import subprocess
-import os
 import json
+import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
-import sys
 
 
 def run_command(cmd, description, timeout=300):
@@ -40,52 +39,52 @@ def backup_neo4j():
     print("=== NEO4J BACKUP WITH ACD-L5X-TOOL-LIB CONTEXT ===")
     print(f"Started: {datetime.now().isoformat()}")
     print()
-    
+
     # Generate timestamp for backup
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     backup_name = f"neo4j_backup_acd_l5x_context_{timestamp}"
-    
+
     # Ensure local backup directory exists
     backup_dir = Path("backup/neo4j")
     backup_dir.mkdir(parents=True, exist_ok=True)
     local_backup_path = backup_dir / backup_name
     local_backup_path.mkdir(parents=True, exist_ok=True)
-    
+
     print(f"📦 Backup name: {backup_name}")
     print(f"📁 Local backup path: {local_backup_path}")
     print()
-    
+
     # Step 1: Verify Neo4j is running and accessible
     print("1. VERIFYING NEO4J SERVICE")
     success, stdout, stderr = run_command(
         ["docker", "ps", "--filter", "name=plc-neo4j", "--format", "{{.Names}}"],
         "Checking Neo4j container status"
     )
-    
+
     if not success or "plc-neo4j" not in stdout:
         print("❌ Neo4j container not running")
         return False
-    
+
     # Test database connectivity
     success, stdout, stderr = run_command(
         ["docker", "exec", "plc-neo4j", "cypher-shell", "-u", "neo4j", "-p", "your-secure-neo4j-password", "RETURN 1"],
         "Testing database connectivity"
     )
-    
+
     if not success:
         print("❌ Cannot connect to Neo4j database")
         return False
-    
+
     print()
-    
+
     # Step 2: Get current database statistics
     print("2. COLLECTING DATABASE STATISTICS")
     success, stdout, stderr = run_command(
-        ["docker", "exec", "plc-neo4j", "cypher-shell", "-u", "neo4j", "-p", "your-secure-neo4j-password", 
+        ["docker", "exec", "plc-neo4j", "cypher-shell", "-u", "neo4j", "-p", "your-secure-neo4j-password",
          "MATCH (n) RETURN labels(n)[0] as NodeType, count(n) as Count ORDER BY NodeType"],
         "Getting node counts by type"
     )
-    
+
     db_stats = {}
     if success:
         # Parse the output to extract statistics
@@ -98,20 +97,20 @@ def backup_neo4j():
                     count = parts[2].strip()
                     if node_type and count.isdigit():
                         db_stats[node_type] = int(count)
-    
+
     print(f"   Database contains: {sum(db_stats.values())} total nodes")
     for node_type, count in db_stats.items():
         print(f"     - {node_type}: {count}")
-    
+
     print()
-    
+
     # Step 3: Create backup directory in container
     print("3. PREPARING BACKUP ENVIRONMENT")
     success, stdout, stderr = run_command(
         ["docker", "exec", "plc-neo4j", "mkdir", "-p", "/var/lib/neo4j/dumps"],
         "Creating backup directory in container"
     )
-    
+
     # Step 4: Attempt Neo4j admin backup
     print("4. CREATING NEO4J BACKUP")
     success, stdout, stderr = run_command(
@@ -119,13 +118,13 @@ def backup_neo4j():
         "Creating Neo4j database backup",
         timeout=600  # 10 minutes
     )
-    
+
     backup_method = "neo4j_admin"
     backup_files = []
-    
+
     if not success:
         print("   Neo4j admin backup failed, trying alternative method...")
-        
+
         # Alternative: Export using Cypher
         print("   Attempting Cypher export...")
         success, stdout, stderr = run_command(
@@ -133,7 +132,7 @@ def backup_neo4j():
              "CALL dbms.procedures() YIELD name WHERE name CONTAINS 'export' RETURN name LIMIT 5"],
             "Checking available export procedures"
         )
-        
+
         # Manual data export as fallback
         print("   Creating manual data export...")
         export_queries = [
@@ -141,7 +140,7 @@ def backup_neo4j():
             ("relationships_export.cypher", "MATCH ()-[r]->() RETURN r LIMIT 10000"),
             ("schema_export.cypher", "CALL db.schema.visualization() YIELD nodes, relationships RETURN nodes, relationships")
         ]
-        
+
         for filename, query in export_queries:
             export_path = f"/var/lib/neo4j/dumps/{filename}"
             success, stdout, stderr = run_command(
@@ -155,37 +154,37 @@ def backup_neo4j():
                 save_result = subprocess.run(save_cmd, input=stdout, text=True, capture_output=True)
                 if save_result.returncode == 0:
                     backup_files.append(filename)
-        
+
         backup_method = "manual_export"
-    
+
     print()
-    
+
     # Step 5: Copy backup files to local directory
     print("5. COPYING BACKUP TO LOCAL DIRECTORY")
-    
+
     # List files in backup directory
     success, stdout, stderr = run_command(
         ["docker", "exec", "plc-neo4j", "ls", "-la", "/var/lib/neo4j/dumps/"],
         "Listing backup files in container"
     )
-    
+
     if success and stdout.strip():
         print(f"   Container backup contents:\n{stdout}")
-        
+
         # Copy entire dumps directory
         success, stdout, stderr = run_command(
             ["docker", "cp", "plc-neo4j:/var/lib/neo4j/dumps/", str(local_backup_path) + "/"],
             "Copying backup files to local directory"
         )
-        
+
         if success:
             print("✅ Backup files copied successfully")
         else:
             print("⚠️  Copy operation had issues, creating backup info manually")
-    
+
     # Step 6: Create backup metadata
     print("6. CREATING BACKUP METADATA")
-    
+
     backup_metadata = {
         "backup_name": backup_name,
         "timestamp": timestamp,
@@ -207,29 +206,29 @@ def backup_neo4j():
         "backup_purpose": "Preserve knowledge graph after ingesting acd-l5x-tool-lib repository context",
         "restoration_notes": "This backup contains comprehensive PLC domain knowledge including file format conversion capabilities"
     }
-    
+
     # Save metadata
     metadata_file = local_backup_path / "backup_metadata.json"
     with open(metadata_file, 'w') as f:
         json.dump(backup_metadata, f, indent=2)
-    
+
     print(f"✅ Backup metadata saved: {metadata_file}")
-    
+
     # Step 7: Calculate backup size and verify
     print("7. BACKUP VERIFICATION")
-    
+
     total_size = sum(f.stat().st_size for f in local_backup_path.rglob('*') if f.is_file())
     size_mb = total_size / (1024 * 1024)
     file_count = len(list(local_backup_path.rglob('*')))
-    
-    print(f"✅ Backup verification complete!")
+
+    print("✅ Backup verification complete!")
     print(f"   Backup location: {local_backup_path}")
     print(f"   Total size: {size_mb:.2f} MB")
     print(f"   Total files: {file_count}")
     print(f"   Backup method: {backup_method}")
-    
+
     # List backup contents
-    print(f"   Backup contents:")
+    print("   Backup contents:")
     for item in local_backup_path.iterdir():
         if item.is_file():
             item_size = item.stat().st_size / 1024  # KB
@@ -237,24 +236,24 @@ def backup_neo4j():
         elif item.is_dir():
             item_count = len(list(item.rglob('*')))
             print(f"     - {item.name}/ ({item_count} items)")
-    
+
     print()
     print("🎉 NEO4J BACKUP COMPLETED SUCCESSFULLY!")
     print()
     print("📊 BACKUP SUMMARY:")
     print(f"   • Backup Name: {backup_name}")
     print(f"   • Database Nodes: {sum(db_stats.values())} total")
-    print(f"   • acd-l5x-tool-lib Context: ✅ Included")
-    print(f"   • File Format Capabilities: ✅ Preserved")
-    print(f"   • PLC Controller Specs: ✅ Preserved")
-    print(f"   • Code Structure Mapping: ✅ Preserved")
-    print(f"   • Integration Relationships: ✅ Preserved")
+    print("   • acd-l5x-tool-lib Context: ✅ Included")
+    print("   • File Format Capabilities: ✅ Preserved")
+    print("   • PLC Controller Specs: ✅ Preserved")
+    print("   • Code Structure Mapping: ✅ Preserved")
+    print("   • Integration Relationships: ✅ Preserved")
     print()
     print("📝 NEXT STEPS:")
     print("   • Backup is ready for archival or transfer")
     print("   • Can be restored using Neo4j admin tools")
     print("   • Contains complete knowledge graph state")
-    
+
     return True
 
 
@@ -272,4 +271,4 @@ if __name__ == "__main__":
         sys.exit(1)
     except Exception as e:
         print(f"\n❌ Unexpected error: {str(e)}")
-        sys.exit(1) 
+        sys.exit(1)

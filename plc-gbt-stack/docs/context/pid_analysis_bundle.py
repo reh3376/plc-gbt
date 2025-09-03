@@ -80,10 +80,10 @@ Have fun hacking – pull requests welcome!
 
 
 import argparse
-import pandas as pd
+from typing import Dict, Tuple
+
 import numpy as np
-import math
-from typing import Tuple, Dict
+import pandas as pd
 
 
 # -------------------------------------------------
@@ -207,7 +207,7 @@ def quick_imc_tune(csv_path: str,
                    lambda_factor: float = 1.0) -> Dict[str, float]:
     df = pd.read_csv(csv_path)
     time_s = pd.to_datetime(df[time_col]).astype('int64') / 1e9
-    interval = infer_interval(time_s)
+    infer_interval(time_s)
     step_idx = detect_steps(df[cv_col])
     K, L, tau = fopdt_from_data(time_s, df[cv_col], df[pv_col], step_idx)
     lam = lambda_factor * tau

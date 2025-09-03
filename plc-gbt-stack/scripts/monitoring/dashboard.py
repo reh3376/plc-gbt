@@ -6,15 +6,12 @@ Purpose: Visual performance and system monitoring for PLC-GPT
 """
 
 import asyncio
-import time
-import json
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
+import time
 from collections import defaultdict, deque
-import threading
-import os
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict
 
 # Try to import psutil, graceful fallback if not available
 try:
@@ -25,10 +22,9 @@ except ImportError:
     print("Warning: psutil not available. System metrics will be simulated.")
 
 # FastAPI and web components
-from fastapi import FastAPI, WebSocket, HTTPException, BackgroundTasks
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.requests import Request
 import uvicorn
+from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi.responses import HTMLResponse, JSONResponse
 
 # Neo4j and Qdrant
 from neo4j import GraphDatabase
@@ -78,7 +74,7 @@ class DatabaseMetrics:
 class MonitoringDashboard:
     """
     Real-time monitoring dashboard for PLC-GPT system.
-    
+
     Features:
     - System resource monitoring
     - Query performance analytics
@@ -86,7 +82,7 @@ class MonitoringDashboard:
     - Real-time websocket updates
     - Alert system for performance issues
     """
-    
+
     def __init__(
         self,
         neo4j_uri: str = "bolt://localhost:7687",
@@ -106,44 +102,44 @@ class MonitoringDashboard:
         except Exception as e:
             logger.warning("Failed to connect to Neo4j", error=str(e))
             self.neo4j_driver = None
-            
+
         try:
             self.qdrant_client = QdrantClient(host=qdrant_host, port=qdrant_port)
         except Exception as e:
             logger.warning("Failed to connect to Qdrant", error=str(e))
             self.qdrant_client = None
-        
+
         # Metrics storage
         self.metrics_retention = timedelta(hours=metrics_retention_hours)
         self.system_metrics = deque(maxlen=1000)
-        self.query_metrics = deque(maxlen=1000)  
+        self.query_metrics = deque(maxlen=1000)
         self.database_metrics = deque(maxlen=1000)
-        
+
         # Real-time tracking
         self.active_connections = set()
         self.active_queries = {}
         self.query_stats = defaultdict(list)
         self.alerts = deque(maxlen=100)
-        
+
         # Monitoring state
         self.monitoring_active = False
         self.monitor_thread = None
         self.start_time = time.time()
-        
+
         # FastAPI app
         self.app = FastAPI(title="PLC-GPT Monitoring Dashboard")
         self._setup_routes()
-        
+
         logger.info(f"MonitoringDashboard initialized, psutil_available={PSUTIL_AVAILABLE}")
-    
+
     def _setup_routes(self):
         """Setup FastAPI routes"""
-        
+
         @self.app.get("/", response_class=HTMLResponse)
         async def dashboard_home():
             """Main dashboard page"""
             return HTMLResponse(self._get_dashboard_html())
-        
+
         @self.app.get("/api/metrics/system")
         async def get_system_metrics():
             """Get current system metrics"""
@@ -155,7 +151,7 @@ class MonitoringDashboard:
                 })
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
-        
+
         @self.app.get("/api/metrics/queries")
         async def get_query_metrics():
             """Get query performance metrics"""
@@ -167,7 +163,7 @@ class MonitoringDashboard:
                 })
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
-        
+
         @self.app.get("/api/metrics/databases")
         async def get_database_metrics():
             """Get database health metrics"""
@@ -179,27 +175,27 @@ class MonitoringDashboard:
                 })
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
-        
+
         @self.app.get("/api/health")
         async def health_check():
             """System health check"""
             health = await self._get_system_health()
             return JSONResponse(health)
-        
+
         @self.app.get("/api/alerts")
         async def get_alerts():
             """Get system alerts"""
             return JSONResponse({
-                "alerts": [alert for alert in self.alerts],
+                "alerts": list(self.alerts),
                 "count": len(self.alerts)
             })
-        
+
         @self.app.websocket("/ws/metrics")
         async def websocket_metrics(websocket: WebSocket):
             """WebSocket for real-time metrics"""
             await websocket.accept()
             self.active_connections.add(websocket)
-            
+
             try:
                 while True:
                     # Send current metrics
@@ -209,15 +205,15 @@ class MonitoringDashboard:
                         "database": asdict(await self._collect_database_metrics()),
                         "timestamp": datetime.now().isoformat()
                     }
-                    
+
                     await websocket.send_json(metrics)
                     await asyncio.sleep(5)  # Update every 5 seconds
-                    
+
             except Exception as e:
                 logger.warning("WebSocket connection closed", error=str(e))
             finally:
                 self.active_connections.discard(websocket)
-    
+
     async def _collect_system_metrics(self) -> SystemMetrics:
         """Collect current system metrics"""
         try:
@@ -226,7 +222,7 @@ class MonitoringDashboard:
                 cpu_percent = psutil.cpu_percent(interval=1)
                 memory = psutil.virtual_memory()
                 disk = psutil.disk_usage('/')
-                
+
                 # Network I/O
                 network_io = psutil.net_io_counters()
                 network_io_bytes = {
@@ -243,7 +239,7 @@ class MonitoringDashboard:
                     "bytes_sent": random.randint(1000000, 10000000),
                     "bytes_recv": random.randint(1000000, 10000000)
                 }
-                
+
                 return SystemMetrics(
                     timestamp=datetime.now(),
                     cpu_percent=cpu_percent,
@@ -253,10 +249,10 @@ class MonitoringDashboard:
                     active_connections=len(self.active_connections),
                     uptime_seconds=time.time() - self.start_time
                 )
-            
+
             # Uptime
             uptime_seconds = time.time() - self.start_time
-            
+
             return SystemMetrics(
                 timestamp=datetime.now(),
                 cpu_percent=cpu_percent,
@@ -266,7 +262,7 @@ class MonitoringDashboard:
                 active_connections=len(self.active_connections),
                 uptime_seconds=uptime_seconds
             )
-            
+
         except Exception as e:
             logger.error("Failed to collect system metrics", error=str(e))
             return SystemMetrics(
@@ -278,19 +274,19 @@ class MonitoringDashboard:
                 active_connections=0,
                 uptime_seconds=0.0
             )
-    
+
     async def _collect_query_metrics(self) -> QueryMetrics:
         """Collect query performance metrics"""
         try:
             # Calculate query statistics
             recent_queries = []
-            for query_id, stats_list in self.query_stats.items():
+            for _query_id, stats_list in self.query_stats.items():
                 recent_stats = [
-                    s for s in stats_list 
+                    s for s in stats_list
                     if s["timestamp"] > datetime.now() - timedelta(minutes=5)
                 ]
                 recent_queries.extend(recent_stats)
-            
+
             if recent_queries:
                 avg_response_time = sum(q["execution_time_ms"] for q in recent_queries) / len(recent_queries)
                 error_count = sum(1 for q in recent_queries if not q.get("success", True))
@@ -300,7 +296,7 @@ class MonitoringDashboard:
                 avg_response_time = 0.0
                 error_rate = 0.0
                 slow_queries = 0
-            
+
             return QueryMetrics(
                 timestamp=datetime.now(),
                 query_count=len(recent_queries),
@@ -310,7 +306,7 @@ class MonitoringDashboard:
                 slow_queries=slow_queries,
                 error_rate=error_rate
             )
-            
+
         except Exception as e:
             logger.error("Failed to collect query metrics", error=str(e))
             return QueryMetrics(
@@ -322,7 +318,7 @@ class MonitoringDashboard:
                 slow_queries=0,
                 error_rate=0.0
             )
-    
+
     async def _collect_database_metrics(self) -> DatabaseMetrics:
         """Collect database health metrics"""
         try:
@@ -330,7 +326,7 @@ class MonitoringDashboard:
             neo4j_status = "connected"
             neo4j_connections = 0
             neo4j_transaction_rate = 0.0
-            
+
             if self.neo4j_driver:
                 try:
                     with self.neo4j_driver.session() as session:
@@ -341,17 +337,17 @@ class MonitoringDashboard:
                     neo4j_status = "disconnected"
             else:
                 neo4j_status = "disconnected"
-            
+
             # Qdrant status
             qdrant_status = "connected"
             qdrant_collections = 0
             qdrant_points_count = 0
-            
+
             if self.qdrant_client:
                 try:
                     collections = self.qdrant_client.get_collections()
                     qdrant_collections = len(collections.collections)
-                    
+
                     # Count total points across collections
                     for collection in collections.collections:
                         try:
@@ -359,12 +355,12 @@ class MonitoringDashboard:
                             qdrant_points_count += info.points_count or 0
                         except Exception:
                             continue
-                            
+
                 except Exception:
                     qdrant_status = "disconnected"
             else:
                 qdrant_status = "disconnected"
-            
+
             return DatabaseMetrics(
                 timestamp=datetime.now(),
                 neo4j_status=neo4j_status,
@@ -374,7 +370,7 @@ class MonitoringDashboard:
                 qdrant_collections=qdrant_collections,
                 qdrant_points_count=qdrant_points_count
             )
-            
+
         except Exception as e:
             logger.error("Failed to collect database metrics", error=str(e))
             return DatabaseMetrics(
@@ -386,17 +382,17 @@ class MonitoringDashboard:
                 qdrant_collections=0,
                 qdrant_points_count=0
             )
-    
+
     async def _get_system_health(self) -> Dict[str, Any]:
         """Get overall system health status"""
         try:
             system_metrics = await self._collect_system_metrics()
             query_metrics = await self._collect_query_metrics()
             db_metrics = await self._collect_database_metrics()
-            
+
             # Determine health status
             health_issues = []
-            
+
             if system_metrics.cpu_percent > 80:
                 health_issues.append("high_cpu_usage")
             if system_metrics.memory_percent > 85:
@@ -407,14 +403,14 @@ class MonitoringDashboard:
                 health_issues.append("neo4j_disconnected")
             if db_metrics.qdrant_status != "connected":
                 health_issues.append("qdrant_disconnected")
-            
+
             if not health_issues:
                 status = "healthy"
             elif len(health_issues) <= 2:
                 status = "warning"
             else:
                 status = "critical"
-            
+
             return {
                 "status": status,
                 "issues": health_issues,
@@ -428,7 +424,7 @@ class MonitoringDashboard:
                     "queries": "ok" if query_metrics.error_rate < 10 else "warning"
                 }
             }
-            
+
         except Exception as e:
             logger.error("Failed to get system health", error=str(e))
             return {
@@ -437,16 +433,16 @@ class MonitoringDashboard:
                 "error": str(e),
                 "last_check": datetime.now().isoformat()
             }
-    
+
     def _get_dashboard_html(self) -> str:
         """Generate dashboard HTML"""
         psutil_warning = "" if PSUTIL_AVAILABLE else """
         <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin-bottom: 20px; border-radius: 4px;">
-            <strong>⚠️ Warning:</strong> psutil not available. System metrics are simulated. 
+            <strong>⚠️ Warning:</strong> psutil not available. System metrics are simulated.
             Install with: <code>pip install psutil</code>
         </div>
         """
-        
+
         return f"""
         <!DOCTYPE html>
         <html>
@@ -472,38 +468,38 @@ class MonitoringDashboard:
         <body>
             <h1>PLC-GPT System Monitoring Dashboard</h1>
             {psutil_warning}
-            
+
             <div class="dashboard">
                 <div class="card">
                     <h2>System Health</h2>
                     <div id="system-health">Loading...</div>
                 </div>
-                
+
                 <div class="card">
                     <h2>System Metrics</h2>
                     <canvas id="system-chart"></canvas>
                 </div>
-                
+
                 <div class="card">
                     <h2>Query Performance</h2>
                     <canvas id="query-chart"></canvas>
                 </div>
-                
+
                 <div class="card">
                     <h2>Database Status</h2>
                     <div id="database-status">Loading...</div>
                 </div>
-                
+
                 <div class="card">
                     <h2>Recent Alerts</h2>
                     <div id="alerts">Loading...</div>
                 </div>
             </div>
-            
+
             <script>
                 // WebSocket connection for real-time updates
                 const ws = new WebSocket(`ws://${{window.location.host}}/ws/metrics`);
-                
+
                 // Chart configurations
                 const systemChart = new Chart(document.getElementById('system-chart'), {{
                     type: 'line',
@@ -528,7 +524,7 @@ class MonitoringDashboard:
                         }}
                     }}
                 }});
-                
+
                 const queryChart = new Chart(document.getElementById('query-chart'), {{
                     type: 'line',
                     data: {{
@@ -547,12 +543,12 @@ class MonitoringDashboard:
                         }}
                     }}
                 }});
-                
+
                 ws.onmessage = function(event) {{
                     const data = JSON.parse(event.data);
                     updateDashboard(data);
                 }};
-                
+
                 function updateDashboard(data) {{
                     // Update system health
                     const healthDiv = document.getElementById('system-health');
@@ -570,7 +566,7 @@ class MonitoringDashboard:
                             <span class="metric-value">${{data.system.active_connections}}</span>
                         </div>
                     `;
-                    
+
                     // Update database status
                     const dbDiv = document.getElementById('database-status');
                     dbDiv.innerHTML = `
@@ -587,33 +583,33 @@ class MonitoringDashboard:
                             <span class="metric-value">${{data.database.qdrant_points_count.toLocaleString()}}</span>
                         </div>
                     `;
-                    
+
                     // Update charts
                     const time = new Date(data.timestamp).toLocaleTimeString();
-                    
+
                     // System chart
                     systemChart.data.labels.push(time);
                     systemChart.data.datasets[0].data.push(data.system.cpu_percent);
                     systemChart.data.datasets[1].data.push(data.system.memory_percent);
-                    
+
                     if (systemChart.data.labels.length > 20) {{
                         systemChart.data.labels.shift();
                         systemChart.data.datasets[0].data.shift();
                         systemChart.data.datasets[1].data.shift();
                     }}
                     systemChart.update('none');
-                    
+
                     // Query chart
                     queryChart.data.labels.push(time);
                     queryChart.data.datasets[0].data.push(data.queries.avg_response_time_ms);
-                    
+
                     if (queryChart.data.labels.length > 20) {{
                         queryChart.data.labels.shift();
                         queryChart.data.datasets[0].data.shift();
                     }}
                     queryChart.update('none');
                 }}
-                
+
                 // Load alerts
                 fetch('/api/alerts')
                     .then(response => response.json())
@@ -634,12 +630,12 @@ class MonitoringDashboard:
         </body>
         </html>
         """
-    
+
     def run_server(self, host: str = "0.0.0.0", port: int = 8080):
         """Run the monitoring dashboard server"""
         logger.info(f"Starting monitoring dashboard on http://{host}:{port}")
         uvicorn.run(self.app, host=host, port=port)
-    
+
     def close(self):
         """Clean up resources"""
         if self.neo4j_driver:
@@ -653,4 +649,4 @@ def start_monitoring_dashboard(
 ):
     """Start the monitoring dashboard"""
     dashboard = MonitoringDashboard(**kwargs)
-    dashboard.run_server(host=host, port=port) 
+    dashboard.run_server(host=host, port=port)

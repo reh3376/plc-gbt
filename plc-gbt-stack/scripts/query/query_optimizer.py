@@ -5,25 +5,21 @@ Created: January 1, 2025
 Purpose: Advanced query optimization and smart caching strategies for PLC-GPT
 """
 
-import asyncio
-import time
 import hashlib
-import pickle
 import json
 import logging
 import re
-from typing import Dict, List, Any, Optional, Tuple, Callable, Union
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from collections import defaultdict, OrderedDict
-from concurrent.futures import ThreadPoolExecutor
-import threading
 import sqlite3
-import os
+import threading
+import time
+from collections import OrderedDict, defaultdict
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 # Neo4j
 from neo4j import GraphDatabase
-from neo4j.exceptions import Neo4jError
 
 # Structured logging
 try:
@@ -74,7 +70,7 @@ class QueryStats:
 class IntelligentQueryOptimizer:
     """
     Advanced query optimization and caching system.
-    
+
     Features:
     - Query plan analysis and optimization
     - Intelligent cache warming and eviction
@@ -82,7 +78,7 @@ class IntelligentQueryOptimizer:
     - Performance-based adaptive caching
     - Query statistics and analytics
     """
-    
+
     def __init__(
         self,
         neo4j_uri: str,
@@ -93,7 +89,7 @@ class IntelligentQueryOptimizer:
     ):
         """
         Initialize query optimizer.
-        
+
         Args:
             neo4j_uri: Neo4j connection URI
             neo4j_user: Neo4j username
@@ -107,12 +103,12 @@ class IntelligentQueryOptimizer:
             max_connection_lifetime=30 * 60,
             max_connection_pool_size=50
         )
-        
+
         # Cache configuration
         self.cache_size_bytes = cache_size_mb * 1024 * 1024
         self.cache_db_path = cache_db_path
         self.current_cache_size = 0
-        
+
         # In-memory caches
         self.memory_cache = OrderedDict()  # LRU cache
         self.query_plans = {}  # Query plan cache
@@ -121,22 +117,22 @@ class IntelligentQueryOptimizer:
             avg_time_ms=0, min_time_ms=float('inf'), max_time_ms=0,
             cache_hits=0, cache_misses=0, last_executed=datetime.now()
         ))
-        
+
         # Performance tracking
         self.optimization_rules = self._load_optimization_rules()
         self.query_patterns = defaultdict(int)
-        
+
         # Threading
         self.lock = threading.RLock()
         self.executor = ThreadPoolExecutor(max_workers=4)
-        
+
         # Initialize cache database
         self._init_cache_db()
-        
+
         logger.info("IntelligentQueryOptimizer initialized",
                    cache_size_mb=cache_size_mb,
                    cache_db_path=cache_db_path)
-    
+
     def _init_cache_db(self):
         """Initialize SQLite cache database"""
         try:
@@ -154,7 +150,7 @@ class IntelligentQueryOptimizer:
                         tags TEXT
                     )
                 """)
-                
+
                 conn.execute("""
                     CREATE TABLE IF NOT EXISTS query_stats (
                         query_hash TEXT PRIMARY KEY,
@@ -169,17 +165,17 @@ class IntelligentQueryOptimizer:
                         optimization_impact REAL
                     )
                 """)
-                
+
                 conn.execute("""
-                    CREATE INDEX IF NOT EXISTS idx_cache_accessed 
+                    CREATE INDEX IF NOT EXISTS idx_cache_accessed
                     ON query_cache(last_accessed)
                 """)
-                
+
                 conn.commit()
-                
+
         except Exception as e:
             logger.error("Failed to initialize cache database", error=str(e))
-    
+
     async def optimize_query(
         self,
         query: str,
@@ -188,63 +184,63 @@ class IntelligentQueryOptimizer:
     ) -> QueryPlan:
         """
         Optimize a Cypher query for better performance.
-        
+
         Args:
             query: Original Cypher query
             parameters: Query parameters
             strategy: Optimization strategy ("auto", "speed", "memory", "accuracy")
-        
+
         Returns:
             Optimized query plan
         """
         if parameters is None:
             parameters = {}
-            
+
         # Generate query hash for caching
         query_content = f"{query}_{json.dumps(parameters, sort_keys=True)}"
         query_hash = hashlib.md5(query_content.encode()).hexdigest()
-        
+
         # Check if we have a cached plan
         if query_hash in self.query_plans:
             plan = self.query_plans[query_hash]
             logger.debug("Using cached query plan", query_hash=query_hash)
             return plan
-        
+
         start_time = time.time()
-        
+
         try:
             # Analyze query structure
             query_analysis = self._analyze_query(query)
-            
+
             # Apply optimization techniques
             optimized_query = query
             optimization_techniques = []
-            
+
             if strategy in ["auto", "speed"]:
                 # Speed optimizations
                 optimized_query, speed_opts = self._apply_speed_optimizations(
                     optimized_query, query_analysis, parameters
                 )
                 optimization_techniques.extend(speed_opts)
-            
+
             if strategy in ["auto", "memory"]:
                 # Memory optimizations
                 optimized_query, memory_opts = self._apply_memory_optimizations(
                     optimized_query, query_analysis
                 )
                 optimization_techniques.extend(memory_opts)
-            
+
             # Estimate query cost
             estimated_cost = await self._estimate_query_cost(optimized_query, parameters)
-            
+
             # Create execution strategy
             execution_strategy = self._determine_execution_strategy(
                 query_analysis, estimated_cost, strategy
             )
-            
+
             # Generate cache key
             cache_key = self._generate_cache_key(optimized_query, parameters)
-            
+
             # Create query plan
             plan = QueryPlan(
                 original_query=query,
@@ -260,18 +256,18 @@ class IntelligentQueryOptimizer:
                     "strategy": strategy
                 }
             )
-            
+
             # Cache the plan
             self.query_plans[query_hash] = plan
-            
+
             logger.info("Query optimized",
                        query_hash=query_hash,
                        techniques=len(optimization_techniques),
                        estimated_cost=estimated_cost,
                        strategy=execution_strategy)
-            
+
             return plan
-            
+
         except Exception as e:
             logger.error("Query optimization failed", error=str(e))
             # Return original query as fallback
@@ -284,11 +280,11 @@ class IntelligentQueryOptimizer:
                 optimization_techniques=[],
                 metadata={"error": str(e)}
             )
-    
+
     def _analyze_query(self, query: str) -> Dict[str, Any]:
         """Analyze query structure and patterns"""
         query_lower = query.lower()
-        
+
         analysis = {
             "query_type": "unknown",
             "complexity": "low",
@@ -300,7 +296,7 @@ class IntelligentQueryOptimizer:
             "estimated_result_size": "small",
             "optimization_opportunities": []
         }
-        
+
         # Determine query type
         if "match" in query_lower:
             if "create" in query_lower or "merge" in query_lower:
@@ -311,41 +307,41 @@ class IntelligentQueryOptimizer:
             analysis["query_type"] = "create"
         elif "delete" in query_lower:
             analysis["query_type"] = "delete"
-        
+
         # Check for complexity indicators
         if "with" in query_lower or "union" in query_lower:
             analysis["complexity"] = "high"
         elif "*" in query or "collect" in query_lower:
             analysis["complexity"] = "medium"
-        
+
         # Check for aggregation
         aggregation_functions = ["count", "sum", "avg", "min", "max", "collect"]
         analysis["has_aggregation"] = any(func in query_lower for func in aggregation_functions)
-        
+
         # Check for sorting and limiting
         analysis["has_sorting"] = "order by" in query_lower
         analysis["has_limiting"] = "limit" in query_lower or "skip" in query_lower
-        
+
         # Find relationship patterns
         rel_patterns = re.findall(r'-\[([^\]]*)\]-', query)
         analysis["relationship_patterns"] = [p.strip(':') for p in rel_patterns if p]
-        
+
         # Find node labels
         label_patterns = re.findall(r'\([\w]*:(\w+)[^\)]*\)', query)
         analysis["node_labels"] = list(set(label_patterns))
-        
+
         # Identify optimization opportunities
         if not analysis["has_limiting"] and analysis["query_type"] == "read":
             analysis["optimization_opportunities"].append("add_limit")
-        
+
         if "*" in query and not analysis["has_limiting"]:
             analysis["optimization_opportunities"].append("limit_traversal")
-        
+
         if analysis["has_aggregation"] and not analysis["has_sorting"]:
             analysis["optimization_opportunities"].append("optimize_aggregation")
-        
+
         return analysis
-    
+
     def _apply_speed_optimizations(
         self,
         query: str,
@@ -355,13 +351,13 @@ class IntelligentQueryOptimizer:
         """Apply speed-focused optimizations"""
         optimized_query = query
         techniques = []
-        
+
         # Add LIMIT if missing for read queries
         if "add_limit" in analysis["optimization_opportunities"]:
             if not re.search(r'\bLIMIT\s+\d+', optimized_query, re.IGNORECASE):
                 optimized_query += " LIMIT 1000"
                 techniques.append("added_default_limit")
-        
+
         # Optimize variable-length relationships
         if "limit_traversal" in analysis["optimization_opportunities"]:
             # Replace unrestricted * with reasonable limits
@@ -371,13 +367,13 @@ class IntelligentQueryOptimizer:
                 optimized_query
             )
             techniques.append("limited_traversal_depth")
-        
+
         # Add index hints for known patterns
         if analysis["node_labels"]:
             for label in analysis["node_labels"]:
                 if label in ["PLCProgram", "Routine", "AOI", "UDT"]:
                     techniques.append(f"index_hint_{label}")
-        
+
         # Optimize ORDER BY with LIMIT
         if analysis["has_sorting"] and analysis["has_limiting"]:
             # Ensure ORDER BY comes before LIMIT for better performance
@@ -388,9 +384,9 @@ class IntelligentQueryOptimizer:
                 flags=re.IGNORECASE
             )
             techniques.append("reordered_limit_orderby")
-        
+
         return optimized_query, techniques
-    
+
     def _apply_memory_optimizations(
         self,
         query: str,
@@ -399,24 +395,24 @@ class IntelligentQueryOptimizer:
         """Apply memory-focused optimizations"""
         optimized_query = query
         techniques = []
-        
+
         # Optimize aggregation queries
         if "optimize_aggregation" in analysis["optimization_opportunities"]:
             # Use WITH to break up complex aggregations
             if "count" in query.lower() and "collect" in query.lower():
                 techniques.append("split_aggregation")
-        
+
         # Reduce result set size for complex traversals
         if analysis["complexity"] == "high":
             techniques.append("added_filters")
-        
+
         # Stream large results
         if not analysis["has_limiting"] and analysis["estimated_result_size"] == "large":
             optimized_query += " LIMIT 10000"
             techniques.append("stream_optimization")
-        
+
         return optimized_query, techniques
-    
+
     async def _estimate_query_cost(
         self,
         query: str,
@@ -428,25 +424,25 @@ class IntelligentQueryOptimizer:
                 # Use EXPLAIN to get query plan
                 result = session.run(f"EXPLAIN {query}", parameters)
                 plan = result.consume().plan
-                
+
                 # Simplified cost estimation based on plan
                 cost = 1.0
-                
+
                 # Add cost for each operator
                 if plan:
                     cost += self._calculate_plan_cost(plan)
-                
+
                 return min(cost, 100.0)  # Cap at 100
-                
+
         except Exception as e:
             logger.warning("Failed to estimate query cost", error=str(e))
             return 5.0
-    
+
     def _calculate_plan_cost(self, plan) -> float:
         """Calculate cost from Neo4j query plan"""
         cost = 0.0
         plan_str = str(plan).lower()
-        
+
         # Add cost for expensive operations
         if "nodebyLabelscan" in plan_str:
             cost += 2.0
@@ -458,9 +454,9 @@ class IntelligentQueryOptimizer:
             cost += 3.0
         if "aggregation" in plan_str:
             cost += 2.5
-        
+
         return cost
-    
+
     def _determine_execution_strategy(
         self,
         analysis: Dict[str, Any],
@@ -468,7 +464,7 @@ class IntelligentQueryOptimizer:
         user_strategy: str
     ) -> str:
         """Determine optimal execution strategy"""
-        
+
         if estimated_cost > 50.0:
             return "batched"
         elif analysis["complexity"] == "high":
@@ -479,47 +475,47 @@ class IntelligentQueryOptimizer:
             return "cached"
         else:
             return "direct"
-    
+
     def _generate_cache_key(self, query: str, parameters: Dict[str, Any]) -> str:
         """Generate cache key for query and parameters"""
         query_content = f"{query}_{json.dumps(parameters, sort_keys=True)}"
         return hashlib.sha256(query_content.encode()).hexdigest()
-    
+
     async def get_cached_result(self, cache_key: str) -> Optional[Any]:
         """Get result from cache"""
         with self.lock:
             if cache_key in self.memory_cache:
                 entry = self.memory_cache[cache_key]
-                
+
                 # Check expiry
                 if entry.expiry_time and entry.expiry_time < datetime.now():
                     del self.memory_cache[cache_key]
                     self.current_cache_size -= entry.size_bytes
                     return None
-                
+
                 # Update access statistics
                 entry.last_accessed = datetime.now()
                 entry.access_count += 1
-                
+
                 # Move to end (LRU)
                 self.memory_cache.move_to_end(cache_key)
-                
+
                 logger.debug("Cache hit", cache_key=cache_key[:16])
                 return entry.result
-            
+
             return None
-    
+
     def get_cache_stats(self) -> Dict[str, Any]:
         """Get cache statistics"""
         with self.lock:
             total_size_mb = self.current_cache_size / (1024 * 1024)
             cache_utilization = (self.current_cache_size / self.cache_size_bytes) * 100
-            
+
             # Calculate hit rates
             total_hits = sum(stats.cache_hits for stats in self.query_stats.values())
             total_misses = sum(stats.cache_misses for stats in self.query_stats.values())
             hit_rate = (total_hits / (total_hits + total_misses)) * 100 if (total_hits + total_misses) > 0 else 0
-            
+
             return {
                 "cache_entries": len(self.memory_cache),
                 "cache_size_mb": round(total_size_mb, 2),
@@ -529,7 +525,7 @@ class IntelligentQueryOptimizer:
                 "total_misses": total_misses,
                 "query_plans_cached": len(self.query_plans)
             }
-    
+
     def _load_optimization_rules(self) -> Dict[str, Any]:
         """Load query optimization rules"""
         return {
@@ -540,13 +536,13 @@ class IntelligentQueryOptimizer:
             "cache_ttl_minutes": 30,
             "index_hints": {
                 "PLCProgram": ["name", "uuid"],
-                "Routine": ["name", "uuid"], 
+                "Routine": ["name", "uuid"],
                 "AOI": ["name", "uuid"],
                 "UDT": ["name", "uuid"],
                 "Device": ["catalog_number", "uuid"]
             }
         }
-    
+
     def close(self):
         """Clean up resources"""
         if self.neo4j_driver:
@@ -557,25 +553,25 @@ class IntelligentQueryOptimizer:
 def analyze_query_complexity(query: str) -> str:
     """Analyze query complexity level"""
     query_lower = query.lower()
-    
+
     complexity_indicators = [
         ("high", ["union", "with.*with", "optional match.*optional match"]),
         ("medium", ["collect", "unwind", "\\*", "order by"]),
         ("low", ["match", "return", "where"])
     ]
-    
+
     for level, patterns in complexity_indicators:
         if any(re.search(pattern, query_lower) for pattern in patterns):
             return level
-    
+
     return "low"
 
 def extract_query_patterns(query: str) -> List[str]:
     """Extract common query patterns for optimization"""
     patterns = []
-    
+
     query_lower = query.lower()
-    
+
     # Pattern detection
     if "shortest" in query_lower:
         patterns.append("shortest_path")
@@ -587,5 +583,5 @@ def extract_query_patterns(query: str) -> List[str]:
         patterns.append("aggregation_collect")
     if "order by" in query_lower and "limit" in query_lower:
         patterns.append("top_n")
-    
-    return patterns 
+
+    return patterns

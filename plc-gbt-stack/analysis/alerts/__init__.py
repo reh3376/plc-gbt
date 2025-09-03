@@ -69,15 +69,16 @@ ALERTING_CONFIG = {
 }
 
 # Alerting types and enums
-from enum import Enum
-from typing import Dict, List, Any, Optional, Callable, Union
+import asyncio
+import hashlib
+import json
+import logging
+from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-import asyncio
-import logging
-import json
-import hashlib
-from collections import defaultdict, deque
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Union
+
 
 class AlertPriority(Enum):
     """Alert priority levels"""
@@ -126,18 +127,18 @@ class AlertCondition:
     priority: AlertPriority
     category: AlertCategory
     enabled: bool = True
-    
+
     # Condition logic
     threshold_value: Optional[float] = None
     comparison_operator: str = ">"  # >, <, >=, <=, ==, !=
     time_window: int = 300  # seconds
     consecutive_violations: int = 1
-    
+
     # Notification settings
     notification_channels: List[NotificationChannel] = field(default_factory=list)
     notification_template: Optional[str] = None
     escalation_enabled: bool = True
-    
+
     # Filtering
     applicable_tags: List[str] = field(default_factory=list)
     applicable_sources: List[str] = field(default_factory=list)
@@ -152,34 +153,34 @@ class Alert:
     priority: AlertPriority
     category: AlertCategory
     status: AlertStatus
-    
+
     # Timestamps
     triggered_time: datetime
     acknowledged_time: Optional[datetime] = None
     resolved_time: Optional[datetime] = None
     last_updated: Optional[datetime] = None
-    
+
     # Context information
     source_id: str = "unknown"
     tag_name: Optional[str] = None
     current_value: Optional[float] = None
     threshold_value: Optional[float] = None
-    
+
     # Root cause analysis
     related_alerts: List[str] = field(default_factory=list)
     root_cause_confidence: float = 0.0
     root_cause_explanation: str = ""
-    
+
     # Notification tracking
     notifications_sent: List[Dict[str, Any]] = field(default_factory=list)
     acknowledgment_user: Optional[str] = None
     resolution_notes: str = ""
-    
+
     # Metadata
     metadata: Dict[str, Any] = field(default_factory=dict)
     escalation_level: int = 0
 
-@dataclass 
+@dataclass
 class NotificationMessage:
     """Notification message structure"""
     message_id: str
@@ -189,18 +190,18 @@ class NotificationMessage:
     subject: str
     body: str
     priority: AlertPriority
-    
+
     # Delivery tracking
     created_time: datetime
     sent_time: Optional[datetime] = None
     delivered_time: Optional[datetime] = None
     failed_time: Optional[datetime] = None
-    
+
     # Status and retry
     delivery_status: str = "pending"  # pending, sent, delivered, failed
     retry_count: int = 0
     max_retries: int = 3
-    
+
     # Message content
     template_used: Optional[str] = None
     variables: Dict[str, Any] = field(default_factory=dict)
@@ -212,16 +213,16 @@ class RootCauseAnalysis:
     primary_alert_id: str
     related_alert_ids: List[str]
     confidence_score: float
-    
+
     # Analysis results
     probable_cause: str
     contributing_factors: List[str]
     correlation_evidence: Dict[str, Any]
-    
+
     # Recommendations
     immediate_actions: List[str]
     preventive_actions: List[str]
-    
+
     # Analysis metadata
     analysis_time: datetime
     analysis_method: str
@@ -229,10 +230,10 @@ class RootCauseAnalysis:
 
 # Import alerting modules
 try:
+    from .alert_dashboard import AlertDashboard
     from .alert_engine import AlertEngine
     from .notification_manager import NotificationManager
     from .root_cause_analyzer import RootCauseAnalyzer
-    from .alert_dashboard import AlertDashboard
     ALERTING_MODULES_AVAILABLE = True
 except ImportError:
     ALERTING_MODULES_AVAILABLE = False
@@ -279,7 +280,7 @@ def get_channel_info(channel: str):
         "teams": {
             "name": "Microsoft Teams",
             "description": "Send notifications to Teams channels",
-            "delivery_time": "< 10 seconds", 
+            "delivery_time": "< 10 seconds",
             "reliability": "High",
             "best_for": ["Enterprise environments", "Team coordination", "Rich formatting"],
             "configuration": ["Teams webhook", "Channels", "Connectors"]
@@ -305,41 +306,41 @@ def get_channel_info(channel: str):
 
 def validate_alert_condition(condition: AlertCondition) -> Dict[str, Any]:
     """Validate alert condition configuration"""
-    
+
     validation = {
         "valid": True,
         "errors": [],
         "warnings": []
     }
-    
+
     # Required fields validation
     required_fields = ["condition_id", "name", "condition_type", "priority"]
     for field in required_fields:
         if not getattr(condition, field, None):
             validation["errors"].append(f"Missing required field: {field}")
             validation["valid"] = False
-    
+
     # Condition type validation
     valid_types = ["threshold", "pattern", "anomaly", "custom"]
     if condition.condition_type not in valid_types:
         validation["errors"].append(f"Invalid condition type: {condition.condition_type}")
         validation["valid"] = False
-    
+
     # Threshold condition validation
     if condition.condition_type == "threshold":
         if condition.threshold_value is None:
             validation["errors"].append("Threshold conditions require threshold_value")
             validation["valid"] = False
-        
+
         valid_operators = [">", "<", ">=", "<=", "==", "!="]
         if condition.comparison_operator not in valid_operators:
             validation["errors"].append(f"Invalid comparison operator: {condition.comparison_operator}")
             validation["valid"] = False
-    
+
     # Time window validation
     if condition.time_window <= 0:
         validation["warnings"].append("Time window should be positive")
-    
+
     # Notification channels validation
     valid_channels = [channel.value for channel in NotificationChannel]
     for channel in condition.notification_channels:
@@ -347,14 +348,14 @@ def validate_alert_condition(condition: AlertCondition) -> Dict[str, Any]:
             validation["warnings"].append(f"Unknown notification channel: {channel}")
         elif hasattr(channel, 'value') and channel.value not in valid_channels:
             validation["warnings"].append(f"Unknown notification channel: {channel.value}")
-    
+
     return validation
 
 def create_alert_from_condition(condition: AlertCondition, trigger_data: Dict[str, Any]) -> Alert:
     """Create an alert instance from a condition and trigger data"""
-    
+
     alert_id = f"{condition.condition_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{trigger_data.get('source_id', 'unknown')}"
-    
+
     # Generate alert title and description
     if condition.condition_type == "threshold":
         title = f"{condition.name}: Value {trigger_data.get('current_value', 'N/A')} {condition.comparison_operator} {condition.threshold_value}"
@@ -362,7 +363,7 @@ def create_alert_from_condition(condition: AlertCondition, trigger_data: Dict[st
     else:
         title = condition.name
         description = condition.description
-    
+
     alert = Alert(
         alert_id=alert_id,
         condition_id=condition.condition_id,
@@ -378,22 +379,22 @@ def create_alert_from_condition(condition: AlertCondition, trigger_data: Dict[st
         threshold_value=condition.threshold_value,
         metadata=trigger_data.get("metadata", {})
     )
-    
+
     return alert
 
 def calculate_alert_hash(alert: Alert) -> str:
     """Calculate unique hash for alert deduplication"""
-    
+
     # Create hash from key identifying fields
     hash_data = f"{alert.condition_id}|{alert.source_id}|{alert.tag_name}|{alert.priority.value}"
     return hashlib.md5(hash_data.encode()).hexdigest()
 
-def format_notification_message(alert: Alert, channel: NotificationChannel, 
+def format_notification_message(alert: Alert, channel: NotificationChannel,
                                template: Optional[str] = None) -> NotificationMessage:
     """Format notification message for specific channel"""
-    
+
     message_id = f"msg_{alert.alert_id}_{channel.value}_{datetime.now().strftime('%H%M%S')}"
-    
+
     # Default templates by channel
     if template is None:
         if channel in [NotificationChannel.EMAIL]:
@@ -417,7 +418,7 @@ Status: {alert.status.value}
         elif channel in [NotificationChannel.SMS]:
             subject = f"{alert.priority.value.upper()}: {alert.title[:50]}"
             body = f"ALERT: {alert.title[:100]}... Source: {alert.source_id}. Value: {alert.current_value}. Triggered: {alert.triggered_time.strftime('%H:%M')}"
-        
+
         elif channel in [NotificationChannel.SLACK, NotificationChannel.TEAMS]:
             subject = f"Alert: {alert.title}"
             emoji = "🔴" if alert.priority == AlertPriority.CRITICAL else "🟠" if alert.priority == AlertPriority.HIGH else "🟡"
@@ -450,10 +451,10 @@ Status: {alert.status.value}
             "triggered_time": alert.triggered_time.strftime('%Y-%m-%d %H:%M:%S'),
             "status": alert.status.value
         }
-        
+
         subject = template.format(**variables) if "{" in template else f"Alert: {alert.title}"
         body = template.format(**variables)
-    
+
     message = NotificationMessage(
         message_id=message_id,
         alert_id=alert.alert_id,
@@ -465,21 +466,21 @@ Status: {alert.status.value}
         created_time=datetime.now(),
         variables={"alert": alert}
     )
-    
+
     return message
 
 def filter_alerts(alerts: List[Alert], filters: Dict[str, Any]) -> List[Alert]:
     """Filter alerts based on criteria"""
-    
+
     filtered_alerts = []
-    
+
     for alert in alerts:
         # Priority filter
         if "min_priority" in filters:
             priority_levels = {p.value: i for i, p in enumerate(AlertPriority)}
             if priority_levels.get(alert.priority.value, 99) > priority_levels.get(filters["min_priority"], 0):
                 continue
-        
+
         # Status filter
         if "status" in filters:
             if isinstance(filters["status"], list):
@@ -488,7 +489,7 @@ def filter_alerts(alerts: List[Alert], filters: Dict[str, Any]) -> List[Alert]:
             else:
                 if alert.status.value != filters["status"]:
                     continue
-        
+
         # Category filter
         if "category" in filters:
             if isinstance(filters["category"], list):
@@ -497,7 +498,7 @@ def filter_alerts(alerts: List[Alert], filters: Dict[str, Any]) -> List[Alert]:
             else:
                 if alert.category.value != filters["category"]:
                     continue
-        
+
         # Source filter
         if "source_id" in filters:
             if isinstance(filters["source_id"], list):
@@ -506,24 +507,24 @@ def filter_alerts(alerts: List[Alert], filters: Dict[str, Any]) -> List[Alert]:
             else:
                 if alert.source_id != filters["source_id"]:
                     continue
-        
+
         # Time filter
         if "time_range" in filters:
             start_time = filters["time_range"].get("start")
             end_time = filters["time_range"].get("end")
-            
+
             if start_time and alert.triggered_time < start_time:
                 continue
             if end_time and alert.triggered_time > end_time:
                 continue
-        
+
         filtered_alerts.append(alert)
-    
+
     return filtered_alerts
 
 def prioritize_alerts(alerts: List[Alert]) -> List[Alert]:
     """Sort alerts by priority and age"""
-    
+
     # Priority order (lower number = higher priority)
     priority_order = {
         AlertPriority.CRITICAL: 0,
@@ -532,7 +533,7 @@ def prioritize_alerts(alerts: List[Alert]) -> List[Alert]:
         AlertPriority.LOW: 3,
         AlertPriority.INFO: 4
     }
-    
+
     return sorted(alerts, key=lambda alert: (
         priority_order.get(alert.priority, 99),
         alert.triggered_time
@@ -540,7 +541,7 @@ def prioritize_alerts(alerts: List[Alert]) -> List[Alert]:
 
 def generate_alert_summary(alerts: List[Alert]) -> Dict[str, Any]:
     """Generate comprehensive alert summary"""
-    
+
     if not alerts:
         return {
             "total_alerts": 0,
@@ -552,27 +553,27 @@ def generate_alert_summary(alerts: List[Alert]) -> Dict[str, Any]:
             "oldest_alert": None,
             "newest_alert": None
         }
-    
+
     # Count by priority
     by_priority = defaultdict(int)
     for alert in alerts:
         by_priority[alert.priority.value] += 1
-    
+
     # Count by category
     by_category = defaultdict(int)
     for alert in alerts:
         by_category[alert.category.value] += 1
-    
+
     # Count by status
     by_status = defaultdict(int)
     for alert in alerts:
         by_status[alert.status.value] += 1
-    
+
     # Find oldest and newest
     sorted_alerts = sorted(alerts, key=lambda a: a.triggered_time)
     oldest_alert = sorted_alerts[0].triggered_time if sorted_alerts else None
     newest_alert = sorted_alerts[-1].triggered_time if sorted_alerts else None
-    
+
     summary = {
         "total_alerts": len(alerts),
         "by_priority": dict(by_priority),
@@ -587,7 +588,7 @@ def generate_alert_summary(alerts: List[Alert]) -> Dict[str, Any]:
         "unresolved_count": len([a for a in alerts if a.status not in [AlertStatus.RESOLVED]]),
         "escalated_count": len([a for a in alerts if a.escalation_level > 0])
     }
-    
+
     return summary
 
 # Export configuration for external use
@@ -595,19 +596,19 @@ __all__ = [
     # Configuration
     "ALERTING_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Data classes
     "AlertCondition",
     "Alert",
     "NotificationMessage",
     "RootCauseAnalysis",
-    
+
     # Enums
     "AlertPriority",
     "AlertStatus",
     "NotificationChannel",
     "AlertCategory",
-    
+
     # Utility functions
     "get_available_channels",
     "get_channel_info",
@@ -618,7 +619,7 @@ __all__ = [
     "filter_alerts",
     "prioritize_alerts",
     "generate_alert_summary",
-    
+
     # Classes (if available)
 ]
 
@@ -643,4 +644,4 @@ def get_package_info():
         "total_modules": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "implementation_status": AVAILABILITY_STATUS
-    } 
+    }

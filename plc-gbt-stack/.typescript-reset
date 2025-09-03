@@ -1,0 +1,6 @@
+# TypeScript Reset Marker
+# This file forces IDE to reset TypeScript cache
+# Created: $(date)
+# 
+# If you're seeing phantom TypeScript errors, delete this file and recreate it
+RESET_TIMESTAMP=1735335000

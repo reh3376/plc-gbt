@@ -32,7 +32,7 @@ class ConversionOptions(BaseModel):
     include_documentation: bool = Field(True, description="Include inline documentation")
     target_version: Optional[str] = Field(None, description="Target L5X version")
     optimization_level: OptimizationLevel = Field(OptimizationLevel.BASIC, description="Optimization level")
-    
+
     class Config:
         use_enum_values = True
 
@@ -52,7 +52,7 @@ class ConversionProgress(BaseModel):
     progress_percentage: int = Field(ge=0, le=100)
     current_step: str
     estimated_time_remaining: Optional[int] = Field(None, description="Seconds remaining")
-    
+
     @validator('progress_percentage')
     def validate_progress(cls, v: int) -> int:
         """Ensure progress is between 0 and 100"""

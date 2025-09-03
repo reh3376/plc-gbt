@@ -5,22 +5,21 @@ Created: January 1, 2025
 Purpose: Transform extracted documents for Neo4j and vector database loading
 """
 
-import os
-import logging
 import asyncio
-import json
-import uuid
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
-from datetime import datetime
 import hashlib
+import json
+import logging
+import os
+import uuid
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 # OpenAI for embeddings
-import openai
+# Neo4j data structures
+from document_parser import ExtractedDocument
 from openai import OpenAI
 
-# Neo4j data structures
-from document_parser import ExtractedDocument, PLCProgram, SpecificationDocument
 
 @dataclass
 class TransformedNode:
@@ -29,7 +28,7 @@ class TransformedNode:
     label: str
     properties: Dict[str, Any]
     relationships: List[Dict[str, Any]]
-    
+
 @dataclass
 class TransformedRelationship:
     """Represents a relationship ready for Neo4j insertion"""
@@ -56,11 +55,11 @@ class TransformationResult:
 
 class ETLTransformer:
     """Transforms extracted documents into graph and vector data"""
-    
+
     def __init__(self, config: Dict[str, Any] = None):
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
-        
+
         # Configure logging
         if not self.logger.handlers:
             handler = logging.StreamHandler()
@@ -70,32 +69,32 @@ class ETLTransformer:
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
             self.logger.setLevel(logging.INFO)
-        
+
         # Initialize OpenAI client
         self.openai_client = OpenAI(
             api_key=os.getenv('OPENAI_API_KEY'),
             organization=os.getenv('OPENAI_ORG_ID')
         )
-        
+
         # Embedding configuration
         self.embedding_model = self.config.get('embedding_model', 'text-embedding-3-large')
         self.embedding_dimensions = self.config.get('embedding_dimensions', 3072)
         self.max_chunk_size = self.config.get('max_chunk_size', 2000)
-        
+
         # UUID cache to maintain consistency
         self.uuid_cache = {}
-    
+
     def generate_uuid(self, identifier: str) -> str:
         """Generate consistent UUID for given identifier"""
         if identifier in self.uuid_cache:
             return self.uuid_cache[identifier]
-        
+
         # Create deterministic UUID based on identifier
         namespace = uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')  # DNS namespace
         generated_uuid = str(uuid.uuid5(namespace, identifier))
         self.uuid_cache[identifier] = generated_uuid
         return generated_uuid
-    
+
     async def generate_embedding(self, text: str) -> Optional[List[float]]:
         """Generate embedding for text using OpenAI API"""
         try:
@@ -103,29 +102,29 @@ class ETLTransformer:
             clean_text = text.strip()
             if len(clean_text) > self.max_chunk_size:
                 clean_text = clean_text[:self.max_chunk_size]
-            
+
             if not clean_text:
                 return None
-            
+
             response = self.openai_client.embeddings.create(
                 model=self.embedding_model,
                 input=clean_text,
                 encoding_format="float"
             )
-            
+
             return response.data[0].embedding
-            
+
         except Exception as e:
             self.logger.error(f"Error generating embedding: {e}")
             return None
-    
+
     async def transform_document(self, extracted_doc: ExtractedDocument) -> TransformationResult:
         """Transform extracted document into graph and vector data"""
         nodes = []
         relationships = []
         vectors = []
         errors = []
-        
+
         try:
             if extracted_doc.file_type == "L5X":
                 nodes, relationships, vectors = await self._transform_l5x_document(extracted_doc)
@@ -133,7 +132,7 @@ class ETLTransformer:
                 nodes, relationships, vectors = await self._transform_pdf_document(extracted_doc)
             else:
                 errors.append(f"Unsupported file type: {extracted_doc.file_type}")
-            
+
             metadata = {
                 "source_file": extracted_doc.file_path,
                 "file_type": extracted_doc.file_type,
@@ -142,7 +141,7 @@ class ETLTransformer:
                 "relationship_count": len(relationships),
                 "vector_count": len(vectors)
             }
-            
+
             return TransformationResult(
                 nodes=nodes,
                 relationships=relationships,
@@ -150,12 +149,12 @@ class ETLTransformer:
                 metadata=metadata,
                 errors=errors
             )
-            
+
         except Exception as e:
             error_msg = f"Error transforming document {extracted_doc.file_path}: {e}"
             self.logger.error(error_msg)
             errors.append(error_msg)
-            
+
             return TransformationResult(
                 nodes=[],
                 relationships=[],
@@ -163,15 +162,15 @@ class ETLTransformer:
                 metadata={"error": error_msg},
                 errors=errors
             )
-    
+
     async def _transform_l5x_document(self, extracted_doc: ExtractedDocument) -> Tuple[List[TransformedNode], List[TransformedRelationship], List[VectorRecord]]:
         """Transform L5X PLC program document"""
         nodes = []
         relationships = []
         vectors = []
-        
+
         plc_program_data = extracted_doc.content.get('plc_program', {})
-        
+
         # Create PLC Program node
         plc_uuid = self.generate_uuid(f"plc:{plc_program_data.get('name', 'unknown')}")
         plc_node = TransformedNode(
@@ -189,12 +188,12 @@ class ETLTransformer:
             relationships=[]
         )
         nodes.append(plc_node)
-        
+
         # Create PLC Program vector embedding
         plc_text = f"PLC Program: {plc_program_data.get('name', '')} " + \
                    f"Firmware: {plc_program_data.get('firmware', '')} " + \
                    f"Project: {plc_program_data.get('project', '')}"
-        
+
         plc_embedding = await self.generate_embedding(plc_text)
         if plc_embedding:
             vectors.append(VectorRecord(
@@ -207,7 +206,7 @@ class ETLTransformer:
                     "file_path": extracted_doc.file_path
                 }
             ))
-        
+
         # Transform Routines
         for routine_data in plc_program_data.get('routines', []):
             routine_uuid = self.generate_uuid(f"routine:{routine_data.get('name', 'unknown')}")
@@ -226,7 +225,7 @@ class ETLTransformer:
                 relationships=[]
             )
             nodes.append(routine_node)
-            
+
             # Create relationships
             relationships.append(TransformedRelationship(
                 source_uuid=plc_uuid,
@@ -234,19 +233,19 @@ class ETLTransformer:
                 type="CONTAINS",
                 properties={"created_at": datetime.now().isoformat()}
             ))
-            
+
             relationships.append(TransformedRelationship(
                 source_uuid=routine_uuid,
                 target_uuid=plc_uuid,
                 type="IN_PROGRAM",
                 properties={"created_at": datetime.now().isoformat()}
             ))
-            
+
             # Create routine vector embedding
             routine_text = f"Routine: {routine_data.get('name', '')} " + \
                           f"Language: {routine_data.get('language', '')} " + \
                           f"Description: {routine_data.get('description', '')}"
-            
+
             routine_embedding = await self.generate_embedding(routine_text)
             if routine_embedding:
                 vectors.append(VectorRecord(
@@ -260,7 +259,7 @@ class ETLTransformer:
                         "file_path": extracted_doc.file_path
                     }
                 ))
-        
+
         # Transform AOIs
         for aoi_data in plc_program_data.get('aois', []):
             aoi_uuid = self.generate_uuid(f"aoi:{aoi_data.get('name', 'unknown')}")
@@ -280,7 +279,7 @@ class ETLTransformer:
                 relationships=[]
             )
             nodes.append(aoi_node)
-            
+
             # Create relationships
             relationships.append(TransformedRelationship(
                 source_uuid=plc_uuid,
@@ -288,12 +287,12 @@ class ETLTransformer:
                 type="CONTAINS",
                 properties={"created_at": datetime.now().isoformat()}
             ))
-            
+
             # Create AOI vector embedding
             aoi_text = f"Add-On Instruction: {aoi_data.get('name', '')} " + \
                        f"Revision: {aoi_data.get('revision', '')} " + \
                        f"Description: {aoi_data.get('description', '')}"
-            
+
             aoi_embedding = await self.generate_embedding(aoi_text)
             if aoi_embedding:
                 vectors.append(VectorRecord(
@@ -307,7 +306,7 @@ class ETLTransformer:
                         "file_path": extracted_doc.file_path
                     }
                 ))
-        
+
         # Transform UDTs
         for udt_data in plc_program_data.get('udts', []):
             udt_uuid = self.generate_uuid(f"udt:{udt_data.get('name', 'unknown')}")
@@ -327,7 +326,7 @@ class ETLTransformer:
                 relationships=[]
             )
             nodes.append(udt_node)
-            
+
             # Create relationships
             relationships.append(TransformedRelationship(
                 source_uuid=plc_uuid,
@@ -335,12 +334,12 @@ class ETLTransformer:
                 type="CONTAINS",
                 properties={"created_at": datetime.now().isoformat()}
             ))
-            
+
             # Create UDT vector embedding
             udt_text = f"User Defined Type: {udt_data.get('name', '')} " + \
                        f"Size: {udt_data.get('size', 0)} bytes " + \
                        f"Description: {udt_data.get('description', '')}"
-            
+
             udt_embedding = await self.generate_embedding(udt_text)
             if udt_embedding:
                 vectors.append(VectorRecord(
@@ -354,7 +353,7 @@ class ETLTransformer:
                         "file_path": extracted_doc.file_path
                     }
                 ))
-        
+
         # Transform Tags
         for tag_data in plc_program_data.get('tags', []):
             tag_uuid = self.generate_uuid(f"tag:{tag_data.get('name', 'unknown')}")
@@ -375,7 +374,7 @@ class ETLTransformer:
                 relationships=[]
             )
             nodes.append(tag_node)
-        
+
         # Transform Devices
         for device_data in plc_program_data.get('devices', []):
             device_uuid = self.generate_uuid(f"device:{device_data.get('name', 'unknown')}")
@@ -395,7 +394,7 @@ class ETLTransformer:
                 relationships=[]
             )
             nodes.append(device_node)
-            
+
             # Create device relationships
             relationships.append(TransformedRelationship(
                 source_uuid=device_uuid,
@@ -403,18 +402,18 @@ class ETLTransformer:
                 type="HOSTS",
                 properties={"created_at": datetime.now().isoformat()}
             ))
-        
+
         return nodes, relationships, vectors
-    
+
     async def _transform_pdf_document(self, extracted_doc: ExtractedDocument) -> Tuple[List[TransformedNode], List[TransformedRelationship], List[VectorRecord]]:
         """Transform PDF specification document"""
         nodes = []
         relationships = []
         vectors = []
-        
+
         content = extracted_doc.content
         metadata = extracted_doc.metadata
-        
+
         # Create SpecDoc node
         spec_uuid = self.generate_uuid(f"specdoc:{extracted_doc.file_path}")
         spec_node = TransformedNode(
@@ -434,12 +433,12 @@ class ETLTransformer:
             relationships=[]
         )
         nodes.append(spec_node)
-        
+
         # Create document-level vector embedding
         doc_text = f"Document: {metadata.get('title', '')} " + \
                    f"Type: {content.get('doc_type', '')} " + \
                    f"Content: {content.get('full_text', '')[:500]}..."  # First 500 chars
-        
+
         doc_embedding = await self.generate_embedding(doc_text)
         if doc_embedding:
             vectors.append(VectorRecord(
@@ -453,13 +452,13 @@ class ETLTransformer:
                     "file_path": extracted_doc.file_path
                 }
             ))
-        
+
         # Create section embeddings
         for section in content.get('sections', []):
             section_uuid = self.generate_uuid(f"section:{spec_uuid}:{section.get('title', 'unknown')}")
             section_text = f"Section: {section.get('title', '')} " + \
                           f"Content: {section.get('content', '')}"
-            
+
             section_embedding = await self.generate_embedding(section_text)
             if section_embedding:
                 vectors.append(VectorRecord(
@@ -473,7 +472,7 @@ class ETLTransformer:
                         "file_path": extracted_doc.file_path
                     }
                 ))
-        
+
         # Transform Q&A pairs
         for qa_data in content.get('qa_pairs', []):
             qa_uuid = self.generate_uuid(f"qa:{hashlib.md5(qa_data.get('question', '').encode()).hexdigest()}")
@@ -492,7 +491,7 @@ class ETLTransformer:
                 relationships=[]
             )
             nodes.append(qa_node)
-            
+
             # Create relationship to source document
             relationships.append(TransformedRelationship(
                 source_uuid=qa_uuid,
@@ -503,7 +502,7 @@ class ETLTransformer:
                     "page_reference": qa_data.get('source_line', 0)
                 }
             ))
-            
+
             # Create Q&A vector embedding
             qa_text = f"Question: {qa_data.get('question', '')} Answer: {qa_data.get('answer', '')}"
             qa_embedding = await self.generate_embedding(qa_text)
@@ -520,9 +519,9 @@ class ETLTransformer:
                         "file_path": extracted_doc.file_path
                     }
                 ))
-        
+
         return nodes, relationships, vectors
-    
+
     def chunk_text(self, text: str, max_chunk_size: int = None) -> List[str]:
         """Split text into chunks for embedding"""
         max_size = max_chunk_size or self.max_chunk_size
@@ -530,7 +529,7 @@ class ETLTransformer:
         chunks = []
         current_chunk = []
         current_size = 0
-        
+
         for word in words:
             word_size = len(word) + 1  # +1 for space
             if current_size + word_size > max_size and current_chunk:
@@ -540,74 +539,75 @@ class ETLTransformer:
             else:
                 current_chunk.append(word)
                 current_size += word_size
-        
+
         if current_chunk:
             chunks.append(' '.join(current_chunk))
-        
+
         return chunks
-    
+
     async def batch_generate_embeddings(self, texts: List[str]) -> List[Optional[List[float]]]:
         """Generate embeddings for multiple texts in batch"""
         embeddings = []
-        
+
         for text in texts:
             embedding = await self.generate_embedding(text)
             embeddings.append(embedding)
-            
+
             # Small delay to respect rate limits
             await asyncio.sleep(0.1)
-        
+
         return embeddings
 
 def main():
     """Test the ETL transformer"""
     import sys
+
     from document_parser import DocumentParser
-    
+
     if len(sys.argv) < 2:
         print("Usage: python etl_transformer.py <file_path>")
         sys.exit(1)
-    
+
     file_path = sys.argv[1]
-    
+
     async def test_transform():
         # Parse document first
         parser = DocumentParser()
         extracted_doc = parser.parse_document(file_path)
-        
+
         if not extracted_doc:
             print(f"Failed to parse {file_path}")
             return
-        
+
         # Transform document
         transformer = ETLTransformer()
         result = await transformer.transform_document(extracted_doc)
-        
+
         print(f"Transformation Results for {file_path}:")
         print(f"Nodes: {len(result.nodes)}")
         print(f"Relationships: {len(result.relationships)}")
         print(f"Vectors: {len(result.vectors)}")
         print(f"Errors: {len(result.errors)}")
-        
+
         if result.errors:
             print("Errors:")
             for error in result.errors:
                 print(f"  - {error}")
-        
+
         # Print some sample data
         if result.nodes:
             print("\nSample Node:")
             print(f"  UUID: {result.nodes[0].uuid}")
             print(f"  Label: {result.nodes[0].label}")
             print(f"  Properties: {list(result.nodes[0].properties.keys())}")
-        
+
         if result.vectors:
             print("\nSample Vector:")
             print(f"  ID: {result.vectors[0].id}")
             print(f"  Dimensions: {len(result.vectors[0].vector)}")
             print(f"  Payload: {list(result.vectors[0].payload.keys())}")
-    
+
     asyncio.run(test_transform())
 
 if __name__ == "__main__":
-    main() 
+    main()

@@ -25,21 +25,18 @@ Phase: Alternative LLM Integration (Post-MCP)
 import asyncio
 import json
 import logging
-import os
-import subprocess
 import sys
 import time
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Depends, Body, Query, Path as PathParam, WebSocket, WebSocketDisconnect
+from fastapi import Body, Depends, FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 # Configure logging
@@ -120,7 +117,7 @@ class CommandRequest(BaseModel):
 
 class CLIExecutor:
     """Secure CLI command executor with validation and sandboxing"""
-    
+
     def __init__(self):
         self.allowed_commands = {
             "plc-cl": {
@@ -129,37 +126,37 @@ class CLIExecutor:
                 "description": "Control loop management commands"
             },
             "plc-memory": {
-                "executable": "python3", 
+                "executable": "python3",
                 "script_path": str(project_root / "scripts" / "cli" / "plc_memory_cli.py"),
                 "description": "Memory system operations"
             }
         }
         self.command_history: List[CLICommandResult] = []
         self.max_history = 1000
-        
-    async def execute_command(self, command: str, args: List[str], 
+
+    async def execute_command(self, command: str, args: List[str],
                             command_timeout: float = 30.0, working_dir: Optional[str] = None) -> CLICommandResult:
         """Execute CLI command with validation and security controls"""
         start_time = time.time()
-        
+
         # Validate command
         if command not in self.allowed_commands:
             raise ValueError(f"Command '{command}' not allowed. Allowed: {list(self.allowed_commands.keys())}")
-        
+
         cmd_config = self.allowed_commands[command]
-        
+
         # Build full command
         if cmd_config["executable"] == "python3":
             full_cmd = ["python3", cmd_config["script_path"]] + args
         else:
             full_cmd = [cmd_config["executable"]] + args
-            
+
         # Set working directory
         if working_dir is None:
             working_dir = str(project_root)
-            
+
         logger.info(f"Executing command: {' '.join(full_cmd)} in {working_dir}")
-        
+
         try:
             # Execute command
             process = await asyncio.create_subprocess_exec(
@@ -168,13 +165,13 @@ class CLIExecutor:
                 stderr=asyncio.subprocess.PIPE,
                 cwd=working_dir
             )
-            
+
             # Wait with timeout using context manager
             async with asyncio.timeout(command_timeout):
                 stdout, stderr = await process.communicate()
-            
+
             execution_time = time.time() - start_time
-            
+
             # Create result
             result = CLICommandResult(
                 command=f"{command} {' '.join(args)}",
@@ -185,7 +182,7 @@ class CLIExecutor:
                 execution_time=execution_time,
                 timestamp=datetime.now(timezone.utc)
             )
-            
+
         except asyncio.TimeoutError:
             result = CLICommandResult(
                 command=f"{command} {' '.join(args)}",
@@ -196,7 +193,7 @@ class CLIExecutor:
                 execution_time=time.time() - start_time,
                 timestamp=datetime.now(timezone.utc)
             )
-            
+
         except Exception as e:
             result = CLICommandResult(
                 command=f"{command} {' '.join(args)}",
@@ -207,12 +204,12 @@ class CLIExecutor:
                 execution_time=time.time() - start_time,
                 timestamp=datetime.now(timezone.utc)
             )
-        
+
         # Store in history
         self._add_to_history(result)
-        
+
         return result
-    
+
     def _add_to_history(self, result: CLICommandResult):
         """Add command result to history"""
         self.command_history.append(result)
@@ -278,9 +275,9 @@ async def list_schemas(
         args.extend(["--type", schema_type])
     if search:
         args.extend(["--search", search])
-    
+
     result = await cli_executor.execute_command("plc-cl", args)
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message="Schema list retrieved" if result.status == ExecutionStatus.SUCCESS else "Failed to retrieve schemas",
@@ -300,9 +297,9 @@ async def create_schema(
     args = ["schema", "create", schema_name, "--type", schema_type]
     if description:
         args.extend(["--description", description])
-    
+
     result = await cli_executor.execute_command("plc-cl", args)
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message=f"Schema '{schema_name}' created" if result.status == ExecutionStatus.SUCCESS else "Failed to create schema",
@@ -326,9 +323,9 @@ async def list_instances(
         args.extend(["--status", status])
     if plc_host:
         args.extend(["--plc-host", plc_host])
-    
+
     result = await cli_executor.execute_command("plc-cl", args)
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message="Instance list retrieved" if result.status == ExecutionStatus.SUCCESS else "Failed to retrieve instances",
@@ -348,9 +345,9 @@ async def create_instance(
     args = ["instance", "create", instance_name, "--schema", schema_name]
     if plc_host:
         args.extend(["--plc-host", plc_host])
-    
+
     result = await cli_executor.execute_command("plc-cl", args)
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message=f"Instance '{instance_name}' created" if result.status == ExecutionStatus.SUCCESS else "Failed to create instance",
@@ -372,9 +369,9 @@ async def connect_plc(
 ):
     """Connect to ControlLogix PLC via CLI"""
     args = ["instance", "plc", "connect", "--host", host, "--slot", str(slot), "--timeout", str(timeout)]
-    
+
     result = await cli_executor.execute_command("plc-cl", args)
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message=f"Connected to PLC {host}" if result.status == ExecutionStatus.SUCCESS else "Failed to connect to PLC",
@@ -393,9 +390,9 @@ async def read_plc_tags(
     args = ["instance", "plc", "read"] + tags
     if connection_id:
         args.extend(["--connection", connection_id])
-    
+
     result = await cli_executor.execute_command("plc-cl", args)
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message="PLC tags read successfully" if result.status == ExecutionStatus.SUCCESS else "Failed to read PLC tags",
@@ -421,9 +418,9 @@ async def query_memory(
         args.extend(["--database", database])
     if limit:
         args.extend(["--limit", str(limit)])
-    
+
     result = await cli_executor.execute_command("plc-memory", args)
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message="Memory query executed" if result.status == ExecutionStatus.SUCCESS else "Memory query failed",
@@ -442,9 +439,9 @@ async def ingest_memory(
     args = ["ingest"] + paths
     if force:
         args.append("--force")
-    
+
     result = await cli_executor.execute_command("plc-memory", args)
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message="Files ingested successfully" if result.status == ExecutionStatus.SUCCESS else "Ingestion failed",
@@ -470,9 +467,9 @@ async def create_batch(
         args.extend(["--config", config_file])
     if dry_run:
         args.append("--dry-run")
-    
+
     result = await cli_executor.execute_command("plc-cl", args)
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message="Batch operation executed" if result.status == ExecutionStatus.SUCCESS else "Batch operation failed",
@@ -489,7 +486,7 @@ async def create_batch(
 async def get_system_status(user = Depends(get_current_user)):
     """Get overall system status via CLI"""
     result = await cli_executor.execute_command("plc-cl", ["status"])
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message="System status retrieved" if result.status == ExecutionStatus.SUCCESS else "Failed to get system status",
@@ -505,7 +502,7 @@ async def get_command_history(
 ):
     """Get recent command execution history"""
     recent_commands = cli_executor.command_history[-limit:]
-    
+
     history_data = []
     for cmd in recent_commands:
         history_data.append({
@@ -515,7 +512,7 @@ async def get_command_history(
             "execution_time": cmd.execution_time,
             "timestamp": cmd.timestamp.isoformat()
         })
-    
+
     return APIResponse(
         success=True,
         message=f"Retrieved {len(history_data)} command history entries",
@@ -538,7 +535,7 @@ async def execute_cli_command(
         timeout=request.timeout,
         working_dir=request.working_directory
     )
-    
+
     return APIResponse(
         success=result.status == ExecutionStatus.SUCCESS,
         message="Command executed" if result.status == ExecutionStatus.SUCCESS else "Command failed",
@@ -573,7 +570,7 @@ async def get_capabilities():
         "endpoints": {
             "control_loops": [
                 "POST /api/v1/cli/schema/list",
-                "POST /api/v1/cli/schema/create", 
+                "POST /api/v1/cli/schema/create",
                 "POST /api/v1/cli/instance/list",
                 "POST /api/v1/cli/instance/create"
             ],
@@ -598,11 +595,11 @@ async def get_capabilities():
         "rate_limits": "none",
         "documentation": "/docs"
     }
-    
+
     return capabilities
 
 # =============================================================================
-# FRONTEND ADAPTER ENDPOINTS 
+# FRONTEND ADAPTER ENDPOINTS
 # =============================================================================
 # These endpoints provide compatibility with the existing frontend expectations
 
@@ -615,14 +612,14 @@ async def get_instances_adapter():
     try:
         # Execute CLI command to get instances
         result = await cli_executor.execute_command("plc-cl", ["instance", "list"])
-        
+
         # Layer 2: Robust Fallback System - Always return valid data
         # Mock structured data matching frontend expectations
         mock_instances = [
             {
                 "id": "loop-001",
                 "name": "Temperature Control Loop 1",
-                "type": "PID", 
+                "type": "PID",
                 "status": "active",
                 "setpoint": 75.0,
                 "processValue": 74.8,
@@ -630,20 +627,20 @@ async def get_instances_adapter():
                 "lastUpdated": datetime.now(timezone.utc).isoformat()
             },
             {
-                "id": "loop-002", 
+                "id": "loop-002",
                 "name": "Pressure Control Loop 1",
                 "type": "PID",
-                "status": "active", 
+                "status": "active",
                 "setpoint": 15.0,
                 "processValue": 14.9,
                 "output": 52.1,
                 "lastUpdated": datetime.now(timezone.utc).isoformat()
             }
         ]
-        
+
         # Combine mock instances with created instances regardless of CLI status
         all_instances = mock_instances + list(created_instances.values())
-        
+
         if result.status == ExecutionStatus.SUCCESS:
             logger.info(f"CLI SUCCESS: Returning {len(all_instances)} instances ({len(mock_instances)} mock + {len(created_instances)} created)")
             return APIResponse(
@@ -691,9 +688,9 @@ async def create_instance_adapter(instance_data: Dict[str, Any]):
         args = ["instance", "create", "--name", instance_data.get("name", "New Instance")]
         if instance_data.get("schema"):
             args.extend(["--schema", instance_data["schema"]])
-            
+
         result = await cli_executor.execute_command("plc-cl", args)
-        
+
         if result.status == ExecutionStatus.SUCCESS:
             # Generate unique ID and store instance
             instance_id = f"loop-{int(time.time())}"
@@ -709,7 +706,7 @@ async def create_instance_adapter(instance_data: Dict[str, Any]):
                 "created": datetime.now(timezone.utc).isoformat()
             }
             logger.info(f"Stored new instance {instance_id}: {created_instances[instance_id]['name']}")
-            
+
             return APIResponse(
                 success=True,
                 message=f"Instance '{instance_data.get('name', 'New Instance')}' created successfully",
@@ -738,7 +735,7 @@ async def get_instance_adapter(instance_id: str):
     """
     try:
         result = await cli_executor.execute_command("plc-cl", ["instance", "get", "--id", instance_id])
-        
+
         if result.status == ExecutionStatus.SUCCESS:
             # Mock instance data - in real implementation, parse CLI output
             mock_instance = {
@@ -751,7 +748,7 @@ async def get_instance_adapter(instance_id: str):
                 "output": 45.2,
                 "lastUpdated": datetime.now(timezone.utc).isoformat()
             }
-            
+
             return APIResponse(
                 success=True,
                 message="Instance retrieved",
@@ -783,9 +780,9 @@ async def update_instance_adapter(instance_id: str, updates: Dict[str, Any]):
         args = ["instance", "update", "--id", instance_id]
         for key, value in updates.items():
             args.extend([f"--{key}", str(value)])
-            
+
         result = await cli_executor.execute_command("plc-cl", args)
-        
+
         return APIResponse(
             success=result.status == ExecutionStatus.SUCCESS,
             message="Instance updated" if result.status == ExecutionStatus.SUCCESS else "Failed to update instance",
@@ -807,7 +804,7 @@ async def delete_instance_adapter(instance_id: str):
     """
     try:
         result = await cli_executor.execute_command("plc-cl", ["instance", "delete", "--id", instance_id])
-        
+
         return APIResponse(
             success=result.status == ExecutionStatus.SUCCESS,
             message="Instance deleted" if result.status == ExecutionStatus.SUCCESS else "Failed to delete instance",
@@ -842,7 +839,7 @@ class ConnectionManager:
             if websocket not in self.active_connections:
                 logger.debug("WebSocket not in active connections, skipping message")
                 return
-                
+
             if websocket.client_state.name == "CONNECTED":
                 await websocket.send_text(message)
             else:
@@ -869,7 +866,7 @@ class ConnectionManager:
             except Exception as e:
                 logger.debug(f"WebSocket broadcast failed: {e}")
                 disconnected_connections.append(connection)
-        
+
         # Clean up disconnected connections
         for connection in disconnected_connections:
             self.disconnect(connection)
@@ -886,7 +883,7 @@ async def periodic_control_loop_updates():
         try:
             if manager.active_connections:
                 current_time = time.time()
-                
+
                 # Generate dynamic values for loop-001
                 loop_001_message = {
                     "type": "control_loop_update",
@@ -900,7 +897,7 @@ async def periodic_control_loop_updates():
                         }
                     }
                 }
-                
+
                 # Generate dynamic values for loop-002
                 loop_002_message = {
                     "type": "control_loop_update",
@@ -914,16 +911,16 @@ async def periodic_control_loop_updates():
                         }
                     }
                 }
-                
+
                 # Broadcast to all connected clients
                 await manager.broadcast(json.dumps(loop_001_message))
                 await manager.broadcast(json.dumps(loop_002_message))
-                
+
                 logger.debug(f"Sent periodic updates to {len(manager.active_connections)} clients")
-                
+
         except Exception as e:
             logger.error(f"Error in periodic updates: {e}")
-        
+
         # Wait 3 seconds before next update
         await asyncio.sleep(3)
 
@@ -938,7 +935,7 @@ async def websocket_endpoint(websocket: WebSocket):
         # Use ConnectionManager for proper connection handling
         await manager.connect(websocket)
         logger.info(f"WebSocket {connection_id} connected successfully")
-        
+
         # Send immediate connection confirmation using ConnectionManager
         initial_message = {
             "type": "connection_established",
@@ -946,13 +943,13 @@ async def websocket_endpoint(websocket: WebSocket):
             "message": "WebSocket connected to industrial backend",
             "connection_id": connection_id
         }
-        
+
         await manager.send_personal_message(json.dumps(initial_message), websocket)
         logger.info(f"Sent connection confirmation to {connection_id}")
-        
+
         # Send immediate data samples in correct format using ConnectionManager
         loop_001_message = {
-            "type": "control_loop_update", 
+            "type": "control_loop_update",
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "data": {
                 "loop_id": "loop-001",
@@ -963,12 +960,12 @@ async def websocket_endpoint(websocket: WebSocket):
                 }
             }
         }
-        
+
         loop_002_message = {
-            "type": "control_loop_update", 
+            "type": "control_loop_update",
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "data": {
-                "loop_id": "loop-002", 
+                "loop_id": "loop-002",
                 "updates": {
                     "process_value": round(14.9 + (time.time() % 3), 2),
                     "control_output": round(52.1 + (time.time() % 7), 2),
@@ -976,18 +973,18 @@ async def websocket_endpoint(websocket: WebSocket):
                 }
             }
         }
-        
+
         await manager.send_personal_message(json.dumps(loop_001_message), websocket)
         await manager.send_personal_message(json.dumps(loop_002_message), websocket)
         logger.info(f"Sent initial control loop data to {connection_id}")
-        
+
         # Simple message loop - just keep connection alive
         try:
             while True:
                 # Wait for client messages or connection close
                 message = await websocket.receive_text()
                 logger.debug(f"Received message from {connection_id}: {message}")
-                
+
                 # Echo back or handle specific requests using ConnectionManager
                 if message == "ping":
                     await manager.send_personal_message("pong", websocket)
@@ -1007,12 +1004,12 @@ async def websocket_endpoint(websocket: WebSocket):
                         }
                     }
                     await manager.send_personal_message(json.dumps(update_message), websocket)
-                
+
         except WebSocketDisconnect:
             logger.info(f"WebSocket {connection_id} disconnected normally")
         except Exception as e:
             logger.debug(f"WebSocket {connection_id} connection ended: {e}")
-                    
+
     except Exception as e:
         logger.error(f"WebSocket {connection_id} error: {e}")
     finally:
@@ -1034,7 +1031,7 @@ async def list_files():
         workspace_path = Path("./mock_files")  # Using mock files directory
         if not workspace_path.exists():
             workspace_path.mkdir(exist_ok=True)
-            
+
         files = []
         for item in workspace_path.rglob("*"):
             if item.is_file():
@@ -1055,7 +1052,7 @@ async def list_files():
                     "path": str(item.relative_to(workspace_path)),
                     "children": []
                 })
-                
+
         return APIResponse(
             success=True,
             message=f"Retrieved {len(files)} files and folders",
@@ -1078,19 +1075,19 @@ async def create_file(file_data: Dict[str, Any]):
     try:
         workspace_path = Path("./mock_files")
         workspace_path.mkdir(exist_ok=True)
-        
+
         file_name = file_data.get("name", "new_file.txt")
         file_type = file_data.get("type", "file")
         parent_path = file_data.get("parentPath", "")
-        
+
         target_path = workspace_path / parent_path / file_name
         target_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         if file_type == "folder":
             target_path.mkdir(exist_ok=True)
         else:
             target_path.write_text(file_data.get("content", ""))
-            
+
         return APIResponse(
             success=True,
             message=f"Created {file_type}: {file_name}",
@@ -1117,14 +1114,14 @@ async def delete_file(file_id: str):
     try:
         workspace_path = Path("./mock_files")
         target_path = workspace_path / file_id
-        
+
         if target_path.exists():
             if target_path.is_dir():
                 import shutil
                 shutil.rmtree(target_path)
             else:
                 target_path.unlink()
-                
+
             return APIResponse(
                 success=True,
                 message=f"Deleted: {file_id}",
@@ -1152,7 +1149,7 @@ async def startup_event():
     logger.info(f"Starting {APP_TITLE} v{APP_VERSION}")
     logger.info("CLI-to-API Bridge initialized successfully")
     logger.info(f"Available commands: {list(cli_executor.allowed_commands.keys())}")
-    
+
     # Start background task for periodic WebSocket updates
     asyncio.create_task(periodic_control_loop_updates())
     logger.info("Started periodic control loop updates background task")
@@ -1165,4 +1162,4 @@ if __name__ == "__main__":
         port=8000,
         reload=True,
         log_level="info"
-    ) 
+    )

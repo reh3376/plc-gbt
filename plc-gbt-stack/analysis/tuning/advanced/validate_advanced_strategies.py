@@ -13,13 +13,12 @@ Phase: 22.2.3 - Advanced Tuning Strategies
 Methodology: AI Task Orchestrator Guide
 """
 
-import sys
-import os
-import time
 import json
-import traceback
+import os
+import sys
+import time
 from datetime import datetime
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 # Add parent directories to path for proper imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
@@ -29,15 +28,23 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
     # Import advanced strategies
-    from mpc_tuning import MPCTuner, EconomicMPCTuner, RobustMPCTuner, HybridMPCTuner
-    from adaptive_control import AdaptiveController, RLSAdaptiveController, GradientDescentController
-    from gain_scheduling import GainScheduler, LinearGainScheduler, FuzzyGainScheduler
-    from multi_loop_coordination import MultiLoopCoordinator, DecentralizedCoordinator, CentralizedCoordinator
+    from adaptive_control import (
+        AdaptiveController,
+        GradientDescentController,
+        RLSAdaptiveController,
+    )
     from advanced_manager import AdvancedTuningManager
-    
+    from gain_scheduling import FuzzyGainScheduler, GainScheduler, LinearGainScheduler
+    from mpc_tuning import EconomicMPCTuner, HybridMPCTuner, MPCTuner, RobustMPCTuner
+    from multi_loop_coordination import (
+        CentralizedCoordinator,
+        DecentralizedCoordinator,
+        MultiLoopCoordinator,
+    )
+
     IMPORTS_SUCCESSFUL = True
     import_errors = []
-    
+
 except ImportError as e:
     IMPORTS_SUCCESSFUL = False
     import_errors = [str(e)]
@@ -45,35 +52,35 @@ except ImportError as e:
 
 def main():
     """Main validation function"""
-    
+
     print("🧪 Phase 22.2.3: Advanced Tuning Strategies Production Validation")
     print("=" * 80)
-    
+
     if not IMPORTS_SUCCESSFUL:
         print("❌ CRITICAL: Import failures prevent validation")
         for error in import_errors:
             print(f"   Error: {error}")
         return
-    
+
     validator = AdvancedStrategiesValidator()
     results = validator.run_comprehensive_validation()
-    
+
     # Print summary
     validator.print_summary(results)
-    
+
     # Save results
     validator.save_results(results)
 
 class AdvancedStrategiesValidator:
     """Comprehensive validator for advanced tuning strategies"""
-    
+
     def __init__(self):
         self.test_scenarios = self._create_test_scenarios()
         self.validation_results = {}
-        
+
     def _create_test_scenarios(self) -> List[Dict[str, Any]]:
         """Create comprehensive test scenarios"""
-        
+
         scenarios = [
             {
                 'name': 'Single Loop Temperature Control',
@@ -197,15 +204,15 @@ class AdvancedStrategiesValidator:
                 }
             }
         ]
-        
+
         return scenarios
-    
+
     def run_comprehensive_validation(self) -> Dict[str, Any]:
         """Run comprehensive validation of all advanced strategies"""
-        
+
         print("🔧 Starting Advanced Tuning Strategies Validation")
         print("-" * 60)
-        
+
         results = {
             'timestamp': datetime.now().isoformat(),
             'total_tests': 0,
@@ -216,7 +223,7 @@ class AdvancedStrategiesValidator:
             'validation_score': 0.0,
             'status': 'unknown'
         }
-        
+
         # Test individual strategies
         strategies_to_test = [
             ('MPC Tuning', MPCTuner),
@@ -234,34 +241,34 @@ class AdvancedStrategiesValidator:
             ('Centralized Coordinator', CentralizedCoordinator),
             ('Advanced Tuning Manager', AdvancedTuningManager)
         ]
-        
+
         for strategy_name, strategy_class in strategies_to_test:
             print(f"🎯 Testing {strategy_name}")
             print("-" * 50)
-            
+
             strategy_results = self._test_strategy(strategy_name, strategy_class)
             results['strategy_results'][strategy_name] = strategy_results
-            
+
             # Update overall counts
             results['total_tests'] += strategy_results['total_tests']
             results['passed_tests'] += strategy_results['passed_tests']
             results['failed_tests'] += strategy_results['failed_tests']
-            
+
             print(f"  📊 {strategy_name} Summary: {strategy_results['passed_tests']}/{strategy_results['total_tests']} passed ({strategy_results['success_rate']:.1f}%)")
             print()
-        
+
         # Calculate final metrics
         results['validation_score'] = (results['passed_tests'] / max(results['total_tests'], 1)) * 100
         results['status'] = self._determine_status(results['validation_score'])
-        
+
         # Performance summary
         results['performance_summary'] = self._create_performance_summary(results)
-        
+
         return results
-    
+
     def _test_strategy(self, strategy_name: str, strategy_class) -> Dict[str, Any]:
         """Test a single strategy across all applicable scenarios"""
-        
+
         strategy_results = {
             'strategy_name': strategy_name,
             'total_tests': 0,
@@ -272,29 +279,29 @@ class AdvancedStrategiesValidator:
             'average_execution_time': 0.0,
             'performance_metrics': {}
         }
-        
+
         execution_times = []
-        
+
         for scenario in self.test_scenarios:
             # Check if strategy is applicable to scenario
             if not self._is_strategy_applicable(strategy_name, scenario):
                 continue
-            
+
             strategy_results['total_tests'] += 1
-            
+
             try:
                 # Create strategy instance
                 strategy = strategy_class()
-                
+
                 # Execute strategy
                 start_time = time.time()
                 result = strategy.execute(scenario['data'])
                 execution_time = time.time() - start_time
                 execution_times.append(execution_time)
-                
+
                 # Validate result
                 is_valid, validation_details = self._validate_strategy_result(result, scenario)
-                
+
                 test_detail = {
                     'scenario': scenario['name'],
                     'success': is_valid,
@@ -302,20 +309,20 @@ class AdvancedStrategiesValidator:
                     'validation_details': validation_details,
                     'error': None
                 }
-                
+
                 if is_valid:
                     strategy_results['passed_tests'] += 1
                     print(f"    ✅ {scenario['name']}: SUCCESS ({execution_time:.3f}s)")
                 else:
                     strategy_results['failed_tests'] += 1
                     print(f"    ❌ {scenario['name']}: FAILED - {validation_details.get('reason', 'Unknown')}")
-                
+
                 strategy_results['test_details'].append(test_detail)
-                
+
             except Exception as e:
                 strategy_results['failed_tests'] += 1
                 error_msg = str(e)
-                
+
                 test_detail = {
                     'scenario': scenario['name'],
                     'success': False,
@@ -323,75 +330,75 @@ class AdvancedStrategiesValidator:
                     'validation_details': {'reason': 'Exception occurred'},
                     'error': error_msg
                 }
-                
+
                 strategy_results['test_details'].append(test_detail)
                 print(f"    ❌ {scenario['name']}: EXCEPTION - {error_msg}")
-        
+
         # Calculate metrics
         if strategy_results['total_tests'] > 0:
             strategy_results['success_rate'] = (strategy_results['passed_tests'] / strategy_results['total_tests']) * 100
-        
+
         if execution_times:
             strategy_results['average_execution_time'] = sum(execution_times) / len(execution_times)
-        
+
         return strategy_results
-    
+
     def _is_strategy_applicable(self, strategy_name: str, scenario: Dict[str, Any]) -> bool:
         """Check if strategy is applicable to scenario"""
-        
+
         scenario_data = scenario['data']
-        
+
         # MPC strategies - applicable to constrained problems
         if 'MPC' in strategy_name:
             return 'constraints' in scenario_data or any(key in scenario_data for key in ['output_min', 'output_max', 'input_min', 'input_max'])
-        
+
         # Adaptive strategies - applicable to time-varying problems
         if 'Adaptive' in strategy_name:
             return 'time_varying' in scenario_data or 'process_data' in scenario_data
-        
+
         # Gain scheduling - applicable to nonlinear problems
         if 'Gain' in strategy_name:
             return 'operating_points' in scenario_data or 'setpoint_range' in scenario_data
-        
+
         # Multi-loop strategies - applicable to multi-loop problems
         if 'Multi' in strategy_name or 'Coordinator' in strategy_name:
             return 'control_loops' in scenario_data and len(scenario_data.get('control_loops', [])) > 1
-        
+
         # Advanced manager - applicable to all scenarios
         if 'Manager' in strategy_name:
             return True
-        
+
         return True  # Default to applicable
-    
+
     def _validate_strategy_result(self, result: Dict[str, Any], scenario: Dict[str, Any]) -> Tuple[bool, Dict[str, Any]]:
         """Validate strategy execution result"""
-        
+
         validation_details = {}
-        
+
         # Check basic result structure
         if not isinstance(result, dict):
             return False, {'reason': 'Result is not a dictionary'}
-        
+
         if not result.get('success', False):
             return False, {'reason': f"Strategy failed: {result.get('error', 'Unknown error')}"}
-        
+
         strategy_result = result.get('result')
         if not strategy_result:
             return False, {'reason': 'No strategy result returned'}
-        
+
         # Check for required attributes
         required_checks = []
-        
+
         # Check execution time
         if hasattr(strategy_result, 'execution_time'):
             exec_time = strategy_result.execution_time
             if exec_time > 60.0:  # More than 1 minute
                 required_checks.append(f"Long execution time: {exec_time:.2f}s")
-        
+
         # Check for parameters (if applicable)
         parameter_found = False
         parameter_locations = ['parameters', 'final_parameters', 'optimized_parameters']
-        
+
         for location in parameter_locations:
             if hasattr(strategy_result, location):
                 params = getattr(strategy_result, location)
@@ -402,16 +409,16 @@ class AdvancedStrategiesValidator:
                     if not param_validation['valid']:
                         required_checks.append(f"Invalid parameters: {param_validation['reason']}")
                     break
-        
+
         if not parameter_found:
             required_checks.append("No parameters found in result")
-        
+
         # Check for performance metrics
         if hasattr(strategy_result, 'performance_metrics'):
             metrics = strategy_result.performance_metrics
             if not isinstance(metrics, dict) or not metrics:
                 required_checks.append("No performance metrics available")
-        
+
         # Determine overall validity
         is_valid = len(required_checks) == 0
         validation_details = {
@@ -420,15 +427,15 @@ class AdvancedStrategiesValidator:
             'parameter_found': parameter_found,
             'has_performance_metrics': hasattr(strategy_result, 'performance_metrics')
         }
-        
+
         if not is_valid:
             validation_details['reason'] = '; '.join(required_checks)
-        
+
         return is_valid, validation_details
-    
+
     def _validate_parameters(self, params: Any) -> Dict[str, Any]:
         """Validate PID parameters"""
-        
+
         # Handle different parameter structures
         if hasattr(params, '__dict__'):
             param_dict = params.__dict__
@@ -436,45 +443,45 @@ class AdvancedStrategiesValidator:
             param_dict = params
         else:
             return {'valid': False, 'reason': 'Parameters not in recognizable format'}
-        
+
         # For multi-loop parameters, check first loop
         if all(isinstance(v, dict) for v in param_dict.values()):
             # Multi-loop case
             first_loop = list(param_dict.values())[0]
             param_dict = first_loop
-        
+
         # Check individual parameters
         issues = []
-        
+
         # Check Kp
         kp = param_dict.get('Kp', param_dict.get('kp'))
         if kp is not None:
             if not (0.001 <= kp <= 100.0):
                 issues.append(f"Kp out of range: {kp}")
-        
+
         # Check Ti
         ti = param_dict.get('Ti', param_dict.get('ti'))
         if ti is not None:
             if not (0.01 <= ti <= 1000.0):
                 issues.append(f"Ti out of range: {ti}")
-        
+
         # Check Td
         td = param_dict.get('Td', param_dict.get('td'))
         if td is not None:
             if not (0.0 <= td <= 100.0):
                 issues.append(f"Td out of range: {td}")
-        
+
         is_valid = len(issues) == 0
-        
+
         return {
             'valid': is_valid,
             'reason': '; '.join(issues) if issues else 'Parameters valid',
             'parameters_found': [k for k in param_dict.keys() if k.lower() in ['kp', 'ti', 'td']]
         }
-    
+
     def _determine_status(self, validation_score: float) -> str:
         """Determine overall validation status"""
-        
+
         if validation_score >= 90.0:
             return "EXCELLENT"
         elif validation_score >= 80.0:
@@ -485,13 +492,13 @@ class AdvancedStrategiesValidator:
             return "ACCEPTABLE"
         else:
             return "NEEDS IMPROVEMENT"
-    
+
     def _create_performance_summary(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """Create performance summary"""
-        
+
         strategy_performances = []
         total_execution_time = 0.0
-        
+
         for strategy_name, strategy_result in results['strategy_results'].items():
             strategy_performances.append({
                 'strategy': strategy_name,
@@ -501,10 +508,10 @@ class AdvancedStrategiesValidator:
                 'total_tests': strategy_result['total_tests']
             })
             total_execution_time += strategy_result['average_execution_time']
-        
+
         # Sort by success rate
         strategy_performances.sort(key=lambda x: x['success_rate'], reverse=True)
-        
+
         return {
             'best_performing_strategies': strategy_performances[:3],
             'total_execution_time': total_execution_time,
@@ -512,15 +519,15 @@ class AdvancedStrategiesValidator:
             'strategies_tested': len(strategy_performances),
             'scenarios_tested': len(self.test_scenarios)
         }
-    
+
     def print_summary(self, results: Dict[str, Any]):
         """Print validation summary"""
-        
+
         print("=" * 80)
         print("🏁 PHASE 22.2.3 ADVANCED TUNING STRATEGIES - PRODUCTION VALIDATION")
         print("=" * 80)
         print()
-        
+
         print("📊 OVERALL RESULTS:")
         print(f"   Total Tests: {results['total_tests']}")
         print(f"   Passed: {results['passed_tests']} ✅")
@@ -529,7 +536,7 @@ class AdvancedStrategiesValidator:
         print(f"   Validation Score: {results['validation_score']:.1f} ({results['status']})")
         print(f"   Overall Status: {'✅' if results['validation_score'] >= 70 else '⚠️' if results['validation_score'] >= 50 else '❌'} {results['status']}")
         print()
-        
+
         print("📋 STRATEGY RESULTS:")
         for strategy_name, strategy_result in results['strategy_results'].items():
             status_icon = "✅" if strategy_result['success_rate'] >= 70 else "⚠️" if strategy_result['success_rate'] >= 50 else "❌"
@@ -537,7 +544,7 @@ class AdvancedStrategiesValidator:
             print(f"      Success Rate: {strategy_result['success_rate']:.1f}% ({strategy_result['passed_tests']}/{strategy_result['total_tests']})")
             print(f"      Avg Execution Time: {strategy_result['average_execution_time']:.3f}s")
         print()
-        
+
         # Performance analysis
         perf_summary = results['performance_summary']
         print("📈 PERFORMANCE ANALYSIS:")
@@ -546,12 +553,12 @@ class AdvancedStrategiesValidator:
         print(f"   Strategies Tested: {perf_summary['strategies_tested']}")
         print(f"   Scenarios Tested: {perf_summary['scenarios_tested']}")
         print()
-        
+
         print("🏆 TOP PERFORMING STRATEGIES:")
         for i, strategy in enumerate(perf_summary['best_performing_strategies'][:3], 1):
             print(f"   {i}. {strategy['strategy']}: {strategy['success_rate']:.1f}% ({strategy['tests_passed']}/{strategy['total_tests']})")
         print()
-        
+
         print("💡 RECOMMENDATIONS:")
         if results['validation_score'] >= 80:
             print("   ✅ Advanced tuning strategies are working excellent")
@@ -565,7 +572,7 @@ class AdvancedStrategiesValidator:
             print("   ❌ Advanced tuning strategies need improvement")
             print("   ❌ Review failed tests before production deployment")
         print()
-        
+
         print("🎯 PHASE 22.2.3 COMPLETION STATUS:")
         if results['validation_score'] >= 70:
             print("   ✅ PHASE 22.2.3 SUCCESSFULLY COMPLETED")
@@ -575,13 +582,13 @@ class AdvancedStrategiesValidator:
             print("   ⚠️ PHASE 22.2.3 NEEDS ATTENTION")
             print("   ⚠️ Some strategies require debugging")
         print("=" * 80)
-    
+
     def save_results(self, results: Dict[str, Any]):
         """Save validation results to file"""
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"advanced_strategies_validation_{timestamp}.json"
-        
+
         try:
             with open(filename, 'w') as f:
                 json.dump(results, f, indent=2, default=str)
@@ -590,4 +597,4 @@ class AdvancedStrategiesValidator:
             print(f"⚠️ Failed to save results: {e}")
 
 if __name__ == "__main__":
-    main() 
+    main()

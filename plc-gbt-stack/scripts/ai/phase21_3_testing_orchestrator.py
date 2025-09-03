@@ -3,7 +3,7 @@
 🧪 Phase 21.3: Instance Management Commands Testing Orchestrator
 
 Comprehensive testing framework for Phase 21.3 Instance Management Commands with CLX PLC integration.
-This orchestrator validates all instance management functionality including creation, validation, 
+This orchestrator validates all instance management functionality including creation, validation,
 export/import, and CLX PLC integration capabilities.
 
 AI Task Orchestrator Implementation
@@ -20,38 +20,32 @@ Testing Objectives:
 - Performance and reliability assessment
 - Production readiness validation
 
-Author: AI Task Orchestrator  
+Author: AI Task Orchestrator
 Created: 2025-01-18
 Phase: 21.3 - Instance Management Commands Testing
 Dependencies: Phase 21.1/21.2 (CLI), pylogix (optional for PLC testing)
 """
 
-import os
-import sys
-import json
 import asyncio
+import json
 import logging
-import time
-import tempfile
-import uuid
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
-from dataclasses import dataclass, asdict, field
-from enum import Enum
-import subprocess
 import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
 
-# Add project root to path  
+# Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
-from rich.status import Status
-from rich import print as rprint
+from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 
 # Test Framework
 console = Console()
@@ -59,9 +53,9 @@ logger = logging.getLogger(__name__)
 
 class TestResult:
     """Individual test result"""
-    def __init__(self, test_name: str, category: str, status: str, 
-                 score: float, duration_seconds: float, 
-                 details: List[str] = None, error_message: str = None, 
+    def __init__(self, test_name: str, category: str, status: str,
+                 score: float, duration_seconds: float,
+                 details: List[str] = None, error_message: str = None,
                  metadata: Dict[str, Any] = None):
         self.test_name = test_name
         self.category = category
@@ -75,7 +69,7 @@ class TestResult:
 class ValidationLevel(Enum):
     """Testing validation levels"""
     BASIC = "basic"
-    STANDARD = "standard" 
+    STANDARD = "standard"
     COMPREHENSIVE = "comprehensive"
     PRODUCTION = "production"
 
@@ -96,10 +90,10 @@ class PhaseValidation:
 class Phase21_3TestingOrchestrator:
     """
     Comprehensive testing orchestrator for Phase 21.3 Instance Management Commands
-    
+
     Testing Categories:
     1. Instance Creation Commands
-    2. Instance Management Commands  
+    2. Instance Management Commands
     3. Instance Validation & Testing
     4. Export/Import Functionality
     5. CLX PLC Integration
@@ -107,25 +101,25 @@ class Phase21_3TestingOrchestrator:
     7. CLI Integration
     8. Production Readiness
     """
-    
+
     def __init__(self, validation_level: ValidationLevel = ValidationLevel.COMPREHENSIVE):
         self.validation_level = validation_level
         self.test_results: List[TestResult] = []
         self.start_time = time.time()
-        
+
         # Test environment setup
         self.test_dir = Path(tempfile.mkdtemp(prefix="phase21_3_test_"))
         self.cli_path = project_root / "cli" / "plc_control_loop_cli.py"
-        
+
         # PLC testing configuration
         self.plc_test_enabled = False
         self.plc_host = "127.0.0.1"  # Default to localhost for simulation
         self.plc_slot = 0
-        
-        console.print(f"🧪 Phase 21.3 Testing Orchestrator Initialized")
+
+        console.print("🧪 Phase 21.3 Testing Orchestrator Initialized")
         console.print(f"Validation Level: {validation_level.value}")
         console.print(f"Test Directory: {self.test_dir}")
-        
+
     def cleanup(self):
         """Clean up test environment"""
         try:
@@ -134,12 +128,12 @@ class Phase21_3TestingOrchestrator:
             console.print("✅ Test environment cleaned up")
         except Exception as e:
             console.print(f"⚠️ Cleanup warning: {e}")
-    
+
     def run_cli_command(self, command_args: List[str], timeout: float = 30.0) -> Tuple[bool, str, str]:
         """Execute CLI command and return success, stdout, stderr"""
         try:
             full_command = ["python3", str(self.cli_path)] + command_args
-            
+
             result = subprocess.run(
                 full_command,
                 capture_output=True,
@@ -147,19 +141,19 @@ class Phase21_3TestingOrchestrator:
                 timeout=timeout,
                 cwd=self.test_dir
             )
-            
+
             return result.returncode == 0, result.stdout, result.stderr
-            
+
         except subprocess.TimeoutExpired:
             return False, "", f"Command timeout after {timeout}s"
         except Exception as e:
             return False, "", str(e)
-    
+
     def test_instance_creation_commands(self) -> List[TestResult]:
         """Test instance creation functionality"""
         results = []
         category = "Instance Creation"
-        
+
         # Test 1: Basic instance creation
         start_time = time.time()
         try:
@@ -170,9 +164,9 @@ class Phase21_3TestingOrchestrator:
                 "--description", "Test instance for validation",
                 "--type", "basic_pid"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "Instance created successfully" in stdout:
                 results.append(TestResult(
                     test_name="Basic Instance Creation",
@@ -196,7 +190,7 @@ class Phase21_3TestingOrchestrator:
                     error_message=stderr or "Creation failed without error message",
                     details=["Instance creation command failed"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Basic Instance Creation",
@@ -206,7 +200,7 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 2: Instance wizard (interactive test simulation)
         start_time = time.time()
         try:
@@ -214,9 +208,9 @@ class Phase21_3TestingOrchestrator:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "wizard", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "wizard" in stdout.lower():
                 results.append(TestResult(
                     test_name="Instance Wizard Availability",
@@ -239,7 +233,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     details=["Wizard help not optimal but command exists"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Instance Wizard Availability",
@@ -249,20 +243,20 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 3: Template-based creation (placeholder test)
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "from-template", "basic-pid", "--name", "template-test"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             # Expected to be not implemented yet
             if "will be implemented" in stdout or "not yet implemented" in stdout:
                 results.append(TestResult(
-                    test_name="Template Creation Functionality", 
+                    test_name="Template Creation Functionality",
                     category=category,
                     status="warning",
                     score=50.0,
@@ -281,7 +275,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     details=["Template creation not properly handled"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Template Creation Functionality",
@@ -291,23 +285,23 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         return results
-    
+
     def test_instance_management_commands(self) -> List[TestResult]:
         """Test instance management functionality"""
         results = []
         category = "Instance Management"
-        
+
         # Test 1: Instance listing
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "list"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success:
                 results.append(TestResult(
                     test_name="Instance Listing",
@@ -330,7 +324,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Instance Listing",
@@ -340,7 +334,7 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 2: Instance info display
         start_time = time.time()
         try:
@@ -350,15 +344,15 @@ class Phase21_3TestingOrchestrator:
                 "--schema", "test-schema",
                 "--name", "info-test-instance"
             ])
-            
+
             if create_success:
                 # Extract instance ID from output (simplified approach)
                 success, stdout, stderr = self.run_cli_command([
                     "instance", "list", "--output", "json"
                 ])
-                
+
                 duration = time.time() - start_time
-                
+
                 if success and stdout.strip():
                     results.append(TestResult(
                         test_name="Instance Information Display",
@@ -390,7 +384,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=time.time() - start_time,
                     details=["Could not create test instance for info testing"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Instance Information Display",
@@ -400,16 +394,16 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 3: Instance update functionality
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "update", "dummy-id", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "update" in stdout.lower():
                 results.append(TestResult(
                     test_name="Instance Update Capability",
@@ -432,7 +426,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Instance Update Capability",
@@ -442,23 +436,23 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         return results
-    
+
     def test_instance_validation_testing(self) -> List[TestResult]:
         """Test instance validation and testing functionality"""
         results = []
         category = "Validation & Testing"
-        
+
         # Test 1: Instance validation
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "validate", "test-id", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "validate" in stdout.lower():
                 results.append(TestResult(
                     test_name="Instance Validation Framework",
@@ -481,7 +475,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Instance Validation Framework",
@@ -491,16 +485,16 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 2: Simulation capability
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "simulate", "test-id", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "simulate" in stdout.lower():
                 results.append(TestResult(
                     test_name="Simulation Capability",
@@ -523,7 +517,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Simulation Capability",
@@ -533,16 +527,16 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 3: Analysis functionality
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "analyze", "test-id", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success:
                 results.append(TestResult(
                     test_name="Analysis Functionality",
@@ -564,7 +558,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Analysis Functionality",
@@ -574,23 +568,23 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         return results
-    
+
     def test_export_import_functionality(self) -> List[TestResult]:
         """Test export/import functionality"""
         results = []
         category = "Export/Import"
-        
+
         # Test 1: Export functionality
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "export", "test-id", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "export" in stdout.lower():
                 results.append(TestResult(
                     test_name="Export Functionality",
@@ -613,7 +607,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Export Functionality",
@@ -623,16 +617,16 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 2: Import functionality
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "import", "dummy-file.json", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "import" in stdout.lower():
                 results.append(TestResult(
                     test_name="Import Functionality",
@@ -655,7 +649,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Import Functionality",
@@ -665,16 +659,16 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 3: Conversion capability
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "convert", "test-id", "--to-schema", "new-schema", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and ("convert" in stdout.lower() or "will be implemented" in stdout):
                 results.append(TestResult(
                     test_name="Conversion Capability",
@@ -697,7 +691,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Conversion Capability",
@@ -707,23 +701,23 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         return results
-    
+
     def test_clx_plc_integration(self) -> List[TestResult]:
         """Test CLX PLC integration functionality"""
         results = []
         category = "CLX PLC Integration"
-        
+
         # Test 1: PLC command availability
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "plc", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "plc" in stdout.lower():
                 results.append(TestResult(
                     test_name="PLC Command Availability",
@@ -746,7 +740,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="PLC Command Availability",
@@ -756,16 +750,16 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 2: Connection functionality
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "plc", "connect", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "connect" in stdout.lower():
                 results.append(TestResult(
                     test_name="PLC Connection Framework",
@@ -788,7 +782,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="PLC Connection Framework",
@@ -798,16 +792,16 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 3: Tag browsing capability
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "plc", "browse", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "browse" in stdout.lower():
                 results.append(TestResult(
                     test_name="Tag Browsing Capability",
@@ -830,7 +824,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Tag Browsing Capability",
@@ -840,16 +834,16 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 4: Read-only enforcement
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "plc", "status"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and ("read" in stdout.lower() or "status" in stdout.lower()):
                 results.append(TestResult(
                     test_name="Read-Only Enforcement",
@@ -872,7 +866,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     details=["Status command exists but output needs verification"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Read-Only Enforcement",
@@ -882,23 +876,23 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         return results
-    
+
     def test_performance_reliability(self) -> List[TestResult]:
         """Test performance and reliability"""
         results = []
         category = "Performance & Reliability"
-        
+
         # Test 1: Command response time
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "list"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and duration < 5.0:
                 score = max(50.0, 100.0 - (duration * 10))  # Penalty for slow response
                 results.append(TestResult(
@@ -923,7 +917,7 @@ class Phase21_3TestingOrchestrator:
                     error_message="Command failed or too slow",
                     details=[f"Duration: {duration:.2f}s"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Command Response Time",
@@ -933,7 +927,7 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 2: Error handling robustness
         start_time = time.time()
         try:
@@ -941,9 +935,9 @@ class Phase21_3TestingOrchestrator:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "info", "invalid-instance-id-12345"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             # Should fail gracefully
             if not success and ("not found" in stderr.lower() or "not found" in stdout.lower()):
                 results.append(TestResult(
@@ -967,7 +961,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     details=["Error handling works but could be improved"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Error Handling Robustness",
@@ -977,17 +971,17 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
-        # Test 3: Memory usage efficiency  
+
+        # Test 3: Memory usage efficiency
         start_time = time.time()
         try:
             # Test with help command (lightweight operation)
             success, stdout, stderr = self.run_cli_command([
                 "instance", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and duration < 1.0:
                 results.append(TestResult(
                     test_name="Memory Usage Efficiency",
@@ -1010,7 +1004,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     details=["Memory usage acceptable but could be optimized"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Memory Usage Efficiency",
@@ -1020,23 +1014,23 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         return results
-    
+
     def test_cli_integration(self) -> List[TestResult]:
         """Test CLI integration with Phase 21.1/21.2"""
         results = []
         category = "CLI Integration"
-        
+
         # Test 1: Command registration
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and "instance" in stdout.lower():
                 results.append(TestResult(
                     test_name="Command Registration",
@@ -1059,7 +1053,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message="Instance commands not found in main CLI help"
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Command Registration",
@@ -1069,16 +1063,16 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 2: Output formatting consistency
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "list", "--output", "json"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success:
                 # Check if output is valid JSON
                 try:
@@ -1113,7 +1107,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     error_message=stderr
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Output Formatting Consistency",
@@ -1123,7 +1117,7 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 3: Authentication integration
         start_time = time.time()
         try:
@@ -1131,9 +1125,9 @@ class Phase21_3TestingOrchestrator:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "create", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success:
                 results.append(TestResult(
                     test_name="Authentication Integration",
@@ -1156,7 +1150,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     details=["Authentication exists but may need configuration"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Authentication Integration",
@@ -1166,23 +1160,23 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         return results
-    
+
     def test_production_readiness(self) -> List[TestResult]:
         """Test production readiness criteria"""
         results = []
         category = "Production Readiness"
-        
+
         # Test 1: Configuration validation
         start_time = time.time()
         try:
             success, stdout, stderr = self.run_cli_command([
                 "config", "show"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success:
                 results.append(TestResult(
                     test_name="Configuration Validation",
@@ -1205,7 +1199,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     details=["Configuration accessible but may need tuning"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Configuration Validation",
@@ -1215,7 +1209,7 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 2: Security compliance
         start_time = time.time()
         try:
@@ -1223,9 +1217,9 @@ class Phase21_3TestingOrchestrator:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "delete", "dummy-id", "--help"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success and ("admin" in stdout.lower() or "permission" in stdout.lower()):
                 results.append(TestResult(
                     test_name="Security Compliance",
@@ -1248,7 +1242,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     details=["Security exists but documentation could be clearer"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Security Compliance",
@@ -1258,7 +1252,7 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         # Test 3: Monitoring and logging readiness
         start_time = time.time()
         try:
@@ -1266,9 +1260,9 @@ class Phase21_3TestingOrchestrator:
             success, stdout, stderr = self.run_cli_command([
                 "instance", "list", "--verbose"
             ])
-            
+
             duration = time.time() - start_time
-            
+
             if success:
                 results.append(TestResult(
                     test_name="Monitoring & Logging Readiness",
@@ -1291,7 +1285,7 @@ class Phase21_3TestingOrchestrator:
                     duration_seconds=duration,
                     details=["Basic monitoring exists but enhancement needed"]
                 ))
-                
+
         except Exception as e:
             results.append(TestResult(
                 test_name="Monitoring & Logging Readiness",
@@ -1301,15 +1295,15 @@ class Phase21_3TestingOrchestrator:
                 duration_seconds=time.time() - start_time,
                 error_message=str(e)
             ))
-        
+
         return results
-    
+
     async def execute_comprehensive_testing(self) -> PhaseValidation:
         """Execute comprehensive testing suite"""
         console.print("🚀 Starting Phase 21.3 Comprehensive Testing...")
-        
+
         validation = PhaseValidation()
-        
+
         try:
             # Execute all test categories
             test_categories = [
@@ -1322,9 +1316,9 @@ class Phase21_3TestingOrchestrator:
                 ("CLI Integration", self.test_cli_integration),
                 ("Production Readiness", self.test_production_readiness)
             ]
-            
+
             all_results = []
-            
+
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
@@ -1332,21 +1326,21 @@ class Phase21_3TestingOrchestrator:
                 MofNCompleteColumn(),
                 console=console
             ) as progress:
-                
+
                 task = progress.add_task("Testing Phase 21.3...", total=len(test_categories))
-                
+
                 for category_name, test_func in test_categories:
                     progress.update(task, description=f"Testing {category_name}")
-                    
+
                     try:
                         category_results = test_func()
                         all_results.extend(category_results)
-                        
+
                         # Log category completion
                         passed = sum(1 for r in category_results if r.status == "passed")
                         total = len(category_results)
                         console.print(f"✅ {category_name}: {passed}/{total} tests passed")
-                        
+
                     except Exception as e:
                         console.print(f"❌ Error in {category_name}: {e}")
                         all_results.append(TestResult(
@@ -1357,24 +1351,24 @@ class Phase21_3TestingOrchestrator:
                             duration_seconds=0.0,
                             error_message=str(e)
                         ))
-                    
+
                     progress.advance(task)
-            
+
             # Calculate overall results
             validation.test_results = all_results
             validation.execution_time = time.time() - self.start_time
-            
+
             # Calculate scores
             if all_results:
                 total_score = sum(r.score for r in all_results)
                 validation.overall_score = total_score / len(all_results)
-                
+
                 passed_tests = sum(1 for r in all_results if r.status == "passed")
                 warning_tests = sum(1 for r in all_results if r.status == "warning")
                 failed_tests = sum(1 for r in all_results if r.status == "failed")
-                
+
                 validation.summary = f"Phase 21.3 validation completed with {validation.overall_score:.1f}% score. Tests: {passed_tests} passed, {warning_tests} warnings, {failed_tests} failed."
-                
+
                 # Determine status
                 if validation.overall_score >= 90.0:
                     validation.status = "passed"
@@ -1382,24 +1376,24 @@ class Phase21_3TestingOrchestrator:
                     validation.status = "warning"
                 else:
                     validation.status = "failed"
-                
+
                 # Production readiness assessment
                 production_score = validation.overall_score
                 critical_failures = sum(1 for r in all_results if r.status == "failed" and r.category in ["Security", "CLX PLC Integration"])
-                
+
                 if production_score >= 85.0 and critical_failures == 0:
                     validation.production_ready = True
                 elif production_score >= 75.0 and critical_failures <= 1:
                     validation.production_ready = "READY_WITH_MONITORING"
                 else:
                     validation.production_ready = False
-                
+
                 # Generate recommendations
                 if failed_tests > 0:
                     validation.recommendations.append(f"Address {failed_tests} failed tests before production deployment")
                 if warning_tests > 0:
                     validation.recommendations.append(f"Review {warning_tests} warning tests for potential improvements")
-                
+
                 validation.recommendations.extend([
                     "Phase 21.3 Instance Management Commands implemented successfully",
                     "CLX PLC integration framework ready for production PLCs",
@@ -1407,22 +1401,22 @@ class Phase21_3TestingOrchestrator:
                     "Export/import functionality provides configuration portability",
                     "Validation framework ensures instance quality"
                 ])
-                
+
                 if validation.production_ready:
                     validation.recommendations.append("✅ System ready for production deployment")
                 elif validation.production_ready == "READY_WITH_MONITORING":
                     validation.recommendations.append("⚠️ Ready for production with enhanced monitoring")
                 else:
                     validation.recommendations.append("🔧 Additional development required before production")
-                
+
         except Exception as e:
             validation.status = "failed"
             validation.overall_score = 0.0
             validation.summary = f"Testing framework error: {str(e)}"
             validation.critical_issues.append(f"Testing execution failed: {e}")
-        
+
         return validation
-    
+
     def generate_report(self, validation: PhaseValidation) -> str:
         """Generate comprehensive test report"""
         report_lines = [
@@ -1438,20 +1432,20 @@ class Phase21_3TestingOrchestrator:
             "",
             validation.summary,
             "",
-            f"### Key Results:",
+            "### Key Results:",
             f"- **Total Tests**: {len(validation.test_results)}",
             f"- **Production Ready**: {validation.production_ready}",
             f"- **Critical Issues**: {len(validation.critical_issues)}",
             ""
         ]
-        
+
         # Test results by category
         categories = {}
         for result in validation.test_results:
             if result.category not in categories:
                 categories[result.category] = []
             categories[result.category].append(result)
-        
+
         for category, results in categories.items():
             report_lines.extend([
                 f"## 🔧 {category}",
@@ -1462,7 +1456,7 @@ class Phase21_3TestingOrchestrator:
                 "",
                 "### Test Results:",
             ])
-            
+
             for result in results:
                 status_emoji = {"passed": "✅", "warning": "⚠️", "failed": "❌"}.get(result.status, "❓")
                 report_lines.append(f"- {status_emoji} **{result.test_name}** ({result.score:.1f}%)")
@@ -1470,9 +1464,9 @@ class Phase21_3TestingOrchestrator:
                     report_lines.append(f"  - Error: {result.error_message}")
                 for detail in result.details:
                     report_lines.append(f"  - {detail}")
-            
+
             report_lines.append("")
-        
+
         # Production readiness assessment
         report_lines.extend([
             "## 🏭 Production Readiness Assessment",
@@ -1481,7 +1475,7 @@ class Phase21_3TestingOrchestrator:
             f"**Overall Score**: {validation.overall_score:.1f}%",
             ""
         ])
-        
+
         if validation.critical_issues:
             report_lines.extend([
                 "### Critical Issues:",
@@ -1490,19 +1484,19 @@ class Phase21_3TestingOrchestrator:
             for issue in validation.critical_issues:
                 report_lines.append(f"- 🔴 {issue}")
             report_lines.append("")
-        
+
         # Recommendations
         if validation.recommendations:
             report_lines.extend([
                 "## 🎯 Recommendations",
                 ""
             ])
-            
+
             for i, rec in enumerate(validation.recommendations, 1):
                 report_lines.append(f"{i}. {rec}")
-            
+
             report_lines.append("")
-        
+
         # CLX PLC Integration Notes
         report_lines.extend([
             "## 🏭 CLX PLC Integration Summary",
@@ -1536,9 +1530,9 @@ class Phase21_3TestingOrchestrator:
             "4. **User Training**: Deploy comprehensive documentation",
             "5. **Phase 21.4**: Implement Advanced CLI Features (batch operations, REPL)"
         ])
-        
+
         return "\n".join(report_lines)
-    
+
     def _get_category_status(self, results: List[TestResult]) -> str:
         """Get overall status for test category"""
         if all(r.status == "passed" for r in results):
@@ -1547,7 +1541,7 @@ class Phase21_3TestingOrchestrator:
             return "❌ FAILED"
         else:
             return "⚠️ WARNING"
-    
+
     def _get_category_score(self, results: List[TestResult]) -> float:
         """Calculate average score for test category"""
         if not results:
@@ -1558,23 +1552,23 @@ async def main():
     """Main testing execution"""
     console.print("🧪 Phase 21.3: Instance Management Commands - Testing Orchestrator")
     console.print("=" * 80)
-    
+
     orchestrator = Phase21_3TestingOrchestrator(ValidationLevel.COMPREHENSIVE)
-    
+
     try:
         # Execute comprehensive testing
         validation = await orchestrator.execute_comprehensive_testing()
-        
+
         # Generate and save report
         report = orchestrator.generate_report(validation)
-        
+
         # Save results
         timestamp = int(time.time())
         session_id = f"phase21_3_{timestamp}"
-        
+
         results_dir = project_root / "results" / "phase21"
         results_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Save JSON results
         json_file = results_dir / f"phase21_3_results_{session_id}.json"
         with open(json_file, 'w') as f:
@@ -1604,12 +1598,12 @@ async def main():
                 ]
             }
             json.dump(validation_dict, f, indent=2, default=str)
-        
+
         # Save markdown report
         report_file = results_dir / f"phase21_3_report_{session_id}.md"
         with open(report_file, 'w') as f:
             f.write(report)
-        
+
         # Display results
         console.print(Panel.fit(
             f"[bold]Phase 21.3 Testing Complete[/bold]\n"
@@ -1618,16 +1612,16 @@ async def main():
             f"Production Ready: {validation.production_ready}",
             border_style="green" if validation.status == "passed" else "yellow" if validation.status == "warning" else "red"
         ))
-        
-        console.print(f"\n📊 Results saved:")
+
+        console.print("\n📊 Results saved:")
         console.print(f"  - JSON: {json_file}")
         console.print(f"  - Report: {report_file}")
-        
+
         if validation.critical_issues:
             console.print(f"\n🔴 Critical Issues ({len(validation.critical_issues)}):")
             for issue in validation.critical_issues:
                 console.print(f"  - {issue}")
-        
+
         # Return appropriate exit code
         if validation.status == "passed":
             return 0
@@ -1635,9 +1629,9 @@ async def main():
             return 1
         else:
             return 2
-            
+
     finally:
         orchestrator.cleanup()
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

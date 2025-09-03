@@ -8,16 +8,25 @@ enhanced data preservation capabilities.
 
 from .converter import EnhancedPLCConverter
 from .models import (
-    PLCProject, PLCController, PLCProgram, PLCRoutine, PLCTag, PLCDevice,
-    ConversionResult, ConversionStatus, DataIntegrityScore,
+    BinaryDataBlock,
+    ComponentExtraction,
+    ConversionResult,
+    ConversionStatus,
+    DataIntegrityScore,
     # Enhanced models for Phase 3.9
-    EnhancedPLCComponent, BinaryDataBlock, ComponentExtraction
+    EnhancedPLCComponent,
+    PLCController,
+    PLCDevice,
+    PLCProgram,
+    PLCProject,
+    PLCRoutine,
+    PLCTag,
 )
 
 __all__ = [
     "EnhancedPLCConverter",
     "PLCProject",
-    "PLCController", 
+    "PLCController",
     "PLCProgram",
     "PLCRoutine",
     "PLCTag",
@@ -28,4 +37,4 @@ __all__ = [
     "EnhancedPLCComponent",
     "BinaryDataBlock",
     "ComponentExtraction"
-] 
+]

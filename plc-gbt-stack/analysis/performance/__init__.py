@@ -5,7 +5,7 @@ Phase 22.3: Performance Analysis Suite Package
 
 Comprehensive loop performance assessment tools including:
 - IAE, ISE, ITAE calculations
-- Settling time and overshoot analysis  
+- Settling time and overshoot analysis
 - Robustness metrics (GM, PM)
 - Control effort quantification
 
@@ -57,6 +57,7 @@ PERFORMANCE_CONFIG = {
 # Performance metric types
 from enum import Enum
 
+
 class PerformanceMetric(Enum):
     """Performance metric types"""
     IAE = "iae"
@@ -90,11 +91,11 @@ class PerformanceGrade(Enum):
 # Import performance analysis modules
 try:
     from .metrics import (
-        PerformanceMetricsCalculator,
-        TimeDomainMetrics,
-        FrequencyDomainMetrics,
         ControlEffortAnalyzer,
-        RobustnessAnalyzer
+        FrequencyDomainMetrics,
+        PerformanceMetricsCalculator,
+        RobustnessAnalyzer,
+        TimeDomainMetrics,
     )
     METRICS_AVAILABLE = True
 except ImportError:
@@ -176,10 +177,10 @@ def get_metric_info(metric_type: str):
 
 def calculate_performance_grade(metrics: dict) -> PerformanceGrade:
     """Calculate overall performance grade based on metrics"""
-    
+
     score = 0
     total_metrics = 0
-    
+
     # Grade individual metrics
     if 'iae' in metrics:
         iae = metrics['iae']
@@ -188,7 +189,7 @@ def calculate_performance_grade(metrics: dict) -> PerformanceGrade:
         elif iae < 100: score += 2
         elif iae < 200: score += 1
         total_metrics += 1
-    
+
     if 'settling_time' in metrics:
         settling = metrics['settling_time']
         if settling < 10: score += 4
@@ -196,7 +197,7 @@ def calculate_performance_grade(metrics: dict) -> PerformanceGrade:
         elif settling < 60: score += 2
         elif settling < 120: score += 1
         total_metrics += 1
-    
+
     if 'overshoot' in metrics:
         overshoot = metrics['overshoot'] * 100  # Convert to percentage
         if overshoot < 5: score += 4
@@ -204,7 +205,7 @@ def calculate_performance_grade(metrics: dict) -> PerformanceGrade:
         elif overshoot < 20: score += 2
         elif overshoot < 40: score += 1
         total_metrics += 1
-    
+
     if 'gain_margin' in metrics:
         gm = metrics['gain_margin']
         if gm > 12: score += 4
@@ -212,7 +213,7 @@ def calculate_performance_grade(metrics: dict) -> PerformanceGrade:
         elif gm > 6: score += 2
         elif gm > 3: score += 1
         total_metrics += 1
-    
+
     if 'phase_margin' in metrics:
         pm = metrics['phase_margin']
         if pm > 75: score += 4
@@ -220,12 +221,12 @@ def calculate_performance_grade(metrics: dict) -> PerformanceGrade:
         elif pm > 45: score += 2
         elif pm > 30: score += 1
         total_metrics += 1
-    
+
     if total_metrics == 0:
         return PerformanceGrade.ACCEPTABLE
-    
+
     average_score = score / total_metrics
-    
+
     if average_score >= 3.5:
         return PerformanceGrade.EXCELLENT
     elif average_score >= 2.5:
@@ -239,30 +240,30 @@ def calculate_performance_grade(metrics: dict) -> PerformanceGrade:
 
 def get_performance_recommendations(metrics: dict, grade: PerformanceGrade) -> list:
     """Generate performance improvement recommendations"""
-    
+
     recommendations = []
-    
+
     if grade in [PerformanceGrade.POOR, PerformanceGrade.UNACCEPTABLE]:
         recommendations.append("Consider complete PID retuning")
-        
+
     if metrics.get('overshoot', 0) > 0.15:  # >15% overshoot
         recommendations.append("Reduce proportional gain to decrease overshoot")
-        
+
     if metrics.get('settling_time', 0) > 120:  # >2 minutes
         recommendations.append("Increase integral gain to improve settling time")
-        
+
     if metrics.get('iae', float('inf')) > 200:
         recommendations.append("Review process model and consider advanced tuning")
-        
+
     if metrics.get('gain_margin', 0) < 6:
         recommendations.append("Increase gain margin for better stability")
-        
+
     if metrics.get('phase_margin', 0) < 45:
         recommendations.append("Increase phase margin to improve robustness")
-        
+
     if not recommendations:
         recommendations.append("Performance is satisfactory")
-    
+
     return recommendations
 
 # Export configuration for external use
@@ -270,18 +271,18 @@ __all__ = [
     # Configuration
     "PERFORMANCE_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Enums
     "PerformanceMetric",
-    "AnalysisType", 
+    "AnalysisType",
     "PerformanceGrade",
-    
+
     # Utility functions
     "get_available_metrics",
     "get_metric_info",
     "calculate_performance_grade",
     "get_performance_recommendations",
-    
+
     # Classes (if available)
 ]
 
@@ -290,7 +291,7 @@ if METRICS_AVAILABLE:
     __all__.extend([
         "PerformanceMetricsCalculator",
         "TimeDomainMetrics",
-        "FrequencyDomainMetrics", 
+        "FrequencyDomainMetrics",
         "ControlEffortAnalyzer",
         "RobustnessAnalyzer"
     ])
@@ -307,4 +308,4 @@ def get_package_info():
         "total_modules": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "implementation_status": AVAILABILITY_STATUS
-    } 
+    }

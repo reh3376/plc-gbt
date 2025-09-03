@@ -99,10 +99,11 @@ BENCHMARKING_CONFIG = {
 }
 
 # Benchmarking types and categories
-from enum import Enum
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
 
 class BenchmarkType(Enum):
     """Types of benchmarking analyses"""
@@ -168,8 +169,8 @@ class PerformanceTracking:
 try:
     from .baseline_establishment import BaselineEstablisher
     from .comparative_analysis import ComparativeAnalyzer
-    from .industry_standards import IndustryStandardsAnalyzer
     from .historical_tracking import HistoricalTracker
+    from .industry_standards import IndustryStandardsAnalyzer
     from .performance_assessor import PerformanceAssessor
     BENCHMARKING_MODULES_AVAILABLE = True
 except ImportError:
@@ -206,7 +207,7 @@ def get_benchmark_info(benchmark_type: str):
             "best_for": ["Performance monitoring", "Degradation detection", "Maintenance planning"]
         },
         "comparative_analysis": {
-            "name": "Comparative Performance Analysis", 
+            "name": "Comparative Performance Analysis",
             "description": "Compare performance across similar processes or time periods",
             "inputs": ["multiple_datasets", "process_characteristics", "operating_conditions"],
             "outputs": ["relative_performance", "best_performers", "improvement_opportunities"],
@@ -225,7 +226,7 @@ def get_benchmark_info(benchmark_type: str):
 def assess_performance_level(metric_value: float, benchmarks: Dict[str, float],
                            higher_is_better: bool = True) -> PerformanceLevel:
     """Assess performance level against benchmarks"""
-    
+
     if higher_is_better:
         if metric_value >= benchmarks.get("world_class", float('inf')):
             return PerformanceLevel.WORLD_CLASS
@@ -257,50 +258,50 @@ def assess_performance_level(metric_value: float, benchmarks: Dict[str, float],
 def calculate_performance_gap(current_value: float, benchmark_value: float,
                             higher_is_better: bool = True) -> float:
     """Calculate performance gap relative to benchmark"""
-    
+
     if benchmark_value == 0:
         return 0.0
-    
+
     if higher_is_better:
         gap = (benchmark_value - current_value) / benchmark_value
     else:
         gap = (current_value - benchmark_value) / benchmark_value
-    
+
     return max(0.0, gap)  # Only positive gaps (areas for improvement)
 
 def analyze_trend_direction(time_series: List[float], min_samples: int = 10) -> TrendDirection:
     """Analyze trend direction in performance data"""
-    
+
     import numpy as np
-    
+
     if len(time_series) < min_samples:
         return TrendDirection.STABLE
-    
+
     # Calculate linear regression slope
     x = np.arange(len(time_series))
     y = np.array(time_series)
-    
+
     # Remove outliers for trend analysis
     std_dev = np.std(y)
     mean_val = np.mean(y)
     mask = np.abs(y - mean_val) <= 3 * std_dev
     x_clean = x[mask]
     y_clean = y[mask]
-    
+
     if len(y_clean) < min_samples:
         return TrendDirection.VOLATILE
-    
+
     # Linear regression
     slope = np.polyfit(x_clean, y_clean, 1)[0]
-    
+
     # Calculate variability
     y_detrended = y_clean - np.polyval([slope, np.mean(y_clean)], x_clean)
     variability = np.std(y_detrended) / np.mean(y_clean) if np.mean(y_clean) != 0 else 0
-    
+
     # Determine trend
     slope_threshold = 0.01 * np.mean(y_clean)  # 1% change threshold
     variability_threshold = 0.1  # 10% variability threshold
-    
+
     if variability > variability_threshold:
         return TrendDirection.VOLATILE
     elif slope > slope_threshold:
@@ -312,19 +313,19 @@ def analyze_trend_direction(time_series: List[float], min_samples: int = 10) -> 
 
 def generate_benchmark_recommendations(comparison: BenchmarkComparison) -> List[str]:
     """Generate improvement recommendations based on benchmarking"""
-    
+
     recommendations = []
-    
+
     # Overall performance assessment
     if comparison.overall_ranking in [PerformanceLevel.POOR, PerformanceLevel.BELOW_AVERAGE]:
         recommendations.append("Overall performance is below industry standards")
         recommendations.append("Comprehensive process optimization recommended")
-    
+
     # Specific metric recommendations
     for metric, gap in comparison.performance_gaps.items():
         if gap > 0.2:  # >20% gap
             recommendations.append(f"Significant improvement opportunity in {metric} ({gap*100:.1f}% gap)")
-            
+
             # Metric-specific recommendations
             if "variability" in metric.lower():
                 recommendations.append("Focus on control loop tuning to reduce variability")
@@ -334,14 +335,14 @@ def generate_benchmark_recommendations(comparison: BenchmarkComparison) -> List[
                 recommendations.append("Consider controller parameter adjustment for faster response")
             elif "accuracy" in metric.lower():
                 recommendations.append("Review measurement system and control strategy")
-    
+
     # Trend-based recommendations
     for metric, trend in comparison.trend_analysis.items():
         if trend == TrendDirection.DECLINING:
             recommendations.append(f"Performance in {metric} is declining - investigate root causes")
         elif trend == TrendDirection.VOLATILE:
             recommendations.append(f"High variability in {metric} - focus on stabilization")
-    
+
     # Industry-specific recommendations
     baseline_process = comparison.baseline.process_type.lower()
     if "distillation" in baseline_process:
@@ -350,17 +351,17 @@ def generate_benchmark_recommendations(comparison: BenchmarkComparison) -> List[
         recommendations.append("Evaluate reactor control optimization opportunities")
     elif "heat exchanger" in baseline_process:
         recommendations.append("Review heat exchanger control configuration")
-    
+
     if not recommendations:
         recommendations.append("Performance meets or exceeds industry benchmarks")
-    
+
     return recommendations
 
 def get_industry_benchmarks(process_type: str, industry: str = "chemical_industry") -> Dict[str, Dict[str, float]]:
     """Get industry-specific performance benchmarks"""
-    
+
     industry_data = BENCHMARKING_CONFIG["industry_standards"].get(industry, {})
-    
+
     if process_type.lower() in ["distillation", "column"]:
         return industry_data.get("metrics", {}).get("distillation_control", {})
     elif process_type.lower() in ["reactor", "cstr"]:
@@ -380,17 +381,17 @@ __all__ = [
     # Configuration
     "BENCHMARKING_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Data classes
     "BenchmarkBaseline",
     "BenchmarkComparison",
     "PerformanceTracking",
-    
+
     # Enums
     "BenchmarkType",
     "PerformanceLevel",
     "TrendDirection",
-    
+
     # Utility functions
     "get_available_benchmarks",
     "get_benchmark_info",
@@ -399,7 +400,7 @@ __all__ = [
     "analyze_trend_direction",
     "generate_benchmark_recommendations",
     "get_industry_benchmarks",
-    
+
     # Classes (if available)
 ]
 
@@ -425,4 +426,4 @@ def get_package_info():
         "total_modules": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "implementation_status": AVAILABILITY_STATUS
-    } 
+    }

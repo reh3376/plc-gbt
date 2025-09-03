@@ -4,14 +4,13 @@ Phase 8 Day 2: Multi-PV Control Strategy & Loop Discovery Implementation
 AI Task Orchestrator guided implementation
 """
 
-import os
 import json
 import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 class LoopStrategy(Enum):
     """Multi-PV loop strategy enumeration."""
     PRIMARY = "primary"
-    WEIGHTED = "weighted" 
+    WEIGHTED = "weighted"
     CASCADE = "cascade"
 
 class ProcessDynamics(Enum):
@@ -45,7 +44,7 @@ class PVAnalysis:
     reliability_score: float
     importance_weight: float
     is_primary_candidate: bool
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
@@ -54,7 +53,7 @@ def main():
     print("🚀 Phase 8 Day 2: Multi-PV Control Strategy & Loop Discovery")
     print("=" * 70)
     print("Following AI Task Orchestrator Methodology")
-    
+
     # Demo multi-PV system
     process_variables = [
         {
@@ -66,7 +65,7 @@ def main():
             'is_primary': True
         },
         {
-            'name': 'Reactor Pressure', 
+            'name': 'Reactor Pressure',
             'process_type': 'Pressure',
             'operating_range': [0, 50],
             'response_time': 15,
@@ -82,7 +81,7 @@ def main():
             'is_primary': False
         }
     ]
-    
+
     # Analysis results
     analyses = []
     for pv in process_variables:
@@ -95,7 +94,7 @@ def main():
             is_primary_candidate=pv['is_primary']
         )
         analyses.append(analysis)
-    
+
     # Create implementation results
     implementation_results = {
         "phase": "Phase 8 Day 2",
@@ -128,27 +127,27 @@ def main():
             "infrastructure_integration": "✅ Complete"
         }
     }
-    
+
     # Save results
     results_file = Path(f"phase8_day2_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
     with open(results_file, 'w') as f:
         json.dump(implementation_results, f, indent=2)
-    
-    print(f"\n📊 Implementation Results:")
+
+    print("\n📊 Implementation Results:")
     print(f"   Task: {implementation_results['task']}")
     print(f"   Validation Score: {implementation_results['validation_results']['overall_validation_score']:.1f}%")
-    
-    print(f"\n✅ Deliverables:")
+
+    print("\n✅ Deliverables:")
     for deliverable, status in implementation_results['deliverables'].items():
         print(f"   {deliverable}: {status}")
-    
-    print(f"\n📈 Demo Results Summary:")
+
+    print("\n📈 Demo Results Summary:")
     summary = implementation_results['analysis_summary']
     print(f"   Total PVs: {summary['total_pvs']}")
     print(f"   Primary Candidates: {summary['primary_candidates']}")
     print(f"   Recommended Strategy: {summary['recommended_strategy']}")
     print(f"   Confidence Score: {summary['confidence_score']:.2f}")
-    
+
     print(f"\n📄 Results saved to: {results_file}")
     print("\n✅ Phase 8 Day 2 implementation completed successfully!")
 

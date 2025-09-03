@@ -12,12 +12,11 @@ Created: 2025-01-17
 Phase: Database Connectivity Resolution
 """
 
-import os
-import sys
 import json
-import time
 import subprocess
-from typing import Dict, List, Tuple, Optional
+import sys
+from typing import Dict, Optional, Tuple
+
 
 def test_connection_method(method_name: str, test_func) -> Tuple[bool, str]:
     """Test a connection method and return success status with details."""
@@ -125,32 +124,32 @@ def create_docker_based_env_config() -> Dict[str, str]:
         'neo4j': get_container_ip('plc-neo4j'),
         'qdrant': get_container_ip('plc-qdrant')
     }
-    
+
     # If we can't get container IPs, fall back to service names
     config = {
         'REDIS_HOST': container_ips.get('redis') or 'plc-redis',
         'POSTGRES_HOST': container_ips.get('postgres') or 'plc-postgres',
         'NEO4J_HOST': container_ips.get('neo4j') or 'plc-neo4j',
         'QDRANT_HOST': container_ips.get('qdrant') or 'plc-qdrant',
-        
+
         # Keep standard ports since they're internal
         'REDIS_PORT': '6379',
         'POSTGRES_PORT': '5432',
         'NEO4J_PORT': '7687',
         'QDRANT_PORT': '6333',
-        
+
         # Database credentials from .env
         'POSTGRES_DB': 'plc_gbt',
         'POSTGRES_USER': 'plc_user',
         'POSTGRES_PASSWORD': 'postgres_password',
         'NEO4J_USER': 'neo4j',
         'NEO4J_PASSWORD': 'password',
-        
+
         # Connection URLs
         'NEO4J_BOLT_URL': f"bolt://{container_ips.get('neo4j') or 'plc-neo4j'}:7687",
         'QDRANT_URL': f"http://{container_ips.get('qdrant') or 'plc-qdrant'}:6333"
     }
-    
+
     return config
 
 def update_plc_memory_config(config: Dict[str, str]) -> str:
@@ -190,18 +189,18 @@ def update_plc_memory_config(config: Dict[str, str]) -> str:
         'fallback_enabled': True,
         'docker_network': 'plc-gbt-stack_plc-database-network'
     }
-    
+
     config_file = 'plc_memory_docker_config.json'
     with open(config_file, 'w') as f:
         json.dump(config_override, f, indent=2)
-    
+
     return config_file
 
 def main():
     """Main diagnostic and fix routine."""
     print("🔧 Database Connection Diagnostic & Fix")
     print("=" * 50)
-    
+
     # Test 1: Localhost connections (expected to fail due to Docker Desktop issue)
     print("\n📡 Testing Localhost Connections (Expected to fail on macOS Docker Desktop):")
     tests = [
@@ -210,16 +209,16 @@ def main():
         ("Neo4j Localhost", test_neo4j_localhost),
         ("Qdrant Localhost", test_qdrant_localhost),
     ]
-    
+
     localhost_working = 0
     for test_name, test_func in tests:
         success, message = test_connection_method(test_name, test_func)
         print(f"  {message}")
         if success:
             localhost_working += 1
-    
+
     print(f"\n📊 Localhost Connectivity: {localhost_working}/{len(tests)} working")
-    
+
     # Test 2: Docker exec connections (should work)
     print("\n🐳 Testing Docker Internal Connections:")
     docker_tests = [
@@ -227,44 +226,44 @@ def main():
         ("PostgreSQL Docker", test_postgres_docker_exec),
         ("Neo4j Docker", test_neo4j_docker_exec),
     ]
-    
+
     docker_working = 0
     for test_name, test_func in docker_tests:
         success, message = test_connection_method(test_name, test_func)
         print(f"  {message}")
         if success:
             docker_working += 1
-    
+
     print(f"\n📊 Docker Internal Connectivity: {docker_working}/{len(docker_tests)} working")
-    
+
     # Diagnosis
     print("\n🔍 Diagnosis:")
     if localhost_working == 0 and docker_working >= 3:
         print("  ✅ IDENTIFIED: Docker Desktop port forwarding issue (common on macOS)")
         print("  💡 SOLUTION: Use Docker internal networking for database connections")
-        
+
         # Create fix
         print("\n🛠️ Creating Docker-based configuration...")
         config = create_docker_based_env_config()
         config_file = update_plc_memory_config(config)
-        
+
         print(f"  ✅ Created configuration override: {config_file}")
         print("  ✅ Configuration uses Docker internal networking")
-        
+
         # Show container IPs
         print("\n🌐 Container Network Information:")
         for service in ['redis', 'postgres', 'neo4j', 'qdrant']:
             container_name = f'plc-{service}'
             ip = get_container_ip(container_name)
             print(f"  {service}: {ip or 'Service name fallback'}")
-        
+
         return True, config_file
-    
+
     elif localhost_working >= 3:
         print("  ✅ Port forwarding is working correctly")
         print("  💡 No configuration changes needed")
         return True, None
-    
+
     else:
         print("  ❌ CRITICAL: Both localhost and Docker internal connections failing")
         print("  💡 RECOMMENDATION: Restart Docker Desktop and try again")
@@ -274,14 +273,14 @@ if __name__ == "__main__":
     try:
         success, config_file = main()
         if success:
-            print(f"\n🎉 Database connectivity issue resolved!")
+            print("\n🎉 Database connectivity issue resolved!")
             if config_file:
                 print(f"📁 Use configuration: {config_file}")
                 print("🔧 PLC Memory system can now connect via Docker networking")
             sys.exit(0)
         else:
-            print(f"\n❌ Database connectivity issue requires manual intervention")
+            print("\n❌ Database connectivity issue requires manual intervention")
             sys.exit(1)
     except Exception as e:
         print(f"\n💥 Diagnostic script failed: {e}")
-        sys.exit(1) 
+        sys.exit(1)

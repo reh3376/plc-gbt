@@ -16,7 +16,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 def generate_training_data() -> List[Dict[str, Any]]:
     """Generate comprehensive training data entries"""
     training_entries = []
-    
+
     # MPC and Control Theory Q&As
     training_entries.extend([
         {
@@ -120,7 +120,7 @@ def generate_training_data() -> List[Dict[str, Any]]:
             ]
         }
     ])
-    
+
     return training_entries
 
 
@@ -128,21 +128,21 @@ def save_training_data(training_entries: List[Dict[str, Any]], output_path: Path
     """Save training data in OpenAI JSONL format"""
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Save as JSONL
     with open(output_path, 'w', encoding='utf-8') as f:
         for entry in training_entries:
             f.write(json.dumps(entry, ensure_ascii=False) + '\n')
-    
+
     logger.info(f"✅ Saved {len(training_entries)} training entries to {output_path}")
-    
+
     # Calculate statistics
     total_messages = sum(len(entry['messages']) for entry in training_entries)
     total_tokens = sum(
         len(json.dumps(entry).split()) * 1.3  # Rough token estimate
         for entry in training_entries
     )
-    
+
     # Save metadata
     metadata = {
         "generated_date": datetime.now().isoformat(),
@@ -172,13 +172,13 @@ def save_training_data(training_entries: List[Dict[str, Any]], output_path: Path
             "SCADA/Historian Integration"
         ]
     }
-    
+
     metadata_path = output_path.with_suffix('.metadata.json')
     with open(metadata_path, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
-    
+
     logger.info(f"✅ Saved metadata to {metadata_path}")
-    
+
     # Print summary
     print(f"""
 ========================================
@@ -191,7 +191,7 @@ Metadata File: {metadata_path}
 
 Categories Covered:
 - MPC Fundamentals: 4 examples
-- System Identification: 1 example  
+- System Identification: 1 example
 - Implementation: 3 examples
 - CLI Operations: 2 examples
 - Architecture: 1 example
@@ -207,14 +207,14 @@ Ready for OpenAI fine-tuning!
 def main():
     """Main execution function"""
     logger.info("Starting MPC training data generation...")
-    
+
     # Generate training data
     training_entries = generate_training_data()
-    
+
     # Save to file
     output_path = Path("plc-gbt-stack/training_data/mpc_comprehensive_training.jsonl")
     save_training_data(training_entries, output_path)
-    
+
     logger.info("✅ Training data generation complete!")
 
 

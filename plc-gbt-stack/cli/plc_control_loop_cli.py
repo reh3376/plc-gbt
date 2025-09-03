@@ -7,7 +7,7 @@ creation, validation, and advanced operations.
 
 AI Task Orchestrator Implementation
 =====================================
-Task Classification: COMPLEX (500-1500 lines, 5-15 files, 3-8 hours)  
+Task Classification: COMPLEX (500-1500 lines, 5-15 files, 3-8 hours)
 Context Management: Standard planning with domain awareness
 Methodology Source: AI_TASK_ORCHESTRATOR_GUIDE.md
 
@@ -20,29 +20,27 @@ Phase 21 Objectives:
 
 Author: AI Task Orchestrator
 Created: 2025-01-18
-Phase: 21.1 - Core CLI Infrastructure  
+Phase: 21.1 - Core CLI Infrastructure
 Dependencies: Phase 20 (JSON Schema Framework), Phase 15/17 (Security)
 """
 
+import asyncio
+import json
+import logging
 import os
 import sys
-import json
-import asyncio
-import logging
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import click
 import yaml
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.prompt import Prompt, Confirm
-from rich import print as rprint
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
@@ -86,31 +84,31 @@ class CLIConfiguration:
     default_output_format: str = "table"
     default_schema_registry: str = "plc-gbt-stack/schemas"
     default_instances_dir: str = "plc-gbt-stack/instances"
-    
+
     # Authentication settings
     auth_enabled: bool = True
     api_base_url: str = "http://localhost:8000"
     session_timeout: int = 3600  # 1 hour
-    
+
     # Performance settings
     max_concurrent_operations: int = 5
     cache_enabled: bool = True
     cache_ttl: int = 300  # 5 minutes
-    
+
     # Logging settings
     log_level: str = "info"
     log_file: Optional[str] = None
     verbose: bool = False
-    
+
     # Advanced settings
     editor: str = os.environ.get("EDITOR", "nano")
     pager: str = os.environ.get("PAGER", "less")
     color_output: bool = True
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return asdict(self)
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "CLIConfiguration":
         """Create from dictionary"""
@@ -118,22 +116,22 @@ class CLIConfiguration:
 
 class ConfigurationManager:
     """Manages CLI configuration persistence and loading"""
-    
+
     def __init__(self, config_dir: Optional[Path] = None):
         self.config_dir = config_dir or DEFAULT_CONFIG_DIR
         self.config_file = self.config_dir / CONFIG_FILE_NAME
         self.config_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self._config: Optional[CLIConfiguration] = None
-        
+
     def load_config(self) -> CLIConfiguration:
         """Load configuration from file or create default"""
         if self._config:
             return self._config
-            
+
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file) as f:
                     config_data = yaml.safe_load(f)
                 self._config = CLIConfiguration.from_dict(config_data)
             except Exception as e:
@@ -142,14 +140,14 @@ class ConfigurationManager:
         else:
             self._config = CLIConfiguration()
             self.save_config()
-            
+
         return self._config
-    
+
     def save_config(self) -> bool:
         """Save configuration to file"""
         if not self._config:
             return False
-            
+
         try:
             with open(self.config_file, 'w') as f:
                 yaml.dump(self._config.to_dict(), f, default_flow_style=False)
@@ -157,7 +155,7 @@ class ConfigurationManager:
         except Exception as e:
             console.print(f"[red]Error saving config: {e}[/red]")
             return False
-    
+
     def update_setting(self, key: str, value: Any) -> bool:
         """Update a specific configuration setting"""
         config = self.load_config()
@@ -166,7 +164,7 @@ class ConfigurationManager:
             self._config = config
             return self.save_config()
         return False
-    
+
     def reset_config(self) -> bool:
         """Reset configuration to defaults"""
         self._config = CLIConfiguration()
@@ -178,39 +176,39 @@ class ConfigurationManager:
 
 class CLIContext:
     """Global CLI context and state management"""
-    
+
     def __init__(self):
         self.config_manager = ConfigurationManager()
         self.config = self.config_manager.load_config()
         self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.start_time = datetime.now()
-        
+
         # State tracking
         self.current_schema: Optional[str] = None
         self.current_instance: Optional[str] = None
         self.operation_count = 0
         self.errors: List[str] = []
-        
+
         # Performance tracking
         self.command_times: Dict[str, float] = {}
-        
+
     def log_operation(self, operation: str, duration: float):
         """Log operation for performance tracking"""
         self.operation_count += 1
         self.command_times[operation] = duration
-        
+
         if self.config.verbose:
             console.print(f"[dim]Operation '{operation}' completed in {duration:.3f}s[/dim]")
-    
+
     def add_error(self, error: str):
         """Add error to tracking"""
         self.errors.append(error)
         logger.error(error)
-    
+
     def get_session_summary(self) -> Dict[str, Any]:
         """Get session summary statistics"""
         session_duration = (datetime.now() - self.start_time).total_seconds()
-        
+
         return {
             "session_id": self.session_id,
             "duration_seconds": session_duration,
@@ -226,26 +224,26 @@ class CLIContext:
 
 class AuthenticationManager:
     """Manages CLI authentication and authorization"""
-    
+
     def __init__(self, config: CLIConfiguration):
         self.config = config
         self.session_token: Optional[str] = None
         self.user_info: Optional[Dict[str, Any]] = None
-        
+
     async def authenticate(self, username: Optional[str] = None, password: Optional[str] = None) -> bool:
         """Authenticate user with the system"""
         if not self.config.auth_enabled:
             return True
-            
+
         # For Phase 21.1, implement basic authentication
         # In future phases, integrate with Phase 15/17 security
-        
+
         if not username:
             username = Prompt.ask("Username", default="admin")
-        
+
         if not password:
             password = Prompt.ask("Password", password=True)
-        
+
         # Placeholder authentication logic
         # TODO: Integrate with actual security system in Phase 21.5
         if username and password:
@@ -257,26 +255,26 @@ class AuthenticationManager:
             }
             console.print(f"[green]✅ Authenticated as {username}[/green]")
             return True
-        
+
         console.print("[red]❌ Authentication failed[/red]")
         return False
-    
+
     def is_authenticated(self) -> bool:
         """Check if user is authenticated"""
         if not self.config.auth_enabled:
             return True
         return self.session_token is not None
-    
+
     def has_permission(self, permission: str) -> bool:
         """Check if user has specific permission"""
         if not self.config.auth_enabled:
             return True
-        
+
         if not self.user_info:
             return False
-        
+
         return permission in self.user_info.get("permissions", [])
-    
+
     def logout(self):
         """Logout current session"""
         self.session_token = None
@@ -321,7 +319,7 @@ def async_command(func):
 
 class OutputFormatter:
     """Handles various output formats for CLI responses"""
-    
+
     @staticmethod
     def format_output(data: Any, format_type: str = "table", title: Optional[str] = None) -> None:
         """Format and display output in specified format"""
@@ -333,25 +331,25 @@ class OutputFormatter:
             OutputFormatter._format_csv(data)
         else:  # table (default)
             OutputFormatter._format_table(data, title)
-    
+
     @staticmethod
     def _format_json(data: Any):
         """Format output as JSON"""
         console.print_json(json.dumps(data, indent=2, default=str))
-    
+
     @staticmethod
     def _format_yaml(data: Any):
         """Format output as YAML"""
         yaml_str = yaml.dump(data, default_flow_style=False)
         console.print(f"[dim]{yaml_str}[/dim]")
-    
+
     @staticmethod
     def _format_csv(data: Any):
         """Format output as CSV"""
         if isinstance(data, list) and data and isinstance(data[0], dict):
             import csv
             import io
-            
+
             output = io.StringIO()
             writer = csv.DictWriter(output, fieldnames=data[0].keys())
             writer.writeheader()
@@ -359,30 +357,30 @@ class OutputFormatter:
             console.print(output.getvalue())
         else:
             console.print("[yellow]Warning: CSV format only supports list of dictionaries[/yellow]")
-    
+
     @staticmethod
     def _format_table(data: Any, title: Optional[str] = None):
         """Format output as rich table"""
         if isinstance(data, list) and data and isinstance(data[0], dict):
             table = Table(title=title)
-            
+
             # Add columns
             for key in data[0].keys():
                 table.add_column(str(key).replace('_', ' ').title())
-            
+
             # Add rows
             for item in data:
                 table.add_row(*[str(v) for v in item.values()])
-            
+
             console.print(table)
         elif isinstance(data, dict):
             table = Table(title=title or "Data")
             table.add_column("Property")
             table.add_column("Value")
-            
+
             for key, value in data.items():
                 table.add_row(str(key).replace('_', ' ').title(), str(value))
-            
+
             console.print(table)
         else:
             console.print(data)
@@ -393,12 +391,12 @@ class OutputFormatter:
 
 @click.group()
 @click.version_option(version=CLI_VERSION, prog_name="plc-cl")
-@click.option('--config-dir', type=click.Path(), 
+@click.option('--config-dir', type=click.Path(),
               help='Configuration directory path')
-@click.option('--verbose', '-v', is_flag=True, 
+@click.option('--verbose', '-v', is_flag=True,
               help='Enable verbose output')
-@click.option('--quiet', '-q', is_flag=True, 
-              help='Suppress non-error output') 
+@click.option('--quiet', '-q', is_flag=True,
+              help='Suppress non-error output')
 @click.option('--format', type=click.Choice(['table', 'json', 'yaml', 'csv']),
               help='Output format')
 @click.option('--no-color', is_flag=True,
@@ -408,10 +406,10 @@ class OutputFormatter:
 def cli(ctx, config_dir, verbose, quiet, format, no_color):
     """
     🖥️ PLC Control Loop CLI - Advanced Control Loop Management
-    
+
     Comprehensive command-line interface for control loop schema management,
     instance creation, validation, and advanced operations.
-    
+
     Examples:
         plc-cl status
         plc-cl schema list
@@ -421,31 +419,31 @@ def cli(ctx, config_dir, verbose, quiet, format, no_color):
     """
     # Initialize CLI context
     cli_ctx = CLIContext()
-    
+
     # Override config directory if specified
     if config_dir:
         cli_ctx.config_manager = ConfigurationManager(Path(config_dir))
         cli_ctx.config = cli_ctx.config_manager.load_config()
-    
+
     # Apply command-line overrides
     if verbose:
         cli_ctx.config.verbose = True
         logging.getLogger().setLevel(logging.DEBUG)
-    
+
     if quiet:
         cli_ctx.config.verbose = False
         logging.getLogger().setLevel(logging.WARNING)
-    
+
     if format:
         cli_ctx.config.default_output_format = format
-    
+
     if no_color:
         cli_ctx.config.color_output = False
         console.no_color = True
-    
+
     # Store context for subcommands
     ctx.obj = cli_ctx
-    
+
     # Initialize authentication manager
     cli_ctx.auth_manager = AuthenticationManager(cli_ctx.config)
 
@@ -462,7 +460,7 @@ def status(ctx, detailed, format):
     """Show system status and health"""
     try:
         cli_ctx: CLIContext = ctx.obj
-        
+
         status_info = {
             "cli_version": CLI_VERSION,
             "session_id": cli_ctx.session_id,
@@ -471,10 +469,10 @@ def status(ctx, detailed, format):
             "operations_performed": cli_ctx.operation_count,
             "errors_encountered": len(cli_ctx.errors)
         }
-        
+
         if detailed:
             status_info.update(cli_ctx.get_session_summary())
-            
+
             # Check schema registry
             schema_registry_path = Path(cli_ctx.config.default_schema_registry)
             status_info["schema_registry"] = {
@@ -482,15 +480,15 @@ def status(ctx, detailed, format):
                 "exists": schema_registry_path.exists(),
                 "schemas_available": len(list(schema_registry_path.glob("**/*.json"))) if schema_registry_path.exists() else 0
             }
-            
-            # Check instances directory  
+
+            # Check instances directory
             instances_path = Path(cli_ctx.config.default_instances_dir)
             status_info["instances_directory"] = {
                 "path": str(instances_path),
                 "exists": instances_path.exists(),
                 "instances_available": len(list(instances_path.glob("**/*.json"))) if instances_path.exists() else 0
             }
-        
+
         OutputFormatter.format_output(
             status_info,
             format or cli_ctx.config.default_output_format,
@@ -504,22 +502,22 @@ def status(ctx, detailed, format):
 @click.pass_context
 def version(ctx):
     """Show version information"""
-    version_info = {
+    {
         "cli_version": CLI_VERSION,
         "python_version": sys.version.split()[0],
         "platform": sys.platform,
         "executable": sys.executable
     }
-    
+
     panel = Panel(
         f"[bold]PLC Control Loop CLI[/bold]\n\n"
         f"Version: {CLI_VERSION}\n"
-        f"Python: {sys.version.split()[0]}\n"  
+        f"Python: {sys.version.split()[0]}\n"
         f"Platform: {sys.platform}",
         title="Version Information",
         border_style="blue"
     )
-    
+
     console.print(panel)
 
 # =============================================================================
@@ -533,7 +531,7 @@ def config(ctx):
     pass
 
 @config.command()
-@click.option('--format', type=click.Choice(['table', 'json', 'yaml']), 
+@click.option('--format', type=click.Choice(['table', 'json', 'yaml']),
               default='table', help='Output format')
 @click.pass_context
 def show(ctx, format):
@@ -541,9 +539,9 @@ def show(ctx, format):
     try:
         cli_ctx: CLIContext = ctx.obj
         config_dict = cli_ctx.config.to_dict()
-        
+
         OutputFormatter.format_output(
-            config_dict, 
+            config_dict,
             format or cli_ctx.config.default_output_format,
             "Current Configuration"
         )
@@ -559,13 +557,13 @@ def set(ctx, key, value):
     """Set configuration value"""
     try:
         cli_ctx: CLIContext = ctx.obj
-        
+
         # Type conversion for common settings
         if key in ['verbose', 'auth_enabled', 'cache_enabled', 'color_output']:
             value = value.lower() in ('true', '1', 'yes', 'on')
         elif key in ['session_timeout', 'max_concurrent_operations', 'cache_ttl']:
             value = int(value)
-        
+
         if cli_ctx.config_manager.update_setting(key, value):
             console.print(f"[green]✅ Set {key} = {value}[/green]")
         else:
@@ -580,7 +578,7 @@ def reset(ctx):
     """Reset configuration to defaults"""
     try:
         cli_ctx: CLIContext = ctx.obj
-        
+
         if Confirm.ask("Are you sure you want to reset all configuration to defaults?"):
             if cli_ctx.config_manager.reset_config():
                 console.print("[green]✅ Configuration reset to defaults[/green]")
@@ -610,7 +608,7 @@ def login(ctx, username, password):
     async def _login_async():
         cli_ctx: CLIContext = ctx.obj
         return await cli_ctx.auth_manager.authenticate(username, password)
-    
+
     try:
         success = _login_async()
         if not success:
@@ -637,7 +635,7 @@ def status(ctx):
     try:
         cli_ctx: CLIContext = ctx.obj
         auth_manager = cli_ctx.auth_manager
-        
+
         if auth_manager.is_authenticated():
             user_info = auth_manager.user_info or {}
             console.print(f"[green]✅ Authenticated as: {user_info.get('username', 'Unknown')}[/green]")
@@ -650,7 +648,7 @@ def status(ctx):
         sys.exit(1)
 
 # =============================================================================
-# COMMAND GROUP IMPORTS AND REGISTRATION  
+# COMMAND GROUP IMPORTS AND REGISTRATION
 # =============================================================================
 
 # Import command groups if available
@@ -700,7 +698,7 @@ else:
         """Schema management commands (Phase 21.2)"""
         console.print("[yellow]⚠️  Schema commands not available - check installation[/yellow]")
 
-# Register instance commands if available  
+# Register instance commands if available
 if INSTANCE_COMMANDS_AVAILABLE:
     cli.add_command(instance_commands, name='instance')
 else:
@@ -752,17 +750,17 @@ def repl(ctx, verbose, save_session):
     """Interactive REPL mode for real-time operations"""
     try:
         from cli.repl.interactive_repl import PLCControlREPL
-        
+
         cli_context = ctx.obj if ctx else None
         repl_instance = PLCControlREPL(cli_context)
-        
+
         # Configure REPL
         repl_instance.session.verbose = verbose
         repl_instance.session.auto_save = save_session
-        
+
         # Start REPL
         repl_instance.start()
-        
+
     except ImportError as e:
         console.print(f"[red]❌ REPL not available: {e}[/red]")
         console.print("[yellow]💡 Try: pip install prompt_toolkit[/yellow]")
@@ -785,4 +783,4 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    main() 
+    main()

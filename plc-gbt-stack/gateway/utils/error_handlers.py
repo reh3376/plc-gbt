@@ -3,15 +3,16 @@ Common Error Handling Utilities
 Extracted error handling patterns to reduce code duplication
 """
 
+from typing import Any, Dict, Optional
+
 import structlog
-from typing import Dict, Any, Optional
 from fastapi import HTTPException
 
 logger = structlog.get_logger()
 
 class MCPError(Exception):
     """Custom exception for MCP-related errors"""
-    def __init__(self, message: str, error_code: Optional[str] = None, 
+    def __init__(self, message: str, error_code: Optional[str] = None,
                  details: Optional[Dict[str, Any]] = None):
         self.message = message
         self.error_code = error_code
@@ -24,10 +25,10 @@ def handle_mcp_error(error: Exception, operation: str, context: Optional[Dict[st
     Returns a consistent error response format
     """
     context = context or {}
-    
-    logger.error(f"MCP operation failed: {operation}", 
+
+    logger.error(f"MCP operation failed: {operation}",
                 error=str(error), context=context)
-    
+
     if isinstance(error, MCPError):
         return {
             "success": False,
@@ -48,7 +49,7 @@ def handle_http_error(error: Exception, operation: str, status_code: int = 500) 
     Convert exceptions to standardized HTTP exceptions
     """
     logger.error(f"HTTP operation failed: {operation}", error=str(error))
-    
+
     if isinstance(error, HTTPException):
         return error
     elif isinstance(error, MCPError):
@@ -62,7 +63,7 @@ def handle_http_error(error: Exception, operation: str, status_code: int = 500) 
             detail=f"{operation} failed: {str(error)}"
         )
 
-def create_error_response(success: bool = False, error: str = "", 
+def create_error_response(success: bool = False, error: str = "",
                          operation: str = "", **kwargs) -> Dict[str, Any]:
     """Create standardized error response"""
     return {
@@ -78,4 +79,4 @@ def create_success_response(data: Dict[str, Any], operation: str = "") -> Dict[s
         "success": True,
         "operation": operation,
         **data
-    } 
+    }

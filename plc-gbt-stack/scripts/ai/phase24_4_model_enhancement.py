@@ -3,8 +3,8 @@
 Phase 24.4: Model Fine-tuning Enhancement
 =========================================
 
-AI Task Orchestrator implementation for enhancing the existing fine-tuned 
-Industrial Control Theory LLM (ft:gpt-4o:industrial-control:20250117) with 
+AI Task Orchestrator implementation for enhancing the existing fine-tuned
+Industrial Control Theory LLM (ft:gpt-4o:industrial-control:20250117) with
 context directory knowledge from Phase 24.3.
 
 Leverages existing infrastructure:
@@ -24,21 +24,20 @@ Date: January 17, 2025
 Methodology: AI Task Orchestrator Guide
 """
 
-import json
 import asyncio
+import json
 import logging
-import subprocess
 import os
-import shutil
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
-import pandas as pd
-import time
+import subprocess
 
 # Add parent directory to path for imports
 import sys
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Configure logging
@@ -71,25 +70,25 @@ class Phase24_4_ModelEnhancer:
     Model enhancement orchestrator for Phase 24.4
     Enhances existing fine-tuned model with context knowledge
     """
-    
+
     def __init__(self, config: Optional[ModelEnhancementConfig] = None):
         """Initialize model enhancer"""
         self.config = config or ModelEnhancementConfig()
         self.session_id = f"phase24_4_{int(time.time())}"
         self.results_dir = Path("results/phase24")
         self.results_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Training data paths
         self.phase24_3_training = Path("plc-gbt-stack/results/phase24/phase24_3_training_data_20250715_060447.jsonl")
         self.phase24_3_validation = Path("plc-gbt-stack/results/phase24/phase24_3_validation_data_20250715_060447.jsonl")
         self.phase10_training = Path("plc-gbt-stack/training_data/openai/context_openai_training_data.jsonl")
-        
+
         # Output paths
         self.merged_training_file = self.results_dir / f"phase24_4_merged_training_{self.session_id}.jsonl"
         self.merged_validation_file = self.results_dir / f"phase24_4_merged_validation_{self.session_id}.jsonl"
-        
+
         logger.info(f"Initialized Phase 24.4 Model Enhancer - Session: {self.session_id}")
-    
+
     async def execute_phase_24_4(self) -> Dict[str, Any]:
         """
         Execute complete Phase 24.4: Model Fine-tuning Enhancement
@@ -97,7 +96,7 @@ class Phase24_4_ModelEnhancer:
         """
         start_time = time.time()
         logger.info("🚀 Starting Phase 24.4: Model Fine-tuning Enhancement")
-        
+
         phase_result = {
             "session_id": self.session_id,
             "start_time": datetime.now().isoformat(),
@@ -108,59 +107,59 @@ class Phase24_4_ModelEnhancer:
             "overall_success": False,
             "execution_time": 0.0
         }
-        
+
         try:
             # Task 24.4.1: Prepare fine-tuning pipeline
             logger.info("📊 Task 24.4.1: Prepare Fine-tuning Pipeline")
             task_1_result = await self.task_24_4_1_prepare_pipeline()
             phase_result["tasks"]["24.4.1"] = asdict(task_1_result)
-            
+
             if not task_1_result.success:
                 raise Exception(f"Task 24.4.1 failed: {task_1_result.error_message}")
-            
+
             # Task 24.4.2: Execute incremental fine-tuning
             logger.info("🤖 Task 24.4.2: Execute Incremental Fine-tuning")
             task_2_result = await self.task_24_4_2_execute_fine_tuning()
             phase_result["tasks"]["24.4.2"] = asdict(task_2_result)
-            
+
             if not task_2_result.success:
                 raise Exception(f"Task 24.4.2 failed: {task_2_result.error_message}")
-            
+
             # Task 24.4.3: Validate model improvements
             logger.info("✅ Task 24.4.3: Validate Model Improvements")
             task_3_result = await self.task_24_4_3_validate_improvements()
             phase_result["tasks"]["24.4.3"] = asdict(task_3_result)
-            
+
             if not task_3_result.success:
                 raise Exception(f"Task 24.4.3 failed: {task_3_result.error_message}")
-            
+
             # Task 24.4.4: Deploy enhanced model
             logger.info("🚀 Task 24.4.4: Deploy Enhanced Model")
             task_4_result = await self.task_24_4_4_deploy_model()
             phase_result["tasks"]["24.4.4"] = asdict(task_4_result)
-            
+
             if not task_4_result.success:
                 logger.warning(f"Task 24.4.4 completed with warnings: {task_4_result.error_message}")
-            
+
             phase_result["overall_success"] = True
             logger.info("✅ Phase 24.4 completed successfully!")
-            
+
         except Exception as e:
             logger.error(f"❌ Phase 24.4 failed: {e}")
             phase_result["error"] = str(e)
             phase_result["overall_success"] = False
-        
+
         phase_result["execution_time"] = time.time() - start_time
         phase_result["end_time"] = datetime.now().isoformat()
-        
+
         # Save results
         results_file = self.results_dir / f"phase24_4_results_{self.session_id}.json"
         with open(results_file, 'w') as f:
             json.dump(phase_result, f, indent=2)
-        
+
         logger.info(f"Phase 24.4 results saved to: {results_file}")
         return phase_result
-    
+
     async def task_24_4_1_prepare_pipeline(self) -> EnhancementResult:
         """
         Task 24.4.1: Prepare fine-tuning pipeline
@@ -176,14 +175,14 @@ class Phase24_4_ModelEnhancer:
             execution_time=0.0,
             details={}
         )
-        
+
         try:
             logger.info("Loading existing training datasets...")
-            
+
             # Load Phase 24.3 training data (16 examples)
             phase24_3_examples = []
             if self.phase24_3_training.exists():
-                with open(self.phase24_3_training, 'r') as f:
+                with open(self.phase24_3_training) as f:
                     for line in f:
                         if line.strip():
                             phase24_3_examples.append(json.loads(line))
@@ -191,20 +190,20 @@ class Phase24_4_ModelEnhancer:
             else:
                 logger.warning("Phase 24.3 training data not found, using template examples")
                 phase24_3_examples = self._generate_template_examples()
-            
+
             # Load Phase 24.3 validation data (2 examples)
             phase24_3_validation = []
             if self.phase24_3_validation.exists():
-                with open(self.phase24_3_validation, 'r') as f:
+                with open(self.phase24_3_validation) as f:
                     for line in f:
                         if line.strip():
                             phase24_3_validation.append(json.loads(line))
                 logger.info(f"Loaded {len(phase24_3_validation)} Phase 24.3 validation examples")
-            
+
             # Load existing Phase 10 training data (109+ examples)
             phase10_examples = []
             if self.phase10_training.exists():
-                with open(self.phase10_training, 'r') as f:
+                with open(self.phase10_training) as f:
                     for line in f:
                         if line.strip():
                             try:
@@ -218,44 +217,44 @@ class Phase24_4_ModelEnhancer:
                 logger.info(f"Loaded {len(phase10_examples)} Phase 10 training examples")
             else:
                 logger.warning("Phase 10 training data not found")
-            
+
             # Merge and balance datasets
             all_training_examples = phase24_3_examples + phase10_examples
             all_validation_examples = phase24_3_validation
-            
+
             # Validate format compliance
             validated_training = []
             validated_validation = []
-            
+
             for example in all_training_examples:
                 if self._validate_openai_format(example):
                     validated_training.append(example)
                 else:
                     logger.warning("Skipping invalid training example")
-            
+
             for example in all_validation_examples:
                 if self._validate_openai_format(example):
                     validated_validation.append(example)
                 else:
                     logger.warning("Skipping invalid validation example")
-            
+
             # Quality assessment
             quality_score = self._calculate_quality_score(validated_training)
-            
+
             if quality_score < self.config.quality_threshold:
                 logger.warning(f"Quality score {quality_score:.2%} below threshold {self.config.quality_threshold:.2%}")
-            
+
             # Save merged datasets
             logger.info("Saving merged training dataset...")
             with open(self.merged_training_file, 'w') as f:
                 for example in validated_training:
                     f.write(json.dumps(example) + '\n')
-            
+
             logger.info("Saving merged validation dataset...")
             with open(self.merged_validation_file, 'w') as f:
                 for example in validated_validation:
                     f.write(json.dumps(example) + '\n')
-            
+
             task_result.success = True
             task_result.details = {
                 "phase24_3_examples": len(phase24_3_examples),
@@ -267,16 +266,16 @@ class Phase24_4_ModelEnhancer:
                 "validation_file": str(self.merged_validation_file),
                 "format_compliance": len(validated_training) / len(all_training_examples) if all_training_examples else 1.0
             }
-            
+
             logger.info(f"✅ Task 24.4.1 completed: {len(validated_training)} training examples prepared")
-            
+
         except Exception as e:
             task_result.error_message = str(e)
             logger.error(f"❌ Task 24.4.1 failed: {e}")
-        
+
         task_result.execution_time = time.time() - start_time
         return task_result
-    
+
     async def task_24_4_2_execute_fine_tuning(self) -> EnhancementResult:
         """
         Task 24.4.2: Execute incremental fine-tuning
@@ -289,24 +288,24 @@ class Phase24_4_ModelEnhancer:
             execution_time=0.0,
             details={}
         )
-        
+
         try:
             # Check OpenAI API key
             if not os.getenv("OPENAI_API_KEY"):
                 raise Exception("OPENAI_API_KEY environment variable not set")
-            
+
             # Use existing OpenAI fine-tuning CLI for training
             logger.info("Initiating fine-tuning using existing CLI infrastructure...")
-            
+
             cli_script = Path("plc-gbt-stack/scripts/ai/openai_fine_tuning_cli.py")
             if not cli_script.exists():
                 cli_script = Path("scripts/ai/openai_fine_tuning_cli.py")
-            
+
             if not cli_script.exists():
                 logger.warning("OpenAI fine-tuning CLI not found, using mock training")
                 # Mock training for development
                 await asyncio.sleep(2)  # Simulate training time
-                
+
                 task_result.success = True
                 task_result.details = {
                     "job_id": f"ftjob-mock-{self.session_id}",
@@ -318,10 +317,10 @@ class Phase24_4_ModelEnhancer:
                     "status": "completed",
                     "mock_training": True
                 }
-                
+
                 logger.info("✅ Task 24.4.2 completed (mock training)")
                 return task_result
-            
+
             # Prepare CLI command
             train_command = [
                 "python", str(cli_script),
@@ -330,9 +329,9 @@ class Phase24_4_ModelEnhancer:
                 "--epochs", str(self.config.n_epochs),
                 "--batch-size", str(self.config.batch_size)
             ]
-            
+
             logger.info(f"Executing: {' '.join(train_command)}")
-            
+
             # Execute fine-tuning
             result = subprocess.run(
                 train_command,
@@ -340,11 +339,11 @@ class Phase24_4_ModelEnhancer:
                 text=True,
                 timeout=3600  # 1 hour timeout
             )
-            
+
             if result.returncode == 0:
                 # Parse job ID from output
                 job_id = self._extract_job_id(result.stdout)
-                
+
                 task_result.success = True
                 task_result.details = {
                     "job_id": job_id,
@@ -355,18 +354,18 @@ class Phase24_4_ModelEnhancer:
                     "cli_output": result.stdout,
                     "status": "initiated"
                 }
-                
+
                 logger.info(f"✅ Task 24.4.2 completed: Fine-tuning job {job_id} initiated")
             else:
                 raise Exception(f"CLI command failed: {result.stderr}")
-        
+
         except Exception as e:
             task_result.error_message = str(e)
             logger.error(f"❌ Task 24.4.2 failed: {e}")
-        
+
         task_result.execution_time = time.time() - start_time
         return task_result
-    
+
     async def task_24_4_3_validate_improvements(self) -> EnhancementResult:
         """
         Task 24.4.3: Validate model improvements
@@ -382,13 +381,13 @@ class Phase24_4_ModelEnhancer:
             execution_time=0.0,
             details={}
         )
-        
+
         try:
             logger.info("Performing model validation...")
-            
+
             # Mock validation for development (replace with actual testing)
             await asyncio.sleep(1)  # Simulate validation time
-            
+
             # Simulate validation metrics
             validation_metrics = {
                 "accuracy_improvement": 0.12,  # 12% improvement
@@ -398,7 +397,7 @@ class Phase24_4_ModelEnhancer:
                 "safety_compliance": 1.0,  # 100% safety compliance
                 "overall_score": 0.93  # 93% overall validation score
             }
-            
+
             # Check if improvements meet targets
             meets_targets = (
                 validation_metrics["accuracy_improvement"] >= 0.10 and  # >10% improvement
@@ -406,7 +405,7 @@ class Phase24_4_ModelEnhancer:
                 validation_metrics["original_knowledge_retention"] >= 0.95 and  # >95% retention
                 validation_metrics["response_time_avg"] <= 2.0  # <2 seconds
             )
-            
+
             task_result.success = meets_targets
             task_result.details = {
                 "validation_metrics": validation_metrics,
@@ -419,19 +418,19 @@ class Phase24_4_ModelEnhancer:
                 },
                 "recommendations": self._generate_recommendations(validation_metrics)
             }
-            
+
             if meets_targets:
                 logger.info("✅ Task 24.4.3 completed: Model improvements validated")
             else:
                 logger.warning("⚠️ Task 24.4.3 completed with warnings: Some targets not met")
-        
+
         except Exception as e:
             task_result.error_message = str(e)
             logger.error(f"❌ Task 24.4.3 failed: {e}")
-        
+
         task_result.execution_time = time.time() - start_time
         return task_result
-    
+
     async def task_24_4_4_deploy_model(self) -> EnhancementResult:
         """
         Task 24.4.4: Deploy enhanced model
@@ -447,15 +446,15 @@ class Phase24_4_ModelEnhancer:
             execution_time=0.0,
             details={}
         )
-        
+
         try:
             logger.info("Preparing enhanced model deployment...")
-            
+
             # Mock deployment for development
             await asyncio.sleep(1)  # Simulate deployment time
-            
+
             enhanced_model_id = f"{self.config.base_model}-{self.config.enhanced_suffix}"
-            
+
             # Generate deployment configuration
             deployment_config = {
                 "enhanced_model_id": enhanced_model_id,
@@ -469,12 +468,12 @@ class Phase24_4_ModelEnhancer:
                     "availability": 0.999
                 }
             }
-            
+
             # Save deployment configuration
             deployment_file = self.results_dir / f"phase24_4_deployment_config_{self.session_id}.json"
             with open(deployment_file, 'w') as f:
                 json.dump(deployment_config, f, indent=2)
-            
+
             task_result.success = True
             task_result.details = {
                 "enhanced_model_id": enhanced_model_id,
@@ -489,16 +488,16 @@ class Phase24_4_ModelEnhancer:
                     "Complete rollout if metrics are satisfactory"
                 ]
             }
-            
+
             logger.info("✅ Task 24.4.4 completed: Enhanced model deployment configured")
-        
+
         except Exception as e:
             task_result.error_message = str(e)
             logger.error(f"❌ Task 24.4.4 failed: {e}")
-        
+
         task_result.execution_time = time.time() - start_time
         return task_result
-    
+
     def _generate_template_examples(self) -> List[Dict[str, Any]]:
         """Generate template examples if Phase 24.3 data not found"""
         return [
@@ -519,12 +518,12 @@ class Phase24_4_ModelEnhancer:
                 "metadata": {"category": "control_theory", "confidence": 0.85}
             }
         ]
-    
+
     def _convert_to_openai_format(self, example: Dict[str, Any]) -> Dict[str, Any]:
         """Convert legacy format to OpenAI fine-tuning format"""
         if "messages" in example:
             return example
-        
+
         # Handle different legacy formats
         if "user" in example and "assistant" in example:
             return {
@@ -542,18 +541,18 @@ class Phase24_4_ModelEnhancer:
                     {"role": "assistant", "content": example["answer"]}
                 ]
             }
-        
+
         return example
-    
+
     def _validate_openai_format(self, example: Dict[str, Any]) -> bool:
         """Validate OpenAI fine-tuning format"""
         if "messages" not in example:
             return False
-        
+
         messages = example["messages"]
         if not isinstance(messages, list) or len(messages) < 2:
             return False
-        
+
         for message in messages:
             if not isinstance(message, dict):
                 return False
@@ -561,31 +560,31 @@ class Phase24_4_ModelEnhancer:
                 return False
             if message["role"] not in ["system", "user", "assistant"]:
                 return False
-        
+
         return True
-    
+
     def _calculate_quality_score(self, examples: List[Dict[str, Any]]) -> float:
         """Calculate training data quality score"""
         if not examples:
             return 0.0
-        
+
         total_score = 0.0
         for example in examples:
             messages = example.get("messages", [])
-            
+
             # Score based on message count and length
             message_score = min(len(messages) / 3.0, 1.0)  # 3+ messages is ideal
-            
+
             # Score based on content length
             total_content = sum(len(msg.get("content", "")) for msg in messages)
             length_score = min(total_content / 200.0, 1.0)  # 200+ chars is good
-            
+
             # Combine scores
             example_score = (message_score + length_score) / 2.0
             total_score += example_score
-        
+
         return total_score / len(examples)
-    
+
     def _extract_job_id(self, cli_output: str) -> str:
         """Extract job ID from CLI output"""
         # Look for job ID pattern in output
@@ -594,62 +593,62 @@ class Phase24_4_ModelEnhancer:
         if match:
             return match.group(1)
         return f"ftjob-mock-{self.session_id}"
-    
+
     def _generate_recommendations(self, metrics: Dict[str, Any]) -> List[str]:
         """Generate recommendations based on validation metrics"""
         recommendations = []
-        
+
         if metrics["accuracy_improvement"] < 0.10:
             recommendations.append("Consider adding more diverse training examples")
-        
+
         if metrics["context_knowledge_score"] < 0.90:
             recommendations.append("Enhance context-specific training data")
-        
+
         if metrics["original_knowledge_retention"] < 0.95:
             recommendations.append("Review training parameters to preserve original knowledge")
-        
+
         if metrics["response_time_avg"] > 2.0:
             recommendations.append("Optimize model inference for better response times")
-        
+
         if not recommendations:
             recommendations.append("Model enhancement meets all targets - ready for production")
-        
+
         return recommendations
 
 async def main():
     """Main execution function"""
     print("🚀 Phase 24.4: Model Fine-tuning Enhancement")
     print("=" * 60)
-    
+
     # Initialize enhancer
     config = ModelEnhancementConfig()
     enhancer = Phase24_4_ModelEnhancer(config)
-    
+
     # Execute Phase 24.4
     try:
         result = await enhancer.execute_phase_24_4()
-        
+
         print("\n📊 Phase 24.4 Results Summary:")
         print(f"Session ID: {result['session_id']}")
         print(f"Overall Success: {'✅' if result['overall_success'] else '❌'}")
         print(f"Execution Time: {result['execution_time']:.1f} seconds")
-        
+
         print("\n📋 Task Results:")
         for task_id, task_result in result["tasks"].items():
             status = "✅" if task_result["success"] else "❌"
             print(f"  {task_id}: {status} ({task_result['execution_time']:.1f}s)")
-        
+
         if result["overall_success"]:
             print("\n🎉 Phase 24.4 completed successfully!")
             print("Enhanced Industrial Control Theory LLM ready for deployment")
         else:
             print(f"\n❌ Phase 24.4 failed: {result.get('error', 'Unknown error')}")
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Phase 24.4 execution failed: {e}")
         raise
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

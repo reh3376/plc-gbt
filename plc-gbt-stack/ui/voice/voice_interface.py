@@ -15,8 +15,8 @@ Status: Architecture Ready - Framework prepared for implementation
 
 import asyncio
 import logging
-from typing import Optional, Dict, Any, AsyncGenerator
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -35,49 +35,49 @@ class VoiceConfig:
 class VoiceInterface:
     """
     Voice interface for PLC-GBT system
-    
+
     Architecture ready - provides framework for:
     - Speech-to-text processing
-    - Text-to-speech output  
+    - Text-to-speech output
     - Voice command recognition
     - Integration with chat interface
     """
-    
+
     def __init__(self, config: Optional[VoiceConfig] = None):
         """Initialize voice interface"""
         self.config = config or VoiceConfig()
         self.is_listening = False
         self.is_speaking = False
-        
+
         # Framework for integration components
         self.speech_recognizer = None  # Will integrate with speech recognition service
         self.text_to_speech = None     # Will integrate with TTS service
         self.audio_processor = None    # Will integrate with audio processing
-        
+
         logger.info("Voice interface architecture initialized")
-    
+
     async def start_voice_session(self) -> None:
         """Start interactive voice session (framework ready)"""
         logger.info("Voice session framework ready - implementation pending")
         # Framework prepared for voice interaction loop
-        
+
     async def listen_for_speech(self) -> Optional[str]:
         """Listen for speech input (architecture ready)"""
         logger.info("Speech listening framework ready")
         # Framework for speech recognition integration
         return None
-    
+
     async def speak_text(self, text: str) -> None:
         """Convert text to speech (architecture ready)"""
         logger.info(f"Text-to-speech framework ready for: {text[:50]}...")
         # Framework for TTS integration
-        
+
     async def process_voice_command(self, command: str) -> str:
         """Process voice command (architecture ready)"""
         logger.info(f"Voice command processing framework ready: {command}")
         # Framework for LLM integration
         return "Voice processing framework ready"
-    
+
     def get_audio_devices(self) -> Dict[str, Any]:
         """Get available audio devices (architecture ready)"""
         return {
@@ -85,12 +85,12 @@ class VoiceInterface:
             "output_devices": [],
             "framework_status": "ready"
         }
-    
+
     async def calibrate_audio(self) -> bool:
         """Calibrate audio settings (architecture ready)"""
         logger.info("Audio calibration framework ready")
         return True
-    
+
     def stop_session(self) -> None:
         """Stop voice session"""
         self.is_listening = False
@@ -107,5 +107,5 @@ if __name__ == "__main__":
     async def demo_voice_framework():
         voice = create_voice_interface()
         await voice.start_voice_session()
-        
-    asyncio.run(demo_voice_framework()) 
+
+    asyncio.run(demo_voice_framework())

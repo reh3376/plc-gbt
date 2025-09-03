@@ -8,20 +8,20 @@ identified in comprehensive database audit.
 Problem: Missing ALL expected tables (python_files, documentation, configuration_files)
 Causing: 0% data completeness in long-term storage tier
 
-Author: AI Task Orchestrator  
+Author: AI Task Orchestrator
 Created: 2025-01-10
 Task: IMMEDIATE Priority Fix (Critical - Fix Today)
 """
 
+import asyncio
+import json
+import logging
 import os
 import sys
-import json
-import asyncio
-import logging
+import traceback
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import traceback
+from typing import Any, Dict, List
 
 # Add current directory to path for imports
 sys.path.append('.')
@@ -53,16 +53,16 @@ logger = logging.getLogger(__name__)
 class PostgreSQLSchemaInitializer:
     """
     🎯 PostgreSQL Schema Initializer
-    
+
     Creates missing database tables for PLC Memory Management System
     following AI Task Orchestrator methodology for critical system fixes.
     """
-    
+
     def __init__(self):
         self.connection = None
         self.schema_version = "1.0.0"
         self.session_id = f"schema_init_{int(datetime.now().timestamp())}"
-        
+
         # Database configuration
         self.db_config = {
             "host": os.getenv("POSTGRES_HOST", "localhost"),
@@ -71,13 +71,13 @@ class PostgreSQLSchemaInitializer:
             "user": os.getenv("POSTGRES_USER", "plc_user"),
             "password": os.getenv("POSTGRES_PASSWORD", "password")
         }
-        
+
         # Define schema tables
         self.schema_definitions = self._define_schema()
-        
+
     def _define_schema(self) -> Dict[str, str]:
         """Define schema for PLC memory ingestion tables"""
-        
+
         return {
             # Python files table - stores processed Python file data
             "python_files": """
@@ -97,7 +97,7 @@ class PostgreSQLSchemaInitializer:
                     last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 );
             """,
-            
+
             # Documentation table - stores processed documentation files
             "documentation": """
                 CREATE TABLE IF NOT EXISTS documentation (
@@ -115,7 +115,7 @@ class PostgreSQLSchemaInitializer:
                     last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 );
             """,
-            
+
             # Configuration files table - stores JSON, YAML, etc. configuration data
             "configuration_files": """
                 CREATE TABLE IF NOT EXISTS configuration_files (
@@ -133,7 +133,7 @@ class PostgreSQLSchemaInitializer:
                     last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 );
             """,
-            
+
             # Schema version tracking table
             "schema_version": """
                 CREATE TABLE IF NOT EXISTS schema_version (
@@ -145,7 +145,7 @@ class PostgreSQLSchemaInitializer:
                     session_id VARCHAR(100)
                 );
             """,
-            
+
             # Database health monitoring table
             "ingestion_health": """
                 CREATE TABLE IF NOT EXISTS ingestion_health (
@@ -197,19 +197,19 @@ class PostgreSQLSchemaInitializer:
                 f"user={self.db_config['user']} "
                 f"password={self.db_config['password']}"
             )
-            
+
             self.connection = psycopg2.connect(connection_string)
             self.connection.autocommit = True
-            
+
             # Test connection
             cursor = self.connection.cursor()
             cursor.execute("SELECT version()")
             version = cursor.fetchone()[0]
             cursor.close()
-            
+
             logger.info(f"✅ PostgreSQL connected: {version}")
             return True
-            
+
         except Exception as e:
             logger.error(f"❌ PostgreSQL connection failed: {str(e)}")
             return False
@@ -217,34 +217,34 @@ class PostgreSQLSchemaInitializer:
     async def check_existing_schema(self) -> Dict[str, bool]:
         """Check which tables already exist"""
         existing_tables = {}
-        
+
         try:
             cursor = self.connection.cursor()
-            
+
             # Check for existing tables
             cursor.execute("""
-                SELECT table_name 
-                FROM information_schema.tables 
+                SELECT table_name
+                FROM information_schema.tables
                 WHERE table_schema = 'public'
                 AND table_name IN ('python_files', 'documentation', 'configuration_files', 'schema_version', 'ingestion_health')
             """)
-            
+
             existing_table_names = [row[0] for row in cursor.fetchall()]
-            
+
             # Map expected tables to existence status
             expected_tables = ['python_files', 'documentation', 'configuration_files', 'schema_version', 'ingestion_health']
             for table in expected_tables:
                 existing_tables[table] = table in existing_table_names
-                
+
             cursor.close()
-            
-            print(f"📊 Existing Tables Analysis:")
+
+            print("📊 Existing Tables Analysis:")
             for table, exists in existing_tables.items():
                 status = "✅ EXISTS" if exists else "❌ MISSING"
                 print(f"   {table}: {status}")
-                
+
             return existing_tables
-            
+
         except Exception as e:
             logger.error(f"Error checking existing schema: {str(e)}")
             return {}
@@ -258,22 +258,22 @@ class PostgreSQLSchemaInitializer:
             "errors": [],
             "success": True
         }
-        
+
         try:
             cursor = self.connection.cursor()
-            
+
             # Phase 1: Create tables
             for table_name, table_sql in self.schema_definitions.items():
                 if not existing_tables.get(table_name, False):
                     try:
                         print(f"🏗️ Creating table: {table_name}")
-                        
+
                         # Execute table creation SQL
                         cursor.execute(table_sql)
-                        
+
                         results["tables_created"].append(table_name)
                         logger.info(f"✅ Created table: {table_name}")
-                        
+
                     except Exception as e:
                         error_msg = f"Failed to create {table_name}: {str(e)}"
                         results["errors"].append(error_msg)
@@ -282,12 +282,12 @@ class PostgreSQLSchemaInitializer:
                 else:
                     results["tables_skipped"].append(table_name)
                     print(f"⏭️ Skipped existing table: {table_name}")
-            
+
             # Phase 2: Create indexes for successfully created tables
             if results["success"] and results["tables_created"]:
-                print(f"\n🔗 Creating indexes for performance optimization...")
+                print("\n🔗 Creating indexes for performance optimization...")
                 index_definitions = self._define_indexes()
-                
+
                 for table_name in results["tables_created"]:
                     if table_name in index_definitions:
                         for index_sql in index_definitions[table_name]:
@@ -296,17 +296,17 @@ class PostgreSQLSchemaInitializer:
                                 index_name = index_sql.split("IF NOT EXISTS ")[1].split(" ON ")[0].strip()
                                 results["indexes_created"].append(f"{table_name}.{index_name}")
                                 print(f"   ✅ Index: {index_name}")
-                                
+
                             except Exception as e:
                                 error_msg = f"Failed to create index for {table_name}: {str(e)}"
                                 results["errors"].append(error_msg)
                                 logger.warning(f"⚠️ {error_msg}")
                                 # Don't fail the whole process for index creation errors
-            
+
             cursor.close()
-            
+
             return results
-            
+
         except Exception as e:
             logger.error(f"Schema creation failed: {str(e)}")
             results["errors"].append(f"Schema creation failed: {str(e)}")
@@ -317,7 +317,7 @@ class PostgreSQLSchemaInitializer:
         """Record schema version in database"""
         try:
             cursor = self.connection.cursor()
-            
+
             cursor.execute("""
                 INSERT INTO schema_version (version, description, session_id)
                 VALUES (%s, %s, %s)
@@ -326,10 +326,10 @@ class PostgreSQLSchemaInitializer:
                 "Initial schema creation for PLC Memory Management System",
                 self.session_id
             ))
-            
+
             cursor.close()
             logger.info(f"✅ Schema version {self.schema_version} recorded")
-            
+
         except Exception as e:
             logger.error(f"Failed to record schema version: {str(e)}")
 
@@ -337,9 +337,9 @@ class PostgreSQLSchemaInitializer:
         """Initialize health monitoring records"""
         try:
             cursor = self.connection.cursor()
-            
+
             tables_to_monitor = ['python_files', 'documentation', 'configuration_files']
-            
+
             for table in tables_to_monitor:
                 cursor.execute("""
                     INSERT INTO ingestion_health (table_name, record_count, health_status, notes, session_id)
@@ -348,13 +348,13 @@ class PostgreSQLSchemaInitializer:
                     table,
                     0,
                     'initialized',
-                    f'Table created and ready for ingestion',
+                    'Table created and ready for ingestion',
                     self.session_id
                 ))
-            
+
             cursor.close()
             logger.info("✅ Health monitoring initialized")
-            
+
         except Exception as e:
             logger.error(f"Failed to initialize health monitoring: {str(e)}")
 
@@ -366,35 +366,35 @@ class PostgreSQLSchemaInitializer:
             "total_tables": 0,
             "missing_tables": []
         }
-        
+
         try:
             cursor = self.connection.cursor(cursor_factory=RealDictCursor)
-            
+
             expected_tables = ['python_files', 'documentation', 'configuration_files', 'schema_version', 'ingestion_health']
-            
+
             for table in expected_tables:
                 try:
                     # Check table exists and get basic info
                     cursor.execute(f"SELECT COUNT(*) as count FROM {table}")
                     result = cursor.fetchone()
-                    
+
                     cursor.execute(f"""
-                        SELECT column_name, data_type 
-                        FROM information_schema.columns 
+                        SELECT column_name, data_type
+                        FROM information_schema.columns
                         WHERE table_name = '{table}'
                         ORDER BY ordinal_position
                     """)
                     columns = cursor.fetchall()
-                    
+
                     validation_results["table_details"][table] = {
                         "exists": True,
                         "record_count": result['count'],
                         "column_count": len(columns),
                         "columns": [col['column_name'] for col in columns]
                     }
-                    
+
                     validation_results["total_tables"] += 1
-                    
+
                 except Exception as e:
                     validation_results["all_tables_exist"] = False
                     validation_results["missing_tables"].append(table)
@@ -402,11 +402,11 @@ class PostgreSQLSchemaInitializer:
                         "exists": False,
                         "error": str(e)
                     }
-            
+
             cursor.close()
-            
+
             return validation_results
-            
+
         except Exception as e:
             logger.error(f"Schema validation failed: {str(e)}")
             return {"error": str(e)}
@@ -417,9 +417,9 @@ class PostgreSQLSchemaInitializer:
         print("Following AI Task Orchestrator Guide Methodology")
         print("Task: IMMEDIATE Priority - Fix Critical PostgreSQL Schema Issue")
         print("=" * 80)
-        
+
         start_time = datetime.now()
-        
+
         # Initialize result tracking
         results = {
             "session_id": self.session_id,
@@ -428,57 +428,57 @@ class PostgreSQLSchemaInitializer:
             "success": False,
             "phases": {}
         }
-        
+
         try:
             # Phase 1: Database Connection
             print("\n📋 Phase 1: Database Connection")
             if not await self.connect_to_database():
                 results["error"] = "Failed to connect to PostgreSQL database"
                 return results
-            
+
             results["phases"]["connection"] = {"status": "success", "message": "Database connected"}
-            
+
             # Phase 2: Check Existing Schema
             print("\n📋 Phase 2: Analyze Existing Schema")
             existing_tables = await self.check_existing_schema()
             results["phases"]["existing_schema"] = {"tables": existing_tables}
-            
+
             # Phase 3: Create Missing Tables
             print("\n📋 Phase 3: Create Missing Tables")
             creation_results = await self.create_missing_tables(existing_tables)
             results["phases"]["table_creation"] = creation_results
-            
+
             if not creation_results["success"]:
                 print("❌ Table creation failed - see errors above")
                 return results
-            
+
             # Phase 4: Record Schema Version
             print("\n📋 Phase 4: Record Schema Version")
             await self.record_schema_version()
-            
+
             # Phase 5: Initialize Health Monitoring
             print("\n📋 Phase 5: Initialize Health Monitoring")
             await self.initialize_health_monitoring()
-            
+
             # Phase 6: Validate Schema
             print("\n📋 Phase 6: Validate Schema Creation")
             validation_results = await self.validate_schema_creation()
             results["phases"]["validation"] = validation_results
-            
+
             # Calculate final results
             duration = (datetime.now() - start_time).total_seconds()
             results["duration_seconds"] = duration
             results["success"] = validation_results.get("all_tables_exist", False)
             results["end_time"] = datetime.now().isoformat()
-            
+
             return results
-            
+
         except Exception as e:
             logger.error(f"Schema initialization failed: {str(e)}")
             traceback.print_exc()
             results["error"] = str(e)
             return results
-            
+
         finally:
             if self.connection:
                 self.connection.close()
@@ -488,49 +488,49 @@ async def main():
     """Main execution function"""
     initializer = PostgreSQLSchemaInitializer()
     results = await initializer.run_schema_initialization()
-    
+
     if results.get("success"):
-        print(f"\n🎯 PostgreSQL Schema Initialization Complete!")
+        print("\n🎯 PostgreSQL Schema Initialization Complete!")
         print("=" * 80)
-        print(f"✅ Success: Schema initialization completed successfully")
+        print("✅ Success: Schema initialization completed successfully")
         print(f"⏱️  Duration: {results['duration_seconds']:.2f} seconds")
         print(f"📊 Tables Created: {len(results['phases']['table_creation']['tables_created'])}")
         print(f"📋 Schema Version: {results['schema_version']}")
-        
+
         # Display created tables
         created_tables = results['phases']['table_creation']['tables_created']
         if created_tables:
-            print(f"\n🏗️ Tables Created:")
+            print("\n🏗️ Tables Created:")
             for table in created_tables:
                 print(f"   ✅ {table}")
-        
+
         # Display validation results
         validation = results['phases']['validation']
         if validation.get('all_tables_exist'):
-            print(f"\n✅ All tables validated successfully")
+            print("\n✅ All tables validated successfully")
             print(f"📊 Total tables: {validation['total_tables']}")
-        
+
         # Save results
         results_file = f"postgresql_schema_init_{initializer.session_id}.json"
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2, default=str)
         print(f"💾 Results saved: {results_file}")
-        
+
         return 0
     else:
-        print(f"\n❌ Schema Initialization Failed!")
+        print("\n❌ Schema Initialization Failed!")
         print("=" * 80)
         if "error" in results:
             print(f"Error: {results['error']}")
-        
+
         # Display any errors from table creation
         creation_errors = results.get('phases', {}).get('table_creation', {}).get('errors', [])
         if creation_errors:
-            print(f"\nTable Creation Errors:")
+            print("\nTable Creation Errors:")
             for error in creation_errors:
                 print(f"   ❌ {error}")
-        
+
         return 1
 
 if __name__ == "__main__":
-    exit(asyncio.run(main())) 
+    exit(asyncio.run(main()))

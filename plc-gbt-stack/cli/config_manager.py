@@ -10,15 +10,15 @@ Created: 2025-01-18
 Phase: 21.1 - Core CLI Infrastructure
 """
 
-import os
 import json
-import yaml
-from pathlib import Path
-from typing import Dict, Any, Optional, Union, List
-from dataclasses import dataclass, asdict, field
-from enum import Enum
 import logging
+import os
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
+import yaml
 from rich.console import Console
 
 console = Console()
@@ -89,7 +89,7 @@ CONFIG_SCHEMA = [
         description="Default pager for viewing long output",
         env_var="PLC_CL_PAGER"
     ),
-    
+
     # Path settings
     ConfigurationField(
         name="default_schema_registry",
@@ -123,7 +123,7 @@ CONFIG_SCHEMA = [
         description="Directory for CLI scripts",
         env_var="PLC_CL_SCRIPTS_DIR"
     ),
-    
+
     # Authentication settings
     ConfigurationField(
         name="auth_enabled",
@@ -158,7 +158,7 @@ CONFIG_SCHEMA = [
         description="Automatically login when authentication is required",
         env_var="PLC_CL_AUTO_LOGIN"
     ),
-    
+
     # Performance settings
     ConfigurationField(
         name="max_concurrent_operations",
@@ -195,7 +195,7 @@ CONFIG_SCHEMA = [
         env_var="PLC_CL_REQUEST_TIMEOUT",
         validation_fn=lambda x: x > 0
     ),
-    
+
     # Logging settings
     ConfigurationField(
         name="log_level",
@@ -230,7 +230,7 @@ CONFIG_SCHEMA = [
         description="Enable audit logging for operations",
         env_var="PLC_CL_AUDIT_LOGGING"
     ),
-    
+
     # Advanced settings
     ConfigurationField(
         name="confirm_destructive",
@@ -272,36 +272,36 @@ CONFIG_SCHEMA = [
 
 class AdvancedConfigurationManager:
     """Advanced configuration manager with validation and environment support"""
-    
+
     def __init__(self, config_dir: Optional[Path] = None):
         self.config_dir = config_dir or Path.home() / ".plc-control-loop"
         self.config_file = self.config_dir / ".plc-cl-config"
         self.config_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Create configuration mapping
         self.config_schema = {field.name: field for field in CONFIG_SCHEMA}
         self._config_data: Dict[str, Any] = {}
         self._loaded = False
-    
+
     def load_configuration(self) -> Dict[str, Any]:
         """Load configuration from file and environment variables"""
         if self._loaded:
             return self._config_data
-        
+
         # Start with defaults
         config = {}
         for field in CONFIG_SCHEMA:
             config[field.name] = field.default_value
-        
+
         # Load from file if exists
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file) as f:
                     file_config = yaml.safe_load(f) or {}
                 config.update(file_config)
             except Exception as e:
                 logger.warning(f"Failed to load config file: {e}")
-        
+
         # Override with environment variables
         for field in CONFIG_SCHEMA:
             if field.env_var and field.env_var in os.environ:
@@ -310,20 +310,20 @@ class AdvancedConfigurationManager:
                     config[field.name] = self._convert_value(env_value, field.data_type)
                 except ValueError as e:
                     logger.warning(f"Invalid environment variable {field.env_var}: {e}")
-        
+
         # Validate configuration
         validated_config = self._validate_configuration(config)
-        
+
         self._config_data = validated_config
         self._loaded = True
-        
+
         return self._config_data
-    
+
     def save_configuration(self, config: Optional[Dict[str, Any]] = None) -> bool:
         """Save configuration to file"""
         try:
             config_to_save = config or self._config_data
-            
+
             # Organize by category for better readability
             organized_config = {}
             for category in ConfigurationCategory:
@@ -332,99 +332,99 @@ class AdvancedConfigurationManager:
                     if field.category == category and field.name in config_to_save:
                         if not field.sensitive:  # Don't save sensitive values
                             category_config[field.name] = config_to_save[field.name]
-                
+
                 if category_config:
                     organized_config[category.value] = category_config
-            
+
             with open(self.config_file, 'w') as f:
                 yaml.dump(organized_config, f, default_flow_style=False, sort_keys=False)
-            
+
             return True
         except Exception as e:
             logger.error(f"Failed to save configuration: {e}")
             return False
-    
+
     def get_setting(self, key: str, default: Any = None) -> Any:
         """Get a configuration setting"""
         config = self.load_configuration()
         return config.get(key, default)
-    
+
     def set_setting(self, key: str, value: Any) -> bool:
         """Set a configuration setting"""
         if key not in self.config_schema:
             return False
-        
+
         field = self.config_schema[key]
-        
+
         try:
             # Type conversion and validation
             converted_value = self._convert_value(value, field.data_type)
-            
+
             if field.validation_fn and not field.validation_fn(converted_value):
                 raise ValueError(f"Validation failed for {key}")
-            
+
             if field.choices and converted_value not in field.choices:
                 raise ValueError(f"Value must be one of: {field.choices}")
-            
+
             self._config_data[key] = converted_value
             return self.save_configuration()
-            
+
         except Exception as e:
             logger.error(f"Failed to set {key}: {e}")
             return False
-    
+
     def reset_configuration(self) -> bool:
         """Reset configuration to defaults"""
         try:
             if self.config_file.exists():
                 self.config_file.unlink()
-            
+
             self._config_data = {}
             self._loaded = False
-            
+
             # Reload defaults
             self.load_configuration()
             return self.save_configuration()
-            
+
         except Exception as e:
             logger.error(f"Failed to reset configuration: {e}")
             return False
-    
+
     def get_configuration_by_category(self, category: ConfigurationCategory) -> Dict[str, Any]:
         """Get configuration settings by category"""
         config = self.load_configuration()
         result = {}
-        
+
         for field in CONFIG_SCHEMA:
             if field.category == category and field.name in config:
                 result[field.name] = config[field.name]
-        
+
         return result
-    
+
     def validate_configuration(self) -> List[str]:
         """Validate current configuration and return any errors"""
         config = self.load_configuration()
         return self._validate_configuration(config, return_errors=True)
-    
+
     def get_field_info(self, field_name: str) -> Optional[ConfigurationField]:
         """Get metadata for a configuration field"""
         return self.config_schema.get(field_name)
-    
+
     def list_all_fields(self) -> List[ConfigurationField]:
         """List all available configuration fields"""
         return CONFIG_SCHEMA
-    
+
     def export_configuration(self, format_type: str = "yaml") -> str:
         """Export configuration in specified format"""
         config = self.load_configuration()
-        
+
         if format_type == "json":
             return json.dumps(config, indent=2)
         elif format_type == "yaml":
             return yaml.dump(config, default_flow_style=False)
         else:
             raise ValueError(f"Unsupported format: {format_type}")
-    
+
     def import_configuration(self, config_data: str, format_type: str = "yaml") -> bool:
         """Import configuration from string"""
         try:
@@ -434,7 +434,7 @@ class AdvancedConfigurationManager:
                 imported_config = yaml.safe_load(config_data)
             else:
                 raise ValueError(f"Unsupported format: {format_type}")
-            
+
             # Flatten if organized by category
             if any(category.value in imported_config for category in ConfigurationCategory):
                 flattened_config = {}
@@ -442,20 +442,20 @@ class AdvancedConfigurationManager:
                     if isinstance(category_data, dict):
                         flattened_config.update(category_data)
                 imported_config = flattened_config
-            
+
             # Validate and save
             validated_config = self._validate_configuration(imported_config)
             self._config_data = validated_config
             return self.save_configuration()
-            
+
         except Exception as e:
             logger.error(f"Failed to import configuration: {e}")
             return False
-    
+
     # =============================================================================
     # PRIVATE METHODS
     # =============================================================================
-    
+
     def _convert_value(self, value: Any, target_type: type) -> Any:
         """Convert value to target type"""
         if target_type == bool:
@@ -470,38 +470,38 @@ class AdvancedConfigurationManager:
             return str(value)
         else:
             return value
-    
+
     def _validate_configuration(self, config: Dict[str, Any], return_errors: bool = False) -> Union[Dict[str, Any], List[str]]:
         """Validate configuration values"""
         errors = []
         validated_config = config.copy()
-        
+
         for field in CONFIG_SCHEMA:
             value = config.get(field.name, field.default_value)
-            
+
             try:
                 # Type validation
                 converted_value = self._convert_value(value, field.data_type)
-                
+
                 # Custom validation
                 if field.validation_fn and not field.validation_fn(converted_value):
                     errors.append(f"Validation failed for {field.name}: {value}")
                     continue
-                
+
                 # Choice validation
                 if field.choices and converted_value not in field.choices:
                     errors.append(f"{field.name} must be one of {field.choices}, got: {converted_value}")
                     continue
-                
+
                 validated_config[field.name] = converted_value
-                
+
             except (ValueError, TypeError) as e:
                 errors.append(f"Invalid value for {field.name}: {value} ({e})")
-        
+
         if return_errors:
             return errors
-        
+
         if errors:
             logger.warning(f"Configuration validation warnings: {errors}")
-        
-        return validated_config 
+
+        return validated_config

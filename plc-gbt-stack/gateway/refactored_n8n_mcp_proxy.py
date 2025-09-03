@@ -12,17 +12,20 @@ Phase: 26.7 - N8N-MCP AI Enhancement Integration (Refactored)
 """
 
 import time
-from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException, Query, Body, Path
+from fastapi import APIRouter, Body, Path, Query
 
-from .models import (
-    NodeSearchRequest, NodeSearchResponse, WorkflowValidationRequest, 
-    WorkflowValidationResponse, NodeEssentialsResponse, AIToolsResponse
-)
 from .clients import N8NMCPClient
+from .models import (
+    AIToolsResponse,
+    NodeEssentialsResponse,
+    NodeSearchResponse,
+    WorkflowValidationRequest,
+    WorkflowValidationResponse,
+)
 from .utils import handle_http_error
 
 # Configure logging
@@ -50,20 +53,20 @@ async def check_health():
     """Check N8N-MCP service health"""
     start_time = time.time()
     client = await get_client()
-    
+
     try:
         async with client as c:
             health_data = await c.check_health()
-            
+
         response_time = (time.time() - start_time) * 1000
-        
+
         return {
             "status": "healthy",
             "n8n_mcp_status": health_data.get("status", "unknown"),
             "response_time_ms": response_time,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         raise handle_http_error(e, "N8N-MCP health check", 503)
 
@@ -76,19 +79,19 @@ async def search_nodes(
     """Search for N8N nodes"""
     start_time = time.time()
     client = await get_client()
-    
+
     try:
         async with client as c:
             search_data = await c.search_nodes(query, category, limit)
-        
+
         search_time = (time.time() - start_time) * 1000
-        
+
         return NodeSearchResponse(
             nodes=search_data.get("nodes", []),
             total_count=len(search_data.get("nodes", [])),
             search_time_ms=search_time
         )
-        
+
     except Exception as e:
         raise handle_http_error(e, "Node search", 500)
 
@@ -96,18 +99,18 @@ async def search_nodes(
 async def get_node_essentials(node_type: str = Path(..., description="Node type identifier")):
     """Get essential properties for a node type"""
     client = await get_client()
-    
+
     try:
         async with client as c:
             essentials_data = await c.get_node_essentials(node_type)
-        
+
         return NodeEssentialsResponse(
             node_type=node_type,
             essential_properties=essentials_data.get("properties", []),
             examples=essentials_data.get("examples", {}),
             documentation=essentials_data.get("documentation", "")
         )
-        
+
     except Exception as e:
         raise handle_http_error(e, "Get node essentials", 500)
 
@@ -115,14 +118,14 @@ async def get_node_essentials(node_type: str = Path(..., description="Node type 
 async def validate_workflow(request: WorkflowValidationRequest):
     """Validate N8N workflow"""
     client = await get_client()
-    
+
     try:
         async with client as c:
             validation_data = await c.validate_workflow(
-                request.workflow, 
+                request.workflow,
                 request.validation_level
             )
-        
+
         return WorkflowValidationResponse(
             valid=validation_data.get("valid", False),
             score=validation_data.get("score", 0.0),
@@ -130,7 +133,7 @@ async def validate_workflow(request: WorkflowValidationRequest):
             warnings=validation_data.get("warnings", []),
             suggestions=validation_data.get("suggestions", [])
         )
-        
+
     except Exception as e:
         raise handle_http_error(e, "Workflow validation", 500)
 
@@ -138,17 +141,17 @@ async def validate_workflow(request: WorkflowValidationRequest):
 async def get_ai_tools():
     """Get AI-capable N8N nodes"""
     client = await get_client()
-    
+
     try:
         async with client as c:
             ai_tools_data = await c.get_ai_tools()
-        
+
         return AIToolsResponse(
             ai_tools=ai_tools_data.get("tools", []),
             total_count=len(ai_tools_data.get("tools", [])),
             categories=ai_tools_data.get("categories", [])
         )
-        
+
     except Exception as e:
         raise handle_http_error(e, "Get AI tools", 500)
 
@@ -160,11 +163,11 @@ async def get_ai_tools():
 async def create_workflow(workflow: Dict[str, Any] = Body(..., description="Workflow definition")):
     """Create new workflow in N8N"""
     client = await get_client()
-    
+
     try:
         async with client as c:
             result = await c.create_workflow(workflow)
-        
+
         return {
             "success": True,
             "workflow_id": result.get("id"),
@@ -173,23 +176,23 @@ async def create_workflow(workflow: Dict[str, Any] = Body(..., description="Work
             "created_at": result.get("created_at"),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         raise handle_http_error(e, "Create workflow", 500)
 
 @router.post("/workflow/optimize")
 async def optimize_workflow(
     workflow: Dict[str, Any] = Body(..., description="Workflow to optimize"),
-    optimization_goals: List[str] = Body(["performance", "reliability"], 
+    optimization_goals: List[str] = Body(["performance", "reliability"],
                                        description="Optimization objectives")
 ):
     """Optimize workflow performance"""
     client = await get_client()
-    
+
     try:
         async with client as c:
             result = await c.optimize_workflow(workflow, optimization_goals)
-        
+
         return {
             "optimized_workflow": result.get("workflow"),
             "improvements": result.get("improvements", []),
@@ -197,7 +200,7 @@ async def optimize_workflow(
             "optimization_score": result.get("score", 0),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         raise handle_http_error(e, "Workflow optimization", 500)
 
@@ -209,12 +212,12 @@ async def optimize_workflow(
 async def get_integration_status():
     """Get comprehensive integration status"""
     client = await get_client()
-    
+
     try:
         async with client as c:
             health_check = await c.check_health()
             stats_check = await c.get_database_stats()
-        
+
         return {
             "integration_status": "active",
             "n8n_mcp_healthy": health_check.get("status") == "healthy",
@@ -226,7 +229,7 @@ async def get_integration_status():
             "proxy_version": "2.0.0-refactored",
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         return {
             "integration_status": "error",
@@ -241,15 +244,15 @@ async def get_integration_status():
 async def startup_n8n_mcp_proxy():
     """Initialize N8N-MCP proxy on startup"""
     logger.info("Initializing refactored N8N-MCP proxy integration")
-    
+
     try:
         client = await get_client()
         async with client as c:
             health_data = await c.check_health()
-            
-        logger.info("Refactored N8N-MCP proxy integration ready", 
+
+        logger.info("Refactored N8N-MCP proxy integration ready",
                    status=health_data.get("status"))
-                   
+
     except Exception as e:
         logger.warning("N8N-MCP service not immediately available", error=str(e))
 
@@ -260,4 +263,4 @@ async def shutdown_n8n_mcp_proxy():
     logger.info("Refactored N8N-MCP proxy integration shut down")
 
 # Export router and handlers
-__all__ = ["router", "startup_n8n_mcp_proxy", "shutdown_n8n_mcp_proxy"] 
+__all__ = ["router", "startup_n8n_mcp_proxy", "shutdown_n8n_mcp_proxy"]

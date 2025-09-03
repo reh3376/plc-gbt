@@ -3,7 +3,7 @@
 N8N-MCP Proxy Gateway
 Phase 26.7: Fine-tuned LLM Integration with n8n-MCP
 
-Provides HTTP proxy endpoints that allow the fine-tuned OpenAI LLM 
+Provides HTTP proxy endpoints that allow the fine-tuned OpenAI LLM
 (ft:gpt-4o:industrial-control:20250117) to access n8n-MCP functionality
 through the existing PLC-GBT Gateway API architecture.
 
@@ -16,16 +16,14 @@ Phase: 26.7 - N8N-MCP AI Enhancement Integration
 """
 
 import asyncio
-import json
-import logging
 import os
 import time
-from typing import Dict, List, Any, Optional, Union
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 import aiohttp
 import structlog
-from fastapi import APIRouter, HTTPException, Depends, Query, Body, Path
+from fastapi import APIRouter, Body, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
 # Configure logging
@@ -79,7 +77,7 @@ class AIToolsResponse(BaseModel):
 # HTTP Client for n8n-MCP communication
 class N8NMCPClient:
     """HTTP client for communicating with n8n-MCP server"""
-    
+
     def __init__(self):
         self.base_url = N8N_MCP_CONFIG["base_url"]
         self.auth_token = N8N_MCP_CONFIG["auth_token"]
@@ -89,7 +87,7 @@ class N8NMCPClient:
             "Content-Type": "application/json"
         }
         self.session: Optional[aiohttp.ClientSession] = None
-    
+
     async def __aenter__(self):
         """Async context manager entry"""
         connector = aiohttp.TCPConnector(
@@ -102,27 +100,27 @@ class N8NMCPClient:
             headers=self.headers
         )
         return self
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit"""
         if self.session:
             await self.session.close()
-    
+
     async def make_request(
-        self, 
-        method: str, 
-        endpoint: str, 
+        self,
+        method: str,
+        endpoint: str,
         data: Optional[Dict] = None,
         params: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """Make HTTP request to n8n-MCP server with retry logic"""
         if not self.session:
             raise RuntimeError("HTTP session not initialized")
-        
+
         url = f"{self.base_url}{endpoint}"
         retries = 0
         max_retries = N8N_MCP_CONFIG["max_retries"]
-        
+
         while retries <= max_retries:
             try:
                 if method.upper() == "GET":
@@ -136,23 +134,23 @@ class N8NMCPClient:
                         return await self._handle_response(response)
                 else:
                     raise ValueError(f"Unsupported HTTP method: {method}")
-                    
+
             except aiohttp.ClientError as e:
                 retries += 1
                 if retries > max_retries:
-                    logger.error(f"HTTP request failed after {max_retries} retries", 
+                    logger.error(f"HTTP request failed after {max_retries} retries",
                                url=url, error=str(e))
                     raise HTTPException(
                         status_code=503,
                         detail=f"n8n-MCP service unavailable: {str(e)}"
                     )
-                
+
                 # Exponential backoff
                 wait_time = 2 ** retries
                 await asyncio.sleep(wait_time)
-                logger.warning(f"Retrying request in {wait_time}s", 
+                logger.warning(f"Retrying request in {wait_time}s",
                              url=url, attempt=retries)
-    
+
     async def _handle_response(self, response: aiohttp.ClientResponse) -> Dict[str, Any]:
         """Handle HTTP response and errors"""
         if response.status == 200:
@@ -174,7 +172,7 @@ class N8NMCPClient:
             )
         else:
             error_text = await response.text()
-            logger.error(f"n8n-MCP request failed", 
+            logger.error("n8n-MCP request failed",
                         status=response.status, error=error_text)
             raise HTTPException(
                 status_code=response.status,
@@ -195,26 +193,26 @@ async def get_mcp_client() -> N8NMCPClient:
 # N8N-MCP PROXY ENDPOINTS
 # =============================================================================
 
-@router.get("/health", 
+@router.get("/health",
            summary="Check n8n-MCP service health",
            description="Verify that n8n-MCP service is accessible and healthy")
 async def check_n8n_mcp_health():
     """Check n8n-MCP service health status"""
     start_time = time.time()
-    
+
     try:
         async with N8NMCPClient() as client:
             health_data = await client.make_request("GET", "/health")
-            
+
         response_time = (time.time() - start_time) * 1000
-        
+
         return {
             "status": "healthy",
             "n8n_mcp_status": health_data.get("status", "unknown"),
             "response_time_ms": response_time,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("n8n-MCP health check failed", error=str(e))
         raise HTTPException(
@@ -230,13 +228,13 @@ async def get_mcp_tools():
     try:
         async with N8NMCPClient() as client:
             tools_data = await client.make_request("GET", "/tools")
-            
+
         return {
             "tools": tools_data.get("tools", []),
             "total_count": len(tools_data.get("tools", [])),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("Failed to retrieve MCP tools", error=str(e))
         raise HTTPException(
@@ -255,23 +253,23 @@ async def search_nodes(
 ):
     """Search for n8n nodes using n8n-MCP"""
     start_time = time.time()
-    
+
     try:
         params = {"query": query, "limit": limit}
         if category:
             params["category"] = category
-            
+
         async with N8NMCPClient() as client:
             search_data = await client.make_request("GET", "/search/nodes", params=params)
-        
+
         search_time = (time.time() - start_time) * 1000
-        
+
         return NodeSearchResponse(
             nodes=search_data.get("nodes", []),
             total_count=len(search_data.get("nodes", [])),
             search_time_ms=search_time
         )
-        
+
     except Exception as e:
         logger.error("Node search failed", query=query, error=str(e))
         raise HTTPException(
@@ -292,14 +290,14 @@ async def get_node_essentials(
             essentials_data = await client.make_request(
                 "GET", f"/nodes/{node_type}/essentials"
             )
-        
+
         return NodeEssentialsResponse(
             node_type=node_type,
             essential_properties=essentials_data.get("properties", []),
             examples=essentials_data.get("examples", {}),
             documentation=essentials_data.get("documentation", "")
         )
-        
+
     except Exception as e:
         logger.error("Failed to get node essentials", node_type=node_type, error=str(e))
         raise HTTPException(
@@ -318,10 +316,10 @@ async def validate_workflow(request: WorkflowValidationRequest):
             "workflow": request.workflow,
             "validation_level": request.validation_level
         }
-        
+
         async with N8NMCPClient() as client:
             validation_data = await client.make_request("POST", "/validate/workflow", data=data)
-        
+
         return WorkflowValidationResponse(
             valid=validation_data.get("valid", False),
             score=validation_data.get("score", 0.0),
@@ -329,7 +327,7 @@ async def validate_workflow(request: WorkflowValidationRequest):
             warnings=validation_data.get("warnings", []),
             suggestions=validation_data.get("suggestions", [])
         )
-        
+
     except Exception as e:
         logger.error("Workflow validation failed", error=str(e))
         raise HTTPException(
@@ -346,13 +344,13 @@ async def get_ai_tools():
     try:
         async with N8NMCPClient() as client:
             ai_tools_data = await client.make_request("GET", "/ai/tools")
-        
+
         return AIToolsResponse(
             ai_tools=ai_tools_data.get("tools", []),
             total_count=len(ai_tools_data.get("tools", [])),
             categories=ai_tools_data.get("categories", [])
         )
-        
+
     except Exception as e:
         logger.error("Failed to get AI tools", error=str(e))
         raise HTTPException(
@@ -368,7 +366,7 @@ async def get_database_stats():
     try:
         async with N8NMCPClient() as client:
             stats_data = await client.make_request("GET", "/database/stats")
-        
+
         return {
             "database_ready": stats_data.get("ready", False),
             "node_count": stats_data.get("node_count", 0),
@@ -378,7 +376,7 @@ async def get_database_stats():
             "last_updated": stats_data.get("last_updated"),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("Failed to get database stats", error=str(e))
         raise HTTPException(
@@ -395,10 +393,10 @@ async def create_workflow(
     """Create a new workflow in n8n via MCP"""
     try:
         data = {"workflow": workflow}
-        
+
         async with N8NMCPClient() as client:
             result = await client.make_request("POST", "/n8n/workflows", data=data)
-        
+
         return {
             "success": True,
             "workflow_id": result.get("id"),
@@ -407,7 +405,7 @@ async def create_workflow(
             "created_at": result.get("created_at"),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("Failed to create workflow", error=str(e))
         raise HTTPException(
@@ -427,7 +425,7 @@ async def validate_existing_workflow(
             result = await client.make_request(
                 "GET", f"/n8n/workflows/{workflow_id}/validate"
             )
-        
+
         return {
             "workflow_id": workflow_id,
             "valid": result.get("valid", False),
@@ -436,9 +434,9 @@ async def validate_existing_workflow(
             "recommendations": result.get("recommendations", []),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
-        logger.error("Failed to validate existing workflow", 
+        logger.error("Failed to validate existing workflow",
                     workflow_id=workflow_id, error=str(e))
         raise HTTPException(
             status_code=500,
@@ -454,7 +452,7 @@ async def validate_existing_workflow(
             description="Use AI to optimize workflow performance and efficiency")
 async def optimize_workflow(
     workflow: Dict[str, Any] = Body(..., description="Workflow to optimize"),
-    optimization_goals: List[str] = Body(["performance", "reliability"], 
+    optimization_goals: List[str] = Body(["performance", "reliability"],
                                        description="Optimization objectives")
 ):
     """Optimize workflow using n8n-MCP AI capabilities"""
@@ -463,10 +461,10 @@ async def optimize_workflow(
             "workflow": workflow,
             "goals": optimization_goals
         }
-        
+
         async with N8NMCPClient() as client:
             result = await client.make_request("POST", "/optimize/workflow", data=data)
-        
+
         return {
             "optimized_workflow": result.get("workflow"),
             "improvements": result.get("improvements", []),
@@ -474,7 +472,7 @@ async def optimize_workflow(
             "optimization_score": result.get("score", 0),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("Workflow optimization failed", error=str(e))
         raise HTTPException(
@@ -490,14 +488,14 @@ async def get_industrial_templates():
     try:
         async with N8NMCPClient() as client:
             templates = await client.make_request("GET", "/templates/industrial")
-        
+
         return {
             "templates": templates.get("templates", []),
             "categories": templates.get("categories", []),
             "total_count": len(templates.get("templates", [])),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("Failed to get industrial templates", error=str(e))
         raise HTTPException(
@@ -520,7 +518,7 @@ async def get_integration_status():
             health_check = await client.make_request("GET", "/health")
             tools_check = await client.make_request("GET", "/tools")
             stats_check = await client.make_request("GET", "/database/stats")
-        
+
         return {
             "integration_status": "active",
             "n8n_mcp_healthy": health_check.get("status") == "healthy",
@@ -533,7 +531,7 @@ async def get_integration_status():
             "proxy_version": "1.0.0",
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         logger.error("Integration status check failed", error=str(e))
         return {
@@ -549,28 +547,28 @@ async def get_integration_status():
 async def startup_n8n_mcp_proxy():
     """Initialize n8n-MCP proxy on startup"""
     logger.info("Initializing n8n-MCP proxy integration")
-    
+
     try:
         # Test connectivity to n8n-MCP service
         async with N8NMCPClient() as client:
             health_data = await client.make_request("GET", "/health")
-            
-        logger.info("n8n-MCP proxy integration ready", 
+
+        logger.info("n8n-MCP proxy integration ready",
                    status=health_data.get("status"))
-                   
+
     except Exception as e:
-        logger.warning("n8n-MCP service not immediately available", 
+        logger.warning("n8n-MCP service not immediately available",
                       error=str(e))
 
 async def shutdown_n8n_mcp_proxy():
     """Clean up n8n-MCP proxy on shutdown"""
     global _mcp_client
-    
+
     if _mcp_client and _mcp_client.session:
         await _mcp_client.session.close()
         _mcp_client = None
-        
+
     logger.info("n8n-MCP proxy integration shut down")
 
 # Export router and handlers for main gateway application
-__all__ = ["router", "startup_n8n_mcp_proxy", "shutdown_n8n_mcp_proxy"] 
+__all__ = ["router", "startup_n8n_mcp_proxy", "shutdown_n8n_mcp_proxy"]

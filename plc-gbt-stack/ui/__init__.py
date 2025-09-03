@@ -19,17 +19,17 @@ __author__ = "PLC-GPT Development Team"
 __description__ = "User Interface & Experience for Fine-tuned LLM Integration"
 
 # Import main components
-from .chat import ChatInterface, TerminalChatUI
-from .voice import VoiceInterface, SpeechProcessor
 from .api import ChatAPI, WebSocketHandler
+from .chat import ChatInterface, TerminalChatUI
 from .docs import InteractiveDocumentation
+from .voice import SpeechProcessor, VoiceInterface
 
 __all__ = [
     "ChatInterface",
-    "TerminalChatUI", 
+    "TerminalChatUI",
     "VoiceInterface",
     "SpeechProcessor",
     "ChatAPI",
     "WebSocketHandler",
     "InteractiveDocumentation"
-] 
+]

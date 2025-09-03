@@ -4,17 +4,17 @@ Enterprise Configuration for PLC-GPT
 Phase 3 Days 6-7: Enterprise Features
 """
 
-import os
-from typing import Dict, Any, List
+from datetime import timedelta
+from typing import Any, Dict, List
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
-from datetime import timedelta
 
 
 class EnterpriseSettings(BaseSettings):
     """
     Enterprise configuration settings for PLC-GPT.
-    
+
     This class manages all enterprise-grade feature configurations including:
     - JWT Authentication
     - Redis Caching
@@ -23,7 +23,7 @@ class EnterpriseSettings(BaseSettings):
     - Enhanced Monitoring
     - Security Configuration
     """
-    
+
     model_config = {
         "extra": "allow",
         "env_prefix": "",
@@ -31,7 +31,7 @@ class EnterpriseSettings(BaseSettings):
         "env_file": ".env",
         "env_file_encoding": "utf-8"
     }
-    
+
     # ========================================
     # JWT Authentication Configuration
     # ========================================
@@ -51,7 +51,7 @@ class EnterpriseSettings(BaseSettings):
         default=7,
         description="JWT refresh token expiration in days"
     )
-    
+
     # ========================================
     # Redis Configuration
     # ========================================
@@ -79,7 +79,7 @@ class EnterpriseSettings(BaseSettings):
         default=5,
         description="Redis socket timeout in seconds"
     )
-    
+
     # ========================================
     # Rate Limiting Configuration
     # ========================================
@@ -103,7 +103,7 @@ class EnterpriseSettings(BaseSettings):
         default=300,
         description="Auth time window in seconds"
     )
-    
+
     # ========================================
     # Role-Based Access Control (RBAC)
     # ========================================
@@ -123,7 +123,7 @@ class EnterpriseSettings(BaseSettings):
         default=["dev@plc-gpt.com"],
         description="List of developer user emails"
     )
-    
+
     # ========================================
     # Cache Configuration
     # ========================================
@@ -143,7 +143,7 @@ class EnterpriseSettings(BaseSettings):
         default=True,
         description="Enable cache invalidation"
     )
-    
+
     # ========================================
     # Enhanced Monitoring
     # ========================================
@@ -163,7 +163,7 @@ class EnterpriseSettings(BaseSettings):
         default=30,
         description="Metrics export interval in seconds"
     )
-    
+
     # ========================================
     # Security Configuration
     # ========================================
@@ -183,7 +183,7 @@ class EnterpriseSettings(BaseSettings):
         default=28800,
         description="Session timeout in seconds"
     )
-    
+
     # ========================================
     # Performance Configuration
     # ========================================
@@ -204,37 +204,37 @@ class EnterpriseSettings(BaseSettings):
         description="Number of async workers"
     )
 
-        
+
     def get_redis_url(self) -> str:
         """Get Redis connection URL."""
         if self.redis_password:
             return f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/{self.redis_db}"
         return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
-    
+
     def get_jwt_expiration(self) -> timedelta:
         """Get JWT token expiration timedelta."""
         return timedelta(hours=self.jwt_expiration_hours)
-    
+
     def get_refresh_expiration(self) -> timedelta:
         """Get refresh token expiration timedelta."""
         return timedelta(days=self.jwt_refresh_expiration_days)
-    
+
     def get_rate_limit_string(self) -> str:
         """Get rate limit string for slowapi."""
         return f"{self.rate_limit_requests}/{self.rate_limit_window}seconds"
-    
+
     def get_auth_rate_limit_string(self) -> str:
         """Get auth rate limit string for slowapi."""
         return f"{self.rate_limit_auth_requests}/{self.rate_limit_auth_window}seconds"
-    
+
     def is_admin_user(self, email: str) -> bool:
         """Check if email is an admin user."""
         return email.lower() in [user.lower() for user in self.admin_users]
-    
+
     def is_developer_user(self, email: str) -> bool:
         """Check if email is a developer user."""
         return email.lower() in [user.lower() for user in self.developer_users]
-    
+
     def get_user_role(self, email: str) -> str:
         """Get user role based on email."""
         if self.is_admin_user(email):
@@ -243,7 +243,7 @@ class EnterpriseSettings(BaseSettings):
             return "developer"
         else:
             return self.default_user_role
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert settings to dictionary."""
         return self.dict()
@@ -298,10 +298,10 @@ def print_environment_setup():
     print("=" * 50)
     print("\nAdd these environment variables to your docker-compose.yml or .env file:")
     print()
-    
+
     for key, value in ENVIRONMENT_VARIABLES.items():
         print(f"export {key}={value}")
-    
+
     print("\nOr add to docker-compose.yml environment section:")
     print("environment:")
     for key, value in ENVIRONMENT_VARIABLES.items():
@@ -309,4 +309,4 @@ def print_environment_setup():
 
 
 if __name__ == "__main__":
-    print_environment_setup() 
+    print_environment_setup()

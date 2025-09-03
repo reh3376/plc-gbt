@@ -21,19 +21,17 @@ Phase: Database Connectivity Enhancement
 Complexity: MODERATE (100-500 lines, 2-5 files, 1-3 hours)
 """
 
-import os
-import sys
-import json
-import time
-import logging
 import asyncio
+import json
+import logging
+import os
 import threading
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Callable
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
-import traceback
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 # Redis imports
 try:
@@ -124,7 +122,7 @@ class HealthCheckResult:
 class PersistentRedisManager:
     """
     🎯 Persistent Redis Connection Manager
-    
+
     Provides enterprise-grade Redis connection management with:
     - Persistent connections for enhanced performance
     - Automatic reconnection with exponential backoff
@@ -132,44 +130,44 @@ class PersistentRedisManager:
     - Connection pooling and resource optimization
     - Performance metrics and monitoring
     - Graceful error handling and recovery
-    
+
     Following AI Task Orchestrator methodology for reliability and performance.
     """
-    
+
     def __init__(self, config: Optional[RedisConnectionConfig] = None):
         """Initialize the persistent Redis manager"""
         self.start_time = datetime.now()
         self.session_id = f"redis_manager_{int(time.time())}"
-        
+
         # Configuration
         self.config = config or self._load_default_config()
-        
+
         # Connection management
         self.connection_pool: Optional[ConnectionPool] = None
         self.redis_client: Optional[redis.Redis] = None
         self.connection_state = ConnectionState.DISCONNECTED
         self.connection_count = 0  # Track active connection count
-        
+
         # Health monitoring
         self.metrics = ConnectionMetrics()
         self.last_health_check: Optional[HealthCheckResult] = None
         self.health_check_thread: Optional[threading.Thread] = None
         self.health_check_enabled = True
-        
+
         # Reconnection management
         self.max_retries = 5
         self.base_retry_delay = 1.0
         self.max_retry_delay = 30.0
         self.current_retry_count = 0
-        
+
         # Performance tracking
         self.operation_times = []
         self.max_operation_history = 1000
-        
+
         # Threading
         self.lock = threading.RLock()
         self.shutdown_event = threading.Event()
-        
+
         logger.info(f"PersistentRedisManager initialized with session: {self.session_id}")
 
     def _load_default_config(self) -> RedisConnectionConfig:
@@ -191,12 +189,12 @@ class PersistentRedisManager:
         if not REDIS_AVAILABLE:
             logger.error("Redis library not available. Please install redis-py")
             return False
-        
+
         try:
             with self.lock:
                 self.connection_state = ConnectionState.CONNECTING
                 self.metrics.connection_attempts += 1
-                
+
                 # Create connection pool
                 self.connection_pool = ConnectionPool(
                     host=self.config.host,
@@ -209,28 +207,28 @@ class PersistentRedisManager:
                     retry_on_timeout=self.config.retry_on_timeout,
                     health_check_interval=self.config.health_check_interval
                 )
-                
+
                 # Create Redis client with connection pool
                 self.redis_client = redis.Redis(
                     connection_pool=self.connection_pool,
                     decode_responses=True
                 )
-                
+
                 # Test connection
                 await self._test_connection()
-                
+
                 self.connection_state = ConnectionState.CONNECTED
                 self.metrics.successful_connections += 1
                 self.metrics.last_connection_time = datetime.now()
                 self.current_retry_count = 0
                 self.connection_count = 1  # Initial connection established
-                
+
                 # Start health monitoring
                 self._start_health_monitoring()
-                
+
                 logger.info(f"✅ Persistent Redis connection established: {self.config.host}:{self.config.port}")
                 return True
-                
+
         except Exception as e:
             self.connection_state = ConnectionState.ERROR
             self.metrics.failed_connections += 1
@@ -246,13 +244,13 @@ class PersistentRedisManager:
             loop = asyncio.get_event_loop()
             pong = await loop.run_in_executor(None, self.redis_client.ping)
             response_time = (time.time() - start_time) * 1000
-            
+
             if pong:
                 logger.debug(f"Redis ping successful: {response_time:.1f}ms")
                 return True
             else:
                 raise Exception("Ping returned False")
-                
+
         except Exception as e:
             logger.error(f"Redis connection test failed: {str(e)}")
             raise
@@ -261,7 +259,7 @@ class PersistentRedisManager:
         """Start background health monitoring thread"""
         if self.health_check_thread and self.health_check_thread.is_alive():
             return
-        
+
         def health_check_loop():
             """Background health check loop"""
             while not self.shutdown_event.is_set() and self.health_check_enabled:
@@ -271,7 +269,7 @@ class PersistentRedisManager:
                 except Exception as e:
                     logger.error(f"Health check error: {str(e)}")
                     time.sleep(5)  # Wait before retry
-        
+
         self.health_check_thread = threading.Thread(
             target=health_check_loop, daemon=True
         )
@@ -281,28 +279,28 @@ class PersistentRedisManager:
     async def _perform_health_check(self) -> HealthCheckResult:
         """Perform comprehensive health check"""
         start_time = time.time()
-        
+
         try:
             # Test basic connectivity
             loop = asyncio.get_event_loop()
             pong = await loop.run_in_executor(None, self.redis_client.ping)
-            
+
             if not pong:
                 raise Exception("Ping failed")
-            
+
             response_time = (time.time() - start_time) * 1000
-            
+
             # Get connection pool info
             connection_count = len(self.connection_pool._available_connections) if self.connection_pool else 0
             self.connection_count = connection_count  # Update instance connection count
-            
+
             # Get Redis info
             info = await loop.run_in_executor(None, self.redis_client.info, 'memory')
             memory_usage_mb = info.get('used_memory', 0) / (1024 * 1024)
-            
+
             # Update connection state
             self.connection_state = ConnectionState.HEALTHY
-            
+
             result = HealthCheckResult(
                 is_healthy=True,
                 response_time_ms=response_time,
@@ -310,26 +308,26 @@ class PersistentRedisManager:
                 memory_usage_mb=memory_usage_mb,
                 last_check_time=datetime.now()
             )
-            
+
             self.last_health_check = result
             return result
-            
+
         except Exception as e:
             logger.warning(f"Health check failed: {str(e)}")
             self.connection_state = ConnectionState.ERROR
-            
+
             result = HealthCheckResult(
                 is_healthy=False,
                 response_time_ms=(time.time() - start_time) * 1000,
                 error_message=str(e),
                 last_check_time=datetime.now()
             )
-            
+
             self.last_health_check = result
-            
+
             # Attempt reconnection if unhealthy
             await self._attempt_reconnection()
-            
+
             return result
 
     async def _attempt_reconnection(self) -> bool:
@@ -337,32 +335,32 @@ class PersistentRedisManager:
         if self.current_retry_count >= self.max_retries:
             logger.error(f"Max reconnection attempts ({self.max_retries}) exceeded")
             return False
-        
+
         self.connection_state = ConnectionState.RECONNECTING
-        
+
         # Calculate delay with exponential backoff
         delay = min(
             self.base_retry_delay * (2 ** self.current_retry_count),
             self.max_retry_delay
         )
-        
+
         logger.info(f"Attempting reconnection in {delay:.1f}s (attempt {self.current_retry_count + 1}/{self.max_retries})")
-        
+
         await asyncio.sleep(delay)
         self.current_retry_count += 1
-        
+
         # Close existing connections
         await self.close_connection()
-        
+
         # Attempt new connection
         success = await self.initialize_connection()
-        
+
         if success:
             logger.info("✅ Reconnection successful")
             self.current_retry_count = 0
         else:
             logger.warning(f"❌ Reconnection attempt {self.current_retry_count} failed")
-        
+
         return success
 
     async def execute_operation(self, operation: CacheOperation, **kwargs) -> Any:
@@ -371,77 +369,77 @@ class PersistentRedisManager:
             logger.warning("Redis not connected, attempting reconnection...")
             if not await self.initialize_connection():
                 raise Exception("Redis connection unavailable")
-        
+
         start_time = time.time()
-        
+
         try:
             with self.lock:
                 self.metrics.total_operations += 1
-                
+
                 # Execute operation based on type
                 loop = asyncio.get_event_loop()
-                
+
                 if operation == CacheOperation.GET:
                     result = await loop.run_in_executor(None, self.redis_client.get, kwargs['key'])
                     if result is not None:
                         self.metrics.cache_hits += 1
                     else:
                         self.metrics.cache_misses += 1
-                    
+
                 elif operation == CacheOperation.SET:
                     result = await loop.run_in_executor(
-                        None, 
-                        self.redis_client.set, 
-                        kwargs['key'], 
+                        None,
+                        self.redis_client.set,
+                        kwargs['key'],
                         kwargs['value'],
                         ex=kwargs.get('ttl')
                     )
-                    
+
                 elif operation == CacheOperation.DELETE:
                     result = await loop.run_in_executor(None, self.redis_client.delete, kwargs['key'])
-                    
+
                 elif operation == CacheOperation.EXISTS:
                     result = await loop.run_in_executor(None, self.redis_client.exists, kwargs['key'])
-                    
+
                 elif operation == CacheOperation.EXPIRE:
                     result = await loop.run_in_executor(
-                        None, 
-                        self.redis_client.expire, 
-                        kwargs['key'], 
+                        None,
+                        self.redis_client.expire,
+                        kwargs['key'],
                         kwargs['ttl']
                     )
-                    
+
                 else:
                     raise ValueError(f"Unsupported operation: {operation}")
-                
+
                 # Record metrics
                 execution_time = (time.time() - start_time) * 1000
                 self._record_operation_time(execution_time)
-                
+
                 self.metrics.successful_operations += 1
                 self.metrics.last_successful_operation = datetime.now()
-                
+
                 return result
-                
+
         except Exception as e:
             self.metrics.failed_operations += 1
             self.metrics.last_error = str(e)
             logger.error(f"Redis operation {operation.value} failed: {str(e)}")
-            
+
             # Mark connection as potentially unhealthy
             if "connection" in str(e).lower() or "timeout" in str(e).lower():
                 self.connection_state = ConnectionState.ERROR
-            
+
             raise
 
     def _record_operation_time(self, execution_time_ms: float) -> None:
         """Record operation execution time for performance tracking"""
         self.operation_times.append(execution_time_ms)
-        
+
         # Keep only recent operation times
         if len(self.operation_times) > self.max_operation_history:
             self.operation_times = self.operation_times[-self.max_operation_history:]
-        
+
         # Update average response time
         if self.operation_times:
             self.metrics.average_response_time_ms = sum(self.operation_times) / len(self.operation_times)
@@ -449,7 +447,7 @@ class PersistentRedisManager:
     def is_connected(self) -> bool:
         """Check if Redis is currently connected and healthy"""
         return (
-            self.connection_state in [ConnectionState.CONNECTED, ConnectionState.HEALTHY] 
+            self.connection_state in [ConnectionState.CONNECTED, ConnectionState.HEALTHY]
             and self.redis_client is not None
         )
 
@@ -457,11 +455,11 @@ class PersistentRedisManager:
         """Check if Redis connection is healthy based on last health check"""
         if not self.last_health_check:
             return False
-        
+
         # Consider healthy if last check was successful and recent
         time_since_check = datetime.now() - self.last_health_check.last_check_time
         return (
-            self.last_health_check.is_healthy 
+            self.last_health_check.is_healthy
             and time_since_check.total_seconds() < (self.config.health_check_interval * 2)
         )
 
@@ -491,11 +489,11 @@ class PersistentRedisManager:
         cache_hit_rate = 0.0
         if self.metrics.cache_hits + self.metrics.cache_misses > 0:
             cache_hit_rate = self.metrics.cache_hits / (self.metrics.cache_hits + self.metrics.cache_misses)
-        
+
         success_rate = 0.0
         if self.metrics.total_operations > 0:
             success_rate = self.metrics.successful_operations / self.metrics.total_operations
-        
+
         return {
             'total_operations': self.metrics.total_operations,
             'success_rate': success_rate,
@@ -514,28 +512,28 @@ class PersistentRedisManager:
             # Stop health monitoring
             self.health_check_enabled = False
             self.shutdown_event.set()
-            
+
             if self.health_check_thread and self.health_check_thread.is_alive():
                 self.health_check_thread.join(timeout=5)
-            
+
             # Close Redis connection
             if self.redis_client:
                 await asyncio.get_event_loop().run_in_executor(
                     None, self.redis_client.close
                 )
                 self.redis_client = None
-            
+
             # Close connection pool
             if self.connection_pool:
                 await asyncio.get_event_loop().run_in_executor(
                     None, self.connection_pool.disconnect
                 )
                 self.connection_pool = None
-            
+
             self.connection_state = ConnectionState.DISCONNECTED
             self.connection_count = 0  # Reset connection count
             logger.info("✅ Redis connection closed gracefully")
-            
+
         except Exception as e:
             logger.error(f"Error closing Redis connection: {str(e)}")
 
@@ -550,17 +548,17 @@ _redis_manager: Optional[PersistentRedisManager] = None
 async def get_persistent_redis_manager() -> PersistentRedisManager:
     """Get or create global persistent Redis manager instance"""
     global _redis_manager
-    
+
     if _redis_manager is None:
         _redis_manager = PersistentRedisManager()
         await _redis_manager.initialize_connection()
-    
+
     return _redis_manager
 
 async def close_persistent_redis_manager() -> None:
     """Close global persistent Redis manager"""
     global _redis_manager
-    
+
     if _redis_manager:
         await _redis_manager.close_connection()
         _redis_manager = None
@@ -589,33 +587,33 @@ async def redis_exists(key: str) -> bool:
 async def main():
     """Test and demonstration of persistent Redis manager"""
     logger.info("Testing PersistentRedisManager...")
-    
+
     try:
         # Initialize manager
         manager = PersistentRedisManager()
         success = await manager.initialize_connection()
-        
+
         if success:
             logger.info("✅ Connection established")
-            
+
             # Test operations
             await manager.execute_operation(CacheOperation.SET, key="test:key", value="test_value", ttl=60)
             result = await manager.execute_operation(CacheOperation.GET, key="test:key")
             logger.info(f"Test result: {result}")
-            
+
             # Show status
             status = manager.get_connection_status()
             logger.info(f"Status: {json.dumps(status, indent=2, default=str)}")
-            
+
         else:
             logger.error("❌ Connection failed")
-            
+
     except Exception as e:
         logger.error(f"Test error: {str(e)}")
-        
+
     finally:
         if 'manager' in locals():
             await manager.close_connection()
 
 if __name__ == '__main__':
-    asyncio.run(main()) 
+    asyncio.run(main())

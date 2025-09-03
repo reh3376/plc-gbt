@@ -24,7 +24,7 @@ ADVANCED_STRATEGIES_CONFIG = {
     "version": __version__,
     "supported_methods": [
         "mpc_tuning",
-        "adaptive_control", 
+        "adaptive_control",
         "gain_scheduling",
         "multi_loop_coordination"
     ],
@@ -45,6 +45,7 @@ ADVANCED_STRATEGIES_CONFIG = {
 
 # Advanced strategy types and categories
 from enum import Enum
+
 
 class AdvancedStrategyType(Enum):
     """Advanced tuning strategy types"""
@@ -83,12 +84,7 @@ class MultiLoopStrategy(Enum):
 
 # Import advanced strategy implementations
 try:
-    from .mpc_tuning import (
-        MPCTuner,
-        EconomicMPCTuner,
-        RobustMPCTuner,
-        HybridMPCTuner
-    )
+    from .mpc_tuning import EconomicMPCTuner, HybridMPCTuner, MPCTuner, RobustMPCTuner
     MPC_AVAILABLE = True
 except ImportError:
     MPC_AVAILABLE = False
@@ -96,10 +92,10 @@ except ImportError:
 try:
     from .adaptive_control import (
         AdaptiveController,
-        RLSAdaptiveController,
         GradientDescentController,
         KalmanFilterController,
-        NeuralAdaptiveController
+        NeuralAdaptiveController,
+        RLSAdaptiveController,
     )
     ADAPTIVE_AVAILABLE = True
 except ImportError:
@@ -107,11 +103,11 @@ except ImportError:
 
 try:
     from .gain_scheduling import (
+        FuzzyGainScheduler,
         GainScheduler,
         LinearGainScheduler,
-        PolynomialGainScheduler,
         LookupTableScheduler,
-        FuzzyGainScheduler
+        PolynomialGainScheduler,
     )
     GAIN_SCHEDULING_AVAILABLE = True
 except ImportError:
@@ -119,11 +115,11 @@ except ImportError:
 
 try:
     from .multi_loop_coordination import (
-        MultiLoopCoordinator,
-        DecentralizedCoordinator,
         CentralizedCoordinator,
+        DecentralizedCoordinator,
         DistributedCoordinator,
-        HierarchicalCoordinator
+        HierarchicalCoordinator,
+        MultiLoopCoordinator,
     )
     MULTI_LOOP_AVAILABLE = True
 except ImportError:
@@ -150,7 +146,7 @@ def get_available_strategies():
     if MPC_AVAILABLE:
         available.append("mpc_tuning")
     if ADAPTIVE_AVAILABLE:
-        available.append("adaptive_control") 
+        available.append("adaptive_control")
     if GAIN_SCHEDULING_AVAILABLE:
         available.append("gain_scheduling")
     if MULTI_LOOP_AVAILABLE:
@@ -192,18 +188,18 @@ __all__ = [
     # Configuration
     "ADVANCED_STRATEGIES_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Enums
     "AdvancedStrategyType",
-    "MPCOptimizationType", 
+    "MPCOptimizationType",
     "AdaptiveAlgorithmType",
     "GainScheduleType",
     "MultiLoopStrategy",
-    
+
     # Utility functions
     "get_available_strategies",
     "get_strategy_info",
-    
+
     # Classes (if available)
 ]
 
@@ -211,7 +207,7 @@ __all__ = [
 if MPC_AVAILABLE:
     __all__.extend([
         "MPCTuner",
-        "EconomicMPCTuner", 
+        "EconomicMPCTuner",
         "RobustMPCTuner",
         "HybridMPCTuner"
     ])
@@ -220,7 +216,7 @@ if ADAPTIVE_AVAILABLE:
     __all__.extend([
         "AdaptiveController",
         "RLSAdaptiveController",
-        "GradientDescentController", 
+        "GradientDescentController",
         "KalmanFilterController",
         "NeuralAdaptiveController"
     ])
@@ -231,7 +227,7 @@ if GAIN_SCHEDULING_AVAILABLE:
         "LinearGainScheduler",
         "PolynomialGainScheduler",
         "LookupTableScheduler",
-        "FuzzyGainScheduler" 
+        "FuzzyGainScheduler"
     ])
 
 if MULTI_LOOP_AVAILABLE:
@@ -257,4 +253,4 @@ def get_package_info():
         "total_available": len([v for v in AVAILABILITY_STATUS.values() if v]),
         "total_strategies": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100
-    } 
+    }

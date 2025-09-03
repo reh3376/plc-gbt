@@ -64,12 +64,13 @@ REALTIME_CONFIG = {
 }
 
 # Real-time monitoring types
-from enum import Enum
-from typing import Dict, List, Any, Optional, Callable
-from dataclasses import dataclass, field
-from datetime import datetime
 import asyncio
 import logging
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
+
 
 class DataSourceType(Enum):
     """Data source types for real-time acquisition"""
@@ -153,11 +154,11 @@ class StreamingResults:
 # Import real-time monitoring modules
 try:
     from .acquisition import (
-        RealTimeDataAcquisition,
-        OPCUAClient,
-        ModbusTCPClient,
+        ConnectionManager,
         DataBuffer,
-        ConnectionManager
+        ModbusTCPClient,
+        OPCUAClient,
+        RealTimeDataAcquisition,
     )
     ACQUISITION_AVAILABLE = True
 except ImportError:
@@ -166,21 +167,16 @@ except ImportError:
 try:
     from .live_engine import (
         LiveAnalysisEngine,
-        StreamingAnalyzer,
+        PerformanceDegradationDetector,
         RollingWindowCalculator,
-        PerformanceDegradationDetector
+        StreamingAnalyzer,
     )
     LIVE_ENGINE_AVAILABLE = True
 except ImportError:
     LIVE_ENGINE_AVAILABLE = False
 
 try:
-    from .monitoring import (
-        SystemMonitor,
-        PerformanceTracker,
-        HealthChecker,
-        MetricsCollector
-    )
+    from .monitoring import HealthChecker, MetricsCollector, PerformanceTracker, SystemMonitor
     MONITORING_AVAILABLE = True
 except ImportError:
     MONITORING_AVAILABLE = False
@@ -196,7 +192,7 @@ AVAILABILITY_STATUS = {
 
 def get_available_protocols():
     """Get list of available data acquisition protocols"""
-    return [protocol for protocol in REALTIME_CONFIG["supported_protocols"]]
+    return list(REALTIME_CONFIG["supported_protocols"])
 
 def get_protocol_info(protocol: str):
     """Get detailed information about a data acquisition protocol"""
@@ -248,20 +244,20 @@ def validate_sampling_rate(rate: float, protocol: str) -> bool:
         "mqtt": {"min": 1000, "max": 300000},     # 1s to 5min
         "websocket": {"min": 50, "max": 1000}     # 50ms to 1s
     }
-    
+
     protocol_limits = limits.get(protocol, {"min": 100, "max": 60000})
     return protocol_limits["min"] <= rate <= protocol_limits["max"]
 
-def calculate_buffer_requirements(sampling_rate: float, duration: float, 
+def calculate_buffer_requirements(sampling_rate: float, duration: float,
                                 tag_count: int) -> Dict[str, int]:
     """Calculate buffer size requirements"""
-    
+
     samples_per_second = 1000 / sampling_rate  # Convert ms to samples/sec
     total_samples = samples_per_second * duration * tag_count
-    
+
     # Memory estimation (assuming 8 bytes per sample + overhead)
     memory_bytes = total_samples * 12  # 8 bytes data + 4 bytes overhead
-    
+
     return {
         "total_samples": int(total_samples),
         "memory_bytes": int(memory_bytes),
@@ -271,7 +267,7 @@ def calculate_buffer_requirements(sampling_rate: float, duration: float,
 
 def get_streaming_recommendations(data_rate: float, analysis_complexity: str) -> Dict[str, Any]:
     """Get streaming analysis configuration recommendations"""
-    
+
     # Base recommendations
     recommendations = {
         "window_size": 300,  # 5 minutes
@@ -279,7 +275,7 @@ def get_streaming_recommendations(data_rate: float, analysis_complexity: str) ->
         "batch_size": 1000,
         "parallel_streams": 2
     }
-    
+
     # Adjust based on data rate (samples per second)
     if data_rate > 100:  # High frequency data
         recommendations.update({
@@ -293,7 +289,7 @@ def get_streaming_recommendations(data_rate: float, analysis_complexity: str) ->
             "batch_size": 100,
             "parallel_streams": 1
         })
-    
+
     # Adjust based on analysis complexity
     if analysis_complexity.lower() == "high":
         recommendations["parallel_streams"] *= 2
@@ -301,12 +297,12 @@ def get_streaming_recommendations(data_rate: float, analysis_complexity: str) ->
     elif analysis_complexity.lower() == "low":
         recommendations["parallel_streams"] = max(1, recommendations["parallel_streams"] // 2)
         recommendations["batch_size"] *= 2
-    
+
     return recommendations
 
 async def test_connection(config: DataSourceConfig) -> Dict[str, Any]:
     """Test connection to data source"""
-    
+
     test_result = {
         "source_id": config.source_id,
         "success": False,
@@ -314,10 +310,10 @@ async def test_connection(config: DataSourceConfig) -> Dict[str, Any]:
         "error": None,
         "timestamp": datetime.now()
     }
-    
+
     try:
         start_time = datetime.now()
-        
+
         # Simulate connection test based on protocol
         if config.source_type == DataSourceType.SIMULATION:
             await asyncio.sleep(0.01)  # Simulate connection delay
@@ -326,18 +322,18 @@ async def test_connection(config: DataSourceConfig) -> Dict[str, Any]:
             # For real protocols, would implement actual connection testing
             await asyncio.sleep(0.1)  # Simulate longer connection test
             test_result["success"] = True
-        
+
         end_time = datetime.now()
         test_result["latency"] = (end_time - start_time).total_seconds() * 1000  # ms
-        
+
     except Exception as e:
         test_result["error"] = str(e)
-    
+
     return test_result
 
 def create_default_config() -> Dict[str, Any]:
     """Create default real-time monitoring configuration"""
-    
+
     return {
         "data_sources": [
             {
@@ -365,19 +361,19 @@ __all__ = [
     # Configuration
     "REALTIME_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Data classes
     "DataSourceConfig",
     "StreamingConfig",
     "RealTimeDataPoint",
     "StreamingResults",
-    
+
     # Enums
     "DataSourceType",
     "StreamingMode",
     "AnalysisType",
     "SystemHealth",
-    
+
     # Utility functions
     "get_available_protocols",
     "get_protocol_info",
@@ -386,7 +382,7 @@ __all__ = [
     "get_streaming_recommendations",
     "test_connection",
     "create_default_config",
-    
+
     # Classes (if available)
 ]
 
@@ -428,4 +424,4 @@ def get_package_info():
         "total_modules": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "implementation_status": AVAILABILITY_STATUS
-    } 
+    }

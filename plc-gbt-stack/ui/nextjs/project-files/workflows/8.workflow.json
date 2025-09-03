@@ -1,0 +1,101 @@
+{
+  "id": "8",
+  "name": "Mock Workflow 8",
+  "description": "Mock workflow for development",
+  "version": "1.0.0",
+  "author": "System",
+  "created": "2025-08-26T20:29:57.717Z",
+  "modified": "2025-08-26T20:29:57.717Z",
+  "tags": [
+    "mock"
+  ],
+  "category": "automation",
+  "priority": "medium",
+  "isPublic": true,
+  "permissions": [
+    "read",
+    "write",
+    "execute"
+  ],
+  "nodes": [
+    {
+      "id": "plc-input-1756240154290-2194ls77d",
+      "type": "plc-input",
+      "position": {
+        "x": -60,
+        "y": 270
+      },
+      "data": {
+        "label": "Plc Input",
+        "description": "plc-input node",
+        "config": {},
+        "status": "configuring",
+        "tags": [
+          "plc-input"
+        ],
+        "lastUpdate": "2025-08-26T20:29:14.290Z"
+      },
+      "dragHandle": ".drag-handle",
+      "selectable": true,
+      "focusable": true,
+      "measured": {
+        "width": 160,
+        "height": 115
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "data-logger-1756240158615-iqnizsa0i",
+      "type": "data-logger",
+      "position": {
+        "x": 210,
+        "y": 270
+      },
+      "data": {
+        "label": "Data Logger",
+        "description": "data-logger node",
+        "config": {},
+        "status": "configuring",
+        "tags": [
+          "data-logger"
+        ],
+        "lastUpdate": "2025-08-26T20:29:18.615Z"
+      },
+      "dragHandle": ".drag-handle",
+      "selectable": true,
+      "focusable": true,
+      "measured": {
+        "width": 163,
+        "height": 115
+      },
+      "selected": true
+    }
+  ],
+  "edges": [
+    {
+      "type": "default",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#6B7280"
+      },
+      "focusable": true,
+      "selectable": true,
+      "source": "plc-input-1756240154290-2194ls77d",
+      "sourceHandle": "output-0",
+      "target": "data-logger-1756240158615-iqnizsa0i",
+      "targetHandle": "input-0",
+      "id": "xy-edge__plc-input-1756240154290-2194ls77doutput-0-data-logger-1756240158615-iqnizsa0iinput-0"
+    }
+  ],
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "variables": {}
+}

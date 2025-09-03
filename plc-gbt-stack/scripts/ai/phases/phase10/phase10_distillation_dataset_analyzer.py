@@ -15,18 +15,17 @@ Author: PLC-GPT Development Team
 Date: January 17, 2025
 """
 
-import pandas as pd
-import numpy as np
 import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Tuple
-import matplotlib.pyplot as plt
-import seaborn as sns
+from typing import Any, Dict
+
+import numpy as np
+import pandas as pd
 from scipy import stats
-from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -36,14 +35,14 @@ class DistillationDatasetAnalyzer:
     """
     Comprehensive analyzer for distillation control dataset following AI Task Orchestrator methodology
     """
-    
+
     def __init__(self, dataset_path: str):
         """Initialize the analyzer with dataset path"""
         self.dataset_path = Path(dataset_path)
         self.df = None
         self.analysis_results = {}
         self.session_id = f"phase10_analysis_{int(datetime.now().timestamp())}"
-        
+
         # Control theory variable definitions
         self.variable_definitions = {
             'PV01': {'type': 'Process Variable', 'description': 'Primary temperature measurement', 'unit': '°F'},
@@ -56,43 +55,43 @@ class DistillationDatasetAnalyzer:
             'DV03': {'type': 'Disturbance Variable', 'description': 'Feed flow rate', 'unit': 'flow_units'},
             'Timestamp': {'type': 'Time Series', 'description': 'Data collection timestamp', 'unit': 'datetime'}
         }
-    
+
     def load_dataset(self) -> bool:
         """Load and validate the distillation control dataset"""
         try:
             logger.info(f"Loading distillation control dataset from: {self.dataset_path}")
-            
+
             # Load dataset with string dtypes first to handle 'No Data' values
             self.df = pd.read_csv(self.dataset_path, dtype='object')
-            
+
             # Replace 'No Data' strings with NaN
             numeric_columns = ['PV01', 'PV02', 'PV03', 'CV01', 'CV01_SP', 'DV01', 'DV02', 'DV03']
             for col in numeric_columns:
                 if col in self.df.columns:
                     self.df[col] = pd.to_numeric(self.df[col], errors='coerce')
-            
+
             # Parse timestamps manually with proper format
             if 'Timestamp' in self.df.columns:
                 self.df['Timestamp'] = pd.to_datetime(self.df['Timestamp'], format='%m/%d/%y:%H:%M:%S:%f', errors='coerce')
-            
+
             # Clean data - remove incomplete records
             initial_count = len(self.df)
             self.df = self.df.dropna()
             final_count = len(self.df)
-            
+
             logger.info(f"Dataset loaded successfully: {final_count:,} records ({initial_count - final_count:,} removed)")
             logger.info(f"Time range: {self.df['Timestamp'].min()} to {self.df['Timestamp'].max()}")
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Error loading dataset: {str(e)}")
             return False
-    
+
     def analyze_dataset_structure(self) -> Dict[str, Any]:
         """Comprehensive dataset structure analysis"""
         logger.info("Analyzing dataset structure...")
-        
+
         structure_analysis = {
             'basic_info': {
                 'total_records': len(self.df),
@@ -111,12 +110,12 @@ class DistillationDatasetAnalyzer:
                 'data_types': self.df.dtypes.to_dict()
             }
         }
-        
+
         # Analyze each variable
         for column in self.df.columns:
             if column == 'Timestamp':
                 continue
-                
+
             var_data = self.df[column]
             structure_analysis['variable_analysis'][column] = {
                 'definition': self.variable_definitions.get(column, {}),
@@ -136,32 +135,32 @@ class DistillationDatasetAnalyzer:
                     'normality_test': stats.jarque_bera(var_data)[1] > 0.05
                 }
             }
-        
+
         self.analysis_results['structure_analysis'] = structure_analysis
         return structure_analysis
-    
+
     def analyze_control_loops(self) -> Dict[str, Any]:
         """Analyze control loop behavior and performance"""
         logger.info("Analyzing control loop behavior...")
-        
+
         control_analysis = {
             'primary_loop': {
                 'pv': 'PV01',
-                'cv': 'CV01', 
+                'cv': 'CV01',
                 'sp': 'CV01_SP',
                 'performance_metrics': {}
             },
             'disturbance_analysis': {},
             'stability_analysis': {}
         }
-        
+
         # Calculate control loop performance metrics
         pv = self.df['PV01']
         cv = self.df['CV01']
         sp = self.df['CV01_SP']
-        
+
         error = pv - sp
-        
+
         control_analysis['primary_loop']['performance_metrics'] = {
             'mae': float(np.mean(np.abs(error))),
             'mse': float(np.mean(error**2)),
@@ -177,7 +176,7 @@ class DistillationDatasetAnalyzer:
                 'tracking_accuracy': float(1 - np.mean(np.abs(error)) / sp.mean())
             }
         }
-        
+
         # Analyze disturbance variables
         for dv in ['DV01', 'DV02', 'DV03']:
             dv_data = self.df[dv]
@@ -187,7 +186,7 @@ class DistillationDatasetAnalyzer:
                 'correlation_with_cv': float(dv_data.corr(cv)),
                 'major_disturbances': int((dv_data.diff().abs() > 2 * dv_data.std()).sum())
             }
-        
+
         # Stability analysis
         cv_changes = cv.diff().abs()
         control_analysis['stability_analysis'] = {
@@ -196,35 +195,35 @@ class DistillationDatasetAnalyzer:
             'stable_periods': int((error.rolling(window=50).std() < 0.5).sum()),
             'unstable_periods': int((error.rolling(window=50).std() > 2.0).sum())
         }
-        
+
         self.analysis_results['control_analysis'] = control_analysis
         return control_analysis
-    
+
     def identify_operating_regimes(self) -> Dict[str, Any]:
         """Identify different operating regimes and conditions"""
         logger.info("Identifying operating regimes...")
-        
+
         # Prepare features for clustering
         features = ['PV01', 'PV02', 'PV03', 'CV01', 'DV01', 'DV02', 'DV03']
         X = self.df[features].values
-        
+
         # Standardize features
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
-        
+
         # Perform K-means clustering
         n_clusters = 5
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         clusters = kmeans.fit_predict(X_scaled)
-        
+
         # Add cluster labels to dataframe
         self.df['operating_regime'] = clusters
-        
+
         regime_analysis = {
             'n_regimes': n_clusters,
             'regime_characteristics': {}
         }
-        
+
         for i in range(n_clusters):
             regime_data = self.df[self.df['operating_regime'] == i]
             regime_analysis['regime_characteristics'][f'regime_{i}'] = {
@@ -238,24 +237,24 @@ class DistillationDatasetAnalyzer:
                     'major_disturbances': int(regime_data['DV01'].std() > self.df['DV01'].std())
                 }
             }
-        
+
         self.analysis_results['regime_analysis'] = regime_analysis
         return regime_analysis
-    
+
     def generate_training_data_insights(self) -> Dict[str, Any]:
         """Generate insights for training data creation"""
         logger.info("Generating training data insights...")
-        
+
         insights = {
             'control_scenarios': [],
             'disturbance_events': [],
             'performance_benchmarks': {},
             'educational_content': []
         }
-        
+
         # Identify different control scenarios
         error = self.df['PV01'] - self.df['CV01_SP']
-        
+
         # Scenario 1: Setpoint changes
         sp_changes = (self.df['CV01_SP'].diff().abs() > 0.1).sum()
         if sp_changes > 0:
@@ -265,7 +264,7 @@ class DistillationDatasetAnalyzer:
                 'frequency': int(sp_changes),
                 'training_value': 'High - demonstrates controller tuning and response'
             })
-        
+
         # Scenario 2: Disturbance rejection
         for dv in ['DV01', 'DV02', 'DV03']:
             dv_events = (self.df[dv].diff().abs() > 2 * self.df[dv].std()).sum()
@@ -276,7 +275,7 @@ class DistillationDatasetAnalyzer:
                     'max_impact': float(self.df[dv].diff().abs().max()),
                     'training_value': 'High - demonstrates disturbance rejection'
                 })
-        
+
         # Performance benchmarks
         insights['performance_benchmarks'] = {
             'best_control_period': {
@@ -292,7 +291,7 @@ class DistillationDatasetAnalyzer:
                 'description': 'Overall control system performance'
             }
         }
-        
+
         # Educational content opportunities
         insights['educational_content'] = [
             {
@@ -316,21 +315,21 @@ class DistillationDatasetAnalyzer:
                 'q_and_a_potential': 'High - specific to distillation temperature control'
             }
         ]
-        
+
         self.analysis_results['training_insights'] = insights
         return insights
-    
+
     def export_analysis_results(self) -> str:
         """Export comprehensive analysis results"""
         logger.info("Exporting analysis results...")
-        
+
         # Create results directory
         results_dir = Path('plc-gbt-stack/results/phase10')
         results_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Export to JSON
         output_file = results_dir / f"distillation_dataset_analysis_{self.session_id}.json"
-        
+
         export_data = {
             'metadata': {
                 'analysis_date': datetime.now().isoformat(),
@@ -354,36 +353,36 @@ class DistillationDatasetAnalyzer:
                 ]
             }
         }
-        
+
         with open(output_file, 'w') as f:
             json.dump(export_data, f, indent=2)
-        
+
         logger.info(f"Analysis results exported to: {output_file}")
         return str(output_file)
-    
+
     def run_comprehensive_analysis(self) -> Dict[str, Any]:
         """Run complete dataset analysis following AI Task Orchestrator methodology"""
         logger.info("🎯 Starting comprehensive distillation dataset analysis...")
-        
+
         # Step 1: Load and validate dataset
         if not self.load_dataset():
             raise Exception("Failed to load dataset")
-        
+
         # Step 2: Analyze dataset structure
-        structure_analysis = self.analyze_dataset_structure()
-        
+        self.analyze_dataset_structure()
+
         # Step 3: Analyze control loops
         control_analysis = self.analyze_control_loops()
-        
+
         # Step 4: Identify operating regimes
         regime_analysis = self.identify_operating_regimes()
-        
+
         # Step 5: Generate training data insights
         training_insights = self.generate_training_data_insights()
-        
+
         # Step 6: Export results
         output_file = self.export_analysis_results()
-        
+
         # Generate summary
         summary = {
             'status': 'completed',
@@ -404,29 +403,29 @@ class DistillationDatasetAnalyzer:
                 'Ready for multi-database integration'
             ]
         }
-        
+
         logger.info("✅ Comprehensive analysis completed successfully")
         return summary
 
 def main():
     """Main execution function"""
     dataset_path = "/Users/reh3376/repos/plc-gbt/docs/context/dataset_still_steam_till_03_02.csv"
-    
+
     analyzer = DistillationDatasetAnalyzer(dataset_path)
     results = analyzer.run_comprehensive_analysis()
-    
-    print(f"\n🎉 Analysis Complete!")
+
+    print("\n🎉 Analysis Complete!")
     print(f"Session ID: {results['session_id']}")
     print(f"Dataset Records: {results['dataset_records']:,}")
     print(f"Output File: {results['output_file']}")
-    
-    print(f"\n📊 Key Findings:")
+
+    print("\n📊 Key Findings:")
     for key, value in results['key_findings'].items():
         print(f"  • {key}: {value}")
-    
-    print(f"\n🚀 Recommendations:")
+
+    print("\n🚀 Recommendations:")
     for rec in results['recommendations']:
         print(f"  • {rec}")
 
 if __name__ == "__main__":
-    main() 
+    main()

@@ -6,7 +6,7 @@ Phase 26.8: Integration Testing
 Tests the complete integration pathway:
 Fine-tuned LLM → Gateway API → Industrial Automation MCP → PLC-GBT System
 
-This script simulates how the fine-tuned OpenAI LLM 
+This script simulates how the fine-tuned OpenAI LLM
 (ft:gpt-4o:industrial-control:20250117) will access
 industrial automation MCP functionality through HTTP REST calls.
 
@@ -14,14 +14,12 @@ Author: AI Task Orchestrator
 Date: July 23, 2025
 """
 
-import asyncio
-import json
 import logging
 import os
 import sys
 import time
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict
 
 import requests
 
@@ -36,7 +34,7 @@ TEST_TIMEOUT = 30
 
 class FineTunedLLMIndustrialMCPTester:
     """Test fine-tuned LLM integration with industrial automation MCP via Gateway API"""
-    
+
     def __init__(self):
         self.gateway_url = GATEWAY_URL
         self.headers = {
@@ -45,14 +43,14 @@ class FineTunedLLMIndustrialMCPTester:
         }
         self.test_results = {}
         self.session_id = f"llm_industrial_mcp_test_{int(time.time())}"
-    
+
     def test_gateway_health(self) -> Dict[str, Any]:
         """Test 1: Verify Gateway API is accessible"""
         logger.info("🔍 Test 1: Gateway API Health Check")
-        
+
         try:
             response = requests.get(f"{self.gateway_url}/health", timeout=10)
-            
+
             if response.status_code == 200:
                 health_data = response.json()
                 return {
@@ -67,25 +65,25 @@ class FineTunedLLMIndustrialMCPTester:
                     "success": False,
                     "error": f"HTTP {response.status_code}"
                 }
-                
+
         except Exception as e:
             return {
                 "test": "gateway_health",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def test_industrial_mcp_health(self) -> Dict[str, Any]:
         """Test 2: Verify industrial automation MCP proxy is accessible"""
         logger.info("🔍 Test 2: Industrial Automation MCP Proxy Health Check")
-        
+
         try:
             response = requests.get(
                 f"{self.gateway_url}/api/v1/industrial-mcp/health",
                 headers=self.headers,
                 timeout=15
             )
-            
+
             if response.status_code == 200:
                 health_data = response.json()
                 return {
@@ -96,30 +94,30 @@ class FineTunedLLMIndustrialMCPTester:
                 }
             else:
                 return {
-                    "test": "industrial_mcp_health", 
+                    "test": "industrial_mcp_health",
                     "success": False,
                     "error": f"HTTP {response.status_code}",
                     "response": response.text[:200]
                 }
-                
+
         except Exception as e:
             return {
                 "test": "industrial_mcp_health",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def test_industrial_tools(self) -> Dict[str, Any]:
         """Test 3: Get industrial automation tools (core LLM capability)"""
         logger.info("🔍 Test 3: Industrial Automation Tools via Gateway API")
-        
+
         try:
             response = requests.get(
                 f"{self.gateway_url}/api/v1/industrial-mcp/tools",
                 headers=self.headers,
                 timeout=15
             )
-            
+
             if response.status_code == 200:
                 tools_data = response.json()
                 return {
@@ -136,18 +134,18 @@ class FineTunedLLMIndustrialMCPTester:
                     "error": f"HTTP {response.status_code}",
                     "response": response.text[:200]
                 }
-                
+
         except Exception as e:
             return {
                 "test": "industrial_tools",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def test_control_loop_creation(self) -> Dict[str, Any]:
         """Test 4: Create control loop (essential LLM industrial capability)"""
         logger.info("🔍 Test 4: Control Loop Creation via Gateway API")
-        
+
         test_control_loop = {
             "name": "LLM_Test_Temperature_Control",
             "loop_type": "PID",
@@ -166,7 +164,7 @@ class FineTunedLLMIndustrialMCPTester:
                 "low_alarm": 65.0
             }
         }
-        
+
         try:
             response = requests.post(
                 f"{self.gateway_url}/api/v1/industrial-mcp/control-loop/create",
@@ -174,7 +172,7 @@ class FineTunedLLMIndustrialMCPTester:
                 json=test_control_loop,
                 timeout=20
             )
-            
+
             if response.status_code == 200:
                 control_data = response.json()
                 return {
@@ -192,18 +190,18 @@ class FineTunedLLMIndustrialMCPTester:
                     "error": f"HTTP {response.status_code}",
                     "response": response.text[:200]
                 }
-                
+
         except Exception as e:
             return {
                 "test": "control_loop_creation",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def test_pid_tuning(self) -> Dict[str, Any]:
         """Test 5: PID auto-tuning (advanced LLM capability)"""
         logger.info("🔍 Test 5: PID Auto-Tuning via Gateway API")
-        
+
         pid_tuning_request = {
             "control_loop_id": "LLM_Test_Temperature_Control",
             "tuning_method": "auto",
@@ -214,7 +212,7 @@ class FineTunedLLMIndustrialMCPTester:
                 {"timestamp": 1690000120, "setpoint": 75.0, "process_value": 75.3, "output": 40.5}
             ]
         }
-        
+
         try:
             response = requests.post(
                 f"{self.gateway_url}/api/v1/industrial-mcp/pid/tune",
@@ -222,7 +220,7 @@ class FineTunedLLMIndustrialMCPTester:
                 json=pid_tuning_request,
                 timeout=20
             )
-            
+
             if response.status_code == 200:
                 tuning_data = response.json()
                 return {
@@ -239,18 +237,18 @@ class FineTunedLLMIndustrialMCPTester:
                     "error": f"HTTP {response.status_code}",
                     "response": response.text[:200]
                 }
-                
+
         except Exception as e:
             return {
                 "test": "pid_tuning",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def test_plc_connection(self) -> Dict[str, Any]:
         """Test 6: PLC connection capability"""
         logger.info("🔍 Test 6: PLC Connection via Gateway API")
-        
+
         plc_connection_request = {
             "plc_address": "192.168.1.100",
             "plc_type": "ControlLogix",
@@ -258,7 +256,7 @@ class FineTunedLLMIndustrialMCPTester:
             "timeout": 5.0,
             "protocol": "EtherNet/IP"
         }
-        
+
         try:
             response = requests.post(
                 f"{self.gateway_url}/api/v1/industrial-mcp/plc/connect",
@@ -266,7 +264,7 @@ class FineTunedLLMIndustrialMCPTester:
                 json=plc_connection_request,
                 timeout=15
             )
-            
+
             if response.status_code == 200:
                 connection_data = response.json()
                 return {
@@ -284,18 +282,18 @@ class FineTunedLLMIndustrialMCPTester:
                     "error": f"HTTP {response.status_code}",
                     "response": response.text[:200]
                 }
-                
+
         except Exception as e:
             return {
                 "test": "plc_connection",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def test_safety_validation(self) -> Dict[str, Any]:
         """Test 7: Safety system validation"""
         logger.info("🔍 Test 7: Safety System Validation via Gateway API")
-        
+
         safety_system_request = {
             "safety_system_name": "Emergency Reactor Shutdown",
             "safety_function": "High Temperature Protection",
@@ -318,7 +316,7 @@ class FineTunedLLMIndustrialMCPTester:
             ],
             "sil_level": 2
         }
-        
+
         try:
             response = requests.post(
                 f"{self.gateway_url}/api/v1/industrial-mcp/safety/validate",
@@ -326,7 +324,7 @@ class FineTunedLLMIndustrialMCPTester:
                 json=safety_system_request,
                 timeout=20
             )
-            
+
             if response.status_code == 200:
                 safety_data = response.json()
                 return {
@@ -345,25 +343,25 @@ class FineTunedLLMIndustrialMCPTester:
                     "error": f"HTTP {response.status_code}",
                     "response": response.text[:200]
                 }
-                
+
         except Exception as e:
             return {
                 "test": "safety_validation",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def test_system_status(self) -> Dict[str, Any]:
         """Test 8: System status monitoring"""
         logger.info("🔍 Test 8: System Status Monitoring via Gateway API")
-        
+
         try:
             response = requests.get(
                 f"{self.gateway_url}/api/v1/industrial-mcp/system/status",
                 headers=self.headers,
                 timeout=15
             )
-            
+
             if response.status_code == 200:
                 status_data = response.json()
                 return {
@@ -382,18 +380,18 @@ class FineTunedLLMIndustrialMCPTester:
                     "error": f"HTTP {response.status_code}",
                     "response": response.text[:200]
                 }
-                
+
         except Exception as e:
             return {
                 "test": "system_status",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def test_knowledge_search(self) -> Dict[str, Any]:
         """Test 9: Industrial knowledge search"""
         logger.info("🔍 Test 9: Industrial Knowledge Search via Gateway API")
-        
+
         try:
             response = requests.get(
                 f"{self.gateway_url}/api/v1/industrial-mcp/knowledge/search",
@@ -405,7 +403,7 @@ class FineTunedLLMIndustrialMCPTester:
                 },
                 timeout=15
             )
-            
+
             if response.status_code == 200:
                 knowledge_data = response.json()
                 return {
@@ -423,25 +421,25 @@ class FineTunedLLMIndustrialMCPTester:
                     "error": f"HTTP {response.status_code}",
                     "response": response.text[:200]
                 }
-                
+
         except Exception as e:
             return {
                 "test": "knowledge_search",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def test_integration_status(self) -> Dict[str, Any]:
         """Test 10: Comprehensive integration status"""
         logger.info("🔍 Test 10: Integration Status Check")
-        
+
         try:
             response = requests.get(
                 f"{self.gateway_url}/api/v1/industrial-mcp/integration/status",
                 headers=self.headers,
                 timeout=15
             )
-            
+
             if response.status_code == 200:
                 status_data = response.json()
                 return {
@@ -463,20 +461,20 @@ class FineTunedLLMIndustrialMCPTester:
                     "error": f"HTTP {response.status_code}",
                     "note": "Status endpoint not fully available"
                 }
-                
+
         except Exception as e:
             return {
                 "test": "integration_status",
                 "success": False,
                 "error": str(e)
             }
-    
+
     def run_comprehensive_test(self) -> Dict[str, Any]:
         """Run all integration tests"""
-        logger.info(f"🚀 Starting Fine-tuned LLM + Industrial Automation MCP Integration Test")
+        logger.info("🚀 Starting Fine-tuned LLM + Industrial Automation MCP Integration Test")
         logger.info(f"Session: {self.session_id}")
         logger.info("=" * 70)
-        
+
         test_functions = [
             self.test_gateway_health,
             self.test_industrial_mcp_health,
@@ -489,21 +487,21 @@ class FineTunedLLMIndustrialMCPTester:
             self.test_knowledge_search,
             self.test_integration_status
         ]
-        
+
         start_time = time.time()
         all_results = []
-        
+
         for i, test_func in enumerate(test_functions, 1):
             try:
                 result = test_func()
                 all_results.append(result)
-                
+
                 status = "✅ PASS" if result.get("success") else "❌ FAIL"
                 logger.info(f"Test {i}/10: {status} - {result.get('test', 'unknown')}")
-                
+
                 if not result.get("success"):
                     logger.error(f"  Error: {result.get('error', 'Unknown error')}")
-                    
+
             except Exception as e:
                 logger.error(f"Test {i}/10: ❌ EXCEPTION - {str(e)}")
                 all_results.append({
@@ -511,14 +509,14 @@ class FineTunedLLMIndustrialMCPTester:
                     "success": False,
                     "error": f"Exception: {str(e)}"
                 })
-        
+
         # Calculate summary
         total_tests = len(all_results)
         successful_tests = sum(1 for r in all_results if r.get("success"))
         success_rate = (successful_tests / total_tests) * 100 if total_tests > 0 else 0
-        
+
         execution_time = time.time() - start_time
-        
+
         summary = {
             "session_id": self.session_id,
             "timestamp": datetime.now().isoformat(),
@@ -530,7 +528,7 @@ class FineTunedLLMIndustrialMCPTester:
             "production_ready": success_rate >= 85,   # 85% threshold for production
             "test_results": all_results
         }
-        
+
         # Print summary
         logger.info("\n" + "=" * 70)
         logger.info("🎯 FINE-TUNED LLM + INDUSTRIAL AUTOMATION MCP INTEGRATION TEST SUMMARY")
@@ -539,7 +537,7 @@ class FineTunedLLMIndustrialMCPTester:
         logger.info(f"Tests Passed: {successful_tests}")
         logger.info(f"Success Rate: {success_rate:.1f}%")
         logger.info(f"Execution Time: {execution_time:.2f} seconds")
-        
+
         if summary["production_ready"]:
             logger.info("🎉 RESULT: PRODUCTION READY")
             logger.info("The fine-tuned LLM can fully access industrial automation capabilities!")
@@ -549,7 +547,7 @@ class FineTunedLLMIndustrialMCPTester:
         else:
             logger.info("❌ RESULT: INTEGRATION NOT READY")
             logger.info("Significant issues detected, requires troubleshooting.")
-        
+
         # Integration guidance
         logger.info("\n📋 INTEGRATION GUIDANCE:")
         if summary["production_ready"]:
@@ -566,18 +564,18 @@ class FineTunedLLMIndustrialMCPTester:
             logger.info("   - Industrial automation MCP server")
             logger.info("   - PLC-GBT application stack")
             logger.info("🔧 Check authentication tokens")
-        
+
         logger.info(f"\n📄 Session ID: {self.session_id}")
-        
+
         return summary
 
 def main():
     """Main test execution"""
     tester = FineTunedLLMIndustrialMCPTester()
-    
+
     try:
         results = tester.run_comprehensive_test()
-        
+
         # Return appropriate exit code
         if results["production_ready"]:
             return 0  # Success
@@ -585,10 +583,10 @@ def main():
             return 1  # Warning
         else:
             return 2  # Error
-            
+
     except Exception as e:
         logger.error(f"Test execution failed: {e}")
         return 3  # Critical error
 
 if __name__ == "__main__":
-    sys.exit(main()) 
+    sys.exit(main())

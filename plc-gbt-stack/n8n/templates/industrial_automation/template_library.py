@@ -6,22 +6,20 @@ Provides comprehensive template library for industrial control loops, data colle
 batch processing, alarm management, and maintenance workflows.
 """
 
+import copy
 import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from enum import Enum
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-import copy
+import os
 
 # Import workflow components
 import sys
-import os
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../llm'))
 
-from nl_workflow_parser import (
-    WorkflowDefinition, WorkflowNode, WorkflowConnection, WorkflowType, NodeType
-)
 
 logger = logging.getLogger(__name__)
 
@@ -93,11 +91,11 @@ class WorkflowTemplate:
 
 class IndustrialTemplateLibrary:
     """Library of industrial automation workflow templates"""
-    
+
     def __init__(self):
         self.templates = {}
         self._initialize_templates()
-    
+
     def _initialize_templates(self):
         """Initialize the template library with pre-built templates"""
         self._create_control_loop_templates()
@@ -108,10 +106,10 @@ class IndustrialTemplateLibrary:
         self._create_safety_system_templates()
         self._create_reporting_templates()
         self._create_integration_templates()
-    
+
     def _create_control_loop_templates(self):
         """Create control loop templates"""
-        
+
         # Basic Temperature Control Template
         temp_control_template = WorkflowTemplate(
             id="temp_control_basic",
@@ -135,7 +133,7 @@ class IndustrialTemplateLibrary:
                     default_value="TT_001.PV"
                 ),
                 TemplateParameter(
-                    name="sp_tag", 
+                    name="sp_tag",
                     description="Setpoint tag name",
                     parameter_type="string",
                     default_value="TIC_001.SP"
@@ -143,7 +141,7 @@ class IndustrialTemplateLibrary:
                 TemplateParameter(
                     name="cv_tag",
                     description="Control variable output tag",
-                    parameter_type="string", 
+                    parameter_type="string",
                     default_value="TIC_001.CV"
                 ),
                 TemplateParameter(
@@ -172,7 +170,7 @@ class IndustrialTemplateLibrary:
                 ),
                 TemplateParameter(
                     name="kd",
-                    description="Derivative gain", 
+                    description="Derivative gain",
                     parameter_type="number",
                     default_value=0.0,
                     min_value=0.0,
@@ -213,7 +211,7 @@ class IndustrialTemplateLibrary:
             ],
             maintenance_notes="Review PID performance monthly, recalibrate sensors quarterly"
         )
-        
+
         # Advanced Cascade Control Template
         cascade_control_template = WorkflowTemplate(
             id="cascade_control_advanced",
@@ -231,7 +229,7 @@ class IndustrialTemplateLibrary:
                     default_value="TIC_001"
                 ),
                 TemplateParameter(
-                    name="secondary_loop_name", 
+                    name="secondary_loop_name",
                     description="Secondary loop name (flow)",
                     parameter_type="string",
                     default_value="FIC_001"
@@ -266,7 +264,7 @@ class IndustrialTemplateLibrary:
             workflow_definition=self._get_cascade_control_workflow(),
             usage_instructions="""
 1. Configure primary temperature control loop
-2. Set up secondary flow control loop  
+2. Set up secondary flow control loop
 3. Tune secondary loop first, then primary loop
 4. Test cascade operation with setpoint changes
 5. Implement feedforward compensation if needed
@@ -277,13 +275,13 @@ class IndustrialTemplateLibrary:
                 "Advanced PLC with cascade control capability"
             ]
         )
-        
+
         self.templates["temp_control_basic"] = temp_control_template
         self.templates["cascade_control_advanced"] = cascade_control_template
-    
+
     def _create_data_collection_templates(self):
         """Create data collection templates"""
-        
+
         # Historian Data Logger Template
         historian_template = WorkflowTemplate(
             id="data_historian_basic",
@@ -343,7 +341,7 @@ class IndustrialTemplateLibrary:
                 "Adequate storage space allocated"
             ]
         )
-        
+
         # Real-time Analytics Template
         analytics_template = WorkflowTemplate(
             id="realtime_analytics",
@@ -378,13 +376,13 @@ class IndustrialTemplateLibrary:
             ],
             workflow_definition=self._get_analytics_workflow()
         )
-        
+
         self.templates["data_historian_basic"] = historian_template
         self.templates["realtime_analytics"] = analytics_template
-    
+
     def _create_alarm_management_templates(self):
         """Create alarm management templates"""
-        
+
         # Multi-level Alarm System Template
         alarm_system_template = WorkflowTemplate(
             id="alarm_system_multilevel",
@@ -449,12 +447,12 @@ class IndustrialTemplateLibrary:
                 "Alarm response procedures documented"
             ]
         )
-        
+
         self.templates["alarm_system_multilevel"] = alarm_system_template
-    
+
     def _create_batch_processing_templates(self):
         """Create batch processing templates"""
-        
+
         # Recipe Management Template
         recipe_template = WorkflowTemplate(
             id="batch_recipe_management",
@@ -513,12 +511,12 @@ class IndustrialTemplateLibrary:
                 "Operator training completed"
             ]
         )
-        
+
         self.templates["batch_recipe_management"] = recipe_template
-    
+
     def _create_maintenance_templates(self):
         """Create maintenance workflow templates"""
-        
+
         # Predictive Maintenance Template
         predictive_maintenance_template = WorkflowTemplate(
             id="predictive_maintenance",
@@ -554,12 +552,12 @@ class IndustrialTemplateLibrary:
             ],
             workflow_definition=self._get_predictive_maintenance_workflow()
         )
-        
+
         self.templates["predictive_maintenance"] = predictive_maintenance_template
-    
+
     def _create_safety_system_templates(self):
         """Create safety system templates"""
-        
+
         # Emergency Shutdown Template
         esd_template = WorkflowTemplate(
             id="emergency_shutdown",
@@ -585,12 +583,12 @@ class IndustrialTemplateLibrary:
             ],
             workflow_definition=self._get_emergency_shutdown_workflow()
         )
-        
+
         self.templates["emergency_shutdown"] = esd_template
-    
+
     def _create_reporting_templates(self):
         """Create reporting workflow templates"""
-        
+
         # Production Report Template
         production_report_template = WorkflowTemplate(
             id="production_reporting",
@@ -617,12 +615,12 @@ class IndustrialTemplateLibrary:
             ],
             workflow_definition=self._get_production_report_workflow()
         )
-        
+
         self.templates["production_reporting"] = production_report_template
-    
+
     def _create_integration_templates(self):
         """Create system integration templates"""
-        
+
         # MES Integration Template
         mes_integration_template = WorkflowTemplate(
             id="mes_integration",
@@ -650,9 +648,9 @@ class IndustrialTemplateLibrary:
             ],
             workflow_definition=self._get_mes_integration_workflow()
         )
-        
+
         self.templates["mes_integration"] = mes_integration_template
-    
+
     # Workflow definition methods
     def _get_temperature_control_workflow(self) -> Dict[str, Any]:
         """Get temperature control workflow definition"""
@@ -671,7 +669,7 @@ class IndustrialTemplateLibrary:
                 },
                 {
                     "id": "read_sp",
-                    "name": "Read Setpoint", 
+                    "name": "Read Setpoint",
                     "type": "plc_read",
                     "parameters": {
                         "tag_name": "{{sp_tag}}",
@@ -714,7 +712,7 @@ class IndustrialTemplateLibrary:
                 {
                     "id": "low_alarm",
                     "name": "Low Temperature Alarm",
-                    "type": "condition", 
+                    "type": "condition",
                     "parameters": {
                         "condition": "value < {{low_alarm}}",
                         "alarm_priority": "medium"
@@ -743,7 +741,7 @@ class IndustrialTemplateLibrary:
                 {"source": "low_alarm", "target": "email_alert", "source_output": 0, "target_input": 0}
             ]
         }
-    
+
     def _get_cascade_control_workflow(self) -> Dict[str, Any]:
         """Get cascade control workflow definition"""
         return {
@@ -757,7 +755,7 @@ class IndustrialTemplateLibrary:
                     "position": [100, 100]
                 },
                 {
-                    "id": "flow_pv", 
+                    "id": "flow_pv",
                     "name": "Flow PV",
                     "type": "plc_read",
                     "parameters": {"tag_name": "{{flow_pv_tag}}"},
@@ -775,7 +773,7 @@ class IndustrialTemplateLibrary:
                 },
                 {
                     "id": "secondary_pid",
-                    "name": "Secondary Flow PID", 
+                    "name": "Secondary Flow PID",
                     "type": "pid_controller",
                     "parameters": {
                         "cascade_ratio": "{{cascade_ratio}}"
@@ -784,7 +782,7 @@ class IndustrialTemplateLibrary:
                 }
             ]
         }
-    
+
     def _get_historian_workflow(self) -> Dict[str, Any]:
         """Get data historian workflow definition"""
         return {
@@ -817,7 +815,7 @@ class IndustrialTemplateLibrary:
                 }
             ]
         }
-    
+
     def _get_analytics_workflow(self) -> Dict[str, Any]:
         """Get real-time analytics workflow definition"""
         return {
@@ -839,7 +837,7 @@ class IndustrialTemplateLibrary:
                 }
             ]
         }
-    
+
     def _get_alarm_system_workflow(self) -> Dict[str, Any]:
         """Get alarm system workflow definition"""
         return {
@@ -875,7 +873,7 @@ class IndustrialTemplateLibrary:
                 }
             ]
         }
-    
+
     def _get_batch_recipe_workflow(self) -> Dict[str, Any]:
         """Get batch recipe workflow definition"""
         return {
@@ -904,7 +902,7 @@ class IndustrialTemplateLibrary:
                 }
             ]
         }
-    
+
     def _get_predictive_maintenance_workflow(self) -> Dict[str, Any]:
         """Get predictive maintenance workflow definition"""
         return {
@@ -926,7 +924,7 @@ class IndustrialTemplateLibrary:
                 }
             ]
         }
-    
+
     def _get_emergency_shutdown_workflow(self) -> Dict[str, Any]:
         """Get emergency shutdown workflow definition"""
         return {
@@ -948,7 +946,7 @@ class IndustrialTemplateLibrary:
                 }
             ]
         }
-    
+
     def _get_production_report_workflow(self) -> Dict[str, Any]:
         """Get production report workflow definition"""
         return {
@@ -970,7 +968,7 @@ class IndustrialTemplateLibrary:
                 }
             ]
         }
-    
+
     def _get_mes_integration_workflow(self) -> Dict[str, Any]:
         """Get MES integration workflow definition"""
         return {
@@ -979,7 +977,7 @@ class IndustrialTemplateLibrary:
                 {
                     "id": "sync_timer",
                     "name": "Sync Timer",
-                    "type": "timer", 
+                    "type": "timer",
                     "parameters": {"interval": "{{sync_interval}}"},
                     "position": [100, 100]
                 },
@@ -992,73 +990,73 @@ class IndustrialTemplateLibrary:
                 }
             ]
         }
-    
+
     # Public methods for template management
     def get_template(self, template_id: str) -> Optional[WorkflowTemplate]:
         """Get template by ID"""
         return self.templates.get(template_id)
-    
+
     def get_templates_by_category(self, category: TemplateCategory) -> List[WorkflowTemplate]:
         """Get all templates in a category"""
         return [t for t in self.templates.values() if t.category == category]
-    
+
     def get_templates_by_industry(self, industry: IndustryType) -> List[WorkflowTemplate]:
         """Get all templates for an industry"""
         return [t for t in self.templates.values() if t.industry == industry]
-    
+
     def get_templates_by_complexity(self, complexity: ComplexityLevel) -> List[WorkflowTemplate]:
         """Get all templates by complexity level"""
         return [t for t in self.templates.values() if t.complexity == complexity]
-    
+
     def search_templates(self, query: str) -> List[WorkflowTemplate]:
         """Search templates by name, description, or tags"""
         query_lower = query.lower()
         results = []
-        
+
         for template in self.templates.values():
-            if (query_lower in template.name.lower() or 
+            if (query_lower in template.name.lower() or
                 query_lower in template.description.lower() or
                 any(query_lower in tag.lower() for tag in template.tags)):
                 results.append(template)
-        
+
         return results
-    
-    def instantiate_template(self, template_id: str, 
+
+    def instantiate_template(self, template_id: str,
                            parameters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Create workflow instance from template with provided parameters"""
         template = self.get_template(template_id)
         if not template:
             return None
-        
+
         # Start with template workflow definition
         workflow_def = copy.deepcopy(template.workflow_definition)
-        
+
         # Replace parameter placeholders
         workflow_json = json.dumps(workflow_def)
         for param_name, param_value in parameters.items():
             placeholder = f"{{{{{param_name}}}}}"
             workflow_json = workflow_json.replace(placeholder, str(param_value))
-        
+
         return json.loads(workflow_json)
-    
-    def validate_parameters(self, template_id: str, 
+
+    def validate_parameters(self, template_id: str,
                           parameters: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """Validate parameters against template requirements"""
         template = self.get_template(template_id)
         if not template:
             return False, ["Template not found"]
-        
+
         errors = []
-        
+
         # Check required parameters
         for param in template.parameters:
             if param.required and param.name not in parameters:
                 errors.append(f"Required parameter '{param.name}' is missing")
                 continue
-            
+
             if param.name in parameters:
                 value = parameters[param.name]
-                
+
                 # Type validation
                 if param.parameter_type == "number":
                     if not isinstance(value, (int, float)):
@@ -1067,17 +1065,17 @@ class IndustrialTemplateLibrary:
                         errors.append(f"Parameter '{param.name}' must be >= {param.min_value}")
                     elif param.max_value is not None and value > param.max_value:
                         errors.append(f"Parameter '{param.name}' must be <= {param.max_value}")
-                
+
                 elif param.parameter_type == "boolean":
                     if not isinstance(value, bool):
                         errors.append(f"Parameter '{param.name}' must be a boolean")
-                
+
                 elif param.parameter_type == "select":
                     if param.options and value not in param.options:
                         errors.append(f"Parameter '{param.name}' must be one of: {', '.join(param.options)}")
-        
+
         return len(errors) == 0, errors
-    
+
     def get_template_catalog(self) -> Dict[str, Any]:
         """Get complete template catalog with metadata"""
         catalog = {
@@ -1087,25 +1085,25 @@ class IndustrialTemplateLibrary:
             "complexity_levels": {},
             "templates": []
         }
-        
+
         # Count by category
         for category in TemplateCategory:
             count = len(self.get_templates_by_category(category))
             if count > 0:
                 catalog["categories"][category.value] = count
-        
+
         # Count by industry
         for industry in IndustryType:
             count = len(self.get_templates_by_industry(industry))
             if count > 0:
                 catalog["industries"][industry.value] = count
-        
+
         # Count by complexity
         for complexity in ComplexityLevel:
             count = len(self.get_templates_by_complexity(complexity))
             if count > 0:
                 catalog["complexity_levels"][complexity.value] = count
-        
+
         # Template summaries
         for template in self.templates.values():
             catalog["templates"].append({
@@ -1119,23 +1117,23 @@ class IndustrialTemplateLibrary:
                 "parameter_count": len(template.parameters),
                 "estimated_setup_time": template.estimated_setup_time
             })
-        
+
         return catalog
 
 # Testing and example usage
 def test_template_library():
     """Test the industrial template library"""
     library = IndustrialTemplateLibrary()
-    
+
     print("=== Industrial Automation Template Library Test ===\n")
-    
+
     # Get catalog
     catalog = library.get_template_catalog()
     print(f"Total Templates: {catalog['total_templates']}")
     print(f"Categories: {list(catalog['categories'].keys())}")
     print(f"Industries: {list(catalog['industries'].keys())}")
     print()
-    
+
     # Test template retrieval
     temp_template = library.get_template("temp_control_basic")
     if temp_template:
@@ -1143,12 +1141,12 @@ def test_template_library():
         print(f"Description: {temp_template.description}")
         print(f"Parameters: {len(temp_template.parameters)}")
         print()
-        
+
         # Test parameter validation
         test_params = {
             "loop_name": "TIC_101",
             "pv_tag": "TT_101.PV",
-            "sp_tag": "TIC_101.SP", 
+            "sp_tag": "TIC_101.SP",
             "cv_tag": "TIC_101.CV",
             "setpoint_value": 85.0,
             "kp": 1.2,
@@ -1158,14 +1156,14 @@ def test_template_library():
             "low_alarm": 75.0,
             "alarm_email": "operator@plant.com"
         }
-        
+
         valid, errors = library.validate_parameters("temp_control_basic", test_params)
         print(f"Parameter Validation: {'✅ PASSED' if valid else '❌ FAILED'}")
         if errors:
             for error in errors:
                 print(f"  - {error}")
         print()
-        
+
         # Test template instantiation
         if valid:
             workflow_instance = library.instantiate_template("temp_control_basic", test_params)
@@ -1173,13 +1171,13 @@ def test_template_library():
                 print(f"Template Instantiated: {workflow_instance['name']}")
                 print(f"Nodes: {len(workflow_instance['nodes'])}")
                 print(f"Connections: {len(workflow_instance.get('connections', []))}")
-    
+
     # Test search
     search_results = library.search_templates("temperature")
     print(f"\nSearch Results for 'temperature': {len(search_results)} templates")
     for result in search_results:
         print(f"  - {result.name} ({result.complexity.value})")
-    
+
     # Test category filtering
     control_templates = library.get_templates_by_category(TemplateCategory.CONTROL_LOOPS)
     print(f"\nControl Loop Templates: {len(control_templates)}")
@@ -1187,4 +1185,4 @@ def test_template_library():
         print(f"  - {template.name}")
 
 if __name__ == "__main__":
-    test_template_library() 
+    test_template_library()

@@ -9,12 +9,11 @@ integrates with existing PLC-GPT infrastructure concepts.
 Created: January 3, 2025
 """
 
-import json
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,12 +35,12 @@ class PIDLoop:
     name: str
     description: str
     process_type: PIDProcessType
-    
+
     # PID Parameters
     kc: float = 1.0  # Proportional gain
     ti: float = 1.0  # Integral time (minutes)
     td: float = 0.0  # Derivative time (minutes)
-    
+
     # Performance Metrics
     last_tuned: Optional[datetime] = None
     performance_score: float = 0.0
@@ -51,20 +50,20 @@ class PIDLoop:
 class PIDIntegrationDemo:
     """
     Simplified PID Integration Demo showing Phase 8 concepts.
-    
+
     Integration Points Demonstrated:
     1. Knowledge Graph Integration (simulated)
     2. AI Task Orchestrator Integration (simulated)
     3. Performance Monitoring Integration (simulated)
     4. Studio 5000 Integration Concepts (simulated)
     """
-    
+
     def __init__(self):
         """Initialize PID Integration Demo"""
         self.pid_loops: Dict[str, PIDLoop] = {}
         self.simulation_data = self._create_simulation_data()
         logger.info("PID Integration Demo initialized")
-    
+
     def _create_simulation_data(self) -> Dict[str, Any]:
         """Create simulated data for demonstration"""
         return {
@@ -86,11 +85,11 @@ class PIDIntegrationDemo:
                 }
             }
         }
-    
+
     def discover_pid_loops_simulation(self) -> List[PIDLoop]:
         """
         Simulate PID loop discovery using knowledge graph concepts.
-        
+
         In real implementation, this would:
         - Query Neo4j for PID/PIDE components
         - Use AI Task Orchestrator for intelligent classification
@@ -99,13 +98,13 @@ class PIDIntegrationDemo:
         print("🔍 Simulating Knowledge Graph Integration...")
         print("   - Querying Neo4j for PID/PIDE components")
         print("   - Using AI Task Orchestrator for classification")
-        
+
         discovered_loops = []
-        
+
         for comp in self.simulation_data['knowledge_graph_components']:
             # Simulate AI classification
             process_type = self._simulate_ai_classification(comp)
-            
+
             loop_id = f"loop_{comp['id']}"
             pid_loop = PIDLoop(
                 loop_id=loop_id,
@@ -113,19 +112,19 @@ class PIDIntegrationDemo:
                 description=comp['description'],
                 process_type=process_type
             )
-            
+
             discovered_loops.append(pid_loop)
             self.pid_loops[loop_id] = pid_loop
-            
+
             print(f"   ✓ Discovered: {comp['name']} ({process_type.value})")
-        
+
         print(f"   📊 Total loops discovered: {len(discovered_loops)}")
         return discovered_loops
-    
+
     def _simulate_ai_classification(self, component: Dict[str, Any]) -> PIDProcessType:
         """Simulate AI-powered process type classification"""
         name = component['name'].lower()
-        
+
         if 'temp' in name:
             return PIDProcessType.TEMPERATURE
         elif 'flow' in name:
@@ -134,29 +133,29 @@ class PIDIntegrationDemo:
             return PIDProcessType.PRESSURE
         else:
             return PIDProcessType.LEVEL
-    
+
     def simulate_multi_pv_configuration(self, loop_id: str) -> Dict[str, Any]:
         """
         Simulate multi-PV control strategy configuration.
-        
+
         In real implementation, this would:
         - Use knowledge graph for PV relationship discovery
         - Apply AI Task Orchestrator for cascade suggestions
         - Configure sensor weighting algorithms
         """
         print(f"\n🎛️  Simulating Multi-PV Configuration for {loop_id}...")
-        
+
         if loop_id not in self.pid_loops:
             return {'error': f'Loop {loop_id} not found'}
-        
+
         loop = self.pid_loops[loop_id]
-        
+
         # Simulate AI guidance
         ai_guidance = self.simulation_data['ai_guidance_database'].get(
             loop.process_type.value.replace('temperature', 'temperature_control'),
             {}
         )
-        
+
         config_result = {
             'loop_id': loop_id,
             'process_type': loop.process_type.value,
@@ -173,13 +172,13 @@ class PIDIntegrationDemo:
                 'compensation_strategy': 'feedforward'
             }
         }
-        
+
         print(f"   ✓ Configured PV strategy: {config_result['pv_configuration']['weighting_strategy']}")
         print(f"   ✓ Cascade opportunities: {len(config_result['cascade_opportunities'])}")
         print(f"   ✓ Disturbances identified: {len(config_result['disturbance_mapping']['identified_disturbances'])}")
-        
+
         return config_result
-    
+
     def _simulate_cascade_analysis(self, loop_id: str) -> List[Dict[str, str]]:
         """Simulate cascade control opportunity analysis"""
         # Simulate finding related loops that could form cascade configurations
@@ -187,11 +186,11 @@ class PIDIntegrationDemo:
             {'secondary_loop': 'flow_control_slave', 'relationship': 'flow_follows_temperature'},
             {'secondary_loop': 'valve_position_control', 'relationship': 'valve_follows_flow'}
         ]
-    
+
     def simulate_automated_tuning(self, loop_id: str, method: str = "ziegler_nichols") -> Dict[str, Any]:
         """
         Simulate automated PID tuning procedure.
-        
+
         In real implementation, this would:
         - Use AI Task Orchestrator for workflow management
         - Execute step tests with real PLC communication
@@ -200,20 +199,20 @@ class PIDIntegrationDemo:
         """
         print(f"\n🔧 Simulating Automated Tuning for {loop_id}...")
         print(f"   - Method: {method}")
-        print(f"   - Using AI Task Orchestrator for workflow")
-        
+        print("   - Using AI Task Orchestrator for workflow")
+
         if loop_id not in self.pid_loops:
             return {'error': f'Loop {loop_id} not found'}
-        
+
         loop = self.pid_loops[loop_id]
-        
+
         # Simulate tuning process
         initial_params = {'kc': loop.kc, 'ti': loop.ti, 'td': loop.td}
-        
+
         # Get AI guidance for this process type
         guidance_key = loop.process_type.value + '_control'
         ai_guidance = self.simulation_data['ai_guidance_database'].get(guidance_key, {})
-        
+
         # Apply simulated tuning algorithm
         if ai_guidance and 'typical_gains' in ai_guidance:
             final_params = ai_guidance['typical_gains'].copy()
@@ -224,13 +223,13 @@ class PIDIntegrationDemo:
                 'ti': initial_params['ti'] * 0.8,
                 'td': initial_params['td'] * 1.5
             }
-        
+
         # Update loop parameters
         loop.kc = final_params['kc']
         loop.ti = final_params['ti']
         loop.td = final_params['td']
         loop.last_tuned = datetime.now()
-        
+
         tuning_result = {
             'session_id': f'tuning_{loop_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
             'loop_id': loop_id,
@@ -249,17 +248,17 @@ class PIDIntegrationDemo:
                 'stability_margin': 85
             }
         }
-        
+
         print(f"   ✓ Tuning completed: Kc={final_params['kc']:.2f}, Ti={final_params['ti']:.2f}, Td={final_params['td']:.2f}")
         print(f"   ✓ AI guidance applied: {tuning_result['ai_guidance_applied']}")
         print(f"   ✓ Estimated response time: {tuning_result['performance_prediction']['response_time_estimate']}s")
-        
+
         return tuning_result
-    
+
     def simulate_performance_monitoring(self, loop_id: str) -> Dict[str, Any]:
         """
         Simulate real-time performance monitoring.
-        
+
         In real implementation, this would:
         - Integrate with Enterprise Monitoring infrastructure
         - Collect real-time PV, SP, CV data via OPC-UA
@@ -267,15 +266,15 @@ class PIDIntegrationDemo:
         - Generate alerts based on performance thresholds
         """
         print(f"\n📊 Simulating Performance Monitoring for {loop_id}...")
-        
+
         if loop_id not in self.pid_loops:
             return {'error': f'Loop {loop_id} not found'}
-        
+
         loop = self.pid_loops[loop_id]
-        
+
         # Simulate real-time data
         import random
-        
+
         performance_data = {
             'timestamp': datetime.now().isoformat(),
             'loop_id': loop_id,
@@ -300,36 +299,36 @@ class PIDIntegrationDemo:
                 'recommendation': 'Performance within acceptable range'
             }
         }
-        
+
         # Generate alerts based on thresholds
         if performance_data['performance_metrics']['oscillation_index'] > 0.3:
             performance_data['alerts'].append('High oscillation detected - consider reducing Kc')
-        
+
         if performance_data['performance_metrics']['cv_saturation_percent'] > 10:
             performance_data['alerts'].append('CV saturation detected - check actuator limits')
-        
+
         print(f"   ✓ PV: {performance_data['real_time_data']['pv_value']:.1f}")
         print(f"   ✓ Performance Score: {performance_data['tuning_status']['performance_score']:.2f}")
         print(f"   ⚠️  Active Alerts: {len(performance_data['alerts'])}")
-        
+
         return performance_data
-    
+
     def simulate_deployment_report(self, loop_id: str) -> Dict[str, Any]:
         """
         Simulate deployment report generation for Studio 5000.
-        
+
         In real implementation, this would:
         - Generate L5X parameter injection code
         - Create Studio 5000 deployment scripts
         - Include validation and rollback procedures
         """
         print(f"\n📋 Generating Deployment Report for {loop_id}...")
-        
+
         if loop_id not in self.pid_loops:
             return {'error': f'Loop {loop_id} not found'}
-        
+
         loop = self.pid_loops[loop_id]
-        
+
         deployment_report = {
             'deployment_info': {
                 'loop_id': loop_id,
@@ -372,43 +371,43 @@ VALIDATE_PARAMETERS
 COMMIT_CHANGES
             '''.strip()
         }
-        
+
         print(f"   ✓ L5X parameters prepared for {deployment_report['l5x_integration']['instruction_type']}")
         print(f"   ✓ Safety validation: {deployment_report['safety_validation']['parameter_bounds_check']}")
-        print(f"   ✓ Deployment script generated")
-        
+        print("   ✓ Deployment script generated")
+
         return deployment_report
-    
+
     def run_complete_demo(self):
         """Run complete PID integration demonstration"""
         print("🎯 PID Integration Demo - Phase 8 Foundation")
         print("=" * 60)
         print("Demonstrating integration with existing PLC-GPT infrastructure")
         print()
-        
+
         try:
             # Step 1: Discover PID loops
             loops = self.discover_pid_loops_simulation()
-            
+
             if not loops:
                 print("❌ No PID loops discovered")
                 return
-            
+
             # Step 2: Configure first loop
             loop_id = loops[0].loop_id
             config_result = self.simulate_multi_pv_configuration(loop_id)
-            
+
             # Step 3: Execute automated tuning
             tuning_result = self.simulate_automated_tuning(loop_id, "ziegler_nichols")
-            
+
             # Step 4: Monitor performance
             performance_data = self.simulate_performance_monitoring(loop_id)
-            
+
             # Step 5: Generate deployment report
             deployment_report = self.simulate_deployment_report(loop_id)
-            
+
             # Summary
-            print(f"\n🎉 Phase 8 Integration Demo Complete!")
+            print("\n🎉 Phase 8 Integration Demo Complete!")
             print("=" * 60)
             print(f"✅ Loops Discovered: {len(loops)}")
             print(f"✅ Multi-PV Configuration: {config_result.get('pv_configuration', {}).get('weighting_strategy', 'N/A')}")
@@ -422,7 +421,7 @@ COMMIT_CHANGES
             print("   • Enterprise Monitoring: Real-time performance tracking")
             print("   • Studio 5000 Integration: L5X parameter deployment")
             print("   • Vector Database: Historical performance patterns")
-            
+
         except Exception as e:
             print(f"❌ Demo error: {e}")
 
@@ -434,4 +433,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

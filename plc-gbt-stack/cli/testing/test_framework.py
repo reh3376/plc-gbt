@@ -18,20 +18,17 @@ Key Features:
 import asyncio
 import json
 import logging
-import os
-import subprocess
 import sys
 import time
 import uuid
-from datetime import datetime, timedelta
+from contextlib import contextmanager
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import psutil
-import pytest
 import yaml
-from dataclasses import dataclass, field
-from contextlib import asynccontextmanager, contextmanager
 
 # Configure logging
 logging.basicConfig(
@@ -85,30 +82,30 @@ class CLITestFramework:
     Comprehensive CLI testing framework with integration tests,
     performance benchmarks, and reporting capabilities.
     """
-    
+
     def __init__(self, config_path: Optional[Path] = None):
         self.config_path = config_path or Path(__file__).parent / "config.yaml"
         self.config = self._load_config()
         self.results_dir = Path(self.config.get("results_dir", "./test_results"))
         self.results_dir.mkdir(exist_ok=True)
-        
+
         self.test_suites: List[TestSuite] = []
         self.session_id = str(uuid.uuid4())[:8]
         self.start_time = datetime.now()
-        
+
         # Performance baselines
         self.baselines = self._load_baselines()
-        
+
         # CLI command base
         self.cli_command = self.config.get("cli_command", "plc-memory")
-        
+
     def _load_config(self) -> Dict[str, Any]:
         """Load testing configuration."""
         if self.config_path.exists():
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path) as f:
                 return yaml.safe_load(f)
         return self._default_config()
-    
+
     def _default_config(self) -> Dict[str, Any]:
         """Default testing configuration."""
         return {
@@ -130,21 +127,21 @@ class CLITestFramework:
                 "test_instances": 3
             }
         }
-    
+
     def _load_baselines(self) -> Dict[str, float]:
         """Load performance baselines."""
         baseline_file = self.results_dir / self.config.get("baselines_file", "performance_baselines.json")
         if baseline_file.exists():
-            with open(baseline_file, 'r') as f:
+            with open(baseline_file) as f:
                 return json.load(f)
         return {}
-    
+
     def _save_baselines(self):
         """Save performance baselines."""
         baseline_file = self.results_dir / self.config.get("baselines_file", "performance_baselines.json")
         with open(baseline_file, 'w') as f:
             json.dump(self.baselines, f, indent=2)
-    
+
     @contextmanager
     def performance_monitor(self):
         """Monitor performance metrics during test execution."""
@@ -152,21 +149,21 @@ class CLITestFramework:
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB
         initial_cpu = process.cpu_percent()
         start_time = time.time()
-        
+
         peak_memory = initial_memory
         peak_cpu = initial_cpu
-        
+
         try:
             yield
         finally:
             end_time = time.time()
             final_memory = process.memory_info().rss / 1024 / 1024
             final_cpu = process.cpu_percent()
-            
+
             duration = end_time - start_time
             peak_memory = max(peak_memory, final_memory)
             peak_cpu = max(peak_cpu, final_cpu)
-            
+
             # Store metrics for access
             self._current_metrics = {
                 "duration": duration,
@@ -174,47 +171,47 @@ class CLITestFramework:
                 "peak_cpu": peak_cpu,
                 "memory_delta": final_memory - initial_memory
             }
-    
+
     async def run_cli_command(self, command: List[str], timeout: Optional[int] = None) -> Tuple[int, str, str]:
         """
         Execute CLI command asynchronously with timeout and error handling.
-        
+
         Returns:
             Tuple of (return_code, stdout, stderr)
         """
         timeout = timeout or self.config.get("timeout", 60)
-        
+
         try:
             process = await asyncio.create_subprocess_exec(
                 *command,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
-            
+
             stdout, stderr = await asyncio.wait_for(
                 process.communicate(),
                 timeout=timeout
             )
-            
+
             return process.returncode, stdout.decode(), stderr.decode()
-            
+
         except asyncio.TimeoutError:
             logger.error(f"Command timed out after {timeout}s: {' '.join(command)}")
             return -1, "", f"Command timed out after {timeout}s"
         except Exception as e:
             logger.error(f"Command execution failed: {e}")
             return -1, "", str(e)
-    
+
     async def test_schema_management(self) -> TestSuite:
         """Test schema management operations."""
         suite = TestSuite(
             name="schema_management",
             description="Test all schema management operations"
         )
-        
+
         # Test schema creation
         test_schema_name = f"test_schema_{self.session_id}"
-        
+
         # Create schema test
         with self.performance_monitor():
             start_time = time.time()
@@ -225,7 +222,7 @@ class CLITestFramework:
                 "--template", "basic"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="schema_create",
             test_type="integration",
@@ -236,7 +233,7 @@ class CLITestFramework:
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Test schema listing
         with self.performance_monitor():
             start_time = time.time()
@@ -244,7 +241,7 @@ class CLITestFramework:
                 self.cli_command, "schema", "list", "--format", "json"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="schema_list",
             test_type="integration",
@@ -255,7 +252,7 @@ class CLITestFramework:
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Test schema validation
         with self.performance_monitor():
             start_time = time.time()
@@ -263,7 +260,7 @@ class CLITestFramework:
                 self.cli_command, "schema", "validate", test_schema_name
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="schema_validate",
             test_type="integration",
@@ -274,7 +271,7 @@ class CLITestFramework:
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Test schema export
         export_file = self.results_dir / f"exported_schema_{self.session_id}.json"
         with self.performance_monitor():
@@ -284,7 +281,7 @@ class CLITestFramework:
                 "--output", str(export_file), "--format", "json"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="schema_export",
             test_type="integration",
@@ -296,21 +293,21 @@ class CLITestFramework:
             output=stdout,
             metadata={"export_file": str(export_file)}
         ))
-        
+
         # Cleanup: Delete test schema
         await self.run_cli_command([
             self.cli_command, "schema", "delete", test_schema_name, "--force"
         ])
-        
+
         return suite
-    
+
     async def test_instance_management(self) -> TestSuite:
         """Test instance management operations."""
         suite = TestSuite(
             name="instance_management",
             description="Test all instance management operations"
         )
-        
+
         # First create a test schema
         test_schema_name = f"test_schema_inst_{self.session_id}"
         await self.run_cli_command([
@@ -318,9 +315,9 @@ class CLITestFramework:
             "--name", test_schema_name,
             "--template", "basic"
         ])
-        
+
         test_instance_name = f"test_instance_{self.session_id}"
-        
+
         # Test instance creation
         with self.performance_monitor():
             start_time = time.time()
@@ -331,7 +328,7 @@ class CLITestFramework:
                 "--environment", "development"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="instance_create",
             test_type="integration",
@@ -342,7 +339,7 @@ class CLITestFramework:
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Test instance listing
         with self.performance_monitor():
             start_time = time.time()
@@ -350,7 +347,7 @@ class CLITestFramework:
                 self.cli_command, "instance", "list", "--format", "json"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="instance_list",
             test_type="integration",
@@ -361,7 +358,7 @@ class CLITestFramework:
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Test instance status
         with self.performance_monitor():
             start_time = time.time()
@@ -369,7 +366,7 @@ class CLITestFramework:
                 self.cli_command, "instance", "status", test_instance_name
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="instance_status",
             test_type="integration",
@@ -380,7 +377,7 @@ class CLITestFramework:
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Cleanup
         await self.run_cli_command([
             self.cli_command, "instance", "delete", test_instance_name, "--force"
@@ -388,16 +385,16 @@ class CLITestFramework:
         await self.run_cli_command([
             self.cli_command, "schema", "delete", test_schema_name, "--force"
         ])
-        
+
         return suite
-    
+
     async def test_memory_system(self) -> TestSuite:
         """Test memory system operations."""
         suite = TestSuite(
             name="memory_system",
             description="Test memory system integration and operations"
         )
-        
+
         # Test memory status
         with self.performance_monitor():
             start_time = time.time()
@@ -405,7 +402,7 @@ class CLITestFramework:
                 self.cli_command, "memory", "status", "--format", "json"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="memory_status",
             test_type="integration",
@@ -416,7 +413,7 @@ class CLITestFramework:
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Test memory search
         with self.performance_monitor():
             start_time = time.time()
@@ -424,7 +421,7 @@ class CLITestFramework:
                 self.cli_command, "memory", "search", "test", "--limit", "10"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="memory_search",
             test_type="integration",
@@ -435,7 +432,7 @@ class CLITestFramework:
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Test memory statistics
         with self.performance_monitor():
             start_time = time.time()
@@ -443,7 +440,7 @@ class CLITestFramework:
                 self.cli_command, "memory", "stats", "--detailed"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="memory_stats",
             test_type="integration",
@@ -454,16 +451,16 @@ class CLITestFramework:
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         return suite
-    
+
     async def test_batch_operations(self) -> TestSuite:
         """Test batch processing operations."""
         suite = TestSuite(
             name="batch_operations",
             description="Test batch processing and job management"
         )
-        
+
         # Create a simple batch script
         batch_script = self.results_dir / f"test_batch_{self.session_id}.py"
         with open(batch_script, 'w') as f:
@@ -478,9 +475,9 @@ print("Batch job completed successfully")
 sys.exit(0)
 """)
         batch_script.chmod(0o755)
-        
+
         test_job_name = f"test_job_{self.session_id}"
-        
+
         # Test batch job creation
         with self.performance_monitor():
             start_time = time.time()
@@ -491,7 +488,7 @@ sys.exit(0)
                 "--priority", "normal"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="batch_create",
             test_type="integration",
@@ -502,7 +499,7 @@ sys.exit(0)
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Test batch job listing
         with self.performance_monitor():
             start_time = time.time()
@@ -510,7 +507,7 @@ sys.exit(0)
                 self.cli_command, "batch", "list", "--format", "json"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="batch_list",
             test_type="integration",
@@ -521,7 +518,7 @@ sys.exit(0)
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Test batch job execution
         with self.performance_monitor():
             start_time = time.time()
@@ -529,7 +526,7 @@ sys.exit(0)
                 self.cli_command, "batch", "run", test_job_name, "--timeout", "30"
             ])
             duration = time.time() - start_time
-        
+
         suite.tests.append(TestResult(
             test_name="batch_run",
             test_type="integration",
@@ -540,21 +537,21 @@ sys.exit(0)
             error_message=stderr if ret_code != 0 else None,
             output=stdout
         ))
-        
+
         # Cleanup
         batch_script.unlink()
-        
+
         return suite
-    
+
     async def benchmark_performance(self) -> List[BenchmarkResult]:
         """Run performance benchmarks."""
         benchmarks = []
         iterations = self.config.get("benchmark_iterations", 5)
-        
+
         # Benchmark schema operations
         for i in range(iterations):
             schema_name = f"bench_schema_{i}_{self.session_id}"
-            
+
             with self.performance_monitor():
                 start_time = time.time()
                 await self.run_cli_command([
@@ -563,7 +560,7 @@ sys.exit(0)
                     "--template", "basic"
                 ])
                 create_duration = time.time() - start_time
-            
+
             benchmarks.append(BenchmarkResult(
                 operation="schema_create",
                 duration=create_duration,
@@ -571,12 +568,12 @@ sys.exit(0)
                 cpu_peak=self._current_metrics.get("peak_cpu", 0),
                 baseline_comparison=self._compare_to_baseline("schema_create", create_duration)
             ))
-            
+
             # Cleanup
             await self.run_cli_command([
                 self.cli_command, "schema", "delete", schema_name, "--force"
             ])
-        
+
         # Benchmark memory operations
         for i in range(iterations):
             with self.performance_monitor():
@@ -585,7 +582,7 @@ sys.exit(0)
                     self.cli_command, "memory", "status"
                 ])
                 status_duration = time.time() - start_time
-            
+
             benchmarks.append(BenchmarkResult(
                 operation="memory_status",
                 duration=status_duration,
@@ -593,16 +590,16 @@ sys.exit(0)
                 cpu_peak=self._current_metrics.get("peak_cpu", 0),
                 baseline_comparison=self._compare_to_baseline("memory_status", status_duration)
             ))
-        
+
         return benchmarks
-    
+
     def _compare_to_baseline(self, operation: str, duration: float) -> Optional[float]:
         """Compare performance to baseline."""
         if operation in self.baselines:
             baseline = self.baselines[operation]
             return (duration - baseline) / baseline * 100  # Percentage change
         return None
-    
+
     def _update_baselines(self, benchmarks: List[BenchmarkResult]):
         """Update performance baselines with new measurements."""
         for benchmark in benchmarks:
@@ -613,59 +610,59 @@ sys.exit(0)
                 # Use exponential moving average
                 alpha = 0.1
                 self.baselines[operation] = (
-                    alpha * benchmark.duration + 
+                    alpha * benchmark.duration +
                     (1 - alpha) * self.baselines[operation]
                 )
-    
+
     async def run_integration_tests(self) -> List[TestSuite]:
         """Run all integration tests."""
         logger.info("Starting integration test suite...")
-        
+
         test_suites = []
-        
+
         # Run individual test suites
         try:
             test_suites.append(await self.test_schema_management())
             test_suites.append(await self.test_instance_management())
             test_suites.append(await self.test_memory_system())
             test_suites.append(await self.test_batch_operations())
-            
+
             # Run PLC tests if enabled
             if self.config.get("integration_tests", {}).get("enable_plc_tests", False):
                 test_suites.append(await self.test_plc_integration())
-            
+
         except Exception as e:
             logger.error(f"Integration test error: {e}")
             raise
-        
+
         self.test_suites = test_suites
         return test_suites
-    
+
     async def run_performance_tests(self) -> List[BenchmarkResult]:
         """Run performance benchmarks."""
         logger.info("Starting performance benchmarks...")
-        
+
         benchmarks = await self.benchmark_performance()
         self._update_baselines(benchmarks)
         self._save_baselines()
-        
+
         return benchmarks
-    
+
     def generate_report(self) -> Dict[str, Any]:
         """Generate comprehensive test report."""
         end_time = datetime.now()
         total_duration = (end_time - self.start_time).total_seconds()
-        
+
         # Aggregate test results
         total_tests = sum(len(suite.tests) for suite in self.test_suites)
         passed_tests = sum(1 for suite in self.test_suites for test in suite.tests if test.status == "passed")
         failed_tests = sum(1 for suite in self.test_suites for test in suite.tests if test.status == "failed")
-        
+
         # Performance summary
         benchmarks = []
         for suite in self.test_suites:
             benchmarks.extend(suite.benchmarks)
-        
+
         report = {
             "session_id": self.session_id,
             "timestamp": self.start_time.isoformat(),
@@ -721,48 +718,48 @@ sys.exit(0)
                 "config": self.config
             }
         }
-        
+
         return report
-    
+
     def save_report(self, report: Dict[str, Any]):
         """Save test report to file."""
         report_file = self.results_dir / f"test_report_{self.session_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        
+
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
-        
+
         logger.info(f"Test report saved: {report_file}")
-        
+
         # Also save summary
         summary_file = self.results_dir / f"test_summary_{self.session_id}.txt"
         with open(summary_file, 'w') as f:
-            f.write(f"PLC-GBT CLI Test Report Summary\n")
-            f.write(f"================================\n\n")
+            f.write("PLC-GBT CLI Test Report Summary\n")
+            f.write("================================\n\n")
             f.write(f"Session ID: {report['session_id']}\n")
             f.write(f"Timestamp: {report['timestamp']}\n")
             f.write(f"Duration: {report['duration']:.2f}s\n\n")
-            f.write(f"Test Results:\n")
+            f.write("Test Results:\n")
             f.write(f"  Total Tests: {report['summary']['total_tests']}\n")
             f.write(f"  Passed: {report['summary']['passed']}\n")
             f.write(f"  Failed: {report['summary']['failed']}\n")
             f.write(f"  Success Rate: {report['summary']['success_rate']:.1f}%\n\n")
-            
+
             for suite in report['test_suites']:
                 f.write(f"Suite: {suite['name']}\n")
                 f.write(f"  Tests: {suite['total_tests']}, Passed: {suite['passed']}, Failed: {suite['failed']}\n")
                 if suite['failed'] > 0:
-                    f.write(f"  Failed Tests:\n")
+                    f.write("  Failed Tests:\n")
                     for test in suite['tests']:
                         if test['status'] == 'failed':
                             f.write(f"    - {test['name']}: {test['error']}\n")
-                f.write(f"\n")
-        
+                f.write("\n")
+
         return report_file
 
 
 class CICDIntegration:
     """CI/CD pipeline integration for automated testing."""
-    
+
     @staticmethod
     def generate_github_workflow() -> str:
         """Generate GitHub Actions workflow for automated testing."""
@@ -783,32 +780,32 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9, '3.10', '3.11']
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest psutil pyyaml
-    
+
     - name: Run CLI tests
       run: |
         python -m plc_gbt_stack.cli.testing.test_framework
-    
+
     - name: Upload test results
       uses: actions/upload-artifact@v3
       if: always()
       with:
         name: test-results-${{ matrix.python-version }}
         path: test_results/
-    
+
     - name: Publish test report
       uses: mikepenz/action-junit-report@v3
       if: always()
@@ -816,31 +813,31 @@ jobs:
         report_paths: 'test_results/junit_*.xml'
         check_name: 'CLI Tests (${{ matrix.python-version }})'
 """
-    
+
     @staticmethod
     def generate_jenkins_pipeline() -> str:
         """Generate Jenkins pipeline for automated testing."""
         return """
 pipeline {
     agent any
-    
+
     triggers {
         pollSCM('H/15 * * * *')  # Poll every 15 minutes
         cron('H 2 * * *')        # Daily build at 2 AM
     }
-    
+
     environment {
         PYTHONPATH = "${WORKSPACE}"
         PLC_MEMORY_TEST_ENV = "ci"
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
+
         stage('Setup Environment') {
             steps {
                 sh '''
@@ -852,7 +849,7 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Run Tests') {
             steps {
                 sh '''
@@ -861,7 +858,7 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Archive Results') {
             steps {
                 archiveArtifacts artifacts: 'test_results/**/*', fingerprint: true
@@ -869,7 +866,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             cleanWs()
@@ -889,7 +886,7 @@ pipeline {
 async def main():
     """Main test execution function."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="PLC-GBT CLI Testing Framework")
     parser.add_argument("--config", type=Path, help="Configuration file path")
     parser.add_argument("--integration", action="store_true", help="Run integration tests")
@@ -897,59 +894,59 @@ async def main():
     parser.add_argument("--all", action="store_true", help="Run all tests")
     parser.add_argument("--report-only", action="store_true", help="Generate report from existing results")
     parser.add_argument("--ci", action="store_true", help="Generate CI/CD configuration files")
-    
+
     args = parser.parse_args()
-    
+
     if args.ci:
         # Generate CI/CD files
         ci_integration = CICDIntegration()
-        
+
         # GitHub Actions
         github_dir = Path(".github/workflows")
         github_dir.mkdir(parents=True, exist_ok=True)
         with open(github_dir / "cli_testing.yml", "w") as f:
             f.write(ci_integration.generate_github_workflow())
-        
+
         # Jenkins
         with open("Jenkinsfile", "w") as f:
             f.write(ci_integration.generate_jenkins_pipeline())
-        
+
         print("CI/CD configuration files generated:")
         print("  - .github/workflows/cli_testing.yml")
         print("  - Jenkinsfile")
         return
-    
+
     # Initialize test framework
     framework = CLITestFramework(config_path=args.config)
-    
+
     try:
         if args.all or args.integration:
             await framework.run_integration_tests()
-        
+
         if args.all or args.performance:
             await framework.run_performance_tests()
-        
+
         # Generate and save report
         report = framework.generate_report()
         report_file = framework.save_report(report)
-        
+
         # Print summary
-        print(f"\nTest Execution Complete!")
+        print("\nTest Execution Complete!")
         print(f"Session ID: {framework.session_id}")
         print(f"Total Tests: {report['summary']['total_tests']}")
         print(f"Passed: {report['summary']['passed']}")
         print(f"Failed: {report['summary']['failed']}")
         print(f"Success Rate: {report['summary']['success_rate']:.1f}%")
         print(f"Report saved: {report_file}")
-        
+
         # Exit with failure code if tests failed
         if report['summary']['failed'] > 0:
             sys.exit(1)
-            
+
     except Exception as e:
         logger.error(f"Test execution failed: {e}")
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

@@ -17,13 +17,13 @@ __version__ = "23.1.0"
 __author__ = "PLC-GBT Development Team"
 __description__ = "Fine-tuned LLM Integration for Industrial Control Systems"
 
-from enum import Enum
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Union, Callable
-import os
 import json
 import logging
+import os
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Union
 
 # Configure logging for LLM operations
 logging.basicConfig(level=logging.INFO)
@@ -254,33 +254,33 @@ def validate_llm_response(response: str, request_type: LLMRequestType) -> Dict[s
         "confidence": 1.0,
         "safety_score": 1.0
     }
-    
+
     if not response or len(response.strip()) == 0:
         validation_results["is_valid"] = False
         validation_results["issues"].append("Empty response")
         return validation_results
-    
+
     # Request-type specific validation
     if request_type == LLMRequestType.COMMAND_GENERATION:
         # Check if response contains valid CLI commands
         if "plc-cl" not in response and "python" not in response:
             validation_results["confidence"] *= 0.8
             validation_results["issues"].append("Response may not contain valid commands")
-    
+
     elif request_type == LLMRequestType.ANALYSIS:
         # Check if response contains analytical content
         analysis_keywords = ["analysis", "performance", "tuning", "optimization", "recommendation"]
         if not any(keyword in response.lower() for keyword in analysis_keywords):
             validation_results["confidence"] *= 0.7
             validation_results["issues"].append("Response may lack analytical content")
-    
+
     # Safety checks
     dangerous_patterns = ["rm -rf", "delete all", "format", "reset everything"]
     for pattern in dangerous_patterns:
         if pattern.lower() in response.lower():
             validation_results["safety_score"] *= 0.3
             validation_results["issues"].append(f"Potentially dangerous operation detected: {pattern}")
-    
+
     return validation_results
 
 def estimate_token_count(text: str) -> int:
@@ -291,28 +291,28 @@ def estimate_token_count(text: str) -> int:
 def optimize_context_for_model(context: ApplicationContext, max_tokens: int = 6000) -> ApplicationContext:
     """Optimize context to fit within token limits"""
     optimized_context = context
-    
+
     # Prioritize recent operations and current state
     if len(context.recent_operations) > 10:
         optimized_context.recent_operations = context.recent_operations[-10:]
-    
+
     if len(context.session_history) > 10:
         optimized_context.session_history = context.session_history[-10:]
-    
+
     if len(context.error_history) > 5:
         optimized_context.error_history = context.error_history[-5:]
-    
+
     return optimized_context
 
 # Import additional classes for Phase 23.2/23.3 integration
-from .intent_recognition import ExtractedEntity, EntityType, IntentRecognitionResult
 from .command_generator import CommandGenerationResult
+from .intent_recognition import EntityType, ExtractedEntity, IntentRecognitionResult
 
 # Export main components
 __all__ = [
     "LLM_CONFIG",
     "LLMRequestType",
-    "LLMResponseStatus", 
+    "LLMResponseStatus",
     "ConversationRole",
     "IntentType",
     "TaskComplexity",
@@ -324,7 +324,7 @@ __all__ = [
     "TaskPlan",
     "ExecutionResult",
     "ExtractedEntity",
-    "EntityType", 
+    "EntityType",
     "IntentRecognitionResult",
     "CommandGenerationResult",
     "get_model_info",
@@ -332,4 +332,4 @@ __all__ = [
     "validate_llm_response",
     "estimate_token_count",
     "optimize_context_for_model"
-] 
+]

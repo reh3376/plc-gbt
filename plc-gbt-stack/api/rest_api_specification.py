@@ -11,14 +11,12 @@ Phase: 27.1 - RESTful API Design
 Dependencies: Phase 21 (CLI), Phase 23 (LLM), Phase 26.4 (Natural Language Engine)
 """
 
-from typing import Dict, List, Any, Optional, Union
-from dataclasses import dataclass, field
-from enum import Enum
 from datetime import datetime
-import json
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 # FastAPI imports for OpenAPI generation
-from fastapi import FastAPI, HTTPException, Query, Path, Body
+from fastapi import Body, FastAPI, Path, Query
 from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel, Field
 
@@ -48,7 +46,7 @@ API_TAGS_METADATA = [
         "description": "Control loop schema and instance management operations"
     },
     {
-        "name": "workflows", 
+        "name": "workflows",
         "description": "Natural language workflow creation and management"
     },
     {
@@ -269,7 +267,7 @@ app = FastAPI(
 # CONTROL LOOP MANAGEMENT ENDPOINTS
 # =============================================================================
 
-@app.get("/api/v1/schemas", 
+@app.get("/api/v1/schemas",
          tags=["control-loops"],
          response_model=APIResponse,
          summary="List all control loop schemas")
@@ -281,7 +279,7 @@ async def list_schemas(
 ):
     """
     Retrieve list of all available control loop schemas.
-    
+
     CLI Equivalent: `plc-cl schema list`
     """
     # Implementation will interface with CLI backend
@@ -294,7 +292,7 @@ async def list_schemas(
 async def create_schema(request: CreateSchemaRequest):
     """
     Create a new control loop schema.
-    
+
     CLI Equivalent: `plc-cl schema create --name {name} --type {type}`
     """
     pass
@@ -306,7 +304,7 @@ async def create_schema(request: CreateSchemaRequest):
 async def get_schema(schema_id: str = Path(..., description="Schema ID")):
     """
     Get detailed information about a specific schema.
-    
+
     CLI Equivalent: `plc-cl schema info {schema_id}`
     """
     pass
@@ -321,7 +319,7 @@ async def update_schema(
 ):
     """
     Update an existing schema.
-    
+
     CLI Equivalent: `plc-cl schema edit {schema_id}`
     """
     pass
@@ -333,7 +331,7 @@ async def update_schema(
 async def delete_schema(schema_id: str = Path(..., description="Schema ID")):
     """
     Delete a schema.
-    
+
     CLI Equivalent: `plc-cl schema delete {schema_id}`
     """
     pass
@@ -348,7 +346,7 @@ async def validate_schema(
 ):
     """
     Validate data against a schema.
-    
+
     CLI Equivalent: `plc-cl schema validate {schema_id} --data {data}`
     """
     pass
@@ -367,7 +365,7 @@ async def list_instances(
 ):
     """
     Retrieve list of all control loop instances.
-    
+
     CLI Equivalent: `plc-cl instance list`
     """
     pass
@@ -379,7 +377,7 @@ async def list_instances(
 async def create_instance(request: CreateInstanceRequest):
     """
     Create a new control loop instance.
-    
+
     CLI Equivalent: `plc-cl instance create --schema {schema_id} --name {name}`
     """
     pass
@@ -391,7 +389,7 @@ async def create_instance(request: CreateInstanceRequest):
 async def get_instance(instance_id: str = Path(..., description="Instance ID")):
     """
     Get detailed information about a specific instance.
-    
+
     CLI Equivalent: `plc-cl instance info {instance_id}`
     """
     pass
@@ -406,7 +404,7 @@ async def update_instance(
 ):
     """
     Update instance configuration.
-    
+
     CLI Equivalent: `plc-cl instance edit {instance_id}`
     """
     pass
@@ -418,7 +416,7 @@ async def update_instance(
 async def delete_instance(instance_id: str = Path(..., description="Instance ID")):
     """
     Delete a control loop instance.
-    
+
     CLI Equivalent: `plc-cl instance delete {instance_id}`
     """
     pass
@@ -430,7 +428,7 @@ async def delete_instance(instance_id: str = Path(..., description="Instance ID"
 async def validate_instance(instance_id: str = Path(..., description="Instance ID")):
     """
     Validate instance configuration.
-    
+
     CLI Equivalent: `plc-cl instance validate {instance_id}`
     """
     pass
@@ -445,7 +443,7 @@ async def simulate_instance(
 ):
     """
     Simulate instance behavior.
-    
+
     CLI Equivalent: `plc-cl instance simulate {instance_id} --duration {duration}`
     """
     pass
@@ -461,7 +459,7 @@ async def simulate_instance(
 async def create_workflow(request: WorkflowRequest):
     """
     Create a new workflow from natural language description.
-    
+
     CLI Equivalent: `plc-cl workflow create {description}`
     """
     pass
@@ -478,7 +476,7 @@ async def list_workflows(
 ):
     """
     List all available workflows.
-    
+
     CLI Equivalent: `plc-cl workflow list`
     """
     pass
@@ -490,7 +488,7 @@ async def list_workflows(
 async def get_workflow(workflow_id: str = Path(..., description="Workflow ID")):
     """
     Get detailed workflow information.
-    
+
     CLI Equivalent: `plc-cl workflow info {workflow_id}`
     """
     pass
@@ -505,7 +503,7 @@ async def analyze_workflow(
 ):
     """
     Analyze workflow performance and generate recommendations.
-    
+
     CLI Equivalent: `plc-cl workflow analyze {workflow_id}`
     """
     pass
@@ -520,7 +518,7 @@ async def optimize_workflow(
 ):
     """
     Optimize workflow based on analysis.
-    
+
     CLI Equivalent: `plc-cl workflow optimize {workflow_id}`
     """
     pass
@@ -536,7 +534,7 @@ async def list_workflow_templates(
 ):
     """
     List available workflow templates.
-    
+
     CLI Equivalent: `plc-cl workflow templates`
     """
     pass
@@ -551,7 +549,7 @@ async def instantiate_template(
 ):
     """
     Create workflow from template with parameters.
-    
+
     CLI Equivalent: `plc-cl workflow from-template {template_id}`
     """
     pass
@@ -563,7 +561,7 @@ async def instantiate_template(
 async def workflow_chat(message: ConversationMessage):
     """
     Interactive workflow management through conversation.
-    
+
     CLI Equivalent: `plc-cl workflow chat`
     """
     pass
@@ -579,7 +577,7 @@ async def workflow_chat(message: ConversationMessage):
 async def ingest_memory(request: MemoryIngestRequest):
     """
     Ingest codebase files into the multi-database memory system.
-    
+
     CLI Equivalent: `plc-memory ingest {paths}`
     """
     pass
@@ -591,7 +589,7 @@ async def ingest_memory(request: MemoryIngestRequest):
 async def query_memory(request: MemoryQueryRequest):
     """
     Query the memory system with intelligent routing.
-    
+
     CLI Equivalent: `plc-memory query {query}`
     """
     pass
@@ -606,7 +604,7 @@ async def get_memory_status(
 ):
     """
     Get memory system status and performance metrics.
-    
+
     CLI Equivalent: `plc-memory status`
     """
     pass
@@ -618,7 +616,7 @@ async def get_memory_status(
 async def optimize_memory(request: MemoryOptimizationRequest):
     """
     Optimize memory tiers and performance.
-    
+
     CLI Equivalent: `plc-memory optimize`
     """
     pass
@@ -633,7 +631,7 @@ async def backup_memory(
 ):
     """
     Create backup of all memory databases.
-    
+
     CLI Equivalent: `plc-memory backup`
     """
     pass
@@ -648,7 +646,7 @@ async def restore_memory(
 ):
     """
     Restore memory system from backup.
-    
+
     CLI Equivalent: `plc-memory restore {backup_id}`
     """
     pass
@@ -660,7 +658,7 @@ async def restore_memory(
 async def memory_health():
     """
     Run comprehensive health checks on memory system.
-    
+
     CLI Equivalent: `plc-memory health`
     """
     pass
@@ -675,7 +673,7 @@ async def clean_memory(
 ):
     """
     Clean up unused data and optimize storage.
-    
+
     CLI Equivalent: `plc-memory clean`
     """
     pass
@@ -691,7 +689,7 @@ async def clean_memory(
 async def connect_plc(request: PLCConnectionRequest):
     """
     Establish connection to ControlLogix PLC.
-    
+
     CLI Equivalent: `plc-cl instance plc connect --host {host} --slot {slot}`
     """
     pass
@@ -703,7 +701,7 @@ async def connect_plc(request: PLCConnectionRequest):
 async def list_plc_connections():
     """
     List all active PLC connections.
-    
+
     CLI Equivalent: `plc-cl instance plc list`
     """
     pass
@@ -715,7 +713,7 @@ async def list_plc_connections():
 async def disconnect_plc(connection_id: str = Path(..., description="Connection ID")):
     """
     Disconnect from PLC.
-    
+
     CLI Equivalent: `plc-cl instance plc disconnect {connection_id}`
     """
     pass
@@ -727,7 +725,7 @@ async def disconnect_plc(connection_id: str = Path(..., description="Connection 
 async def read_plc_tags(request: PLCTagReadRequest):
     """
     Read values from PLC tags.
-    
+
     CLI Equivalent: `plc-cl instance plc read {tags}`
     """
     pass
@@ -739,7 +737,7 @@ async def read_plc_tags(request: PLCTagReadRequest):
 async def browse_plc_tags(connection_id: str = Path(..., description="Connection ID")):
     """
     Browse available PLC tags and structure.
-    
+
     CLI Equivalent: `plc-cl instance plc browse {connection_id}`
     """
     pass
@@ -751,7 +749,7 @@ async def browse_plc_tags(connection_id: str = Path(..., description="Connection
 async def monitor_plc_tags(request: PLCMonitoringRequest):
     """
     Start monitoring PLC tags in real-time.
-    
+
     CLI Equivalent: `plc-cl instance plc monitor {tags}`
     """
     pass
@@ -766,7 +764,7 @@ async def discover_plcs(
 ):
     """
     Discover ControlLogix PLCs on the network.
-    
+
     CLI Equivalent: `plc-cl instance plc discover`
     """
     pass
@@ -785,7 +783,7 @@ async def list_plugins(
 ):
     """
     List all installed plugins.
-    
+
     CLI Equivalent: `plc-cl plugin list`
     """
     pass
@@ -797,7 +795,7 @@ async def list_plugins(
 async def install_plugin(request: PluginInstallRequest):
     """
     Install a plugin from marketplace or file.
-    
+
     CLI Equivalent: `plc-cl plugin install {plugin_name}`
     """
     pass
@@ -809,7 +807,7 @@ async def install_plugin(request: PluginInstallRequest):
 async def uninstall_plugin(plugin_id: str = Path(..., description="Plugin ID")):
     """
     Uninstall a plugin.
-    
+
     CLI Equivalent: `plc-cl plugin uninstall {plugin_id}`
     """
     pass
@@ -821,7 +819,7 @@ async def uninstall_plugin(plugin_id: str = Path(..., description="Plugin ID")):
 async def enable_plugin(plugin_id: str = Path(..., description="Plugin ID")):
     """
     Enable a plugin.
-    
+
     CLI Equivalent: `plc-cl plugin enable {plugin_id}`
     """
     pass
@@ -833,7 +831,7 @@ async def enable_plugin(plugin_id: str = Path(..., description="Plugin ID")):
 async def disable_plugin(plugin_id: str = Path(..., description="Plugin ID")):
     """
     Disable a plugin.
-    
+
     CLI Equivalent: `plc-cl plugin disable {plugin_id}`
     """
     pass
@@ -849,7 +847,7 @@ async def browse_marketplace(
 ):
     """
     Browse available plugins in marketplace.
-    
+
     CLI Equivalent: `plc-cl plugin search {search}`
     """
     pass
@@ -865,7 +863,7 @@ async def browse_marketplace(
 async def execute_automation(request: AutomationScriptRequest):
     """
     Execute an automation script.
-    
+
     CLI Equivalent: `plc-cl automation run {script}`
     """
     pass
@@ -877,7 +875,7 @@ async def execute_automation(request: AutomationScriptRequest):
 async def list_automation_scripts():
     """
     List available automation scripts.
-    
+
     CLI Equivalent: `plc-cl automation list`
     """
     pass
@@ -889,7 +887,7 @@ async def list_automation_scripts():
 async def execute_batch_operation(request: BatchOperationRequest):
     """
     Execute a batch operation on multiple targets.
-    
+
     CLI Equivalent: `plc-cl batch {operation_type} {targets}`
     """
     pass
@@ -903,7 +901,7 @@ async def get_batch_history(
 ):
     """
     Get history of batch operations.
-    
+
     CLI Equivalent: `plc-cl batch history`
     """
     pass
@@ -919,7 +917,7 @@ async def get_batch_history(
 async def get_system_status():
     """
     Get overall system status and health.
-    
+
     CLI Equivalent: `plc-cl status`
     """
     pass
@@ -931,7 +929,7 @@ async def get_system_status():
 async def get_system_config():
     """
     Get system configuration settings.
-    
+
     CLI Equivalent: `plc-cl config show`
     """
     pass
@@ -943,7 +941,7 @@ async def get_system_config():
 async def update_system_config(config: Dict[str, Any] = Body(...)):
     """
     Update system configuration.
-    
+
     CLI Equivalent: `plc-cl config set {key} {value}`
     """
     pass
@@ -959,7 +957,7 @@ async def get_system_logs(
 ):
     """
     Retrieve system logs.
-    
+
     CLI Equivalent: `plc-cl logs --level {level} --since {since}`
     """
     pass
@@ -974,7 +972,7 @@ async def get_system_metrics(
 ):
     """
     Get system performance metrics.
-    
+
     CLI Equivalent: `plc-cl metrics --type {metric_type} --range {time_range}`
     """
     pass
@@ -990,7 +988,7 @@ async def get_system_metrics(
 async def start_repl_session():
     """
     Start a new interactive REPL session.
-    
+
     CLI Equivalent: `plc-cl repl`
     """
     pass
@@ -1005,7 +1003,7 @@ async def execute_repl_command(
 ):
     """
     Execute a command in an active REPL session.
-    
+
     CLI Equivalent: REPL command execution
     """
     pass
@@ -1017,7 +1015,7 @@ async def execute_repl_command(
 async def get_repl_history(session_id: str = Path(..., description="REPL session ID")):
     """
     Get command history for a REPL session.
-    
+
     CLI Equivalent: REPL `history` command
     """
     pass
@@ -1029,7 +1027,7 @@ async def get_repl_history(session_id: str = Path(..., description="REPL session
 async def end_repl_session(session_id: str = Path(..., description="REPL session ID")):
     """
     End an active REPL session.
-    
+
     CLI Equivalent: REPL `exit` command
     """
     pass
@@ -1082,7 +1080,7 @@ def get_custom_openapi():
     """Generate custom OpenAPI schema with MCP integration details"""
     if app.openapi_schema:
         return app.openapi_schema
-    
+
     openapi_schema = get_openapi(
         title=API_TITLE,
         version=API_VERSION,
@@ -1090,7 +1088,7 @@ def get_custom_openapi():
         routes=app.routes,
         tags=API_TAGS_METADATA
     )
-    
+
     # Add MCP server integration information
     openapi_schema["info"]["x-mcp-integration"] = {
         "server_name": "plc-gbt-mcp-server",
@@ -1098,11 +1096,11 @@ def get_custom_openapi():
         "protocol": "Model Context Protocol",
         "capabilities": [
             "tools",
-            "prompts", 
+            "prompts",
             "resources"
         ]
     }
-    
+
     # Add security schemes for industrial environments
     openapi_schema["components"]["securitySchemes"] = {
         "ApiKeyAuth": {
@@ -1116,7 +1114,7 @@ def get_custom_openapi():
             "bearerFormat": "JWT"
         }
     }
-    
+
     # Add industrial automation specific extensions
     openapi_schema["info"]["x-industrial-automation"] = {
         "safety_certified": True,
@@ -1124,7 +1122,7 @@ def get_custom_openapi():
         "real_time_capabilities": True,
         "read_only_mode": True  # Default for safety
     }
-    
+
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
@@ -1136,10 +1134,10 @@ app.openapi = get_custom_openapi
 
 def get_api_endpoint_summary() -> Dict[str, Any]:
     """Generate comprehensive summary of all API endpoints"""
-    
+
     routes_by_tag = {}
     total_endpoints = 0
-    
+
     for route in app.routes:
         if hasattr(route, 'tags') and route.tags:
             tag = route.tags[0]
@@ -1151,7 +1149,7 @@ def get_api_endpoint_summary() -> Dict[str, Any]:
                 "summary": getattr(route, 'summary', '')
             })
             total_endpoints += len(route.methods) - 1  # Exclude HEAD/OPTIONS
-    
+
     cli_command_mapping = {
         "control-loops": [
             "plc-cl schema list/create/info/edit/delete/validate",
@@ -1177,7 +1175,7 @@ def get_api_endpoint_summary() -> Dict[str, Any]:
             "plc-cl status/config/logs/metrics/repl"
         ]
     }
-    
+
     return {
         "total_endpoints": total_endpoints,
         "endpoints_by_category": routes_by_tag,
@@ -1202,5 +1200,5 @@ if __name__ == "__main__":
     print("\nEndpoint Categories:")
     for category, endpoints in API_ENDPOINT_SUMMARY['endpoints_by_category'].items():
         print(f"  • {category}: {len(endpoints)} endpoints")
-    print(f"\nOpenAPI Schema: Available at /openapi.json")
-    print(f"Documentation: Available at /docs") 
+    print("\nOpenAPI Schema: Available at /openapi.json")
+    print("Documentation: Available at /docs")

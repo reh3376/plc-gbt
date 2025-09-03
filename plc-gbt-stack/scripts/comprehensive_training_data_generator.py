@@ -6,11 +6,11 @@ Comprehensive Training Data Generator for Codebase Integration
 AI Task Orchestrator Implementation for Enhanced Fine-tuning
 Increases codebase-specific training from 11% to 45%+ coverage
 
-This script systematically analyzes the entire PLC-GBT codebase to generate 
+This script systematically analyzes the entire PLC-GBT codebase to generate
 comprehensive training data covering:
 
 1. Architecture & Structure (15% of training data)
-2. Core Classes & Functions (20% of training data) 
+2. Core Classes & Functions (20% of training data)
 3. CLI Commands & API Endpoints (10% of training data)
 4. Integration Patterns (5% of training data)
 5. Configuration & Usage Examples (5% of training data)
@@ -25,18 +25,13 @@ Methodology: AI Task Orchestrator Guide
 import ast
 import json
 import logging
-import os
 import re
-import subprocess
 import sys
-import time
 from collections import defaultdict
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Set, Tuple
-import inspect
-import importlib.util
+from typing import Any, Dict, List, Optional, Union
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -65,11 +60,11 @@ class TrainingDataEntry:
 
 class CodebaseAnalyzer:
     """Analyzes the codebase to extract training data elements"""
-    
+
     def __init__(self, project_root: Path):
         self.project_root = project_root
         self.plc_gbt_stack = project_root / "plc-gbt-stack"
-        
+
         # Analysis results
         self.functions: Dict[str, CodeElement] = {}
         self.classes: Dict[str, CodeElement] = {}
@@ -77,7 +72,7 @@ class CodebaseAnalyzer:
         self.api_endpoints: Dict[str, CodeElement] = {}
         self.modules: Dict[str, CodeElement] = {}
         self.integration_patterns: Dict[str, CodeElement] = {}
-        
+
         logger.info(f"Initialized CodebaseAnalyzer for {project_root}")
 
     def analyze_python_file(self, file_path: Path) -> Dict[str, List[CodeElement]]:
@@ -88,55 +83,55 @@ class CodebaseAnalyzer:
             'imports': [],
             'patterns': []
         }
-        
+
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
-            
+
             # Parse AST
             tree = ast.parse(content)
-            
+
             # Extract classes
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
                     class_element = self._extract_class_element(node, file_path, content)
                     elements['classes'].append(class_element)
-                    
+
                 elif isinstance(node, ast.FunctionDef):
                     func_element = self._extract_function_element(node, file_path, content)
                     elements['functions'].append(func_element)
-                    
+
                 elif isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
                     import_element = self._extract_import_element(node, file_path)
                     elements['imports'].append(import_element)
-            
+
             # Extract patterns (decorators, click commands, etc.)
             elements['patterns'].extend(self._extract_patterns(content, file_path))
-            
+
         except Exception as e:
             logger.warning(f"Error analyzing {file_path}: {e}")
-            
+
         return elements
 
     def _extract_class_element(self, node: ast.ClassDef, file_path: Path, content: str) -> CodeElement:
         """Extract class information"""
-        
+
         # Get docstring
         docstring = ast.get_docstring(node) or "No description available"
-        
+
         # Get base classes
         bases = [ast.unparse(base) for base in node.bases] if node.bases else []
-        
+
         # Get methods
         methods = []
         for item in node.body:
             if isinstance(item, ast.FunctionDef):
                 methods.append(item.name)
-        
+
         signature = f"class {node.name}"
         if bases:
             signature += f"({', '.join(bases)})"
-        
+
         return CodeElement(
             type="class",
             name=node.name,
@@ -151,9 +146,9 @@ class CodebaseAnalyzer:
 
     def _extract_function_element(self, node: ast.FunctionDef, file_path: Path, content: str) -> CodeElement:
         """Extract function information"""
-        
+
         docstring = ast.get_docstring(node) or "No description available"
-        
+
         # Build signature
         args = []
         if node.args.args:
@@ -162,11 +157,11 @@ class CodebaseAnalyzer:
                 if arg.annotation:
                     arg_str += f": {ast.unparse(arg.annotation)}"
                 args.append(arg_str)
-        
+
         signature = f"def {node.name}({', '.join(args)})"
         if node.returns:
             signature += f" -> {ast.unparse(node.returns)}"
-        
+
         return CodeElement(
             type="function",
             name=node.name,
@@ -181,7 +176,7 @@ class CodebaseAnalyzer:
 
     def _extract_import_element(self, node: Union[ast.Import, ast.ImportFrom], file_path: Path) -> CodeElement:
         """Extract import information"""
-        
+
         if isinstance(node, ast.Import):
             imports = [alias.name for alias in node.names]
             description = f"Import: {', '.join(imports)}"
@@ -189,7 +184,7 @@ class CodebaseAnalyzer:
             module = node.module or ""
             imports = [alias.name for alias in node.names]
             description = f"From {module} import: {', '.join(imports)}"
-        
+
         return CodeElement(
             type="import",
             name=description,
@@ -201,7 +196,7 @@ class CodebaseAnalyzer:
     def _extract_patterns(self, content: str, file_path: Path) -> List[CodeElement]:
         """Extract special patterns like CLI commands, decorators, etc."""
         patterns = []
-        
+
         # Click commands
         click_commands = re.findall(r'@click\.command\(\)\s*\n.*?def\s+(\w+)', content, re.DOTALL)
         for cmd in click_commands:
@@ -212,7 +207,7 @@ class CodebaseAnalyzer:
                 file_path=str(file_path.relative_to(self.project_root)),
                 category="cli"
             ))
-        
+
         # FastAPI endpoints
         api_endpoints = re.findall(r'@app\.(get|post|put|delete)\(["\']([^"\']+)["\']', content)
         for method, path in api_endpoints:
@@ -223,7 +218,7 @@ class CodebaseAnalyzer:
                 file_path=str(file_path.relative_to(self.project_root)),
                 category="api"
             ))
-        
+
         # Database models
         db_models = re.findall(r'class\s+(\w+)\([^)]*Model[^)]*\)', content)
         for model in db_models:
@@ -234,12 +229,12 @@ class CodebaseAnalyzer:
                 file_path=str(file_path.relative_to(self.project_root)),
                 category="database"
             ))
-        
+
         return patterns
 
     def _categorize_element(self, name: str, file_path: str) -> str:
         """Categorize code elements based on name and location"""
-        
+
         # File path based categorization
         if "/cli/" in file_path:
             return "cli"
@@ -255,7 +250,7 @@ class CodebaseAnalyzer:
             return "automation"
         elif "/n8n/" in file_path:
             return "workflow"
-        
+
         # Name based categorization
         name_lower = name.lower()
         if any(word in name_lower for word in ['manager', 'orchestrator', 'coordinator']):
@@ -266,14 +261,14 @@ class CodebaseAnalyzer:
             return "processing"
         elif any(word in name_lower for word in ['config', 'setting', 'option']):
             return "configuration"
-        
+
         return "general"
 
     def _assess_complexity(self, element_count: int, content_length: int) -> str:
         """Assess complexity of code element"""
-        
+
         complexity_score = element_count + (content_length / 100)
-        
+
         if complexity_score < 5:
             return "simple"
         elif complexity_score < 15:
@@ -285,24 +280,24 @@ class CodebaseAnalyzer:
 
     def analyze_codebase(self) -> Dict[str, Any]:
         """Analyze the entire codebase"""
-        
+
         logger.info("Starting comprehensive codebase analysis...")
-        
+
         results = {
             'files_analyzed': 0,
             'total_elements': 0,
             'categories': defaultdict(int),
             'complexities': defaultdict(int)
         }
-        
+
         # Find all Python files
         python_files = list(self.plc_gbt_stack.glob("**/*.py"))
         logger.info(f"Found {len(python_files)} Python files to analyze")
-        
+
         for file_path in python_files:
             try:
                 elements = self.analyze_python_file(file_path)
-                
+
                 # Store elements
                 for element_list in elements.values():
                     for element in element_list:
@@ -310,7 +305,7 @@ class CodebaseAnalyzer:
                         results['categories'][element.category] += 1
                         if element.complexity:
                             results['complexities'][element.complexity] += 1
-                        
+
                         # Store in appropriate collection
                         if element.type == "class":
                             self.classes[element.name] = element
@@ -320,57 +315,57 @@ class CodebaseAnalyzer:
                             self.cli_commands[element.name] = element
                         elif element.type == "api_endpoint":
                             self.api_endpoints[element.name] = element
-                
+
                 results['files_analyzed'] += 1
-                
+
             except Exception as e:
                 logger.warning(f"Error processing {file_path}: {e}")
-        
+
         logger.info(f"Analysis complete: {results['total_elements']} elements from {results['files_analyzed']} files")
         return results
 
 class TrainingDataGenerator:
     """Generates training data from analyzed codebase elements"""
-    
+
     def __init__(self, analyzer: CodebaseAnalyzer):
         self.analyzer = analyzer
         self.training_entries: List[TrainingDataEntry] = []
-        
+
     def generate_comprehensive_training_data(self) -> List[TrainingDataEntry]:
         """Generate comprehensive training data covering all aspects of the codebase"""
-        
+
         logger.info("Generating comprehensive training data...")
-        
+
         # Category 1: Architecture & Structure (15% target)
         self._generate_architecture_training_data()
-        
+
         # Category 2: Core Classes & Functions (20% target)
         self._generate_core_functionality_training_data()
-        
+
         # Category 3: CLI Commands & API Endpoints (10% target)
         self._generate_interface_training_data()
-        
+
         # Category 4: Integration Patterns (5% target)
         self._generate_integration_training_data()
-        
+
         # Category 5: Configuration & Usage Examples (5% target)
         self._generate_usage_training_data()
-        
+
         # Category 6: Function-specific training data (20% target)
         self._generate_function_specific_training_data()
-        
+
         # Category 7: Class-specific training data (15% target)
         self._generate_class_specific_training_data()
-        
+
         # Category 8: Module and import patterns (10% target)
         self._generate_module_training_data()
-        
+
         logger.info(f"Generated {len(self.training_entries)} training entries")
         return self.training_entries
 
     def _generate_architecture_training_data(self):
         """Generate training data about codebase architecture and structure"""
-        
+
         # Multi-database architecture
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -381,7 +376,7 @@ class TrainingDataGenerator:
             category="architecture",
             complexity="complex"
         ))
-        
+
         # Modular architecture
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -389,10 +384,10 @@ class TrainingDataGenerator:
                 {"role": "assistant", "content": "PLC-GBT follows a modular architecture with core modules: `core.py` (BaseOrchestrator, DatabaseManager, ConfigurationManager, LoggingManager), `metrics.py` (MetricCalculator, PerformanceClassifier), `data.py` (DataLoader, DataValidator, DataPreprocessor), `analysis.py` (StatisticalAnalyzer, ReportGenerator), and `integration.py` (ServiceManager, external API clients). This eliminates 90% code duplication and provides reusable components across the entire codebase."}
             ],
             metadata={"source": "modular_architecture", "type": "organization"},
-            category="architecture", 
+            category="architecture",
             complexity="complex"
         ))
-        
+
         # CLI-to-API Bridge architecture
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -406,7 +401,7 @@ class TrainingDataGenerator:
 
     def _generate_core_functionality_training_data(self):
         """Generate training data about core classes and functions"""
-        
+
         # BaseOrchestrator pattern
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -417,7 +412,7 @@ class TrainingDataGenerator:
             category="core_functionality",
             complexity="moderate"
         ))
-        
+
         # DatabaseManager usage
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -428,7 +423,7 @@ class TrainingDataGenerator:
             category="core_functionality",
             complexity="complex"
         ))
-        
+
         # MemoryCoordinator usage
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -436,13 +431,13 @@ class TrainingDataGenerator:
                 {"role": "assistant", "content": "MemoryCoordinator intelligently routes queries across the 4-tier memory architecture:\n\n```python\nfrom memory_coordinator import MemoryCoordinator, QueryStrategy\n\ncoordinator = MemoryCoordinator()\n\n# Intelligent routing based on query type and data tier\nresult = await coordinator.query(\n    query='PID control tuning methods',\n    strategy=QueryStrategy.INTELLIGENT  # Auto-selects best database\n)\n\n# Specific tier targeting\nhistorical_data = await coordinator.query(\n    query='temperature data last 30 days',\n    strategy=QueryStrategy.LONG_TERM  # Uses PostgreSQL\n)\n\n# Real-time caching\ncached_result = await coordinator.query(\n    query='current system status',\n    strategy=QueryStrategy.SHORT_TERM  # Uses Redis\n)\n```"}
             ],
             metadata={"source": "MemoryCoordinator", "file": "scripts/ai/memory_coordinator.py"},
-            category="core_functionality", 
+            category="core_functionality",
             complexity="complex"
         ))
 
     def _generate_interface_training_data(self):
         """Generate training data about CLI commands and API endpoints"""
-        
+
         # PLC-CL CLI commands
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -453,7 +448,7 @@ class TrainingDataGenerator:
             category="cli_interface",
             complexity="moderate"
         ))
-        
+
         # PLC-Memory CLI commands
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -464,7 +459,7 @@ class TrainingDataGenerator:
             category="cli_interface",
             complexity="moderate"
         ))
-        
+
         # API endpoints via bridge
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -478,7 +473,7 @@ class TrainingDataGenerator:
 
     def _generate_integration_training_data(self):
         """Generate training data about integration patterns"""
-        
+
         # WolframAlpha Pro integration
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -489,7 +484,7 @@ class TrainingDataGenerator:
             category="integration",
             complexity="complex"
         ))
-        
+
         # N8N workflow integration
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -503,7 +498,7 @@ class TrainingDataGenerator:
 
     def _generate_usage_training_data(self):
         """Generate training data about configuration and usage examples"""
-        
+
         # Configuration management
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -514,7 +509,7 @@ class TrainingDataGenerator:
             category="configuration",
             complexity="simple"
         ))
-        
+
         # Complete workflow example
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -528,15 +523,15 @@ class TrainingDataGenerator:
 
     def _generate_function_specific_training_data(self):
         """Generate training data for specific functions found in the codebase"""
-        
+
         # Get sample of important functions from different categories
         important_functions = {}
-        for func_name, func_element in self.analyzer.functions.items():
+        for _func_name, func_element in self.analyzer.functions.items():
             if func_element.category not in important_functions:
                 important_functions[func_element.category] = []
             if len(important_functions[func_element.category]) < 5:  # Max 5 per category
                 important_functions[func_element.category].append(func_element)
-        
+
         for category, functions in important_functions.items():
             for func in functions:
                 self.training_entries.append(TrainingDataEntry(
@@ -551,19 +546,19 @@ class TrainingDataGenerator:
 
     def _generate_class_specific_training_data(self):
         """Generate training data for specific classes found in the codebase"""
-        
+
         # Get sample of important classes from different categories
         important_classes = {}
-        for class_name, class_element in self.analyzer.classes.items():
+        for _class_name, class_element in self.analyzer.classes.items():
             if class_element.category not in important_classes:
                 important_classes[class_element.category] = []
             if len(important_classes[class_element.category]) < 3:  # Max 3 per category
                 important_classes[class_element.category].append(class_element)
-        
+
         for category, classes in important_classes.items():
             for cls in classes:
                 methods_str = ", ".join(cls.related_elements[:5]) if cls.related_elements else "No methods documented"
-                
+
                 self.training_entries.append(TrainingDataEntry(
                     messages=[
                         {"role": "user", "content": f"What is the {cls.name} class and how do I use it in PLC-GBT?"},
@@ -576,7 +571,7 @@ class TrainingDataGenerator:
 
     def _generate_module_training_data(self):
         """Generate training data about module structure and import patterns"""
-        
+
         # Module organization patterns
         self.training_entries.append(TrainingDataEntry(
             messages=[
@@ -587,7 +582,7 @@ class TrainingDataGenerator:
             category="module_structure",
             complexity="moderate"
         ))
-        
+
         # Add more CLI command patterns
         cli_commands = [
             ("schema list", "List all available control loop schemas", "plc-cl schema list"),
@@ -601,7 +596,7 @@ class TrainingDataGenerator:
             ("health report", "Generate health report", "plc-memory health --detailed"),
             ("backup create", "Create system backup", "plc-memory backup --session=backup_001")
         ]
-        
+
         for cmd_name, description, example in cli_commands:
             self.training_entries.append(TrainingDataEntry(
                 messages=[
@@ -612,7 +607,7 @@ class TrainingDataGenerator:
                 category="cli_interface",
                 complexity="simple"
             ))
-        
+
         # Add API endpoint patterns
         api_endpoints = [
             ("GET /api/v1/health", "Check API health", "Health check for the CLI-to-API bridge"),
@@ -624,7 +619,7 @@ class TrainingDataGenerator:
             ("GET /api/v1/capabilities", "Get API capabilities", "Discover available endpoints"),
             ("GET /api/v1/history", "Get command history", "Retrieve execution history")
         ]
-        
+
         for endpoint, description, details in api_endpoints:
             method, path = endpoint.split(" ", 1)
             self.training_entries.append(TrainingDataEntry(
@@ -633,10 +628,10 @@ class TrainingDataGenerator:
                     {"role": "assistant", "content": f"Use the {method} {path} endpoint to {description.lower()}:\n\n```python\nimport requests\n\nresponse = requests.{method.lower()}('http://127.0.0.1:8080{path}')\nresult = response.json()\n\nif result.get('success'):\n    print('Success:', result.get('message'))\n    data = result.get('data')\nelse:\n    print('Error:', result.get('message'))\n```\n\n**Purpose:** {details}\n**Returns:** JSON response with success status, message, and data payload."}
                 ],
                 metadata={"source": "api_endpoints", "endpoint": endpoint},
-                category="api_interface", 
+                category="api_interface",
                 complexity="simple"
             ))
-        
+
         # Add database integration patterns
         db_patterns = [
             ("Redis", "short-term memory and caching", "Real-time data, session storage, temporary results"),
@@ -644,7 +639,7 @@ class TrainingDataGenerator:
             ("PostgreSQL", "persistent data and history", "Long-term storage, historical data, structured records"),
             ("Qdrant", "vector similarity and search", "Embeddings, semantic search, similarity matching")
         ]
-        
+
         for db_name, purpose, use_cases in db_patterns:
             self.training_entries.append(TrainingDataEntry(
                 messages=[
@@ -658,9 +653,9 @@ class TrainingDataGenerator:
 
     def save_training_data(self, output_file: Path):
         """Save training data in OpenAI fine-tuning format"""
-        
+
         logger.info(f"Saving {len(self.training_entries)} training entries to {output_file}")
-        
+
         with open(output_file, 'w', encoding='utf-8') as f:
             for entry in self.training_entries:
                 # Convert to OpenAI format
@@ -668,7 +663,7 @@ class TrainingDataGenerator:
                     "messages": entry.messages
                 }
                 f.write(json.dumps(openai_format, ensure_ascii=False) + '\n')
-        
+
         # Also save metadata
         metadata_file = output_file.with_suffix('.metadata.json')
         with open(metadata_file, 'w', encoding='utf-8') as f:
@@ -679,65 +674,65 @@ class TrainingDataGenerator:
                 "complexities": {},
                 "source_files": set()
             }
-            
+
             for entry in self.training_entries:
                 metadata["categories"][entry.category] = metadata["categories"].get(entry.category, 0) + 1
                 metadata["complexities"][entry.complexity] = metadata["complexities"].get(entry.complexity, 0) + 1
                 if "file" in entry.metadata:
                     metadata["source_files"].add(entry.metadata["file"])
-            
+
             metadata["source_files"] = list(metadata["source_files"])
             json.dump(metadata, f, indent=2, ensure_ascii=False)
-        
+
         logger.info(f"Training data saved with metadata to {metadata_file}")
 
 def main():
     """Main execution function"""
-    
+
     logger.info("🚀 Starting Comprehensive Training Data Generation")
     logger.info("=" * 60)
-    
+
     # Initialize
     project_root = Path(__file__).parent.parent.parent
     analyzer = CodebaseAnalyzer(project_root)
-    
+
     # Analyze codebase
     logger.info("📊 Step 1: Analyzing codebase structure...")
     analysis_results = analyzer.analyze_codebase()
-    
-    logger.info(f"📈 Analysis Results:")
+
+    logger.info("📈 Analysis Results:")
     logger.info(f"   Files analyzed: {analysis_results['files_analyzed']}")
     logger.info(f"   Total elements: {analysis_results['total_elements']}")
     logger.info(f"   Categories: {dict(analysis_results['categories'])}")
     logger.info(f"   Complexities: {dict(analysis_results['complexities'])}")
-    
+
     # Generate training data
     logger.info("📝 Step 2: Generating comprehensive training data...")
     generator = TrainingDataGenerator(analyzer)
     training_entries = generator.generate_comprehensive_training_data()
-    
+
     # Calculate coverage
     total_existing = 123  # Current dataset size
     new_codebase_entries = len(training_entries)
     current_codebase_entries = 14  # Current codebase-specific entries
-    
+
     new_total = total_existing + new_codebase_entries
     new_codebase_percentage = ((current_codebase_entries + new_codebase_entries) / new_total) * 100
-    
-    logger.info(f"📊 Training Data Summary:")
+
+    logger.info("📊 Training Data Summary:")
     logger.info(f"   New codebase entries: {new_codebase_entries}")
     logger.info(f"   Total entries (with existing): {new_total}")
     logger.info(f"   New codebase coverage: {new_codebase_percentage:.1f}%")
     logger.info(f"   Target achieved: {'✅ YES' if new_codebase_percentage >= 45 else '❌ NO'}")
-    
+
     # Save training data
     logger.info("💾 Step 3: Saving training data...")
     output_file = project_root / "plc-gbt-stack" / "training_data" / "comprehensive_codebase_training_data.jsonl"
     generator.save_training_data(output_file)
-    
+
     logger.info("🎉 Comprehensive training data generation complete!")
     return new_codebase_percentage >= 45
 
 if __name__ == "__main__":
     success = main()
-    sys.exit(0 if success else 1) 
+    sys.exit(0 if success else 1)

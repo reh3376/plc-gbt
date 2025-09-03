@@ -14,15 +14,14 @@ and generates high-quality training data for OpenAI fine-tuning, with special fo
 Uses AI Task Orchestrator methodology for systematic data extraction and generation.
 """
 
+import asyncio
 import json
 import logging
-import os
 import sys
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-import asyncio
-from collections import defaultdict
+from typing import Any, Dict, List
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
@@ -36,32 +35,32 @@ logger = logging.getLogger(__name__)
 
 class MPCTrainingDataBuilder:
     """Builds comprehensive training data from PLC Memory system"""
-    
+
     def __init__(self):
         self.db_manager = DatabaseManager()
         self.memory_coordinator = MemoryCoordinator(self.db_manager)
         self.training_entries = []
         self.categories = defaultdict(int)
-        
+
     async def initialize(self):
         """Initialize database connections"""
         logger.info("Initializing PLC Memory connections...")
         await self.db_manager.initialize_all_connections()
         logger.info("✅ Database connections established")
-        
+
     async def extract_mpc_content(self) -> List[Dict[str, Any]]:
         """Extract MPC-overview.md content from Neo4j"""
         logger.info("Extracting MPC-overview.md content from Neo4j...")
-        
+
         query = """
         MATCH (doc:Documentation)
         WHERE doc.path CONTAINS 'MPC-overview'
         RETURN doc
         """
-        
+
         results = await self.db_manager.execute_query('neo4j', query)
         mpc_nodes = []
-        
+
         for record in results:
             node = record.get('doc')
             if node:
@@ -70,24 +69,24 @@ class MPCTrainingDataBuilder:
                     'title': node.get('title'),
                     'headings_count': node.get('headings_count')
                 })
-                
+
         logger.info(f"Found {len(mpc_nodes)} MPC documentation nodes")
         return mpc_nodes
-        
+
     async def extract_cli_api_mappings(self) -> List[Dict[str, Any]]:
         """Extract CLI to API mappings from databases"""
         logger.info("Extracting CLI to API mappings...")
-        
+
         # Query Neo4j for CLI API bridge file
         query = """
         MATCH (p:PythonFile)
         WHERE p.path CONTAINS 'cli_api_bridge'
         RETURN p
         """
-        
+
         results = await self.db_manager.execute_query('neo4j', query)
         cli_mappings = []
-        
+
         for record in results:
             node = record.get('p')
             if node:
@@ -95,7 +94,7 @@ class MPCTrainingDataBuilder:
                     'file': node.get('path'),
                     'type': 'cli_api_bridge'
                 })
-                
+
         # Also query PostgreSQL for CLI files
         pg_query = """
         SELECT file_path, classes, functions, imports
@@ -103,9 +102,9 @@ class MPCTrainingDataBuilder:
         WHERE file_path LIKE '%/cli/%' OR file_path LIKE '%cli_api_bridge%'
         LIMIT 50
         """
-        
+
         pg_results = await self.db_manager.execute_query('postgresql', pg_query)
-        
+
         for row in pg_results:
             cli_mappings.append({
                 'file': row['file_path'],
@@ -113,29 +112,29 @@ class MPCTrainingDataBuilder:
                 'functions': row['functions'],
                 'imports': row['imports']
             })
-            
+
         logger.info(f"Found {len(cli_mappings)} CLI-related files")
         return cli_mappings
-        
+
     async def extract_control_implementations(self) -> List[Dict[str, Any]]:
         """Extract control theory implementations"""
         logger.info("Extracting control theory implementations...")
-        
+
         # Query for control-related Python files
         query = """
         SELECT file_path, classes, functions, imports
         FROM python_files
-        WHERE file_path LIKE '%control%' 
+        WHERE file_path LIKE '%control%'
            OR file_path LIKE '%pid%'
            OR file_path LIKE '%mpc%'
            OR file_path LIKE '%cascade%'
            OR file_path LIKE '%feedforward%'
         LIMIT 100
         """
-        
+
         results = await self.db_manager.execute_query('postgresql', query)
         control_files = []
-        
+
         for row in results:
             control_files.append({
                 'file': row['file_path'],
@@ -143,14 +142,14 @@ class MPCTrainingDataBuilder:
                 'functions': row['functions'],
                 'imports': row['imports']
             })
-            
+
         logger.info(f"Found {len(control_files)} control implementation files")
         return control_files
-        
+
     def generate_mpc_qa_pairs(self, mpc_content: List[Dict]) -> List[Dict]:
         """Generate Q&A pairs from MPC content"""
         qa_pairs = []
-        
+
         # MPC fundamentals
         qa_pairs.extend([
             {
@@ -175,14 +174,14 @@ class MPCTrainingDataBuilder:
                 ]
             }
         ])
-        
+
         self.categories['mpc_fundamentals'] = len(qa_pairs)
         return qa_pairs
-        
+
     def generate_cli_qa_pairs(self, cli_mappings: List[Dict]) -> List[Dict]:
         """Generate Q&A pairs for CLI functionality"""
         qa_pairs = []
-        
+
         # CLI command examples
         qa_pairs.extend([
             {
@@ -200,14 +199,14 @@ class MPCTrainingDataBuilder:
                 ]
             }
         ])
-        
+
         self.categories['cli_operations'] = len(qa_pairs)
         return qa_pairs
-        
+
     def generate_implementation_qa_pairs(self, control_files: List[Dict]) -> List[Dict]:
         """Generate Q&A pairs for control implementations"""
         qa_pairs = []
-        
+
         qa_pairs.extend([
             {
                 "messages": [
@@ -224,33 +223,33 @@ class MPCTrainingDataBuilder:
                 ]
             }
         ])
-        
+
         self.categories['implementations'] = len(qa_pairs)
         return qa_pairs
-        
+
     async def build_training_dataset(self) -> Dict[str, Any]:
         """Build complete training dataset from PLC Memory"""
         logger.info("Starting MPC training data generation from PLC Memory...")
-        
+
         # Extract content from databases
         mpc_content = await self.extract_mpc_content()
         cli_mappings = await self.extract_cli_api_mappings()
         control_implementations = await self.extract_control_implementations()
-        
+
         # Generate Q&A pairs for each category
         self.training_entries.extend(self.generate_mpc_qa_pairs(mpc_content))
         self.training_entries.extend(self.generate_cli_qa_pairs(cli_mappings))
         self.training_entries.extend(self.generate_implementation_qa_pairs(control_implementations))
-        
+
         # Add system architecture Q&As
         self.training_entries.extend(self.generate_architecture_qa_pairs())
-        
+
         # Add integration pattern Q&As
         self.training_entries.extend(self.generate_integration_qa_pairs())
-        
+
         logger.info(f"Generated {len(self.training_entries)} total training entries")
         logger.info(f"Categories: {dict(self.categories)}")
-        
+
         # Prepare dataset metadata
         dataset = {
             "metadata": {
@@ -268,9 +267,9 @@ class MPCTrainingDataBuilder:
             },
             "training_data": self.training_entries
         }
-        
+
         return dataset
-        
+
     def generate_architecture_qa_pairs(self) -> List[Dict]:
         """Generate Q&A pairs about system architecture"""
         qa_pairs = [
@@ -282,10 +281,10 @@ class MPCTrainingDataBuilder:
                 ]
             }
         ]
-        
+
         self.categories['architecture'] = len(qa_pairs)
         return qa_pairs
-        
+
     def generate_integration_qa_pairs(self) -> List[Dict]:
         """Generate Q&A pairs about integration patterns"""
         qa_pairs = [
@@ -297,37 +296,37 @@ class MPCTrainingDataBuilder:
                 ]
             }
         ]
-        
+
         self.categories['integration'] = len(qa_pairs)
         return qa_pairs
-        
+
     async def save_dataset(self, dataset: Dict[str, Any], output_path: Path):
         """Save training dataset to JSONL format"""
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Save training data in OpenAI format
         training_file = output_path.with_suffix('.jsonl')
         with open(training_file, 'w', encoding='utf-8') as f:
             for entry in dataset['training_data']:
                 f.write(json.dumps(entry, ensure_ascii=False) + '\n')
-                
+
         logger.info(f"✅ Training data saved to {training_file}")
-        
+
         # Save metadata
         metadata_file = output_path.with_suffix('.metadata.json')
         with open(metadata_file, 'w', encoding='utf-8') as f:
             json.dump(dataset['metadata'], f, indent=2, ensure_ascii=False)
-            
+
         logger.info(f"✅ Metadata saved to {metadata_file}")
-        
+
         # Generate summary statistics
         total_entries = len(dataset['training_data'])
         total_tokens = sum(
             len(json.dumps(entry).split()) * 1.3  # Rough token estimate
             for entry in dataset['training_data']
         )
-        
+
         logger.info(f"""
 Training Data Summary:
 - Total Q&A pairs: {total_entries}
@@ -335,29 +334,29 @@ Training Data Summary:
 - Categories: {json.dumps(dataset['metadata']['categories'], indent=2)}
 - Output file: {training_file}
         """)
-        
+
     async def cleanup(self):
         """Clean up database connections"""
         await self.db_manager.close_all_connections()
-        
+
 
 async def main():
     """Main execution function"""
     builder = MPCTrainingDataBuilder()
-    
+
     try:
         # Initialize connections
         await builder.initialize()
-        
+
         # Build training dataset
         dataset = await builder.build_training_dataset()
-        
+
         # Save to file
         output_path = Path("plc-gbt-stack/training_data/mpc_plc_memory_training_data.jsonl")
         await builder.save_dataset(dataset, output_path)
-        
+
         logger.info("✅ MPC training data generation complete!")
-        
+
     except Exception as e:
         logger.error(f"Error generating training data: {e}", exc_info=True)
         raise

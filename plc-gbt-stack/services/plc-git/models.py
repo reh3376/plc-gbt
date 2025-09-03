@@ -40,7 +40,7 @@ class GitRepository(BaseModel):
     current_branch: str
     is_dirty: bool = False
     last_commit_hash: Optional[str] = None
-    
+
     class Config:
         use_enum_values = True
 

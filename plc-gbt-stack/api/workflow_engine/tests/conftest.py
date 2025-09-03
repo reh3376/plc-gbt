@@ -5,25 +5,20 @@ Phase 1.5: Automated Testing Suite Implementation
 Pytest configuration and fixtures for comprehensive testing with >95% coverage.
 Includes industrial compliance, performance benchmarking, and MCP integration.
 
-Author: AI Task Orchestrator  
+Author: AI Task Orchestrator
 Date: December 22, 2024
 Phase: 1.5 - Automated Testing Suite Implementation
 """
 
 import asyncio
-import json
 import logging
-import os
 import tempfile
 from pathlib import Path
-from typing import AsyncGenerator, Dict, Any, Optional
 from unittest.mock import AsyncMock, Mock
 
-import pytest
-import pytest_asyncio
-from fastapi.testclient import TestClient
-from httpx import AsyncClient
 import asyncpg
+import pytest
+from httpx import AsyncClient
 
 # Set up test logging
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +31,7 @@ TEST_N8N_FRAMEWORK_PATH = Path(__file__).parent.parent.parent.parent / "n8n-fram
 
 # Industrial testing requirements
 PERFORMANCE_THRESHOLD_MS = 100  # <100ms execution overhead
-INDUSTRIAL_LATENCY_MS = 50      # <50ms for critical workflows  
+INDUSTRIAL_LATENCY_MS = 50      # <50ms for critical workflows
 MIN_COVERAGE_PERCENT = 95       # >95% test coverage required
 
 
@@ -53,24 +48,24 @@ def event_loop():
 async def test_database():
     """Set up test database for integration tests."""
     logger.info("🔧 Setting up test database...")
-    
+
     # Create test database connection
     try:
         conn = await asyncpg.connect(
             host="localhost",
             port=5432,
-            user="test_user", 
+            user="test_user",
             password="test_pass",
             database="postgres"  # Connect to postgres DB to create test DB
         )
-        
+
         # Create test database if not exists
         await conn.execute("CREATE DATABASE test_plc_workflows")
         await conn.close()
-        
+
         # Connect to test database
         test_conn = await asyncpg.connect(TEST_DATABASE_URL)
-        
+
         # Apply test schema
         schema_path = Path(__file__).parent.parent.parent.parent / "schemas" / "n8n_workflow_integration_schema.sql"
         if schema_path.exists():
@@ -78,25 +73,25 @@ async def test_database():
                 schema_sql = f.read()
             await test_conn.execute(schema_sql)
             logger.info("✅ Test database schema applied")
-        
+
         yield test_conn
-        
+
         # Cleanup
         await test_conn.close()
-        
+
         # Drop test database
         cleanup_conn = await asyncpg.connect(
             host="localhost",
-            port=5432, 
+            port=5432,
             user="test_user",
-            password="test_pass", 
+            password="test_pass",
             database="postgres"
         )
         await cleanup_conn.execute("DROP DATABASE IF EXISTS test_plc_workflows")
         await cleanup_conn.close()
-        
+
         logger.info("🧹 Test database cleaned up")
-        
+
     except Exception as e:
         logger.warning(f"⚠️ Database test setup failed: {e} - using mock")
         # Return mock for CI/CD environments without database
@@ -106,9 +101,9 @@ async def test_database():
 @pytest.fixture
 async def workflow_engine():
     """Create PLCGBTWorkflowEngine instance for testing."""
-    from ..n8n_integration import PLCGBTWorkflowEngine
     from ..config import WorkflowEngineConfig
-    
+    from ..n8n_integration import PLCGBTWorkflowEngine
+
     # Create test configuration
     test_config = WorkflowEngineConfig(
         database_url=TEST_DATABASE_URL,
@@ -116,10 +111,10 @@ async def workflow_engine():
         n8n_framework_path=str(TEST_N8N_FRAMEWORK_PATH),
         performance_threshold_ms=PERFORMANCE_THRESHOLD_MS
     )
-    
+
     # Initialize engine
     engine = PLCGBTWorkflowEngine(test_config)
-    
+
     try:
         await engine.initialize()
         yield engine
@@ -134,13 +129,14 @@ async def workflow_engine():
 @pytest.fixture
 async def test_client():
     """Create FastAPI test client."""
-    from ..fastapi_router import create_workflow_router
     from fastapi import FastAPI
-    
+
+    from ..fastapi_router import create_workflow_router
+
     # Create test app
     app = FastAPI(title="Test N8N Workflow API")
     app.include_router(create_workflow_router(), prefix="/api/v1/workflows")
-    
+
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
 
@@ -149,7 +145,7 @@ async def test_client():
 def sample_workflow_definition():
     """Sample workflow definition for testing."""
     return {
-        "id": "test-workflow-001", 
+        "id": "test-workflow-001",
         "name": "Test Industrial Workflow",
         "description": "Sample workflow for automated testing",
         "workflow_data": {
@@ -165,7 +161,7 @@ def sample_workflow_definition():
                 },
                 {
                     "id": "http-request",
-                    "type": "n8n-nodes-base.httpRequest", 
+                    "type": "n8n-nodes-base.httpRequest",
                     "typeVersion": 1,
                     "position": [300, 100],
                     "parameters": {
@@ -230,7 +226,7 @@ def industrial_performance_metrics():
     }
 
 
-@pytest.fixture 
+@pytest.fixture
 async def temp_directory():
     """Create temporary directory for test files."""
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -288,27 +284,28 @@ async def playwright_mcp():
 def performance_monitor():
     """Performance monitoring utilities for industrial testing."""
     import time
+
     import psutil
-    
+
     class PerformanceMonitor:
         def __init__(self):
             self.start_time = None
             self.start_memory = None
-            
+
         def start_monitoring(self):
             self.start_time = time.time()
             self.start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
-            
+
         def stop_monitoring(self):
             end_time = time.time()
             end_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
-            
+
             return {
                 "execution_time_ms": (end_time - self.start_time) * 1000,
                 "memory_usage_mb": end_memory - self.start_memory,
                 "timestamp": end_time
             }
-    
+
     return PerformanceMonitor()
 
 
@@ -328,7 +325,7 @@ def workflow_test_data_generator():
             "industrial_tags": [workflow_type, complexity, "test"],
             "safety_level": "SIL0"
         }
-        
+
         if complexity == "simple":
             base_workflow["workflow_data"] = {
                 "nodes": [{"id": "start", "type": "start"}],
@@ -353,9 +350,9 @@ def workflow_test_data_generator():
                 "connections": {f"node-{i}": {"main": [[f"node-{i+1}"]]} for i in range(9)},
                 "active": True
             }
-            
+
         return base_workflow
-    
+
     return generate_workflow
 
 
@@ -365,9 +362,9 @@ def workflow_test_data_generator():
 async def cleanup_test_resources():
     """Automatically clean up test resources after each test."""
     yield  # Run the test
-    
+
     # Cleanup logic here
     logger.debug("🧹 Cleaning up test resources...")
-    
+
     # Clean up any temporary files, connections, etc.
     # This runs after each test automatically

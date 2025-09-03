@@ -19,10 +19,10 @@ Date: January 18, 2025
 Methodology: AI Task Orchestrator Guide
 """
 
-from typing import Dict, List, Any, Optional, Union, Tuple
+import logging
 from datetime import datetime
 from enum import Enum
-import logging
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -64,42 +64,39 @@ class ConfidenceLevel(Enum):
     ABSOLUTE = "absolute"      # > 0.95
 
 # Import main components
-from .statistical_tests import (
-    StatisticalTestSuite,
-    StatisticalTestResult,
-    TestType,
-    run_statistical_validation
-)
-
 from .confidence_scoring import (
-    ConfidenceScorer,
-    ConfidenceScore,
     ConfidenceDimension,
-    calculate_overall_confidence
+    ConfidenceScore,
+    ConfidenceScorer,
+    calculate_overall_confidence,
 )
-
-from .wolfram_integration import (
-    WolframValidator,
-    WolframValidationResult,
-    MathematicalValidation,
-    verify_mathematical_accuracy
+from .statistical_tests import (
+    StatisticalTestResult,
+    StatisticalTestSuite,
+    TestType,
+    run_statistical_validation,
 )
-
 from .validation_manager import (
     ValidationManager,
-    ValidationResult,
     ValidationReport,
-    get_validation_manager
+    ValidationResult,
+    get_validation_manager,
+)
+from .wolfram_integration import (
+    MathematicalValidation,
+    WolframValidationResult,
+    WolframValidator,
+    verify_mathematical_accuracy,
 )
 
 # Export main components
 __all__ = [
     # Core validation classes
     'ValidationManager',
-    'StatisticalTestSuite', 
+    'StatisticalTestSuite',
     'ConfidenceScorer',
     'WolframValidator',
-    
+
     # Data classes
     'ValidationResult',
     'ValidationReport',
@@ -107,20 +104,20 @@ __all__ = [
     'ConfidenceScore',
     'WolframValidationResult',
     'MathematicalValidation',
-    
+
     # Enums
     'ValidationLevel',
     'ValidationStatus',
     'ConfidenceLevel',
     'TestType',
     'ConfidenceDimension',
-    
+
     # Utility functions
     'run_statistical_validation',
     'calculate_overall_confidence',
     'verify_mathematical_accuracy',
     'get_validation_manager',
-    
+
     # Configuration
     'VALIDATION_CONFIG'
-] 
+]

@@ -24,22 +24,15 @@ Phase: 21.5.1 - PLC Memory Integration
 Dependencies: plc-memory system, Phase 21.1-21.4 CLI framework
 """
 
-import os
-import sys
-import json
 import asyncio
 import logging
-from datetime import datetime, timedelta
+import sys
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
-from dataclasses import dataclass, asdict
-from enum import Enum
+from typing import Any, Dict, List, Optional
 
-import click
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn
 
 # Project imports
 project_root = Path(__file__).parent.parent.parent
@@ -48,9 +41,9 @@ sys.path.insert(0, str(project_root / "scripts" / "ai"))
 
 # Import plc-memory system components
 try:
-    from memory_coordinator import MemoryCoordinator, MemoryRequest, QueryStrategy
-    from database_manager import DatabaseManager, DatabaseType, MemoryTier
     from codebase_analyzer import AnalysisDepth
+    from database_manager import DatabaseManager, DatabaseType, MemoryTier
+    from memory_coordinator import MemoryCoordinator, MemoryRequest, QueryStrategy
     MEMORY_SYSTEM_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"PLC Memory system not available: {e}")
@@ -72,12 +65,12 @@ class MemoryIntegrationStatus:
     coordinator_initialized: bool = False
     last_check: Optional[datetime] = None
     performance_metrics: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.databases_connected is None:
             self.databases_connected = {
                 "redis": False,
-                "neo4j": False, 
+                "neo4j": False,
                 "postgresql": False,
                 "qdrant": False
             }
@@ -85,80 +78,80 @@ class MemoryIntegrationStatus:
 class MemoryIntegrationManager:
     """
     Manages integration between CLI and plc-memory system
-    
+
     Provides:
     - Memory system initialization and health checking
     - Schema and instance memory operations
     - Semantic search capabilities
     - Historical tracking and recommendations
     """
-    
+
     def __init__(self):
         self.status = MemoryIntegrationStatus()
         self.db_manager: Optional[DatabaseManager] = None
         self.coordinator: Optional[MemoryCoordinator] = None
         self._initialization_attempted = False
-        
+
     async def initialize(self) -> bool:
         """Initialize memory system connections"""
         if not MEMORY_SYSTEM_AVAILABLE:
             logger.warning("PLC Memory system not available - operating without memory integration")
             return False
-            
+
         if self._initialization_attempted:
             return self.status.available
-            
+
         self._initialization_attempted = True
-        
+
         try:
             console.print("[dim]🧠 Initializing PLC Memory system...[/dim]")
-            
+
             # Initialize database manager
             self.db_manager = DatabaseManager()
             await self.db_manager.initialize_all_connections()
-            
+
             # Initialize memory coordinator
             self.coordinator = MemoryCoordinator(self.db_manager)
-            
+
             # Check database connections
             health_check = await self.db_manager.health_check()
             self.status.databases_connected = {
                 "redis": health_check.get("redis", {}).get("status") == "healthy",
                 "neo4j": health_check.get("neo4j", {}).get("status") == "healthy",
-                "postgresql": health_check.get("postgresql", {}).get("status") == "healthy", 
+                "postgresql": health_check.get("postgresql", {}).get("status") == "healthy",
                 "qdrant": health_check.get("qdrant", {}).get("status") == "healthy"
             }
-            
+
             # Update status
             self.status.available = True
             self.status.coordinator_initialized = True
             self.status.last_check = datetime.now()
-            
+
             connected_count = sum(self.status.databases_connected.values())
             console.print(f"[green]✅ Memory system initialized with {connected_count}/4 databases[/green]")
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to initialize memory system: {e}")
             console.print(f"[yellow]⚠️  Memory system unavailable: {e}[/yellow]")
             self.status.available = False
             return False
-    
+
     async def cleanup(self):
         """Cleanup memory system connections"""
         if self.db_manager:
             await self.db_manager.cleanup()
-            
+
     def is_available(self) -> bool:
         """Check if memory system is available"""
         return self.status.available and MEMORY_SYSTEM_AVAILABLE
-    
+
     async def store_schema_activity(self, schema_id: str, operation: str, metadata: Dict[str, Any]) -> bool:
         """Store schema activity in memory system"""
         if not self.is_available():
             return False
-            
+
         try:
             request = MemoryRequest(
                 operation_type='store_activity',
@@ -171,19 +164,19 @@ class MemoryIntegrationManager:
                 },
                 routing_strategy=QueryStrategy.BALANCED
             )
-            
+
             response = await self.coordinator.query_memory(request)
             return response.success
-            
+
         except Exception as e:
             logger.error(f"Failed to store schema activity: {e}")
             return False
-    
+
     async def store_instance_activity(self, instance_id: str, operation: str, metadata: Dict[str, Any]) -> bool:
         """Store instance activity in memory system"""
         if not self.is_available():
             return False
-            
+
         try:
             request = MemoryRequest(
                 operation_type='store_activity',
@@ -196,19 +189,19 @@ class MemoryIntegrationManager:
                 },
                 routing_strategy=QueryStrategy.BALANCED
             )
-            
+
             response = await self.coordinator.query_memory(request)
             return response.success
-            
+
         except Exception as e:
             logger.error(f"Failed to store instance activity: {e}")
             return False
-    
+
     async def get_schema_recommendations(self, context: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Get schema recommendations based on context"""
         if not self.is_available():
             return []
-            
+
         try:
             request = MemoryRequest(
                 operation_type='search_recommendations',
@@ -217,21 +210,21 @@ class MemoryIntegrationManager:
                 routing_strategy=QueryStrategy.ACCURACY_OPTIMIZED,
                 metadata={'limit': 5}
             )
-            
+
             response = await self.coordinator.query_memory(request)
             if response.success and response.data:
                 return response.data.get('recommendations', [])
             return []
-            
+
         except Exception as e:
             logger.error(f"Failed to get schema recommendations: {e}")
             return []
-    
+
     async def get_instance_recommendations(self, schema_id: str, context: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Get instance recommendations based on schema and context"""
         if not self.is_available():
             return []
-            
+
         try:
             request = MemoryRequest(
                 operation_type='search_recommendations',
@@ -243,21 +236,21 @@ class MemoryIntegrationManager:
                 routing_strategy=QueryStrategy.ACCURACY_OPTIMIZED,
                 metadata={'limit': 3}
             )
-            
+
             response = await self.coordinator.query_memory(request)
             if response.success and response.data:
                 return response.data.get('recommendations', [])
             return []
-            
+
         except Exception as e:
             logger.error(f"Failed to get instance recommendations: {e}")
             return []
-    
+
     async def semantic_search(self, query: str, data_type: str = 'code_function', limit: int = 10) -> List[Dict[str, Any]]:
         """Perform semantic search across memory system"""
         if not self.is_available():
             return []
-            
+
         try:
             request = MemoryRequest(
                 operation_type='search',
@@ -266,53 +259,53 @@ class MemoryIntegrationManager:
                 routing_strategy=QueryStrategy.BALANCED,
                 metadata={'limit': limit}
             )
-            
+
             response = await self.coordinator.query_memory(request)
             if response.success and response.data:
                 return response.data.get('results', [])
             return []
-            
+
         except Exception as e:
             logger.error(f"Failed to perform semantic search: {e}")
             return []
-    
+
     async def get_usage_analytics(self) -> Dict[str, Any]:
         """Get usage analytics from memory system"""
         if not self.is_available():
             return {}
-            
+
         try:
             # Get performance summary from coordinator
             performance = self.coordinator.get_performance_summary()
-            
-            # Get database health status  
+
+            # Get database health status
             health = await self.db_manager.health_check()
-            
+
             return {
                 'performance': performance,
                 'health': health,
                 'status': asdict(self.status)
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to get usage analytics: {e}")
             return {}
-    
+
     async def optimize_memory_tiers(self) -> Dict[str, Any]:
         """Optimize memory tier distribution"""
         if not self.is_available():
             return {'error': 'Memory system not available'}
-            
+
         try:
             result = await self.coordinator.optimize_memory_tiers()
             return result
-            
+
         except Exception as e:
             logger.error(f"Failed to optimize memory tiers: {e}")
             return {'error': str(e)}
 
 # =============================================================================
-# CLI INTEGRATION FUNCTIONS  
+# CLI INTEGRATION FUNCTIONS
 # =============================================================================
 
 # Global memory integration manager instance
@@ -321,17 +314,17 @@ _memory_manager: Optional[MemoryIntegrationManager] = None
 async def get_memory_manager() -> MemoryIntegrationManager:
     """Get or create memory integration manager"""
     global _memory_manager
-    
+
     if _memory_manager is None:
         _memory_manager = MemoryIntegrationManager()
         await _memory_manager.initialize()
-        
+
     return _memory_manager
 
 async def cleanup_memory_manager():
     """Cleanup memory manager"""
     global _memory_manager
-    
+
     if _memory_manager:
         await _memory_manager.cleanup()
         _memory_manager = None
@@ -362,13 +355,13 @@ def with_memory_integration(func):
         async def async_wrapper():
             memory_manager = await get_memory_manager()
             return await func(memory_manager, *args, **kwargs)
-        
+
         if asyncio.iscoroutinefunction(func):
             return asyncio.run(async_wrapper())
         else:
             # For non-async functions, just pass the manager
             return func(_memory_manager, *args, **kwargs)
-    
+
     return wrapper
 
 def memory_enhanced_command(func):
@@ -379,9 +372,9 @@ def memory_enhanced_command(func):
             ctx = kwargs['ctx']
             if hasattr(ctx.obj, 'memory_status'):
                 ctx.obj.memory_status = memory_integration_status()
-        
+
         return func(*args, **kwargs)
-    
+
     return wrapper
 
 # =============================================================================
@@ -392,24 +385,24 @@ if __name__ == "__main__":
     async def main():
         """Demonstrate memory integration functionality"""
         console.print("[bold blue]🧠 PLC Memory Integration Test[/bold blue]")
-        
+
         manager = MemoryIntegrationManager()
         success = await manager.initialize()
-        
+
         if success:
             console.print("[green]✅ Memory integration successful[/green]")
-            
+
             # Test semantic search
             results = await manager.semantic_search("PID controller", limit=3)
             console.print(f"Found {len(results)} semantic search results")
-            
+
             # Test analytics
             analytics = await manager.get_usage_analytics()
             console.print(f"Analytics available: {bool(analytics)}")
-            
+
         else:
             console.print("[yellow]⚠️  Memory integration unavailable[/yellow]")
-        
+
         await manager.cleanup()
-    
-    asyncio.run(main()) 
+
+    asyncio.run(main())

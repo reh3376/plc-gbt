@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Initialize Qdrant collections for plc-memory system"""
 
+
 import requests
-import json
-import sys
 
 QDRANT_URL = "http://localhost:6333"
 
@@ -22,7 +21,7 @@ def create_collection(name, vector_size):
             "distance": "Cosine"
         }
     }
-    
+
     try:
         response = requests.put(url, json=data)
         if response.status_code == 200:

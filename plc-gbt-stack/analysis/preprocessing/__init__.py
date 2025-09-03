@@ -19,87 +19,83 @@ Components:
 - quality: Data quality assessment and improvement tools
 - streams: Real-time data streaming and synchronization
 
-Author: AI Task Orchestrator  
+Author: AI Task Orchestrator
 Created: January 18, 2025
 Phase: 22.1.2 - Enhanced Data Preprocessing
 Dependencies: Phase 22.1.1 (Core Framework), existing DataLoader modules
 """
 
 from .collectors import (
-    UnifiedDataCollector,
-    PLCDataCollector, 
-    DatabaseCollector,
-    StreamCollector,
+    CollectionResult,
     CollectionStrategy,
+    DatabaseCollector,
     DataSource,
-    CollectionResult
+    PLCDataCollector,
+    StreamCollector,
+    UnifiedDataCollector,
 )
-
-from .validators import (
-    IndustrialDataValidator,
-    ControlLoopValidator,
-    RealTimeValidator,
-    ValidationSeverity,
-    ValidationResult as PreprocessingValidationResult,
-    ValidationRule
-)
-
 from .processors import (
     ControlDataProcessor,
+    ProcessingStrategy,
     SignalProcessor,
     TimeSeriesProcessor,
-    ProcessingStrategy,
-    ProcessingOptions as AdvancedProcessingOptions
 )
-
+from .processors import ProcessingOptions as AdvancedProcessingOptions
 from .quality import (
     DataQualityAssessor,
     QualityImprover,
     QualityMetrics,
+    QualityReport,
     QualityThresholds,
-    QualityReport
 )
-
 from .streams import (
-    RealTimeProcessor,
-    StreamSynchronizer,
     DataBuffer,
+    RealTimeProcessor,
     StreamingOptions,
-    SynchronizationStrategy
+    StreamSynchronizer,
+    SynchronizationStrategy,
 )
+from .validators import (
+    ControlLoopValidator,
+    IndustrialDataValidator,
+    RealTimeValidator,
+    ValidationRule,
+    ValidationSeverity,
+)
+from .validators import ValidationResult as PreprocessingValidationResult
 
 __all__ = [
     # Collectors
     'UnifiedDataCollector',
-    'PLCDataCollector', 
+    'PLCDataCollector',
     'DatabaseCollector',
     'StreamCollector',
     'CollectionStrategy',
     'DataSource',
     'CollectionResult',
-    
+
     # Validators
     'IndustrialDataValidator',
-    'ControlLoopValidator', 
+    'ControlLoopValidator',
     'RealTimeValidator',
     'ValidationSeverity',
     'PreprocessingValidationResult',
     'ValidationRule',
-    
+
     # Processors
     'ControlDataProcessor',
     'SignalProcessor',
     'TimeSeriesProcessor',
     'ProcessingStrategy',
     'AdvancedProcessingOptions',
-    
+
     # Quality
     'DataQualityAssessor',
     'QualityImprover',
     'QualityMetrics',
     'QualityThresholds',
     'QualityReport',
-    
+
     # Streams
     'RealTimeProcessor',
     'StreamSynchronizer',
@@ -109,4 +105,4 @@ __all__ = [
 ]
 
 __version__ = "1.0.0"
-__phase__ = "22.1.2" 
+__phase__ = "22.1.2"

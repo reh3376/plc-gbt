@@ -8,21 +8,20 @@ Complexity: Moderate (targeted optimizations, specific improvements)
 Methodology: AI Task Orchestrator systematic optimization approach
 """
 
-import os
-import sys
+import asyncio
 import json
 import logging
-import asyncio
-import numpy as np
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
-from dataclasses import dataclass, asdict
-from enum import Enum
 import math
+import sys
 import time
-import threading
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict
+
+import numpy as np
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent.parent
@@ -30,12 +29,10 @@ sys.path.insert(0, str(project_root / "scripts/ai"))
 
 # Import Phase 8 Day 4 components
 from scripts.ai.phases.phase8.phase8_day4_tuning_engine import (
-    TuningProcedureOrchestrator,
-    TuningMethod,
-    ControllerType,
     FOPDTModel,
+    StepTestData,
+    TuningMethod,
     TuningParameters,
-    StepTestData
 )
 
 # Configure logging
@@ -69,7 +66,7 @@ class ConnectionMetrics:
     data_integrity: float
     error_rate: float
     reliability_score: float
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
@@ -82,7 +79,7 @@ class PerformanceMetrics:
     throughput: float
     latency: float
     efficiency_score: float
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
@@ -91,7 +88,7 @@ class Phase8Day4Optimizer:
     Performance optimizer for Phase 8 Day 4 components
     Following AI Task Orchestrator methodology
     """
-    
+
     def __init__(self):
         self.task_analysis = {
             "task_id": "phase8_day4_optimization",
@@ -144,11 +141,11 @@ class Phase8Day4Optimizer:
                 }
             }
         }
-        
+
         logger.info("🚀 Phase 8 Day 4: Performance Optimization")
         logger.info(f"📊 Task Complexity: {self.task_analysis['complexity']}")
         logger.info(f"⏱️ Estimated Effort: {self.task_analysis['estimated_effort']['time']}")
-    
+
     async def execute_optimization(self) -> Dict[str, Any]:
         """Execute comprehensive optimization"""
         optimization_result = {
@@ -160,14 +157,14 @@ class Phase8Day4Optimizer:
             "before_after_comparison": {},
             "next_steps": []
         }
-        
+
         print("🚀 Phase 8 Day 4: Performance Optimization")
         print("=" * 80)
         print("Following AI Task Orchestrator Methodology")
-        print(f"Target: Communication Layer 90.0% -> 95%+")
-        print(f"Target: Performance & Reliability 82.4% -> 90%+")
+        print("Target: Communication Layer 90.0% -> 95%+")
+        print("Target: Performance & Reliability 82.4% -> 90%+")
         print()
-        
+
         # 1. Optimize Communication Layer
         print("📡 Optimizing Communication Layer...")
         comm_optimization = await self._optimize_communication_layer()
@@ -176,7 +173,7 @@ class Phase8Day4Optimizer:
             "status": "completed",
             "details": comm_optimization
         })
-        
+
         # 2. Optimize Performance & Reliability
         print("⚡ Optimizing Performance & Reliability...")
         perf_optimization = await self._optimize_performance_reliability()
@@ -185,7 +182,7 @@ class Phase8Day4Optimizer:
             "status": "completed",
             "details": perf_optimization
         })
-        
+
         # 3. Implement Advanced Features
         print("🔧 Implementing Advanced Features...")
         advanced_features = await self._implement_advanced_features()
@@ -194,41 +191,41 @@ class Phase8Day4Optimizer:
             "status": "completed",
             "details": advanced_features
         })
-        
+
         # 4. Run Validation Tests
         print("🧪 Running Optimization Validation...")
         validation_result = await self._run_optimization_validation()
         optimization_result["validation_results"] = validation_result
-        
+
         # 5. Performance Comparison
         comparison_result = await self._run_before_after_comparison()
         optimization_result["before_after_comparison"] = comparison_result
-        
+
         # Calculate overall success
         comm_score = validation_result.get("communication_score", 0)
         perf_score = validation_result.get("performance_score", 0)
-        
+
         if comm_score >= 95 and perf_score >= 90:
             optimization_result["optimization_status"] = "excellent"
         elif comm_score >= 93 and perf_score >= 88:
             optimization_result["optimization_status"] = "good"
         else:
             optimization_result["optimization_status"] = "needs_improvement"
-        
+
         optimization_result["next_steps"] = [
             "Optimizations successfully implemented",
             "Enhanced scores ready for Phase 8 Day 5",
             "Production-ready communication and performance systems"
         ]
-        
+
         return optimization_result
-    
+
     async def _optimize_communication_layer(self) -> Dict[str, Any]:
         """Optimize communication layer for better reliability and features"""
-        
+
         class EnhancedPLCCommunicationManager:
             """Enhanced PLC communication manager with improved reliability"""
-            
+
             def __init__(self):
                 self.connection_status = ConnectionStatus.DISCONNECTED
                 self.data_collection_active = False
@@ -239,26 +236,26 @@ class Phase8Day4Optimizer:
                 self.connection_metrics = None
                 self.data_quality_monitor = True
                 self.security_enabled = True
-                
+
             async def enhanced_connect_to_plc(self, opc_ua_endpoint: str) -> Dict[str, Any]:
                 """Enhanced connection with retry logic and metrics"""
                 connection_start = time.time()
-                
+
                 # Simulate connection process with retry logic
                 for attempt in range(self.max_retries):
                     try:
                         self.connection_status = ConnectionStatus.CONNECTING
                         await asyncio.sleep(0.1)  # Connection time
-                        
+
                         # Simulate authentication
                         self.connection_status = ConnectionStatus.AUTHENTICATING
                         auth_start = time.time()
                         await asyncio.sleep(0.05)  # Authentication time
                         auth_time = time.time() - auth_start
-                        
+
                         self.connection_status = ConnectionStatus.AUTHENTICATED
                         connection_time = time.time() - connection_start
-                        
+
                         # Calculate connection metrics
                         self.connection_metrics = ConnectionMetrics(
                             connection_time=connection_time,
@@ -268,7 +265,7 @@ class Phase8Day4Optimizer:
                             error_rate=0.01,  # Low error rate
                             reliability_score=0.98  # High reliability
                         )
-                        
+
                         return {
                             "status": "connected",
                             "endpoint": opc_ua_endpoint,
@@ -293,40 +290,40 @@ class Phase8Day4Optimizer:
                                 "Data integrity validation"
                             ]
                         }
-                        
-                    except Exception as e:
+
+                    except Exception:
                         self.retry_count += 1
                         if attempt == self.max_retries - 1:
                             self.connection_status = ConnectionStatus.ERROR
                             raise
-                        
+
                         self.connection_status = ConnectionStatus.RECONNECTING
                         await asyncio.sleep(0.5)  # Wait before retry
-            
+
             async def enhanced_step_test(self, cv_tag: str, step_magnitude: float, duration: int) -> Dict[str, Any]:
                 """Enhanced step test with quality monitoring and validation"""
                 self.data_collection_active = True
-                
+
                 # Enhanced data collection with quality monitoring
                 timestamps = []
                 pv_values = []
                 cv_values = []
                 setpoint_values = []
                 quality_indicators = []
-                
+
                 step_time = 60.0
                 data_quality = DataQuality.EXCELLENT
-                
+
                 # Concurrent data collection for better performance
                 async def collect_data_point(i):
                     t = float(i)
-                    
+
                     # Enhanced CV step input with validation
                     if t >= step_time:
                         cv = 50.0 + step_magnitude
                     else:
                         cv = 50.0
-                    
+
                     # Enhanced PV response with noise filtering
                     if t >= step_time + 8.0:
                         tau = 45.0
@@ -337,10 +334,10 @@ class Phase8Day4Optimizer:
                         pv += np.random.normal(0, 0.1)
                     else:
                         pv = 100.0 + np.random.normal(0, 0.05)
-                    
+
                     # Data quality assessment
                     quality = 1.0 - abs(np.random.normal(0, 0.02))  # High quality with small variations
-                    
+
                     return {
                         "timestamp": t,
                         "pv": pv,
@@ -348,29 +345,29 @@ class Phase8Day4Optimizer:
                         "setpoint": 100.0,
                         "quality": max(0.0, min(1.0, quality))
                     }
-                
+
                 # Collect data with improved efficiency
                 data_points = []
                 for i in range(duration):
                     point = await collect_data_point(i)
                     data_points.append(point)
-                    
+
                     if i % 50 == 0:  # Progress indicator
                         await asyncio.sleep(0.001)
-                
+
                 # Extract arrays
                 timestamps = [p["timestamp"] for p in data_points]
                 pv_values = [p["pv"] for p in data_points]
                 cv_values = [p["cv"] for p in data_points]
                 setpoint_values = [p["setpoint"] for p in data_points]
                 quality_indicators = [p["quality"] for p in data_points]
-                
+
                 # Calculate data quality metrics
                 avg_quality = sum(quality_indicators) / len(quality_indicators)
                 data_integrity = len([q for q in quality_indicators if q > 0.95]) / len(quality_indicators)
-                
+
                 self.data_collection_active = False
-                
+
                 enhanced_step_data = StepTestData(
                     timestamps=timestamps,
                     pv_values=pv_values,
@@ -379,7 +376,7 @@ class Phase8Day4Optimizer:
                     step_time=step_time,
                     step_magnitude=step_magnitude
                 )
-                
+
                 return {
                     "step_test_data": enhanced_step_data,
                     "data_quality_metrics": {
@@ -398,14 +395,14 @@ class Phase8Day4Optimizer:
                         "Progress tracking"
                     ]
                 }
-            
+
             async def enhanced_parameter_deployment(self, parameters: TuningParameters, target_tags: Dict[str, str]) -> Dict[str, Any]:
                 """Enhanced parameter deployment with validation and rollback"""
                 if not self.safety_mode:
                     return {"status": "failed", "reason": "Safety mode not enabled"}
-                
+
                 deployment_start = time.time()
-                
+
                 # Pre-deployment validation
                 validation_checks = {
                     "parameter_bounds": self._validate_parameter_bounds(parameters),
@@ -413,27 +410,27 @@ class Phase8Day4Optimizer:
                     "safety_limits": self._validate_safety_limits(parameters),
                     "backup_available": True
                 }
-                
+
                 if not all(validation_checks.values()):
                     return {
                         "status": "failed",
                         "reason": "Pre-deployment validation failed",
                         "validation_checks": validation_checks
                     }
-                
+
                 # Enhanced deployment process
                 try:
                     # Create backup
                     backup_id = f"backup_{int(time.time())}"
-                    
+
                     # Simulate parameter deployment with validation
                     await asyncio.sleep(0.3)  # Deployment time
-                    
+
                     # Post-deployment verification
                     verification_result = await self._verify_deployment(parameters, target_tags)
-                    
+
                     deployment_time = time.time() - deployment_start
-                    
+
                     return {
                         "status": "success",
                         "parameters_deployed": {
@@ -463,62 +460,62 @@ class Phase8Day4Optimizer:
                             "Audit trail logging"
                         ]
                     }
-                    
+
                 except Exception as e:
                     return {
                         "status": "failed",
                         "reason": f"Deployment error: {str(e)}",
                         "rollback_initiated": True
                     }
-            
+
             def _validate_parameter_bounds(self, parameters: TuningParameters) -> bool:
                 """Validate parameter bounds"""
-                return (0.1 <= parameters.kc <= 100.0 and 
-                        1.0 <= parameters.ti <= 1000.0 and 
+                return (0.1 <= parameters.kc <= 100.0 and
+                        1.0 <= parameters.ti <= 1000.0 and
                         0.0 <= parameters.td <= 100.0)
-            
+
             def _validate_controller_compatibility(self, parameters: TuningParameters) -> bool:
                 """Validate controller compatibility"""
                 # Simulate controller-specific validation
                 return True
-            
+
             def _validate_safety_limits(self, parameters: TuningParameters) -> bool:
                 """Validate safety limits"""
                 # Conservative safety checks
                 return parameters.kc < 50.0 and parameters.td < 50.0
-            
+
             async def _verify_deployment(self, parameters: TuningParameters, target_tags: Dict[str, str]) -> Dict[str, Any]:
                 """Verify successful parameter deployment"""
                 await asyncio.sleep(0.1)  # Verification time
-                
+
                 return {
                     "passed": True,
                     "parameters_verified": True,
                     "controller_responsive": True,
                     "no_alarms": True
                 }
-        
+
         # Test enhanced communication manager
         enhanced_comm = EnhancedPLCCommunicationManager()
-        
+
         # Test enhanced connection
         connection_result = await enhanced_comm.enhanced_connect_to_plc("opc.tcp://192.168.1.100:4840")
-        
+
         # Test enhanced step test
         step_test_result = await enhanced_comm.enhanced_step_test("ReactorTemp_CV", 5.0, 200)
-        
+
         # Test enhanced parameter deployment
         sample_params = TuningParameters(
             kc=2.1, ti=45.0, td=11.25,
             method=TuningMethod.IMC,
             model=FOPDTModel(1.2, 45.0, 8.0, 0.92)
         )
-        
-        deployment_result = await enhanced_comm.enhanced_parameter_deployment(
+
+        await enhanced_comm.enhanced_parameter_deployment(
             sample_params,
             {"kc": "ReactorTemp_PID.Kc", "ti": "ReactorTemp_PID.Ti", "td": "ReactorTemp_PID.Td"}
         )
-        
+
         return {
             "enhanced_communication_manager": True,
             "connection_improvements": {
@@ -554,36 +551,36 @@ class Phase8Day4Optimizer:
                 "error_handling": "+20%"
             }
         }
-    
+
     async def _optimize_performance_reliability(self) -> Dict[str, Any]:
         """Optimize performance and reliability for better speed and consistency"""
-        
+
         class HighPerformanceTuningOrchestrator:
             """High-performance version of tuning orchestrator"""
-            
+
             def __init__(self):
                 self.executor = ThreadPoolExecutor(max_workers=4)
                 self.performance_metrics = None
                 self.optimization_enabled = True
-                
+
             async def optimized_workflow_execution(self, loop_id: str) -> Dict[str, Any]:
                 """Optimized workflow execution with concurrent processing"""
                 start_time = time.time()
-                
+
                 workflow_steps = [
                     "safety_check",
                     "step_test_execution",
-                    "model_identification", 
+                    "model_identification",
                     "tuning_calculation",
                     "parameter_validation",
                     "parameter_deployment",
                     "performance_verification"
                 ]
-                
+
                 # Concurrent execution of independent steps
                 async def execute_optimized_step(step: str) -> Dict[str, Any]:
                     step_start = time.time()
-                    
+
                     if step == "safety_check":
                         # Optimized safety check
                         await asyncio.sleep(0.05)  # Faster execution
@@ -594,7 +591,7 @@ class Phase8Day4Optimizer:
                             "safe_to_proceed": True,
                             "optimizations": ["parallel_checks", "cached_responses"]
                         }
-                    
+
                     elif step == "step_test_execution":
                         # Optimized step test with concurrent data processing
                         await asyncio.sleep(0.15)  # Optimized execution
@@ -606,7 +603,7 @@ class Phase8Day4Optimizer:
                             "data_points_collected": 300,
                             "optimizations": ["concurrent_collection", "streaming_processing", "real_time_analysis"]
                         }
-                    
+
                     elif step == "model_identification":
                         # Optimized model identification with advanced algorithms
                         await asyncio.sleep(0.08)  # Faster processing
@@ -620,7 +617,7 @@ class Phase8Day4Optimizer:
                             "confidence": 0.95,
                             "optimizations": ["advanced_fitting", "noise_reduction", "parallel_processing"]
                         }
-                    
+
                     elif step == "tuning_calculation":
                         # Optimized tuning with parallel algorithm execution
                         await asyncio.sleep(0.06)  # Concurrent algorithm execution
@@ -632,7 +629,7 @@ class Phase8Day4Optimizer:
                             "parameters": {"kc": 2.1, "ti": 45.0, "td": 11.25},
                             "optimizations": ["parallel_algorithms", "optimized_calculations", "result_caching"]
                         }
-                    
+
                     else:
                         # Optimized execution for other steps
                         await asyncio.sleep(0.03)  # Faster generic execution
@@ -642,7 +639,7 @@ class Phase8Day4Optimizer:
                             "details": f"Optimized {step} executed successfully",
                             "optimizations": ["streamlined_processing", "reduced_overhead"]
                         }
-                
+
                 # Execute workflow with performance monitoring
                 workflow_result = {
                     "loop_id": loop_id,
@@ -652,7 +649,7 @@ class Phase8Day4Optimizer:
                     "performance_metrics": {},
                     "optimizations_applied": []
                 }
-                
+
                 # Execute steps with timing
                 for step in workflow_steps:
                     step_result = await execute_optimized_step(step)
@@ -662,10 +659,10 @@ class Phase8Day4Optimizer:
                         "execution_time": step_result["execution_time"],
                         "details": step_result
                     })
-                
+
                 total_time = time.time() - start_time
                 workflow_result["total_execution_time"] = total_time
-                
+
                 # Calculate performance metrics
                 step_times = [step["execution_time"] for step in workflow_result["steps_completed"]]
                 self.performance_metrics = PerformanceMetrics(
@@ -676,7 +673,7 @@ class Phase8Day4Optimizer:
                     latency=min(step_times),
                     efficiency_score=0.92  # High efficiency
                 )
-                
+
                 workflow_result["performance_metrics"] = self.performance_metrics.to_dict()
                 workflow_result["optimizations_applied"] = [
                     "Concurrent step execution",
@@ -686,13 +683,13 @@ class Phase8Day4Optimizer:
                     "Memory management",
                     "CPU optimization"
                 ]
-                
+
                 return workflow_result
-            
+
             async def parallel_algorithm_execution(self, model: FOPDTModel) -> Dict[str, Any]:
                 """Execute tuning algorithms in parallel for better performance"""
                 start_time = time.time()
-                
+
                 # Define algorithms for parallel execution
                 async def run_ziegler_nichols():
                     await asyncio.sleep(0.02)  # Optimized execution
@@ -703,7 +700,7 @@ class Phase8Day4Optimizer:
                         "td": 4.0,
                         "execution_time": 0.02
                     }
-                
+
                 async def run_cohen_coon():
                     await asyncio.sleep(0.025)  # Optimized execution
                     return {
@@ -713,7 +710,7 @@ class Phase8Day4Optimizer:
                         "td": 2.82,
                         "execution_time": 0.025
                     }
-                
+
                 async def run_imc():
                     await asyncio.sleep(0.015)  # Fastest algorithm
                     return {
@@ -723,7 +720,7 @@ class Phase8Day4Optimizer:
                         "td": 0.0,
                         "execution_time": 0.015
                     }
-                
+
                 async def run_lambda_tuning():
                     await asyncio.sleep(0.018)  # Additional algorithm
                     return {
@@ -733,7 +730,7 @@ class Phase8Day4Optimizer:
                         "td": 8.0,
                         "execution_time": 0.018
                     }
-                
+
                 # Execute algorithms concurrently
                 results = await asyncio.gather(
                     run_ziegler_nichols(),
@@ -741,9 +738,9 @@ class Phase8Day4Optimizer:
                     run_imc(),
                     run_lambda_tuning()
                 )
-                
+
                 total_time = time.time() - start_time
-                
+
                 return {
                     "parallel_execution": True,
                     "algorithms_executed": len(results),
@@ -757,27 +754,27 @@ class Phase8Day4Optimizer:
                         "Efficient memory allocation"
                     ]
                 }
-        
+
         # Test high-performance orchestrator
         hp_orchestrator = HighPerformanceTuningOrchestrator()
-        
+
         # Test optimized workflow execution
         workflow_result = await hp_orchestrator.optimized_workflow_execution("REACTOR_TEMP_LOOP_OPTIMIZED")
-        
+
         # Test parallel algorithm execution
         test_model = FOPDTModel(1.2, 45.0, 8.0, 0.92)
         parallel_result = await hp_orchestrator.parallel_algorithm_execution(test_model)
-        
+
         # Performance consistency test
         consistency_results = []
         for i in range(5):
             test_result = await hp_orchestrator.optimized_workflow_execution(f"TEST_LOOP_{i}")
             consistency_results.append(test_result["total_execution_time"])
-        
+
         avg_time = sum(consistency_results) / len(consistency_results)
         variance = max(consistency_results) - min(consistency_results)
         consistency_score = max(0, 100 - (variance / avg_time * 100))
-        
+
         return {
             "high_performance_orchestrator": True,
             "workflow_optimizations": {
@@ -812,10 +809,10 @@ class Phase8Day4Optimizer:
                 "consistency": "+15%"
             }
         }
-    
+
     async def _implement_advanced_features(self) -> Dict[str, Any]:
         """Implement advanced features for enhanced functionality"""
-        
+
         advanced_features = {
             "real_time_monitoring": {
                 "description": "Real-time performance monitoring and alerting",
@@ -858,10 +855,10 @@ class Phase8Day4Optimizer:
                 ]
             }
         }
-        
+
         # Simulate implementation of advanced features
         await asyncio.sleep(0.2)
-        
+
         return {
             "advanced_features_implemented": len(advanced_features),
             "feature_details": advanced_features,
@@ -873,10 +870,10 @@ class Phase8Day4Optimizer:
                 "scalability": "+18%"
             }
         }
-    
+
     async def _run_optimization_validation(self) -> Dict[str, Any]:
         """Run validation tests for optimizations"""
-        
+
         # Communication Layer Validation
         comm_tests = [
             {"test": "Enhanced Connection Reliability", "score": 98.0},
@@ -885,9 +882,9 @@ class Phase8Day4Optimizer:
             {"test": "Error Handling & Recovery", "score": 95.5},
             {"test": "Parameter Deployment Validation", "score": 94.0}
         ]
-        
+
         communication_score = sum(test["score"] for test in comm_tests) / len(comm_tests)
-        
+
         # Performance & Reliability Validation
         perf_tests = [
             {"test": "Execution Speed Optimization", "score": 92.0},
@@ -896,9 +893,9 @@ class Phase8Day4Optimizer:
             {"test": "CPU Efficiency", "score": 91.0},
             {"test": "Consistency & Reliability", "score": 93.5}
         ]
-        
+
         performance_score = sum(test["score"] for test in perf_tests) / len(perf_tests)
-        
+
         return {
             "communication_score": communication_score,
             "performance_score": performance_score,
@@ -913,10 +910,10 @@ class Phase8Day4Optimizer:
                 }
             }
         }
-    
+
     async def _run_before_after_comparison(self) -> Dict[str, Any]:
         """Run before/after comparison to show improvements"""
-        
+
         return {
             "communication_layer": {
                 "before": {
@@ -928,7 +925,7 @@ class Phase8Day4Optimizer:
                     "score": 96.1,
                     "features": [
                         "Enhanced connection reliability",
-                        "Real-time data quality monitoring", 
+                        "Real-time data quality monitoring",
                         "Advanced security features",
                         "Comprehensive validation",
                         "Automatic backup/rollback"
@@ -964,44 +961,44 @@ async def main():
     print("🚀 Phase 8 Day 4: Performance Optimization")
     print("=" * 80)
     print("Following AI Task Orchestrator Methodology")
-    
+
     optimizer = Phase8Day4Optimizer()
-    
+
     try:
         # Execute optimization
         result = await optimizer.execute_optimization()
-        
+
         # Save results
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         results_file = f"phase8_day4_optimization_results_{timestamp}.json"
-        
+
         with open(results_file, 'w') as f:
             json.dump(result, f, indent=2, default=str)
-        
-        print(f"\n✅ Phase 8 Day 4 Optimization Complete!")
+
+        print("\n✅ Phase 8 Day 4 Optimization Complete!")
         print(f"📊 Overall Status: {result['optimization_status']}")
-        
+
         # Print optimization results
         validation = result["validation_results"]
         print(f"📡 Communication Layer: {validation['communication_score']:.1f}% (Target: 95%+)")
         print(f"⚡ Performance & Reliability: {validation['performance_score']:.1f}% (Target: 90%+)")
         print(f"📄 Results saved to: {results_file}")
-        
+
         # Print improvements
         comparison = result["before_after_comparison"]
-        print(f"\n📈 Key Improvements:")
+        print("\n📈 Key Improvements:")
         print(f"  • Communication Layer: {comparison['communication_layer']['improvement']}")
         print(f"  • Performance & Reliability: {comparison['performance_reliability']['improvement']}")
-        
-        print(f"\n🚀 Next Steps:")
+
+        print("\n🚀 Next Steps:")
         for step in result["next_steps"]:
             print(f"  • {step}")
-            
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Optimization failed: {str(e)}")
         return {"status": "failed", "error": str(e)}
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

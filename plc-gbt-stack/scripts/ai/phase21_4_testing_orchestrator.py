@@ -26,33 +26,26 @@ Phase: 21.4 - Advanced CLI Features Testing
 Dependencies: Phase 21.1/21.2/21.3 (CLI Framework), all Phase 21.4 modules
 """
 
-import os
-import sys
 import json
-import asyncio
 import logging
-import time
-import tempfile
-import subprocess
-import uuid
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
-from dataclasses import dataclass, asdict, field
-from enum import Enum
-import traceback
 import shutil
+import sys
+import tempfile
+import time
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
-from rich.status import Status
-from rich import print as rprint
+from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
 # Test Framework
 console = Console()
@@ -114,25 +107,25 @@ class TestSuite:
 
 class Phase21_4TestingOrchestrator:
     """Comprehensive testing orchestrator for Phase 21.4"""
-    
+
     def __init__(self):
         self.test_suites: Dict[str, TestSuite] = {}
         self.session_id = f"phase21_4_testing_{int(time.time())}"
         self.test_data_dir = Path(tempfile.mkdtemp(prefix="phase21_4_test_"))
-        
+
         # Initialize test environment
         self._setup_test_environment()
         self._register_test_suites()
-        
+
     def _setup_test_environment(self):
         """Setup test environment"""
-        console.print(f"🧪 Setting up Phase 21.4 test environment")
+        console.print("🧪 Setting up Phase 21.4 test environment")
         console.print(f"Test session: [cyan]{self.session_id}[/cyan]")
         console.print(f"Test data directory: [yellow]{self.test_data_dir}[/yellow]")
-        
+
         # Create test data files
         self._create_test_data()
-        
+
     def _create_test_data(self):
         """Create test data files"""
         # Create CSV file for batch testing
@@ -142,7 +135,7 @@ test_controller_2,advanced-pide,cascade_pid,Test controller 2,2.0,1.0,0.2
 test_controller_3,feedforward-pid,feedforward_pid,Test controller 3,1.5,0.8,0.15
 """
         (self.test_data_dir / "test_instances.csv").write_text(csv_content)
-        
+
         # Create test script
         script_content = {
             "name": "test_automation_script",
@@ -161,7 +154,7 @@ test_controller_3,feedforward-pid,feedforward_pid,Test controller 3,1.5,0.8,0.15
                     "description": "List schemas"
                 },
                 {
-                    "id": "cmd2", 
+                    "id": "cmd2",
                     "command_type": "wait",
                     "command": "wait",
                     "parameters": {"seconds": 1},
@@ -177,7 +170,7 @@ test_controller_3,feedforward-pid,feedforward_pid,Test controller 3,1.5,0.8,0.15
             "permissions": []
         }
         (self.test_data_dir / "test_script.json").write_text(json.dumps(script_content, indent=2))
-        
+
         # Create test plugin
         plugin_content = '''#!/usr/bin/env python3
 """Test Plugin for Phase 21.4 validation"""
@@ -197,10 +190,10 @@ PLUGIN_METADATA = {
 class Plugin(PluginInterface):
     def get_metadata(self):
         return PluginMetadata(**PLUGIN_METADATA)
-    
+
     def initialize(self, cli_context, config):
         return True
-    
+
     def get_commands(self):
         return [test_command]
 
@@ -213,10 +206,10 @@ def main():
     return Plugin()
 '''
         (self.test_data_dir / "test_plugin.py").write_text(plugin_content)
-    
+
     def _register_test_suites(self):
         """Register all test suites"""
-        
+
         # Batch Operations Test Suite
         batch_suite = TestSuite(
             suite_id="batch_operations",
@@ -253,7 +246,7 @@ def main():
             ]
         )
         self.test_suites["batch_operations"] = batch_suite
-        
+
         # Interactive REPL Test Suite
         repl_suite = TestSuite(
             suite_id="interactive_repl",
@@ -290,7 +283,7 @@ def main():
             ]
         )
         self.test_suites["interactive_repl"] = repl_suite
-        
+
         # Plugin System Test Suite
         plugin_suite = TestSuite(
             suite_id="plugin_system",
@@ -327,7 +320,7 @@ def main():
             ]
         )
         self.test_suites["plugin_system"] = plugin_suite
-        
+
         # Automation Support Test Suite
         automation_suite = TestSuite(
             suite_id="automation_support",
@@ -364,7 +357,7 @@ def main():
             ]
         )
         self.test_suites["automation_support"] = automation_suite
-        
+
         # CLI Integration Test Suite
         integration_suite = TestSuite(
             suite_id="cli_integration",
@@ -394,7 +387,7 @@ def main():
             ]
         )
         self.test_suites["cli_integration"] = integration_suite
-        
+
         # Performance Test Suite
         performance_suite = TestSuite(
             suite_id="performance",
@@ -424,7 +417,7 @@ def main():
             ]
         )
         self.test_suites["performance"] = performance_suite
-        
+
         # Production Readiness Test Suite
         production_suite = TestSuite(
             suite_id="production_readiness",
@@ -454,17 +447,17 @@ def main():
             ]
         )
         self.test_suites["production_readiness"] = production_suite
-    
+
     # =============================================================================
     # BATCH OPERATIONS TESTS
     # =============================================================================
-    
+
     def _test_batch_module_import(self) -> TestExecution:
         """Test batch operations module import"""
         start_time = time.time()
         try:
-            from cli.commands.batch import batch_processor, BatchProcessor, CSVProcessor
-            
+            from cli.commands.batch import BatchProcessor, CSVProcessor, batch_processor
+
             if batch_processor and BatchProcessor and CSVProcessor:
                 return TestExecution(
                     test_id="batch_001",
@@ -480,7 +473,7 @@ def main():
                     message="Batch operations module components missing",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="batch_001",
@@ -489,16 +482,16 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_csv_import(self) -> TestExecution:
         """Test CSV import functionality"""
         start_time = time.time()
         try:
             from cli.commands.batch import CSVProcessor
-            
+
             csv_file = self.test_data_dir / "test_instances.csv"
             instances = CSVProcessor.read_csv_instances(csv_file)
-            
+
             if len(instances) == 3:
                 # Validate structure
                 required_fields = ['name', 'schema', 'type']
@@ -524,7 +517,7 @@ def main():
                     message=f"Expected 3 instances, got {len(instances)}",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="batch_002",
@@ -533,19 +526,19 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_batch_command_registration(self) -> TestExecution:
         """Test batch command registration"""
         start_time = time.time()
         try:
             from cli.commands.batch import batch_commands
-            
+
             if batch_commands and hasattr(batch_commands, 'commands'):
                 command_names = list(batch_commands.commands.keys())
                 expected_commands = ['create', 'validate', 'update', 'export', 'status']
-                
+
                 found_commands = [cmd for cmd in expected_commands if cmd in command_names]
-                
+
                 if len(found_commands) >= 3:  # At least 3 core commands
                     return TestExecution(
                         test_id="batch_003",
@@ -568,7 +561,7 @@ def main():
                     message="Batch commands not properly registered",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="batch_003",
@@ -577,24 +570,24 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_batch_processing_engine(self) -> TestExecution:
         """Test batch processing engine"""
         start_time = time.time()
         try:
-            from cli.commands.batch import BatchProcessor, BatchOperationType
-            
+            from cli.commands.batch import BatchProcessor
+
             processor = BatchProcessor()
-            
+
             # Test with mock items
             test_items = [
                 {"id": "test1", "name": "Test Item 1"},
                 {"id": "test2", "name": "Test Item 2"}
             ]
-            
+
             # Create batch ID
             batch_id = processor.create_batch_id()
-            
+
             if batch_id and len(batch_id) > 0:
                 return TestExecution(
                     test_id="batch_004",
@@ -610,7 +603,7 @@ def main():
                     message="Batch processing engine failed",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="batch_004",
@@ -619,17 +612,17 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     # =============================================================================
     # REPL TESTS
     # =============================================================================
-    
+
     def _test_repl_module_import(self) -> TestExecution:
         """Test REPL module import"""
         start_time = time.time()
         try:
             from cli.repl.interactive_repl import PLCControlREPL, REPLCommand, REPLSession
-            
+
             if PLCControlREPL and REPLCommand and REPLSession:
                 return TestExecution(
                     test_id="repl_001",
@@ -645,7 +638,7 @@ def main():
                     message="REPL module components missing",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="repl_001",
@@ -654,19 +647,19 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_repl_command_registry(self) -> TestExecution:
         """Test REPL command registry"""
         start_time = time.time()
         try:
             from cli.repl.interactive_repl import PLCControlREPL
-            
+
             repl = PLCControlREPL()
-            
+
             # Check for basic commands
             expected_commands = ['help', 'exit', 'status', 'schema', 'instance']
             found_commands = [cmd for cmd in expected_commands if cmd in repl.commands]
-            
+
             if len(found_commands) >= 4:
                 return TestExecution(
                     test_id="repl_002",
@@ -682,7 +675,7 @@ def main():
                     message=f"Some REPL commands missing: found {found_commands}",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="repl_002",
@@ -691,15 +684,15 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_repl_session_management(self) -> TestExecution:
         """Test REPL session management"""
         start_time = time.time()
         try:
             from cli.repl.interactive_repl import PLCControlREPL
-            
+
             repl = PLCControlREPL()
-            
+
             # Check session creation
             if repl.session and repl.session.session_id:
                 return TestExecution(
@@ -716,7 +709,7 @@ def main():
                     message="REPL session not created properly",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="repl_003",
@@ -725,18 +718,18 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_repl_command_processing(self) -> TestExecution:
         """Test REPL command processing"""
         start_time = time.time()
         try:
             from cli.repl.interactive_repl import PLCControlREPL
-            
+
             repl = PLCControlREPL()
-            
+
             # Test basic command processing
             result = repl._cmd_help([])
-            
+
             if result and "Help displayed" in result:
                 return TestExecution(
                     test_id="repl_004",
@@ -752,7 +745,7 @@ def main():
                     message="REPL command processing partial",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="repl_004",
@@ -761,17 +754,17 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     # =============================================================================
     # PLUGIN SYSTEM TESTS
     # =============================================================================
-    
+
     def _test_plugin_manager_import(self) -> TestExecution:
         """Test plugin manager import"""
         start_time = time.time()
         try:
-            from cli.plugins.plugin_manager import PluginManager, PluginInterface, plugin_manager
-            
+            from cli.plugins.plugin_manager import PluginInterface, PluginManager, plugin_manager
+
             if PluginManager and PluginInterface and plugin_manager:
                 return TestExecution(
                     test_id="plugin_001",
@@ -787,7 +780,7 @@ def main():
                     message="Plugin manager components missing",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="plugin_001",
@@ -796,21 +789,21 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_plugin_discovery(self) -> TestExecution:
         """Test plugin discovery"""
         start_time = time.time()
         try:
             from cli.plugins.plugin_manager import PluginManager
-            
+
             # Create test plugin manager with test directory
             manager = PluginManager(plugins_dir=self.test_data_dir)
-            
+
             # Copy test plugin to plugins directory
             shutil.copy2(self.test_data_dir / "test_plugin.py", self.test_data_dir / "test_plugin.py")
-            
+
             plugins = manager.discover_plugins()
-            
+
             if len(plugins) > 0:
                 return TestExecution(
                     test_id="plugin_002",
@@ -826,7 +819,7 @@ def main():
                     message="No plugins discovered",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="plugin_002",
@@ -835,19 +828,19 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_plugin_loading(self) -> TestExecution:
         """Test plugin loading"""
         start_time = time.time()
         try:
             from cli.plugins.plugin_manager import PluginManager
-            
+
             manager = PluginManager(plugins_dir=self.test_data_dir)
-            
+
             # Try to load test plugin
             test_plugin_path = self.test_data_dir / "test_plugin.py"
             metadata = manager.load_plugin_metadata(test_plugin_path)
-            
+
             if metadata and metadata.name == "test_plugin":
                 return TestExecution(
                     test_id="plugin_003",
@@ -863,7 +856,7 @@ def main():
                     message="Plugin metadata loading failed",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="plugin_003",
@@ -872,19 +865,19 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_plugin_commands(self) -> TestExecution:
         """Test plugin commands"""
         start_time = time.time()
         try:
             from cli.plugins.plugin_manager import plugin_commands
-            
+
             if plugin_commands and hasattr(plugin_commands, 'commands'):
                 command_names = list(plugin_commands.commands.keys())
                 expected_commands = ['list', 'install', 'enable', 'disable', 'info']
-                
+
                 found_commands = [cmd for cmd in expected_commands if cmd in command_names]
-                
+
                 if len(found_commands) >= 3:
                     return TestExecution(
                         test_id="plugin_004",
@@ -907,7 +900,7 @@ def main():
                     message="Plugin commands not registered",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="plugin_004",
@@ -916,17 +909,17 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     # =============================================================================
     # AUTOMATION SUPPORT TESTS
     # =============================================================================
-    
+
     def _test_script_engine_import(self) -> TestExecution:
         """Test script engine import"""
         start_time = time.time()
         try:
-            from cli.automation.script_engine import ScriptEngine, CommandRecorder, script_engine
-            
+            from cli.automation.script_engine import CommandRecorder, ScriptEngine, script_engine
+
             if ScriptEngine and CommandRecorder and script_engine:
                 return TestExecution(
                     test_id="automation_001",
@@ -942,7 +935,7 @@ def main():
                     message="Script engine components missing",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="automation_001",
@@ -951,20 +944,20 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_command_recording(self) -> TestExecution:
         """Test command recording"""
         start_time = time.time()
         try:
             from cli.automation.script_engine import CommandRecorder
-            
+
             recorder = CommandRecorder()
-            
+
             # Test recording session
             session_id = recorder.start_recording("test_session")
             recorder.record_command("test command", {"param": "value"})
             script = recorder.stop_recording()
-            
+
             if script and len(script.commands) == 1:
                 return TestExecution(
                     test_id="automation_002",
@@ -980,7 +973,7 @@ def main():
                     message="Command recording failed",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="automation_002",
@@ -989,18 +982,18 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_script_execution(self) -> TestExecution:
         """Test script execution"""
         start_time = time.time()
         try:
             from cli.automation.script_engine import ScriptEngine
-            
+
             engine = ScriptEngine(scripts_dir=self.test_data_dir)
-            
+
             # Try to load test script
             script = engine.load_script("test_automation_script")
-            
+
             if script and script.name == "test_automation_script":
                 return TestExecution(
                     test_id="automation_003",
@@ -1016,7 +1009,7 @@ def main():
                     message="Script loading partially working",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="automation_003",
@@ -1025,18 +1018,18 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_cicd_integration(self) -> TestExecution:
         """Test CI/CD integration"""
         start_time = time.time()
         try:
             from cli.automation.script_engine import CICDIntegration, script_engine
-            
+
             cicd = CICDIntegration(script_engine)
-            
+
             # Test workflow generation
             workflow = cicd.generate_github_workflow("test_script")
-            
+
             if workflow and "name: PLC Control Loop Automation" in workflow:
                 return TestExecution(
                     test_id="automation_004",
@@ -1052,7 +1045,7 @@ def main():
                     message="CI/CD workflow generation failed",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="automation_004",
@@ -1061,17 +1054,17 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     # =============================================================================
     # CLI INTEGRATION TESTS
     # =============================================================================
-    
+
     def _test_main_cli_import(self) -> TestExecution:
         """Test main CLI import with Phase 21.4 features"""
         start_time = time.time()
         try:
             from cli.plc_control_loop_cli import cli
-            
+
             if cli:
                 return TestExecution(
                     test_id="integration_001",
@@ -1086,7 +1079,7 @@ def main():
                     message="Main CLI import failed",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="integration_001",
@@ -1095,19 +1088,19 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_command_registration(self) -> TestExecution:
         """Test command registration"""
         start_time = time.time()
         try:
             from cli.plc_control_loop_cli import cli
-            
+
             # Check for Phase 21.4 commands
             command_names = list(cli.commands.keys())
             expected_commands = ['batch', 'repl']  # Core Phase 21.4 commands
-            
+
             found_commands = [cmd for cmd in expected_commands if cmd in command_names]
-            
+
             if len(found_commands) >= 1:
                 return TestExecution(
                     test_id="integration_002",
@@ -1123,7 +1116,7 @@ def main():
                     message="Some Phase 21.4 commands missing",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="integration_002",
@@ -1132,14 +1125,14 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_help_system(self) -> TestExecution:
         """Test help system"""
         start_time = time.time()
         try:
             # Test CLI help command availability
             # This is a simplified test - in real implementation would test actual help output
-            
+
             return TestExecution(
                 test_id="integration_003",
                 result=TestResult.PASSED,
@@ -1147,7 +1140,7 @@ def main():
                 execution_time=time.time() - start_time,
                 details={"help_system": "available"}
             )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="integration_003",
@@ -1156,40 +1149,36 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     # =============================================================================
     # PERFORMANCE TESTS
     # =============================================================================
-    
+
     def _test_import_performance(self) -> TestExecution:
         """Test module import performance"""
         start_time = time.time()
         try:
             # Test import times for all Phase 21.4 modules
             import_times = {}
-            
+
             # Test batch operations import
             batch_start = time.time()
-            from cli.commands.batch import batch_processor
             import_times['batch'] = time.time() - batch_start
-            
+
             # Test REPL import
             repl_start = time.time()
-            from cli.repl.interactive_repl import PLCControlREPL
             import_times['repl'] = time.time() - repl_start
-            
+
             # Test plugin system import
             plugin_start = time.time()
-            from cli.plugins.plugin_manager import PluginManager
             import_times['plugin'] = time.time() - plugin_start
-            
+
             # Test automation import
             automation_start = time.time()
-            from cli.automation.script_engine import ScriptEngine
             import_times['automation'] = time.time() - automation_start
-            
+
             max_import_time = max(import_times.values())
-            
+
             if max_import_time < 2.0:  # All imports under 2 seconds
                 return TestExecution(
                     test_id="perf_001",
@@ -1206,7 +1195,7 @@ def main():
                     execution_time=time.time() - start_time,
                     details=import_times
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="perf_001",
@@ -1215,23 +1204,23 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_batch_performance(self) -> TestExecution:
         """Test batch processing performance"""
         start_time = time.time()
         try:
             from cli.commands.batch import BatchProcessor
-            
+
             processor = BatchProcessor()
-            
+
             # Create test items
             test_items = [{"id": f"test_{i}", "name": f"Test Item {i}"} for i in range(10)]
-            
+
             # Time batch ID generation
             batch_start = time.time()
             batch_id = processor.create_batch_id()
             batch_time = time.time() - batch_start
-            
+
             if batch_time < 1.0 and batch_id:
                 return TestExecution(
                     test_id="perf_002",
@@ -1247,7 +1236,7 @@ def main():
                     message=f"Batch performance slow: {batch_time:.3f}s",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="perf_002",
@@ -1256,20 +1245,20 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_repl_performance(self) -> TestExecution:
         """Test REPL performance"""
         start_time = time.time()
         try:
             from cli.repl.interactive_repl import PLCControlREPL
-            
+
             repl = PLCControlREPL()
-            
+
             # Test command processing performance
             cmd_start = time.time()
-            result = repl._cmd_help([])
+            repl._cmd_help([])
             cmd_time = time.time() - cmd_start
-            
+
             if cmd_time < 0.5:  # Under 500ms
                 return TestExecution(
                     test_id="perf_003",
@@ -1285,7 +1274,7 @@ def main():
                     message=f"REPL performance slow: {cmd_time:.3f}s",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="perf_003",
@@ -1294,18 +1283,18 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     # =============================================================================
     # PRODUCTION READINESS TESTS
     # =============================================================================
-    
+
     def _test_error_handling(self) -> TestExecution:
         """Test error handling"""
         start_time = time.time()
         try:
             error_tests_passed = 0
             total_error_tests = 3
-            
+
             # Test 1: Batch operations error handling
             try:
                 from cli.commands.batch import CSVProcessor
@@ -1315,7 +1304,7 @@ def main():
                     error_tests_passed += 1
             except:
                 pass  # Expected to handle gracefully
-            
+
             # Test 2: REPL error handling
             try:
                 from cli.repl.interactive_repl import PLCControlREPL
@@ -1325,7 +1314,7 @@ def main():
                 error_tests_passed += 1  # Should not crash
             except:
                 pass
-            
+
             # Test 3: Plugin system error handling
             try:
                 from cli.plugins.plugin_manager import PluginManager
@@ -1336,7 +1325,7 @@ def main():
                     error_tests_passed += 1
             except:
                 pass
-            
+
             if error_tests_passed >= 2:
                 return TestExecution(
                     test_id="prod_001",
@@ -1352,7 +1341,7 @@ def main():
                     message=f"Error handling needs improvement: {error_tests_passed}/{total_error_tests}",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="prod_001",
@@ -1361,14 +1350,14 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_resource_management(self) -> TestExecution:
         """Test resource management"""
         start_time = time.time()
         try:
             # Test that modules properly clean up resources
             resource_tests_passed = 0
-            
+
             # Test 1: Batch processor cleanup
             try:
                 from cli.commands.batch import BatchProcessor
@@ -1380,7 +1369,7 @@ def main():
                     resource_tests_passed += 1  # Basic cleanup via garbage collection is acceptable
             except:
                 pass
-            
+
             # Test 2: REPL session cleanup
             try:
                 from cli.repl.interactive_repl import PLCControlREPL
@@ -1390,7 +1379,7 @@ def main():
                 resource_tests_passed += 1
             except:
                 pass
-            
+
             # Test 3: Plugin manager cleanup
             try:
                 from cli.plugins.plugin_manager import PluginManager
@@ -1400,7 +1389,7 @@ def main():
                 resource_tests_passed += 1
             except:
                 pass
-            
+
             if resource_tests_passed >= 2:
                 return TestExecution(
                     test_id="prod_002",
@@ -1416,7 +1405,7 @@ def main():
                     message=f"Resource management needs attention: {resource_tests_passed}/3",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="prod_002",
@@ -1425,13 +1414,13 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     def _test_security_validation(self) -> TestExecution:
         """Test security validation"""
         start_time = time.time()
         try:
             security_tests_passed = 0
-            
+
             # Test 1: Plugin security checks
             try:
                 from cli.plugins.plugin_manager import PluginManager
@@ -1441,7 +1430,7 @@ def main():
                     security_tests_passed += 1
             except:
                 pass
-            
+
             # Test 2: Script execution security
             try:
                 from cli.automation.script_engine import ScriptEngine
@@ -1451,11 +1440,11 @@ def main():
                     security_tests_passed += 1
             except:
                 pass
-            
+
             # Test 3: General security considerations
             # Basic check that modules don't expose dangerous functions
             security_tests_passed += 1  # Basic security through design
-            
+
             if security_tests_passed >= 2:
                 return TestExecution(
                     test_id="prod_003",
@@ -1471,7 +1460,7 @@ def main():
                     message=f"Security validation needs review: {security_tests_passed}/3",
                     execution_time=time.time() - start_time
                 )
-                
+
         except Exception as e:
             return TestExecution(
                 test_id="prod_003",
@@ -1480,22 +1469,22 @@ def main():
                 execution_time=time.time() - start_time,
                 error=str(e)
             )
-    
+
     # =============================================================================
     # EXECUTION ENGINE
     # =============================================================================
-    
+
     def run_test_suite(self, suite_name: str) -> TestSuite:
         """Run a specific test suite"""
         if suite_name not in self.test_suites:
             raise ValueError(f"Test suite not found: {suite_name}")
-        
+
         suite = self.test_suites[suite_name]
         suite.start_time = datetime.now()
         suite.execution_results = []
-        
+
         console.print(f"🧪 Running test suite: [cyan]{suite.name}[/cyan]")
-        
+
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
@@ -1503,46 +1492,46 @@ def main():
             MofNCompleteColumn(),
             console=console
         ) as progress:
-            
+
             task = progress.add_task(f"Running {suite.name}", total=len(suite.tests))
-            
+
             for test_case in suite.tests:
                 progress.update(task, description=f"Running {test_case.name}")
-                
+
                 # Execute test
                 result = test_case.function()
                 suite.execution_results.append(result)
-                
+
                 # Show result
                 status_emoji = {
                     TestResult.PASSED: "✅",
-                    TestResult.FAILED: "❌", 
+                    TestResult.FAILED: "❌",
                     TestResult.WARNING: "⚠️",
                     TestResult.SKIPPED: "⏭️",
                     TestResult.ERROR: "💥"
                 }.get(result.result, "❓")
-                
+
                 progress.console.print(f"  {status_emoji} {test_case.name}: {result.message}")
                 progress.advance(task)
-        
+
         suite.end_time = datetime.now()
         return suite
-    
+
     def run_all_tests(self) -> Dict[str, TestSuite]:
         """Run all test suites"""
-        console.print(f"🚀 Starting comprehensive Phase 21.4 testing")
+        console.print("🚀 Starting comprehensive Phase 21.4 testing")
         console.print(f"Test suites: {len(self.test_suites)}")
-        
+
         results = {}
-        
+
         for suite_name in self.test_suites.keys():
             try:
                 results[suite_name] = self.run_test_suite(suite_name)
             except Exception as e:
                 console.print(f"❌ Test suite {suite_name} failed: {e}")
-        
+
         return results
-    
+
     def generate_test_report(self, results: Dict[str, TestSuite]) -> Dict[str, Any]:
         """Generate comprehensive test report"""
         total_tests = 0
@@ -1550,9 +1539,9 @@ def main():
         total_failed = 0
         total_warnings = 0
         total_errors = 0
-        
+
         category_results = {}
-        
+
         for suite_name, suite in results.items():
             suite_stats = {
                 "total": len(suite.execution_results),
@@ -1562,7 +1551,7 @@ def main():
                 "errors": 0,
                 "execution_time": (suite.end_time - suite.start_time).total_seconds() if suite.end_time else 0
             }
-            
+
             for result in suite.execution_results:
                 total_tests += 1
                 if result.result == TestResult.PASSED:
@@ -1577,15 +1566,15 @@ def main():
                 elif result.result == TestResult.ERROR:
                     total_errors += 1
                     suite_stats["errors"] += 1
-            
+
             category_results[suite_name] = suite_stats
-        
+
         # Calculate overall score
         if total_tests > 0:
             overall_score = ((total_passed * 100) + (total_warnings * 75)) / (total_tests * 100) * 100
         else:
             overall_score = 0
-        
+
         # Determine readiness level
         if overall_score >= 90:
             readiness = "PRODUCTION_READY"
@@ -1595,7 +1584,7 @@ def main():
             readiness = "NEEDS_IMPROVEMENT"
         else:
             readiness = "NOT_READY"
-        
+
         return {
             "session_id": self.session_id,
             "timestamp": datetime.now().isoformat(),
@@ -1614,10 +1603,10 @@ def main():
                 for suite_name, suite in results.items()
             }
         }
-    
+
     def display_test_summary(self, report: Dict[str, Any]):
         """Display test summary"""
-        
+
         # Overall status
         readiness_colors = {
             "PRODUCTION_READY": "green",
@@ -1625,22 +1614,22 @@ def main():
             "NEEDS_IMPROVEMENT": "orange",
             "NOT_READY": "red"
         }
-        
+
         color = readiness_colors.get(report["readiness"], "white")
-        
+
         console.print(Panel.fit(
             f"[bold {color}]Phase 21.4 Testing Complete[/bold {color}]\n"
             f"Overall Score: {report['overall_score']:.1f}%\n"
             f"Status: {report['readiness']}",
             border_style=color
         ))
-        
+
         # Summary table
         summary_table = Table(title="Test Results Summary")
         summary_table.add_column("Metric", style="cyan")
         summary_table.add_column("Count", style="magenta")
         summary_table.add_column("Percentage", style="green")
-        
+
         total = report["summary"]["total_tests"]
         for metric, count in report["summary"].items():
             if metric != "total_tests":
@@ -1650,9 +1639,9 @@ def main():
                     str(count),
                     f"{percentage:.1f}%"
                 )
-        
+
         console.print(summary_table)
-        
+
         # Category results
         category_table = Table(title="Test Suite Results")
         category_table.add_column("Test Suite", style="cyan")
@@ -1661,14 +1650,14 @@ def main():
         category_table.add_column("Failed", style="red")
         category_table.add_column("Warnings", style="yellow")
         category_table.add_column("Score", style="magenta")
-        
+
         for suite_name, results in report["category_results"].items():
             total_tests = results["total"]
             if total_tests > 0:
                 score = ((results["passed"] * 100) + (results["warnings"] * 75)) / (total_tests * 100) * 100
             else:
                 score = 0
-            
+
             category_table.add_row(
                 suite_name.replace("_", " ").title(),
                 str(results["total"]),
@@ -1677,43 +1666,43 @@ def main():
                 str(results["warnings"]),
                 f"{score:.1f}%"
             )
-        
+
         console.print(category_table)
-    
+
     def cleanup(self):
         """Cleanup test environment"""
         try:
             if self.test_data_dir.exists():
                 shutil.rmtree(self.test_data_dir)
-            console.print(f"🧹 Test environment cleaned up")
+            console.print("🧹 Test environment cleaned up")
         except Exception as e:
             console.print(f"⚠️ Cleanup warning: {e}")
 
 def main():
     """Main testing function"""
     orchestrator = Phase21_4TestingOrchestrator()
-    
+
     try:
         # Run all tests
         results = orchestrator.run_all_tests()
-        
+
         # Generate report
         report = orchestrator.generate_test_report(results)
-        
+
         # Display summary
         orchestrator.display_test_summary(report)
-        
+
         # Save detailed report
         report_file = Path(f"phase21_4_test_report_{orchestrator.session_id}.json")
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
-        
+
         console.print(f"📊 Detailed report saved: [cyan]{report_file}[/cyan]")
-        
+
         return 0 if report["readiness"] in ["PRODUCTION_READY", "READY_WITH_MONITORING"] else 1
-        
+
     finally:
         orchestrator.cleanup()
 
 if __name__ == "__main__":
-    sys.exit(main()) 
+    sys.exit(main())

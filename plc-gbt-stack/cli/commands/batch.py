@@ -25,38 +25,36 @@ Phase: 21.4.1 - Batch Operations
 Dependencies: Phase 21.1/21.2/21.3 (CLI, Schema, Instance Management)
 """
 
-import os
-import sys
-import json
-import csv
 import asyncio
+import csv
+import json
 import logging
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
-from dataclasses import dataclass, asdict, field
-from enum import Enum
-import uuid
-import tempfile
-import shutil
+import sys
 import time
-import fnmatch
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import click
-import yaml
-import pandas as pd
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn, TimeElapsedColumn
-from rich.prompt import Prompt, Confirm
-from rich.tree import Tree
-from rich import print as rprint
-from rich.status import Status
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
+from rich.table import Table
 
 # Import CLI framework components
-from ..framework import CLICommand, requires_permission, Permission
+from ..framework import Permission, requires_permission
+
 
 # Import configuration - avoid circular import by lazy loading
 def get_cli_configuration():
@@ -76,7 +74,7 @@ def get_cli_configuration():
 
 # Import existing managers
 try:
-    from .instance import InstanceManager, InstanceConfiguration, InstanceStatus, InstanceType
+    from .instance import InstanceConfiguration, InstanceManager, InstanceStatus, InstanceType
     from .schema import SchemaManager
     MANAGERS_AVAILABLE = True
 except ImportError as e:
@@ -154,16 +152,16 @@ class BatchExecutionSummary:
 
 class BatchProcessor:
     """Core batch processing engine"""
-    
+
     def __init__(self):
         self.instance_manager = InstanceManager() if MANAGERS_AVAILABLE else None
         self.schema_manager = SchemaManager() if MANAGERS_AVAILABLE else None
         self.batch_history: List[BatchExecutionSummary] = []
-        
+
     def create_batch_id(self) -> str:
         """Generate unique batch ID"""
         return f"batch_{int(time.time())}_{str(uuid.uuid4())[:8]}"
-    
+
     async def execute_batch_operation(
         self,
         operation_type: BatchOperationType,
@@ -173,17 +171,17 @@ class BatchProcessor:
         continue_on_error: bool = True
     ) -> BatchExecutionSummary:
         """Execute batch operation with parallel processing"""
-        
+
         batch_id = self.create_batch_id()
         start_time = datetime.now()
         operation_params = operation_params or {}
-        
+
         console.print(f"🚀 Starting batch operation: {operation_type.value}")
         console.print(f"Batch ID: [cyan]{batch_id}[/cyan]")
         console.print(f"Items to process: [yellow]{len(items)}[/yellow]")
-        
+
         results = []
-        
+
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
@@ -192,12 +190,12 @@ class BatchProcessor:
             TimeElapsedColumn(),
             console=console
         ) as progress:
-            
+
             task = progress.add_task(
                 f"Processing {operation_type.value}",
                 total=len(items)
             )
-            
+
             # Use ThreadPoolExecutor for parallel processing
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 # Submit all tasks
@@ -209,17 +207,17 @@ class BatchProcessor:
                         operation_params
                     ): item for item in items
                 }
-                
+
                 # Process completed tasks
                 for future in as_completed(future_to_item):
                     item = future_to_item[future]
                     try:
                         result = future.result()
                         results.append(result)
-                        
+
                         # Update progress
                         progress.advance(task)
-                        
+
                         # Display result
                         if result.status == "success":
                             status_emoji = "✅"
@@ -227,11 +225,11 @@ class BatchProcessor:
                             status_emoji = "❌"
                         else:
                             status_emoji = "⚠️"
-                        
+
                         progress.console.print(
                             f"  {status_emoji} {result.item_name}: {result.message}"
                         )
-                        
+
                     except Exception as e:
                         # Handle task execution error
                         error_result = BatchOperationResult(
@@ -245,19 +243,19 @@ class BatchProcessor:
                         )
                         results.append(error_result)
                         progress.advance(task)
-                        
+
                         if not continue_on_error:
                             console.print(f"❌ Stopping batch due to error: {e}")
                             break
-        
+
         # Calculate summary
         end_time = datetime.now()
         execution_time = (end_time - start_time).total_seconds()
-        
+
         successful = sum(1 for r in results if r.status == "success")
         failed = sum(1 for r in results if r.status == "failed")
         skipped = sum(1 for r in results if r.status == "skipped")
-        
+
         # Determine overall status
         if failed == 0:
             overall_status = BatchStatus.COMPLETED
@@ -265,7 +263,7 @@ class BatchProcessor:
             overall_status = BatchStatus.FAILED
         else:
             overall_status = BatchStatus.PARTIAL
-        
+
         summary = BatchExecutionSummary(
             batch_id=batch_id,
             operation_type=operation_type,
@@ -279,14 +277,14 @@ class BatchProcessor:
             results=results,
             status=overall_status
         )
-        
+
         self.batch_history.append(summary)
-        
+
         # Display summary
         self._display_batch_summary(summary)
-        
+
         return summary
-    
+
     def _execute_single_operation(
         self,
         operation_type: BatchOperationType,
@@ -294,11 +292,11 @@ class BatchProcessor:
         params: Dict[str, Any]
     ) -> BatchOperationResult:
         """Execute single operation on item"""
-        
+
         start_time = time.time()
         item_id = item.get('id', str(uuid.uuid4()))
         item_name = item.get('name', f"item_{item_id[:8]}")
-        
+
         try:
             if operation_type == BatchOperationType.CREATE:
                 return self._execute_create_operation(item, params, start_time)
@@ -316,7 +314,7 @@ class BatchProcessor:
                 return self._execute_analyze_operation(item, params, start_time)
             else:
                 raise ValueError(f"Unknown operation type: {operation_type}")
-                
+
         except Exception as e:
             execution_time = time.time() - start_time
             return BatchOperationResult(
@@ -328,58 +326,58 @@ class BatchProcessor:
                 execution_time=execution_time,
                 error=str(e)
             )
-    
+
     def _execute_create_operation(self, item: Dict[str, Any], params: Dict[str, Any], start_time: float) -> BatchOperationResult:
         """Execute create operation"""
         execution_time = time.time() - start_time
-        
+
         # Simulate instance creation
         item_id = item.get('id', str(uuid.uuid4()))
         item_name = item.get('name', f"instance_{item_id[:8]}")
-        
+
         # Mock successful creation
         return BatchOperationResult(
             item_id=item_id,
             item_name=item_name,
             operation=BatchOperationType.CREATE,
             status="success",
-            message=f"Instance created successfully",
+            message="Instance created successfully",
             execution_time=execution_time,
             details={
                 "schema": item.get('schema', 'standard-pid'),
                 "type": item.get('type', 'basic_pid')
             }
         )
-    
+
     def _execute_update_operation(self, item: Dict[str, Any], params: Dict[str, Any], start_time: float) -> BatchOperationResult:
         """Execute update operation"""
         execution_time = time.time() - start_time
-        
+
         item_id = item.get('id', 'unknown')
         item_name = item.get('name', 'unknown')
-        
+
         return BatchOperationResult(
             item_id=item_id,
             item_name=item_name,
             operation=BatchOperationType.UPDATE,
             status="success",
-            message=f"Parameters updated successfully",
+            message="Parameters updated successfully",
             execution_time=execution_time,
             details={
                 "updated_params": params.get('updates', {})
             }
         )
-    
+
     def _execute_validate_operation(self, item: Dict[str, Any], params: Dict[str, Any], start_time: float) -> BatchOperationResult:
         """Execute validate operation"""
         execution_time = time.time() - start_time
-        
+
         item_id = item.get('id', 'unknown')
         item_name = item.get('name', 'unknown')
-        
+
         # Mock validation result
         validation_passed = True  # In real implementation, would validate against schema
-        
+
         return BatchOperationResult(
             item_id=item_id,
             item_name=item_name,
@@ -392,15 +390,15 @@ class BatchProcessor:
                 "schema_version": item.get('schema_version', '1.0.0')
             }
         )
-    
+
     def _execute_export_operation(self, item: Dict[str, Any], params: Dict[str, Any], start_time: float) -> BatchOperationResult:
         """Execute export operation"""
         execution_time = time.time() - start_time
-        
+
         item_id = item.get('id', 'unknown')
         item_name = item.get('name', 'unknown')
         export_format = params.get('format', 'json')
-        
+
         return BatchOperationResult(
             item_id=item_id,
             item_name=item_name,
@@ -413,31 +411,31 @@ class BatchProcessor:
                 "output_file": f"{item_name}.{export_format}"
             }
         )
-    
+
     def _execute_delete_operation(self, item: Dict[str, Any], params: Dict[str, Any], start_time: float) -> BatchOperationResult:
         """Execute delete operation"""
         execution_time = time.time() - start_time
-        
+
         item_id = item.get('id', 'unknown')
         item_name = item.get('name', 'unknown')
-        
+
         return BatchOperationResult(
             item_id=item_id,
             item_name=item_name,
             operation=BatchOperationType.DELETE,
             status="success",
-            message=f"Instance deleted successfully",
+            message="Instance deleted successfully",
             execution_time=execution_time
         )
-    
+
     def _execute_convert_operation(self, item: Dict[str, Any], params: Dict[str, Any], start_time: float) -> BatchOperationResult:
         """Execute convert operation"""
         execution_time = time.time() - start_time
-        
+
         item_id = item.get('id', 'unknown')
         item_name = item.get('name', 'unknown')
         target_schema = params.get('target_schema', 'advanced-pid')
-        
+
         return BatchOperationResult(
             item_id=item_id,
             item_name=item_name,
@@ -450,39 +448,39 @@ class BatchProcessor:
                 "target_schema": target_schema
             }
         )
-    
+
     def _execute_analyze_operation(self, item: Dict[str, Any], params: Dict[str, Any], start_time: float) -> BatchOperationResult:
         """Execute analyze operation"""
         execution_time = time.time() - start_time
-        
+
         item_id = item.get('id', 'unknown')
         item_name = item.get('name', 'unknown')
-        
+
         return BatchOperationResult(
             item_id=item_id,
             item_name=item_name,
             operation=BatchOperationType.ANALYZE,
             status="success",
-            message=f"Analysis completed",
+            message="Analysis completed",
             execution_time=execution_time,
             details={
                 "analysis_type": params.get('type', 'performance'),
                 "score": 85.5  # Mock score
             }
         )
-    
+
     def _display_batch_summary(self, summary: BatchExecutionSummary):
         """Display batch execution summary"""
-        
+
         # Status color mapping
         status_colors = {
             BatchStatus.COMPLETED: "green",
             BatchStatus.PARTIAL: "yellow",
             BatchStatus.FAILED: "red"
         }
-        
+
         color = status_colors.get(summary.status, "white")
-        
+
         console.print(Panel.fit(
             f"[bold {color}]Batch Operation Complete[/bold {color}]\n"
             f"Operation: {summary.operation_type.value}\n"
@@ -490,19 +488,19 @@ class BatchProcessor:
             f"Duration: {summary.execution_time:.2f}s",
             border_style=color
         ))
-        
+
         # Results table
         table = Table(title="Batch Results Summary")
         table.add_column("Metric", style="cyan")
         table.add_column("Count", style="magenta")
         table.add_column("Percentage", style="green")
-        
+
         total = summary.total_items
         table.add_row("Total Items", str(total), "100.0%")
         table.add_row("Successful", str(summary.successful), f"{(summary.successful/total*100):.1f}%")
         table.add_row("Failed", str(summary.failed), f"{(summary.failed/total*100):.1f}%")
         table.add_row("Skipped", str(summary.skipped), f"{(summary.skipped/total*100):.1f}%")
-        
+
         console.print(table)
 
 # =============================================================================
@@ -525,22 +523,22 @@ def get_batch_processor():
 
 class CSVProcessor:
     """CSV processing utilities for batch operations"""
-    
+
     @staticmethod
     def read_csv_instances(file_path: Path) -> List[Dict[str, Any]]:
         """Read instance definitions from CSV file"""
         instances = []
-        
+
         try:
-            with open(file_path, 'r', newline='', encoding='utf-8') as csvfile:
+            with open(file_path, newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
-                
+
                 for row_num, row in enumerate(reader, start=1):
                     # Validate required fields
                     if not row.get('name'):
                         console.print(f"⚠️ Row {row_num}: Missing required 'name' field, skipping")
                         continue
-                    
+
                     # Process row into instance definition
                     instance = {
                         'name': row['name'],
@@ -549,7 +547,7 @@ class CSVProcessor:
                         'description': row.get('description', ''),
                         'parameters': {}
                     }
-                    
+
                     # Extract parameter columns (any column starting with 'param_')
                     for key, value in row.items():
                         if key.startswith('param_') and value:
@@ -562,27 +560,27 @@ class CSVProcessor:
                                     instance['parameters'][param_name] = int(value)
                             except ValueError:
                                 instance['parameters'][param_name] = value
-                    
+
                     instances.append(instance)
-                    
+
         except Exception as e:
             console.print(f"❌ Error reading CSV file: {e}")
             return []
-        
+
         console.print(f"📊 Loaded {len(instances)} instances from CSV")
         return instances
-    
+
     @staticmethod
     def write_csv_results(results: List[BatchOperationResult], output_path: Path):
         """Write batch results to CSV file"""
         try:
             with open(output_path, 'w', newline='', encoding='utf-8') as csvfile:
                 fieldnames = [
-                    'item_id', 'item_name', 'operation', 'status', 
+                    'item_id', 'item_name', 'operation', 'status',
                     'message', 'execution_time', 'error'
                 ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                
+
                 writer.writeheader()
                 for result in results:
                     writer.writerow({
@@ -594,9 +592,9 @@ class CSVProcessor:
                         'execution_time': f"{result.execution_time:.3f}",
                         'error': result.error or ''
                     })
-            
+
             console.print(f"📝 Results written to: {output_path}")
-            
+
         except Exception as e:
             console.print(f"❌ Error writing CSV results: {e}")
 
@@ -611,7 +609,7 @@ def batch_commands(ctx):
     pass
 
 @batch_commands.command('create')
-@click.option('--from-csv', type=click.Path(exists=True), 
+@click.option('--from-csv', type=click.Path(exists=True),
               help='CSV file with instance definitions')
 @click.option('--schema', help='Default schema for all instances')
 @click.option('--type', help='Default instance type')
@@ -625,24 +623,24 @@ def batch_create(from_csv, schema, type, max_workers, output, dry_run):
         if not from_csv:
             console.print("❌ --from-csv parameter is required")
             return
-        
+
         csv_file = Path(from_csv)
         console.print(f"📂 Reading instances from: {csv_file}")
-        
+
         # Read instances from CSV
         instances = CSVProcessor.read_csv_instances(csv_file)
-        
+
         if not instances:
             console.print("❌ No valid instances found in CSV file")
             return
-        
+
         # Apply defaults
         for instance in instances:
             if schema and not instance.get('schema'):
                 instance['schema'] = schema
             if type and not instance.get('type'):
                 instance['type'] = type
-        
+
         if dry_run:
             console.print(f"🔍 Dry run: Would create {len(instances)} instances")
             for instance in instances[:5]:  # Show first 5
@@ -650,7 +648,7 @@ def batch_create(from_csv, schema, type, max_workers, output, dry_run):
             if len(instances) > 5:
                 console.print(f"  ... and {len(instances) - 5} more")
             return
-        
+
         # Execute batch creation
         async def _create():
             summary = await get_batch_processor().execute_batch_operation(
@@ -659,15 +657,15 @@ def batch_create(from_csv, schema, type, max_workers, output, dry_run):
                 {'defaults': {'schema': schema, 'type': type}},
                 max_workers=max_workers
             )
-            
+
             # Save results if requested
             if output:
                 CSVProcessor.write_csv_results(summary.results, Path(output))
-            
+
             return summary
-        
+
         asyncio.run(_create())
-        
+
     except Exception as e:
         console.print(f"❌ Batch create error: {e}")
 
@@ -684,10 +682,10 @@ def batch_validate(pattern, path, level, max_workers, output):
     try:
         search_path = Path(path) if path else Path.cwd()
         pattern = pattern or "*.json"
-        
+
         console.print(f"🔍 Searching for files matching: {pattern}")
         console.print(f"Search path: {search_path}")
-        
+
         # Find matching files
         matching_files = []
         for file_path in search_path.rglob(pattern):
@@ -697,13 +695,13 @@ def batch_validate(pattern, path, level, max_workers, output):
                     'name': file_path.name,
                     'path': str(file_path)
                 })
-        
+
         console.print(f"📁 Found {len(matching_files)} files to validate")
-        
+
         if not matching_files:
             console.print("⚠️ No files found matching pattern")
             return
-        
+
         # Execute batch validation
         async def _validate():
             summary = await get_batch_processor().execute_batch_operation(
@@ -712,21 +710,21 @@ def batch_validate(pattern, path, level, max_workers, output):
                 {'level': level},
                 max_workers=max_workers
             )
-            
+
             # Save results if requested
             if output:
                 CSVProcessor.write_csv_results(summary.results, Path(output))
-            
+
             return summary
-        
+
         asyncio.run(_validate())
-        
+
     except Exception as e:
         console.print(f"❌ Batch validate error: {e}")
 
 @batch_commands.command('update')
 @click.option('--query', help='Filter query for instances to update')
-@click.option('--set', 'set_params', multiple=True, 
+@click.option('--set', 'set_params', multiple=True,
               help='Parameters to set (format: key=value)')
 @click.option('--from-csv', type=click.Path(exists=True),
               help='CSV file with update instructions')
@@ -747,22 +745,22 @@ def batch_update(query, set_params, from_csv, max_workers, output, dry_run):
                 {'id': f'instance_{i}', 'name': f'Instance {i}', 'type': 'basic_pid'}
                 for i in range(1, 6)
             ]
-        
+
         # Parse set parameters
         update_params = {}
         for param in set_params:
             if '=' in param:
                 key, value = param.split('=', 1)
                 update_params[key] = value
-        
+
         if dry_run:
             console.print(f"🔍 Dry run: Would update {len(updates)} instances")
             if update_params:
                 console.print(f"Parameters to set: {update_params}")
             return
-        
+
         console.print(f"🔄 Updating {len(updates)} instances")
-        
+
         # Execute batch update
         async def _update():
             summary = await get_batch_processor().execute_batch_operation(
@@ -771,15 +769,15 @@ def batch_update(query, set_params, from_csv, max_workers, output, dry_run):
                 {'updates': update_params},
                 max_workers=max_workers
             )
-            
+
             # Save results if requested
             if output:
                 CSVProcessor.write_csv_results(summary.results, Path(output))
-            
+
             return summary
-        
+
         asyncio.run(_update())
-        
+
     except Exception as e:
         console.print(f"❌ Batch update error: {e}")
 
@@ -807,18 +805,18 @@ def batch_export(ids, query, format, output_dir, max_workers):
                 {'id': f'instance_{i}', 'name': f'Instance {i}', 'type': 'basic_pid'}
                 for i in range(1, 6)
             ]
-        
+
         console.print(f"📤 Exporting {len(instances)} instances to {format} format")
-        
+
         # Set output directory
         if not output_dir:
             output_dir = Path.cwd() / "exports"
         else:
             output_dir = Path(output_dir)
-        
+
         output_dir.mkdir(exist_ok=True)
         console.print(f"📁 Output directory: {output_dir}")
-        
+
         # Execute batch export
         async def _export():
             summary = await get_batch_processor().execute_batch_operation(
@@ -827,28 +825,28 @@ def batch_export(ids, query, format, output_dir, max_workers):
                 {'format': format, 'output_dir': str(output_dir)},
                 max_workers=max_workers
             )
-            
+
             return summary
-        
+
         asyncio.run(_export())
-        
+
     except Exception as e:
         console.print(f"❌ Batch export error: {e}")
 
 @batch_commands.command('status')
 @click.option('--limit', default=10, help='Number of recent batches to show')
-@click.option('--format', type=click.Choice(['table', 'json']), 
+@click.option('--format', type=click.Choice(['table', 'json']),
               default='table', help='Output format')
 @requires_permission(Permission.READ)
 def batch_status(limit, format):
     """Show status of recent batch operations"""
     try:
         recent_batches = get_batch_processor().batch_history[-limit:]
-        
+
         if not recent_batches:
             console.print("📋 No batch operations found")
             return
-        
+
         if format == 'json':
             result = []
             for batch in recent_batches:
@@ -858,7 +856,7 @@ def batch_status(limit, format):
                 if batch_dict['end_time']:
                     batch_dict['end_time'] = batch_dict['end_time'].isoformat()
                 result.append(batch_dict)
-            
+
             console.print(json.dumps(result, indent=2))
         else:
             table = Table(title="Recent Batch Operations")
@@ -868,15 +866,15 @@ def batch_status(limit, format):
             table.add_column("Items", style="yellow")
             table.add_column("Success Rate", style="blue")
             table.add_column("Duration", style="white")
-            
+
             for batch in recent_batches:
                 success_rate = (batch.successful / batch.total_items * 100) if batch.total_items > 0 else 0
                 status_color = {
                     BatchStatus.COMPLETED: "green",
-                    BatchStatus.PARTIAL: "yellow", 
+                    BatchStatus.PARTIAL: "yellow",
                     BatchStatus.FAILED: "red"
                 }.get(batch.status, "white")
-                
+
                 table.add_row(
                     batch.batch_id[:16] + "...",
                     batch.operation_type.value,
@@ -885,9 +883,9 @@ def batch_status(limit, format):
                     f"{success_rate:.1f}%",
                     f"{batch.execution_time:.1f}s"
                 )
-            
+
             console.print(table)
-        
+
     except Exception as e:
         console.print(f"❌ Error showing batch status: {e}")
 
@@ -901,4 +899,4 @@ __all__ = ['batch_commands', 'BatchProcessor', 'BatchCommand', 'register_batch_c
 
 # For standalone testing
 if __name__ == "__main__":
-    batch_commands() 
+    batch_commands()

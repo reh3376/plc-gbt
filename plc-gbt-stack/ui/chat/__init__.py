@@ -14,13 +14,13 @@ Task: 23.5.1 - Chat Interface
 """
 
 from .chat_interface import ChatInterface
-from .terminal_ui import TerminalChatUI
 from .message_formatter import MessageFormatter
 from .progress_indicator import ProgressIndicator
+from .terminal_ui import TerminalChatUI
 
 __all__ = [
     "ChatInterface",
     "TerminalChatUI",
-    "MessageFormatter", 
+    "MessageFormatter",
     "ProgressIndicator"
-] 
+]

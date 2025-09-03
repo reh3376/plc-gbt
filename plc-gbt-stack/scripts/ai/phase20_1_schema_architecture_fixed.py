@@ -6,25 +6,21 @@ Comprehensive JSON schema framework for control loops with versioning, inheritan
 and management capabilities.
 
 Author: AI Task Orchestrator
-Created: 2025-01-17  
+Created: 2025-01-17
 Phase: 20.1 - Schema Architecture & Management System
 """
 
-import os
-import json
 import asyncio
+import json
 import logging
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
-from dataclasses import dataclass, asdict, field
-from enum import Enum
 import re
-import hashlib
-import sqlite3
-from contextlib import asynccontextmanager
-import jsonschema
-from jsonschema import Draft7Validator, validators
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict
+
+from jsonschema import Draft7Validator
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -65,10 +61,10 @@ class SchemaVersion:
     major: int  # Breaking changes (XX)
     minor: int  # New features (YY)
     patch: int  # Bug fixes (ZZZ)
-    
+
     def __str__(self) -> str:
         return f"{self.major:02d}.{self.minor:02d}.{self.patch:03d}"
-    
+
     @classmethod
     def from_string(cls, version_str: str) -> "SchemaVersion":
         """Parse version string like '01.05.002'"""
@@ -76,7 +72,7 @@ class SchemaVersion:
         match = re.match(pattern, version_str)
         if not match:
             raise ValueError(f"Invalid version format: {version_str}")
-        
+
         major, minor, patch = map(int, match.groups())
         return cls(major=major, minor=minor, patch=patch)
 
@@ -100,12 +96,12 @@ class SchemaMetadata:
 
 class SimpleSchemaManager:
     """Simplified schema manager for Phase 20.1 demonstration"""
-    
+
     def __init__(self):
         self.schemas: Dict[str, Dict[str, Any]] = {}
         self.session_id = f"phase20_1_{int(datetime.now().timestamp())}"
         self.start_time = datetime.now()
-        
+
     async def create_base_schemas(self) -> Dict[str, Any]:
         """Create the 4 base control loop schema types"""
         results = {
@@ -114,7 +110,7 @@ class SimpleSchemaManager:
             "errors": [],
             "summary": {}
         }
-        
+
         try:
             # Define base schemas
             base_schemas = [
@@ -125,25 +121,25 @@ class SimpleSchemaManager:
                     "description": "Standard PID controller implemented in ladder logic"
                 },
                 {
-                    "id": "ladder_logic_advanced_pid", 
+                    "id": "ladder_logic_advanced_pid",
                     "name": "Ladder Logic Advanced PID Controller",
                     "type": ControlLoopType.LADDER_LOGIC_ADVANCED_PID,
                     "description": "Advanced PID controller with enhanced features"
                 },
                 {
                     "id": "function_block_standard_pide",
-                    "name": "Function Block Standard PIDE Controller", 
+                    "name": "Function Block Standard PIDE Controller",
                     "type": ControlLoopType.FUNCTION_BLOCK_STANDARD_PIDE,
                     "description": "Standard PIDE controller using function blocks"
                 },
                 {
                     "id": "function_block_advanced_pide",
                     "name": "Function Block Advanced PIDE Controller",
-                    "type": ControlLoopType.FUNCTION_BLOCK_ADVANCED_PIDE, 
+                    "type": ControlLoopType.FUNCTION_BLOCK_ADVANCED_PIDE,
                     "description": "Advanced PIDE controller with comprehensive features"
                 }
             ]
-            
+
             # Create each schema
             for schema_def in base_schemas:
                 # Create metadata
@@ -158,7 +154,7 @@ class SimpleSchemaManager:
                     updated_at=datetime.now(timezone.utc),
                     created_by="AI Task Orchestrator Phase 20.1"
                 )
-                
+
                 # Create JSON schema
                 json_schema = {
                     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -189,7 +185,7 @@ class SimpleSchemaManager:
                             "required": ["tag"]
                         },
                         "setpoint": {
-                            "type": "object", 
+                            "type": "object",
                             "properties": {
                                 "tag": {"type": "string"},
                                 "default_value": {"type": "number"},
@@ -217,7 +213,7 @@ class SimpleSchemaManager:
                                     "maximum": 1000
                                 },
                                 "integral_time": {
-                                    "type": "number", 
+                                    "type": "number",
                                     "minimum": 0.001,
                                     "maximum": 3600
                                 },
@@ -242,16 +238,16 @@ class SimpleSchemaManager:
                     "required": ["tag_name", "process_variable", "setpoint", "control_output", "pid_parameters", "operating_mode"],
                     "additionalProperties": False
                 }
-                
+
                 # Store schema
                 self.schemas[schema_def["id"]] = {
                     "metadata": asdict(metadata),
                     "json_schema": json_schema
                 }
-                
+
                 results["created_schemas"].append(schema_def["id"])
                 logger.info(f"Created schema: {schema_def['id']}")
-            
+
             # Generate summary
             results["summary"] = {
                 "total_schemas_attempted": 4,
@@ -259,14 +255,14 @@ class SimpleSchemaManager:
                 "success_rate": len(results["created_schemas"]) / 4 * 100,
                 "execution_time_seconds": (datetime.now() - self.start_time).total_seconds()
             }
-            
+
         except Exception as e:
             error_msg = f"Failed to create base schemas: {str(e)}"
             results["errors"].append(error_msg)
             logger.error(error_msg)
-        
+
         return results
-    
+
     async def validate_schemas(self) -> Dict[str, Any]:
         """Validate all created schemas"""
         results = {
@@ -275,10 +271,10 @@ class SimpleSchemaManager:
             "errors": [],
             "summary": {}
         }
-        
+
         try:
             valid_count = 0
-            
+
             for schema_id, schema_data in self.schemas.items():
                 try:
                     # Validate JSON schema syntax
@@ -288,16 +284,16 @@ class SimpleSchemaManager:
                 except Exception as e:
                     is_valid = False
                     validation_errors = [str(e)]
-                
+
                 results["validation_results"].append({
                     "schema_id": schema_id,
                     "is_valid": is_valid,
                     "errors": validation_errors
                 })
-                
+
                 if is_valid:
                     valid_count += 1
-            
+
             # Generate summary
             total_count = len(results["validation_results"])
             results["summary"] = {
@@ -306,14 +302,14 @@ class SimpleSchemaManager:
                 "invalid_schemas": total_count - valid_count,
                 "validation_rate": (valid_count / total_count * 100) if total_count > 0 else 0
             }
-            
+
         except Exception as e:
             error_msg = f"Schema validation failed: {str(e)}"
             results["errors"].append(error_msg)
             logger.error(error_msg)
-        
+
         return results
-    
+
     async def generate_documentation(self) -> Dict[str, Any]:
         """Generate documentation for the schema architecture"""
         results = {
@@ -322,11 +318,11 @@ class SimpleSchemaManager:
             "errors": [],
             "summary": {}
         }
-        
+
         try:
             docs_path = Path("plc-gbt-stack/schemas/docs")
             docs_path.mkdir(parents=True, exist_ok=True)
-            
+
             # Generate overview documentation
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             overview_content = f"""# Control Loop Schema Architecture Overview
@@ -347,7 +343,7 @@ The architecture defines 4 fundamental control loop types:
 - **Description**: Standard PID controller implemented in ladder logic
 - **Use Case**: Basic PID control applications
 
-### 2. Ladder Logic Advanced PID  
+### 2. Ladder Logic Advanced PID
 - **ID**: ladder_logic_advanced_pid
 - **Description**: Advanced PID controller with enhanced features
 - **Use Case**: Complex control scenarios requiring advanced PID features
@@ -374,7 +370,7 @@ Each schema includes:
 
 Schemas use semantic versioning with format XX.YY.ZZZ:
 - **XX**: Major version (breaking changes)
-- **YY**: Minor version (new features)  
+- **YY**: Minor version (new features)
 - **ZZZ**: Patch version (bug fixes)
 
 ## Common Properties
@@ -404,12 +400,12 @@ Phase 20.1 Achievements:
 - Phase 20.3: Add sub-type schemas (Feedforward, Cascade, etc.)
 - Phase 20.4: Enable user customization and extensibility
 """
-            
+
             overview_file = docs_path / "schema_overview.md"
             with open(overview_file, 'w', encoding='utf-8') as f:
                 f.write(overview_content)
             results["documentation_files"].append(str(overview_file))
-            
+
             # Generate API documentation
             api_content = f"""# Schema API Documentation
 
@@ -447,7 +443,7 @@ docs = await manager.generate_documentation()
 @dataclass
 class SchemaMetadata:
     schema_id: str
-    name: str  
+    name: str
     description: str
     version: SchemaVersion
     control_type: ControlLoopType
@@ -466,7 +462,7 @@ class SchemaVersion:
     major: int  # Breaking changes (XX)
     minor: int  # New features (YY)
     patch: int  # Bug fixes (ZZZ)
-    
+
     def __str__(self) -> str:
         return f"{{self.major:02d}}.{{self.minor:02d}}.{{self.patch:03d}}"
 ```
@@ -507,7 +503,7 @@ instance = {{
         "max_value": 500
     }},
     "setpoint": {{
-        "tag": "TIC_101_SP", 
+        "tag": "TIC_101_SP",
         "default_value": 350,
         "min_value": 100,
         "max_value": 450
@@ -530,24 +526,24 @@ instance = {{
 
 This instance conforms to the ladder_logic_standard_pid schema and can be validated using the JSON Schema framework.
 """
-            
+
             api_file = docs_path / "schema_api.md"
             with open(api_file, 'w', encoding='utf-8') as f:
                 f.write(api_content)
             results["documentation_files"].append(str(api_file))
-            
+
             results["summary"] = {
                 "documentation_files_created": len(results["documentation_files"]),
                 "total_size_bytes": sum(Path(f).stat().st_size for f in results["documentation_files"])
             }
-            
+
         except Exception as e:
             error_msg = f"Documentation generation failed: {str(e)}"
             results["errors"].append(error_msg)
             logger.error(error_msg)
-        
+
         return results
-    
+
     async def execute_phase_20_1(self) -> Dict[str, Any]:
         """Execute complete Phase 20.1 implementation"""
         phase_results = {
@@ -559,40 +555,40 @@ This instance conforms to the ladder_logic_standard_pid schema and can be valida
             "errors": [],
             "summary": {}
         }
-        
+
         try:
             logger.info("Starting Phase 20.1: Schema Architecture & Management System")
-            
+
             # Task 1: Create base schemas
             logger.info("Task 1: Creating base control loop schema types")
             base_schema_results = await self.create_base_schemas()
             phase_results["tasks"]["create_base_schemas"] = base_schema_results
-            
+
             # Task 2: Validate all schemas
             logger.info("Task 2: Validating all schemas")
             validation_results = await self.validate_schemas()
             phase_results["tasks"]["validate_schemas"] = validation_results
-            
+
             # Task 3: Generate documentation
             logger.info("Task 3: Generating comprehensive documentation")
             documentation_results = await self.generate_documentation()
             phase_results["tasks"]["generate_documentation"] = documentation_results
-            
+
             # Calculate overall results
             end_time = datetime.now()
             execution_time = (end_time - self.start_time).total_seconds()
-            
+
             # Determine overall status
             all_tasks_successful = all(
-                len(task_result.get("errors", [])) == 0 
+                len(task_result.get("errors", [])) == 0
                 for task_result in phase_results["tasks"].values()
             )
-            
+
             if all_tasks_successful:
                 phase_results["overall_status"] = "completed"
             else:
                 phase_results["overall_status"] = "completed_with_errors"
-            
+
             # Generate summary
             phase_results["summary"] = {
                 "execution_time_seconds": execution_time,
@@ -608,22 +604,22 @@ This instance conforms to the ladder_logic_standard_pid schema and can be valida
                     "no_critical_errors": len(phase_results["errors"]) == 0
                 }
             }
-            
+
             # Collect all errors
             for task_name, task_result in phase_results["tasks"].items():
                 if task_result.get("errors"):
                     phase_results["errors"].extend([f"{task_name}: {error}" for error in task_result["errors"]])
-            
+
             logger.info(f"Phase 20.1 completed with status: {phase_results['overall_status']}")
             logger.info(f"Execution time: {execution_time:.2f} seconds")
             logger.info(f"Schemas created: {phase_results['summary']['schemas_created']}")
-            
+
         except Exception as e:
             error_msg = f"Phase 20.1 execution failed: {str(e)}"
             phase_results["errors"].append(error_msg)
             phase_results["overall_status"] = "failed"
             logger.error(error_msg)
-        
+
         return phase_results
 
 # =============================================================================
@@ -634,47 +630,47 @@ async def main():
     """Main execution function for Phase 20.1"""
     print("🏗️ Phase 20.1: Schema Architecture & Management System")
     print("=" * 60)
-    
+
     try:
         # Initialize manager
         manager = SimpleSchemaManager()
-        
+
         # Execute phase
         results = await manager.execute_phase_20_1()
-        
+
         # Display results
-        print(f"\n📊 PHASE 20.1 RESULTS")
+        print("\n📊 PHASE 20.1 RESULTS")
         print(f"Session ID: {results['session_id']}")
         print(f"Status: {results['overall_status'].upper()}")
         print(f"Execution Time: {results['summary']['execution_time_seconds']:.2f} seconds")
         print(f"Schemas Created: {results['summary']['schemas_created']}")
         print(f"Validation Rate: {results['summary']['validation_success_rate']:.1f}%")
         print(f"Documentation Files: {results['summary']['documentation_files']}")
-        
+
         if results['errors']:
             print(f"\n❌ ERRORS ({len(results['errors'])}):")
             for error in results['errors']:
                 print(f"  - {error}")
-        
-        print(f"\n✅ SUCCESS CRITERIA:")
+
+        print("\n✅ SUCCESS CRITERIA:")
         for criterion, met in results['summary']['success_criteria_met'].items():
             status = "✅" if met else "❌"
             print(f"  {status} {criterion}")
-        
+
         # Save results
         results_file = Path("plc-gbt-stack/results/phase20") / f"phase20_1_results_{int(datetime.now().timestamp())}.json"
         results_file.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(results_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, default=str)
-        
+
         print(f"\n💾 Results saved to: {results_file}")
-        
+
         return results
-        
+
     except Exception as e:
         print(f"\n💥 CRITICAL ERROR: {str(e)}")
         return {"error": str(e), "status": "failed"}
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

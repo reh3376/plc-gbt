@@ -11,44 +11,50 @@ Example of how to transform existing monolithic scripts into modular components.
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 
 # Import modular components
 sys.path.append(str(Path(__file__).parent))
 
+from modules.analysis import PerformanceAnalyzer, ReportGenerator
 from modules.core import BaseOrchestrator, TaskAnalysis
 from modules.data import DataLoader, DataPreprocessor
 from modules.metrics import (
-    MetricCalculator, PerformanceClassifier, MetricConfiguration,
-    PerformanceRanges, MetricType, create_standard_control_metrics,
-    create_process_quality_metrics
+    MetricCalculator,
+    MetricConfiguration,
+    MetricType,
+    PerformanceClassifier,
+    PerformanceRanges,
+    create_process_quality_metrics,
+    create_standard_control_metrics,
 )
-from modules.analysis import PerformanceAnalyzer, ReportGenerator
+
 
 class ModularControlLoopAnalyzer(BaseOrchestrator):
     """
     Modular control loop analyzer using the new architecture
-    
+
     Dramatically simplified compared to the original monolithic version:
     - 90% less code duplication
     - Reusable components
     - Consistent error handling
     - Standardized logging and reporting
     """
-    
+
     def __init__(self, config_file: Optional[str] = None):
         super().__init__("modular_control_loop_analysis", config_file)
-        
+
         # Initialize modular components
         self.metric_calculator = MetricCalculator()
         self.performance_classifier = PerformanceClassifier()
         self.performance_analyzer = PerformanceAnalyzer()
-        
+
         # Configuration cache
         self.metric_configurations = {}
         self._setup_default_configurations()
-    
+
     def _analyze_task(self) -> TaskAnalysis:
         """Task analysis following AI Task Orchestrator methodology"""
         return TaskAnalysis(
@@ -80,7 +86,7 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                 "Report generated successfully"
             ]
         )
-    
+
     def _setup_default_configurations(self):
         """Setup predefined metric configurations"""
         self.metric_configurations = {
@@ -90,11 +96,11 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
             "mae_focused": self._create_mae_focused_config(),
             "research_comprehensive": self._create_research_config()
         }
-        
+
         self.log_execution_step("Configuration Setup", "completed", {
             "available_configurations": list(self.metric_configurations.keys())
         })
-    
+
     def _create_mse_focused_config(self) -> List[MetricConfiguration]:
         """Configuration focused on MSE for optimization/ML applications"""
         return [
@@ -121,7 +127,7 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                 higher_is_better=True
             )
         ]
-    
+
     def _create_mae_focused_config(self) -> List[MetricConfiguration]:
         """Configuration focused on MAE for robust analysis"""
         return [
@@ -147,7 +153,7 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                 units="% error"
             )
         ]
-    
+
     def _create_research_config(self) -> List[MetricConfiguration]:
         """Comprehensive configuration for research applications"""
         return [
@@ -188,28 +194,28 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                 higher_is_better=True
             )
         ]
-    
-    def analyze_dataset(self, file_path: str, 
+
+    def analyze_dataset(self, file_path: str,
                        configuration_name: str = "standard_control",
                        pv_column: Optional[str] = None,
                        sp_column: Optional[str] = None,
                        cv_column: Optional[str] = None) -> Dict[str, Any]:
         """
         Analyze dataset using modular components
-        
+
         Args:
             file_path: Path to dataset file
             configuration_name: Name of metric configuration to use
             pv_column: Process variable column (auto-detected if None)
-            sp_column: Setpoint column (auto-detected if None) 
+            sp_column: Setpoint column (auto-detected if None)
             cv_column: Control variable column (auto-detected if None)
-            
+
         Returns:
             Complete analysis results
         """
         if not self.validate_requirements():
             return {"error": "Requirements validation failed"}
-        
+
         try:
             # 1. Load data using modular data loader
             self.log_execution_step("Data Loading", "started")
@@ -219,7 +225,7 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                 "columns": dataset_info.total_columns,
                 "memory_mb": f"{dataset_info.memory_usage_mb:.1f}"
             })
-            
+
             # 2. Extract control loop data using modular preprocessor
             self.log_execution_step("Control Variable Extraction", "started")
             control_data = DataPreprocessor.extract_control_loop_data(
@@ -231,13 +237,13 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                 "data_points": control_data.data_points,
                 "data_quality": f"{control_data.data_quality['overall_quality']:.1%}"
             })
-            
+
             # 3. Get metric configuration
             if configuration_name not in self.metric_configurations:
                 raise ValueError(f"Unknown configuration: {configuration_name}")
-            
+
             metric_configs = self.metric_configurations[configuration_name]
-            
+
             # 4. Calculate metrics using modular calculator
             self.log_execution_step("Metric Calculation", "started")
             data_dict = {
@@ -247,7 +253,7 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                 "cv_array": control_data.cv_array,
                 "sampling_time": 1.0  # Could be extracted from timestamps
             }
-            
+
             metric_results = self.metric_calculator.calculate_multiple_metrics(
                 metric_configs, data_dict
             )
@@ -255,21 +261,21 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                 "metrics_calculated": len(metric_results),
                 "configuration": configuration_name
             })
-            
+
             # 5. Generate performance classification
             self.log_execution_step("Performance Classification", "started")
             overall_performance = self.performance_classifier.calculate_overall_score(metric_results)
-            performance_summary = self.performance_classifier.generate_performance_summary(metric_results)
+            self.performance_classifier.generate_performance_summary(metric_results)
             self.log_execution_step("Performance Classification", "completed", {
                 "overall_score": f"{overall_performance['overall_score']:.1f}%",
                 "classification": overall_performance['overall_classification']
             })
-            
+
             # 6. Run comprehensive analysis using modular analyzer
             self.log_execution_step("Comprehensive Analysis", "started")
             analysis_result = self.performance_analyzer.analyze_control_performance(
                 control_data.pv_array,
-                control_data.sp_array, 
+                control_data.sp_array,
                 control_data.cv_array,
                 f"{self.session_id}_detailed"
             )
@@ -277,12 +283,12 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                 "quality_score": f"{analysis_result.quality_score:.1f}%",
                 "recommendations": len(analysis_result.recommendations)
             })
-            
+
             # 7. Generate final report
             self.log_execution_step("Report Generation", "started")
-            report = ReportGenerator.generate_summary_report(analysis_result, "dict")
+            ReportGenerator.generate_summary_report(analysis_result, "dict")
             self.log_execution_step("Report Generation", "completed")
-            
+
             # Compile final results
             final_results = {
                 "session_info": {
@@ -326,42 +332,41 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
                     "performance_metrics": self.results["performance_metrics"]
                 }
             }
-            
+
             # Add performance metrics for this execution
             self.add_performance_metric("overall_score", overall_performance['overall_score'])
             self.add_performance_metric("data_quality", control_data.data_quality['overall_quality'])
             self.add_performance_metric("metrics_calculated", len(metric_results))
-            
+
             # Save results
             results_file = self.save_results()
             final_results["results_file"] = results_file
-            
+
             return final_results
-            
+
         except Exception as e:
             self.log_error(f"Analysis failed: {str(e)}", e)
             return {"error": str(e), "session_id": self.session_id}
-    
+
     def execute(self) -> Dict[str, Any]:
         """Execute with default beer feed dataset for demonstration"""
         # Use the default beer feed dataset for demonstration
-        dataset_path = "/Users/reh3376/repos/PLC_GPT/plc-gpt-stack/training_data/plc_training_20250703_161624.jsonl"
-        
+
         # Since this is a JSONL file, we'll simulate with a synthetic dataset
         # In a real implementation, this would load the actual data
-        
+
         self.logger.info("🧪 Running demonstration with synthetic dataset")
-        
+
         # Create synthetic control loop data for demonstration
         import pandas as pd
         np.random.seed(42)
-        
+
         n_points = 1000
         time = np.linspace(0, 100, n_points)
         setpoint = 50 + 10 * np.sin(0.1 * time) + np.random.normal(0, 0.5, n_points)
         pv = setpoint + np.random.normal(0, 1.5, n_points) + 0.1 * np.sin(0.5 * time)
         cv = 50 + 2 * (setpoint - pv) + np.random.normal(0, 0.8, n_points)
-        
+
         # Create DataFrame
         synthetic_df = pd.DataFrame({
             'timestamp': time,
@@ -369,25 +374,25 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
             'SP01': setpoint,
             'CV01': cv
         })
-        
+
         # Save to temporary file
         temp_file = "/tmp/synthetic_control_data.csv"
         synthetic_df.to_csv(temp_file, index=False)
-        
+
         # Run analysis with different configurations
         results = {}
-        
+
         for config_name in self.metric_configurations.keys():
             self.logger.info(f"🔍 Testing configuration: {config_name}")
             config_results = self.analyze_dataset(
-                temp_file, 
+                temp_file,
                 configuration_name=config_name,
                 pv_column="PV01",
-                sp_column="SP01", 
+                sp_column="SP01",
                 cv_column="CV01"
             )
             results[config_name] = config_results
-        
+
         return {
             "demonstration_completed": True,
             "configurations_tested": list(self.metric_configurations.keys()),
@@ -395,7 +400,7 @@ class ModularControlLoopAnalyzer(BaseOrchestrator):
             "modular_architecture": {
                 "components_used": [
                     "BaseOrchestrator", "DataLoader", "DataPreprocessor",
-                    "MetricCalculator", "PerformanceClassifier", 
+                    "MetricCalculator", "PerformanceClassifier",
                     "PerformanceAnalyzer", "ReportGenerator"
                 ],
                 "benefits_demonstrated": [
@@ -413,30 +418,30 @@ def main():
     """Demonstrate the modular control loop analyzer"""
     print("🏗️ Modular Control Loop Analyzer Demonstration")
     print("=" * 60)
-    
+
     # Initialize analyzer with modular architecture
     with ModularControlLoopAnalyzer() as analyzer:
         # Execute demonstration
         results = analyzer.execute()
-        
+
         # Display results summary
-        print(f"\n✅ Demonstration completed successfully!")
+        print("\n✅ Demonstration completed successfully!")
         print(f"📊 Configurations tested: {len(results['configurations_tested'])}")
         print(f"🧩 Modular components used: {len(results['modular_architecture']['components_used'])}")
-        
-        print(f"\n🎯 Modular Architecture Benefits:")
+
+        print("\n🎯 Modular Architecture Benefits:")
         for benefit in results['modular_architecture']['benefits_demonstrated']:
             print(f"   ✅ {benefit}")
-        
+
         # Show performance comparison
-        print(f"\n📈 Performance Comparison by Configuration:")
+        print("\n📈 Performance Comparison by Configuration:")
         for config_name, config_results in results['results_by_configuration'].items():
             if 'performance_summary' in config_results:
                 score = config_results['performance_summary']['overall_score']
                 classification = config_results['performance_summary']['overall_classification']
                 print(f"   {config_name:20}: {score:5.1f}% ({classification})")
-        
-        print(f"\n🏁 All analyses completed with modular architecture!")
+
+        print("\n🏁 All analyses completed with modular architecture!")
 
 if __name__ == "__main__":
-    main() 
+    main()

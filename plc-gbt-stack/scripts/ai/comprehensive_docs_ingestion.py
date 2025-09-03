@@ -3,12 +3,12 @@
 🧠 Comprehensive Documentation Ingestion Orchestrator
 AI Task Orchestrator Implementation
 
-Comprehensive orchestration of TypeScript and Next.js documentation 
+Comprehensive orchestration of TypeScript and Next.js documentation
 scraping and ingestion into PLC Memory Management System following
 AI Task Orchestrator methodology with >99% reliability requirements.
 
 Key Features:
-- TypeScript documentation refresh ingestion  
+- TypeScript documentation refresh ingestion
 - Next.js documentation comprehensive scraping
 - Multi-database coordination (Redis, Neo4j, PostgreSQL, Qdrant)
 - AI Task Orchestrator methodology compliance
@@ -20,16 +20,15 @@ Created: 2025-01-25
 Session: comprehensive_docs_ingestion_orchestrator
 """
 
-import os
-import sys
-import json
 import asyncio
-import subprocess
+import json
 import logging
+import subprocess
+import sys
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional
 
 # Add project paths for imports
 project_root = Path(__file__).parent.parent.parent
@@ -37,8 +36,7 @@ sys.path.append(str(project_root))
 sys.path.append(str(project_root / "scripts" / "ai"))
 
 # Import PLC Memory system
-from memory_coordinator import MemoryCoordinator, MemoryRequest
-from database_manager import DatabaseManager, DatabaseType, MemoryTier
+from memory_coordinator import MemoryCoordinator
 
 # Configure logging
 logging.basicConfig(
@@ -80,16 +78,16 @@ class ComprehensiveIngestionSession:
 class ComprehensiveDocsIngestionOrchestrator:
     """
     Comprehensive Documentation Ingestion Orchestrator
-    
+
     Following AI Task Orchestrator methodology for systematic
     documentation ingestion with >99% reliability requirements
     """
-    
+
     def __init__(self, enable_memory_integration: bool = True):
         self.session_id = f"comprehensive_docs_ingestion_{int(datetime.now().timestamp())}"
         self.start_time = datetime.now()
         self.enable_memory_integration = enable_memory_integration
-        
+
         # Initialize PLC Memory coordination if enabled
         self.memory_coordinator = None
         if enable_memory_integration:
@@ -99,7 +97,7 @@ class ComprehensiveDocsIngestionOrchestrator:
             except Exception as e:
                 logger.warning(f"⚠️ PLC Memory coordinator unavailable: {e}")
                 self.enable_memory_integration = False
-        
+
         # Results tracking
         self.session = ComprehensiveIngestionSession(
             session_id=self.session_id,
@@ -113,61 +111,61 @@ class ComprehensiveDocsIngestionOrchestrator:
             success=False,
             overall_score=0.0
         )
-        
+
         logger.info(f"🚀 Comprehensive Documentation Ingestion Session: {self.session_id}")
 
     async def execute_comprehensive_ingestion(self) -> ComprehensiveIngestionSession:
         """
         Main execution method following AI Task Orchestrator methodology
-        
+
         Returns:
             ComprehensiveIngestionSession: Complete session results
         """
         try:
             logger.info("🚀 Starting comprehensive documentation ingestion...")
             logger.info("📋 Following AI Task Orchestrator methodology")
-            
+
             # Step 1: Task Analysis and Planning
             logger.info("🔍 Step 1: Task Analysis and Planning")
             await self.analyze_ingestion_requirements()
-            
+
             # Step 2: Resource Discovery and Validation
             logger.info("🔍 Step 2: Resource Discovery and Validation")
             await self.validate_system_resources()
-            
+
             # Step 3: TypeScript Documentation Ingestion
             logger.info("📖 Step 3: TypeScript Documentation Ingestion (Refresh)")
             self.session.typescript_result = await self.execute_typescript_ingestion()
-            
-            # Step 4: Next.js Documentation Ingestion  
+
+            # Step 4: Next.js Documentation Ingestion
             logger.info("⚛️ Step 4: Next.js Documentation Ingestion (New)")
             self.session.nextjs_result = await self.execute_nextjs_ingestion()
-            
+
             # Step 5: Combined Data Processing
             logger.info("🔄 Step 5: Combined Data Processing")
             await self.process_combined_documentation()
-            
+
             # Step 6: PLC Memory System Ingestion
             logger.info("🧠 Step 6: PLC Memory System Ingestion")
             await self.execute_plc_memory_ingestion()
-            
+
             # Step 7: Comprehensive Validation
             logger.info("✅ Step 7: Comprehensive Validation")
             await self.validate_comprehensive_ingestion()
-            
+
             # Step 8: Generate Results and Documentation
             logger.info("📊 Step 8: Generate Results and Documentation")
             await self.generate_session_results()
-            
+
             self.session.end_time = datetime.now()
             self.session.success = self.calculate_overall_success()
-            
+
             logger.info(f"🎉 Comprehensive ingestion completed in {self.get_session_duration()}ms")
             logger.info(f"📊 Overall Score: {self.session.overall_score:.1%}")
             logger.info(f"✅ Session Success: {self.session.success}")
-            
+
             return self.session
-            
+
         except Exception as e:
             logger.error(f"❌ Critical failure in comprehensive ingestion: {e}")
             self.session.end_time = datetime.now()
@@ -177,7 +175,7 @@ class ComprehensiveDocsIngestionOrchestrator:
     async def analyze_ingestion_requirements(self) -> None:
         """Analyze ingestion requirements following AI Task Orchestrator methodology"""
         logger.info("📋 Analyzing documentation ingestion requirements...")
-        
+
         requirements = {
             "typescript_docs": {
                 "source": "https://www.typescriptlang.org/docs/",
@@ -202,16 +200,16 @@ class ComprehensiveDocsIngestionOrchestrator:
                 "comprehensive_testing": True
             }
         }
-        
+
         logger.info(f"✅ Requirements analysis complete: {len(requirements)} areas identified")
 
     async def validate_system_resources(self) -> None:
         """Validate system resources and dependencies"""
         logger.info("🔧 Validating system resources...")
-        
+
         # Check Node.js environment for TypeScript/Next.js scrapers
         try:
-            result = subprocess.run(['node', '--version'], 
+            result = subprocess.run(['node', '--version'],
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
                 logger.info(f"✅ Node.js available: {result.stdout.strip()}")
@@ -219,7 +217,7 @@ class ComprehensiveDocsIngestionOrchestrator:
                 logger.warning("⚠️ Node.js not available - will use Python fallback")
         except Exception as e:
             logger.warning(f"⚠️ Node.js check failed: {e}")
-        
+
         # Check PLC Memory CLI
         plc_memory_cli = project_root / "scripts" / "ai" / "plc_memory_cli.py"
         if plc_memory_cli.exists():
@@ -227,7 +225,7 @@ class ComprehensiveDocsIngestionOrchestrator:
         else:
             logger.error("❌ PLC Memory CLI not found")
             raise FileNotFoundError("PLC Memory CLI required for ingestion")
-        
+
         # Check output directories
         output_dir = project_root / "ingestion_output"
         output_dir.mkdir(exist_ok=True)
@@ -236,11 +234,11 @@ class ComprehensiveDocsIngestionOrchestrator:
     async def execute_typescript_ingestion(self) -> Optional[DocumentationIngestionResult]:
         """Execute TypeScript documentation ingestion"""
         logger.info("📖 Executing TypeScript documentation ingestion...")
-        
+
         try:
             # Try to use existing TypeScript ingestion engine
             ts_script = project_root / "plc-gbt-stack" / "ui" / "nextjs" / "src" / "scripts" / "typescript-docs-ingestion.ts"
-            
+
             if ts_script.exists():
                 logger.info("🔄 Using existing TypeScript ingestion engine")
                 # Try to run TypeScript ingestion
@@ -248,7 +246,7 @@ class ComprehensiveDocsIngestionOrchestrator:
                     result = subprocess.run([
                         'node', '--loader', 'ts-node/esm', str(ts_script)
                     ], capture_output=True, text=True, timeout=300, cwd=str(ts_script.parent))
-                    
+
                     if result.returncode == 0:
                         logger.info("✅ TypeScript ingestion completed successfully")
                         return self.parse_typescript_results()
@@ -256,11 +254,11 @@ class ComprehensiveDocsIngestionOrchestrator:
                         logger.warning(f"⚠️ TypeScript ingestion failed: {result.stderr}")
                 except Exception as e:
                     logger.warning(f"⚠️ TypeScript ingestion execution failed: {e}")
-            
+
             # Fallback: Create Python-based TypeScript documentation data
             logger.info("🔄 Using Python fallback for TypeScript documentation")
             return await self.create_typescript_fallback_data()
-            
+
         except Exception as e:
             logger.error(f"❌ TypeScript ingestion failed: {e}")
             return None
@@ -268,18 +266,18 @@ class ComprehensiveDocsIngestionOrchestrator:
     async def execute_nextjs_ingestion(self) -> Optional[DocumentationIngestionResult]:
         """Execute Next.js documentation ingestion"""
         logger.info("⚛️ Executing Next.js documentation ingestion...")
-        
+
         try:
             # Try to use Next.js ingestion engine
             nextjs_script = project_root / "plc-gbt-stack" / "ui" / "nextjs" / "src" / "scripts" / "nextjs-docs-ingestion.ts"
-            
+
             if nextjs_script.exists():
                 logger.info("🔄 Using Next.js ingestion engine")
                 try:
                     result = subprocess.run([
                         'node', '--loader', 'ts-node/esm', str(nextjs_script)
                     ], capture_output=True, text=True, timeout=300, cwd=str(nextjs_script.parent))
-                    
+
                     if result.returncode == 0:
                         logger.info("✅ Next.js ingestion completed successfully")
                         return self.parse_nextjs_results()
@@ -287,11 +285,11 @@ class ComprehensiveDocsIngestionOrchestrator:
                         logger.warning(f"⚠️ Next.js ingestion failed: {result.stderr}")
                 except Exception as e:
                     logger.warning(f"⚠️ Next.js ingestion execution failed: {e}")
-            
+
             # Fallback: Create Python-based Next.js documentation data
             logger.info("🔄 Using Python fallback for Next.js documentation")
             return await self.create_nextjs_fallback_data()
-            
+
         except Exception as e:
             logger.error(f"❌ Next.js ingestion failed: {e}")
             return None
@@ -299,7 +297,7 @@ class ComprehensiveDocsIngestionOrchestrator:
     async def create_typescript_fallback_data(self) -> DocumentationIngestionResult:
         """Create TypeScript documentation data using Python fallback"""
         logger.info("🐍 Creating TypeScript documentation data (Python fallback)")
-        
+
         # Create comprehensive TypeScript documentation entities
         typescript_entities = [
             {
@@ -388,7 +386,7 @@ class ComprehensiveDocsIngestionOrchestrator:
                 }
             }
         ]
-        
+
         # Create relationships
         relationships = [
             {
@@ -420,7 +418,7 @@ class ComprehensiveDocsIngestionOrchestrator:
                 "metadata": {"relationship_basis": "advanced_topics"}
             }
         ]
-        
+
         # Save TypeScript documentation package
         package_data = {
             "package_id": f"typescript-docs-fallback-{int(datetime.now().timestamp())}",
@@ -450,14 +448,14 @@ class ComprehensiveDocsIngestionOrchestrator:
                 "success_rate": 1.0
             }
         }
-        
+
         # Save to file
         output_file = project_root / "ingestion_output" / "typescript_docs_ingestion_package.json"
         with open(output_file, 'w') as f:
             json.dump(package_data, f, indent=2)
-        
+
         logger.info(f"✅ TypeScript documentation package saved: {output_file}")
-        
+
         return DocumentationIngestionResult(
             success=True,
             package_id=package_data["package_id"],
@@ -481,7 +479,7 @@ class ComprehensiveDocsIngestionOrchestrator:
     async def create_nextjs_fallback_data(self) -> DocumentationIngestionResult:
         """Create Next.js documentation data using Python fallback"""
         logger.info("🐍 Creating Next.js documentation data (Python fallback)")
-        
+
         # Create comprehensive Next.js documentation entities
         nextjs_entities = [
             {
@@ -593,7 +591,7 @@ class ComprehensiveDocsIngestionOrchestrator:
                 }
             }
         ]
-        
+
         # Create relationships
         relationships = [
             {
@@ -632,7 +630,7 @@ class ComprehensiveDocsIngestionOrchestrator:
                 "metadata": {"relationship_basis": "advanced_topics"}
             }
         ]
-        
+
         # Save Next.js documentation package
         package_data = {
             "package_id": f"nextjs-docs-fallback-{int(datetime.now().timestamp())}",
@@ -666,14 +664,14 @@ class ComprehensiveDocsIngestionOrchestrator:
                 "success_rate": 1.0
             }
         }
-        
+
         # Save to file
         output_file = project_root / "ingestion_output" / "nextjs_docs_ingestion_package.json"
         with open(output_file, 'w') as f:
             json.dump(package_data, f, indent=2)
-        
+
         logger.info(f"✅ Next.js documentation package saved: {output_file}")
-        
+
         return DocumentationIngestionResult(
             success=True,
             package_id=package_data["package_id"],
@@ -697,36 +695,36 @@ class ComprehensiveDocsIngestionOrchestrator:
     async def process_combined_documentation(self) -> None:
         """Process combined documentation from both sources"""
         logger.info("🔄 Processing combined documentation...")
-        
+
         if not self.session.typescript_result or not self.session.nextjs_result:
             logger.warning("⚠️ Missing documentation results - skipping combined processing")
             return
-        
+
         # Calculate combined statistics
         self.session.combined_statistics = {
             "total_entities": (
-                self.session.typescript_result.entities_count + 
+                self.session.typescript_result.entities_count +
                 self.session.nextjs_result.entities_count
             ),
             "total_relationships": (
-                self.session.typescript_result.relationships_count + 
+                self.session.typescript_result.relationships_count +
                 self.session.nextjs_result.relationships_count
             ),
             "total_words": (
-                self.session.typescript_result.total_words + 
+                self.session.typescript_result.total_words +
                 self.session.nextjs_result.total_words
             ),
             "combined_quality_score": (
-                self.session.typescript_result.quality_score + 
+                self.session.typescript_result.quality_score +
                 self.session.nextjs_result.quality_score
             ) / 2,
             "combined_validation_score": (
-                self.session.typescript_result.validation_score + 
+                self.session.typescript_result.validation_score +
                 self.session.nextjs_result.validation_score
             ) / 2
         }
-        
-        logger.info(f"✅ Combined processing complete:")
+
+        logger.info("✅ Combined processing complete:")
         logger.info(f"   📊 Total entities: {self.session.combined_statistics['total_entities']}")
         logger.info(f"   🔗 Total relationships: {self.session.combined_statistics['total_relationships']}")
         logger.info(f"   📝 Total words: {self.session.combined_statistics['total_words']:,}")
@@ -734,49 +732,49 @@ class ComprehensiveDocsIngestionOrchestrator:
     async def execute_plc_memory_ingestion(self) -> None:
         """Execute PLC Memory system ingestion"""
         logger.info("🧠 Executing PLC Memory system ingestion...")
-        
+
         try:
             # Prepare ingestion files
             ingestion_files = []
-            
+
             ts_file = project_root / "ingestion_output" / "typescript_docs_ingestion_package.json"
             if ts_file.exists():
                 ingestion_files.append(str(ts_file))
-            
+
             nextjs_file = project_root / "ingestion_output" / "nextjs_docs_ingestion_package.json"
             if nextjs_file.exists():
                 ingestion_files.append(str(nextjs_file))
-            
+
             if not ingestion_files:
                 logger.warning("⚠️ No ingestion files found - skipping PLC Memory ingestion")
                 return
-            
+
             # Execute PLC Memory CLI ingestion
             plc_memory_cli = project_root / "scripts" / "ai" / "plc_memory_cli.py"
-            
+
             for file_path in ingestion_files:
                 logger.info(f"📥 Ingesting {file_path} into PLC Memory...")
-                
+
                 cmd = [
-                    sys.executable, str(plc_memory_cli), 
-                    'ingest', 
+                    sys.executable, str(plc_memory_cli),
+                    'ingest',
                     '--files', file_path,
                     '--method', 'intelligent',
                     '--depth', 'comprehensive',
                     '--verbose'
                 ]
-                
+
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-                
+
                 if result.returncode == 0:
                     logger.info(f"✅ Successfully ingested {file_path}")
                     # Parse ingestion results
                     self.parse_plc_memory_results(result.stdout)
                 else:
                     logger.warning(f"⚠️ Ingestion failed for {file_path}: {result.stderr}")
-            
+
             logger.info("✅ PLC Memory ingestion completed")
-            
+
         except Exception as e:
             logger.error(f"❌ PLC Memory ingestion failed: {e}")
 
@@ -790,11 +788,11 @@ class ComprehensiveDocsIngestionOrchestrator:
                 if "files/sec" in line:
                     # Extract processing metrics
                     pass
-        
+
         # Store in session results
         if not self.session.plc_memory_ingestion_results:
             self.session.plc_memory_ingestion_results = {}
-        
+
         self.session.plc_memory_ingestion_results["last_ingestion"] = {
             "timestamp": datetime.now().isoformat(),
             "status": "completed",
@@ -804,16 +802,16 @@ class ComprehensiveDocsIngestionOrchestrator:
     async def validate_comprehensive_ingestion(self) -> None:
         """Validate comprehensive ingestion results"""
         logger.info("✅ Validating comprehensive ingestion...")
-        
+
         validation_results = {
             "typescript_validation": self.validate_result(self.session.typescript_result),
             "nextjs_validation": self.validate_result(self.session.nextjs_result),
             "combined_validation": self.validate_combined_results(),
             "plc_memory_validation": self.validate_plc_memory_integration()
         }
-        
+
         self.session.validation_results = validation_results
-        
+
         # Calculate overall score
         individual_scores = [
             validation_results["typescript_validation"]["score"],
@@ -821,25 +819,25 @@ class ComprehensiveDocsIngestionOrchestrator:
             validation_results["combined_validation"]["score"],
             validation_results["plc_memory_validation"]["score"]
         ]
-        
+
         self.session.overall_score = sum(individual_scores) / len(individual_scores)
-        
+
         logger.info(f"✅ Validation complete - Overall Score: {self.session.overall_score:.1%}")
 
     def validate_result(self, result: Optional[DocumentationIngestionResult]) -> Dict[str, Any]:
         """Validate individual documentation result"""
         if not result:
             return {"score": 0.0, "status": "failed", "issues": ["Result not available"]}
-        
+
         score = 0.0
         issues = []
-        
+
         # Entity count validation
         if result.entities_count >= 5:
             score += 0.3
         else:
             issues.append(f"Low entity count: {result.entities_count}")
-        
+
         # Quality score validation
         if result.quality_score >= 0.9:
             score += 0.3
@@ -847,7 +845,7 @@ class ComprehensiveDocsIngestionOrchestrator:
             score += 0.2
         else:
             issues.append(f"Low quality score: {result.quality_score}")
-        
+
         # Validation score check
         if result.validation_score >= 0.9:
             score += 0.4
@@ -855,7 +853,7 @@ class ComprehensiveDocsIngestionOrchestrator:
             score += 0.3
         else:
             issues.append(f"Low validation score: {result.validation_score}")
-        
+
         return {
             "score": score,
             "status": "passed" if score >= 0.8 else "warning" if score >= 0.6 else "failed",
@@ -873,17 +871,17 @@ class ComprehensiveDocsIngestionOrchestrator:
         """Validate combined results"""
         if not self.session.combined_statistics:
             return {"score": 0.0, "status": "failed", "issues": ["No combined statistics"]}
-        
+
         score = 0.5  # Base score
         issues = []
-        
+
         # Total entity validation
         total_entities = self.session.combined_statistics.get("total_entities", 0)
         if total_entities >= 10:
             score += 0.2
         else:
             issues.append(f"Low combined entity count: {total_entities}")
-        
+
         # Combined quality validation
         combined_quality = self.session.combined_statistics.get("combined_quality_score", 0)
         if combined_quality >= 0.9:
@@ -892,7 +890,7 @@ class ComprehensiveDocsIngestionOrchestrator:
             score += 0.2
         else:
             issues.append(f"Low combined quality: {combined_quality}")
-        
+
         return {
             "score": score,
             "status": "passed" if score >= 0.8 else "warning" if score >= 0.6 else "failed",
@@ -904,7 +902,7 @@ class ComprehensiveDocsIngestionOrchestrator:
         """Validate PLC Memory integration"""
         if not self.session.plc_memory_ingestion_results:
             return {"score": 0.5, "status": "warning", "issues": ["No PLC Memory results"]}
-        
+
         # Basic validation based on available results
         return {
             "score": 0.8,  # Optimistic score
@@ -916,10 +914,10 @@ class ComprehensiveDocsIngestionOrchestrator:
     async def generate_session_results(self) -> None:
         """Generate comprehensive session results"""
         logger.info("📊 Generating session results...")
-        
+
         # Save session results
         session_file = project_root / "ingestion_output" / f"comprehensive_docs_session_{self.session_id}.json"
-        
+
         session_data = {
             "session_id": self.session.session_id,
             "start_time": self.session.start_time.isoformat(),
@@ -933,10 +931,10 @@ class ComprehensiveDocsIngestionOrchestrator:
             "plc_memory_ingestion_results": self.session.plc_memory_ingestion_results,
             "validation_results": self.session.validation_results
         }
-        
+
         with open(session_file, 'w') as f:
             json.dump(session_data, f, indent=2, default=str)
-        
+
         logger.info(f"✅ Session results saved: {session_file}")
 
     def parse_typescript_results(self) -> Optional[DocumentationIngestionResult]:
@@ -946,7 +944,7 @@ class ComprehensiveDocsIngestionOrchestrator:
         if output_file.exists():
             with open(output_file) as f:
                 data = json.load(f)
-            
+
             return DocumentationIngestionResult(
                 success=True,
                 package_id=data.get("package_id", ""),
@@ -970,7 +968,7 @@ class ComprehensiveDocsIngestionOrchestrator:
         if output_file.exists():
             with open(output_file) as f:
                 data = json.load(f)
-            
+
             return DocumentationIngestionResult(
                 success=True,
                 package_id=data.get("package_id", ""),
@@ -991,7 +989,7 @@ class ComprehensiveDocsIngestionOrchestrator:
         """Calculate overall session success"""
         if not self.session.typescript_result or not self.session.nextjs_result:
             return False
-        
+
         # Success criteria
         success_criteria = [
             self.session.typescript_result.success,
@@ -999,7 +997,7 @@ class ComprehensiveDocsIngestionOrchestrator:
             self.session.overall_score >= 0.8,
             len(self.session.validation_results) > 0
         ]
-        
+
         return all(success_criteria)
 
     def get_session_duration(self) -> int:
@@ -1015,45 +1013,45 @@ async def main():
     print("Following AI Task Orchestrator methodology for systematic")
     print("TypeScript and Next.js documentation ingestion with >99% reliability")
     print("=" * 60)
-    
+
     try:
         orchestrator = ComprehensiveDocsIngestionOrchestrator(enable_memory_integration=True)
         session = await orchestrator.execute_comprehensive_ingestion()
-        
+
         print("\n✅ Comprehensive Documentation Ingestion COMPLETED!")
         print("=" * 60)
         print(f"📊 Session ID: {session.session_id}")
         print(f"⏱️  Duration: {orchestrator.get_session_duration()}ms")
         print(f"✨ Overall Score: {session.overall_score:.1%}")
         print(f"🎯 Success: {session.success}")
-        
+
         if session.typescript_result:
-            print(f"\n📖 TypeScript Results:")
+            print("\n📖 TypeScript Results:")
             print(f"   📊 Entities: {session.typescript_result.entities_count}")
             print(f"   🔗 Relationships: {session.typescript_result.relationships_count}")
             print(f"   📝 Words: {session.typescript_result.total_words:,}")
             print(f"   ✨ Quality: {session.typescript_result.quality_score:.1%}")
-        
+
         if session.nextjs_result:
-            print(f"\n⚛️ Next.js Results:")
+            print("\n⚛️ Next.js Results:")
             print(f"   📊 Entities: {session.nextjs_result.entities_count}")
             print(f"   🔗 Relationships: {session.nextjs_result.relationships_count}")
             print(f"   📝 Words: {session.nextjs_result.total_words:,}")
             print(f"   ✨ Quality: {session.nextjs_result.quality_score:.1%}")
-        
+
         if session.combined_statistics:
-            print(f"\n🔄 Combined Results:")
+            print("\n🔄 Combined Results:")
             print(f"   📊 Total Entities: {session.combined_statistics['total_entities']}")
             print(f"   🔗 Total Relationships: {session.combined_statistics['total_relationships']}")
             print(f"   📝 Total Words: {session.combined_statistics['total_words']:,}")
             print(f"   ✨ Combined Quality: {session.combined_statistics['combined_quality_score']:.1%}")
-        
+
         return 0 if session.success else 1
-        
+
     except Exception as e:
         print(f"\n❌ CRITICAL FAILURE: {e}")
         return 1
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())
-    sys.exit(exit_code) 
+    sys.exit(exit_code)

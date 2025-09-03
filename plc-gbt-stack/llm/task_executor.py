@@ -24,15 +24,12 @@ Methodology: AI Task Orchestrator Guide
 """
 
 import asyncio
-import json
 import logging
 import time
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Callable, Union, Tuple
-from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -84,7 +81,7 @@ class TaskStep:
     rollback_command: Optional[str] = None
     safety_level: int = 1  # 1=low risk, 5=high risk
     confirmation_required: bool = False
-    
+
     # Execution state
     status: TaskStatus = TaskStatus.PENDING
     start_time: Optional[datetime] = None
@@ -101,20 +98,20 @@ class TaskPlan:
     description: str
     original_request: str
     steps: List[TaskStep] = field(default_factory=list)
-    
+
     # Metadata
     priority: TaskPriority = TaskPriority.NORMAL
     estimated_duration: timedelta = field(default_factory=lambda: timedelta(minutes=5))
     created_at: datetime = field(default_factory=datetime.now)
     created_by: str = "system"
-    
+
     # Execution state
     status: TaskStatus = TaskStatus.PENDING
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     progress_percentage: float = 0.0
     current_step_index: int = 0
-    
+
     # Safety and validation
     safety_score: float = 1.0  # 1.0=safe, 5.0=dangerous
     requires_approval: bool = False
@@ -123,7 +120,7 @@ class TaskPlan:
 
 class ExecutionContext:
     """Maintains state and context during task execution"""
-    
+
     def __init__(self, task_plan: TaskPlan):
         self.task_plan = task_plan
         self.variables: Dict[str, Any] = {}
@@ -131,29 +128,29 @@ class ExecutionContext:
         self.rollback_stack: List[str] = []
         self.execution_log: List[Dict[str, Any]] = []
         self.safety_violations: List[str] = []
-        
+
     def set_variable(self, name: str, value: Any) -> None:
         """Set a context variable"""
         self.variables[name] = value
         self.log_event("variable_set", {"name": name, "value": str(value)})
-        
+
     def get_variable(self, name: str, default: Any = None) -> Any:
         """Get a context variable"""
         return self.variables.get(name, default)
-        
+
     def set_step_result(self, step_id: str, result: Any) -> None:
         """Store result from a completed step"""
         self.step_results[step_id] = result
         self.log_event("step_completed", {"step_id": step_id, "result": str(result)})
-        
+
     def get_step_result(self, step_id: str) -> Any:
         """Get result from a previously completed step"""
         return self.step_results.get(step_id)
-        
+
     def add_rollback_action(self, action: str) -> None:
         """Add an action to the rollback stack"""
         self.rollback_stack.append(action)
-        
+
     def log_event(self, event_type: str, data: Dict[str, Any]) -> None:
         """Log an execution event"""
         event = {
@@ -163,7 +160,7 @@ class ExecutionContext:
         }
         self.execution_log.append(event)
         logger.info(f"Task {self.task_plan.task_id}: {event_type} - {data}")
-        
+
     def add_safety_violation(self, violation: str) -> None:
         """Record a safety violation"""
         self.safety_violations.append(violation)
@@ -172,23 +169,23 @@ class ExecutionContext:
 
 class ProgressTracker:
     """Real-time progress tracking and user feedback"""
-    
+
     def __init__(self, task_plan: TaskPlan):
         self.task_plan = task_plan
         self.callbacks: List[Callable[[Dict[str, Any]], None]] = []
-        
+
     def add_callback(self, callback: Callable[[Dict[str, Any]], None]) -> None:
         """Add a progress callback function"""
         self.callbacks.append(callback)
-        
+
     def update_progress(self, step_index: int, step_status: TaskStatus, message: str = "") -> None:
         """Update task progress"""
         total_steps = len(self.task_plan.steps)
         progress_percentage = (step_index / total_steps) * 100 if total_steps > 0 else 0
-        
+
         self.task_plan.current_step_index = step_index
         self.task_plan.progress_percentage = progress_percentage
-        
+
         progress_data = {
             "task_id": self.task_plan.task_id,
             "task_name": self.task_plan.name,
@@ -199,7 +196,7 @@ class ProgressTracker:
             "message": message,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         # Notify all callbacks
         for callback in self.callbacks:
             try:
@@ -209,7 +206,7 @@ class ProgressTracker:
 
 class ErrorRecovery:
     """Intelligent error handling and recovery strategies"""
-    
+
     def __init__(self):
         self.recovery_strategies: Dict[str, Callable] = {
             "retry": self._retry_strategy,
@@ -218,23 +215,23 @@ class ErrorRecovery:
             "alternative": self._alternative_strategy,
             "user_intervention": self._user_intervention_strategy
         }
-        
+
     async def handle_error(self, step: TaskStep, error: Exception, context: ExecutionContext) -> Tuple[bool, str]:
         """
         Handle step execution error and determine recovery action
-        
+
         Returns:
             Tuple[bool, str]: (should_continue, recovery_action)
         """
         error_type = type(error).__name__
         error_message = str(error)
-        
+
         context.log_event("error_occurred", {
             "step_id": step.step_id,
             "error_type": error_type,
             "error_message": error_message
         })
-        
+
         # Determine recovery strategy based on error type and step configuration
         if step.retries_attempted < step.retry_count:
             return await self._retry_strategy(step, error, context)
@@ -244,32 +241,32 @@ class ErrorRecovery:
             return await self._rollback_strategy(step, error, context)
         else:
             return await self._user_intervention_strategy(step, error, context)
-            
+
     async def _retry_strategy(self, step: TaskStep, error: Exception, context: ExecutionContext) -> Tuple[bool, str]:
         """Retry the failed step"""
         step.retries_attempted += 1
         wait_time = min(2 ** step.retries_attempted, 30)  # Exponential backoff, max 30s
-        
+
         context.log_event("retry_attempt", {
             "step_id": step.step_id,
             "attempt": step.retries_attempted,
             "wait_time": wait_time
         })
-        
+
         await asyncio.sleep(wait_time)
         return True, "retry"
-        
+
     async def _skip_strategy(self, step: TaskStep, error: Exception, context: ExecutionContext) -> Tuple[bool, str]:
         """Skip the failed step and continue"""
         context.log_event("step_skipped", {
             "step_id": step.step_id,
             "reason": "error_recovery"
         })
-        
+
         step.status = TaskStatus.FAILED
         step.error = str(error)
         return True, "skip"
-        
+
     async def _rollback_strategy(self, step: TaskStep, error: Exception, context: ExecutionContext) -> Tuple[bool, str]:
         """Execute rollback command and continue"""
         try:
@@ -277,7 +274,7 @@ class ErrorRecovery:
                 context.log_event("rollback_initiated", {"step_id": step.step_id})
                 # Execute rollback command (implementation depends on command type)
                 context.add_rollback_action(step.rollback_command)
-                
+
             return True, "rollback"
         except Exception as rollback_error:
             context.log_event("rollback_failed", {
@@ -285,33 +282,33 @@ class ErrorRecovery:
                 "rollback_error": str(rollback_error)
             })
             return False, "rollback_failed"
-            
+
     async def _alternative_strategy(self, step: TaskStep, error: Exception, context: ExecutionContext) -> Tuple[bool, str]:
         """Try an alternative approach"""
         # This would be implemented based on specific step types and available alternatives
         context.log_event("alternative_attempted", {"step_id": step.step_id})
         return True, "alternative"
-        
+
     async def _user_intervention_strategy(self, step: TaskStep, error: Exception, context: ExecutionContext) -> Tuple[bool, str]:
         """Request user intervention"""
         context.log_event("user_intervention_required", {
             "step_id": step.step_id,
             "error": str(error)
         })
-        
+
         # In a real implementation, this would prompt the user
         # For now, we'll mark as failed and stop execution
         return False, "user_intervention_required"
 
 class TaskExecutor:
     """Core task execution engine with safety and monitoring"""
-    
+
     def __init__(self):
         self.running_tasks: Dict[str, TaskPlan] = {}
         self.completed_tasks: Dict[str, TaskPlan] = {}
         self.error_recovery = ErrorRecovery()
         self.safety_checks_enabled = True
-        
+
         # Command executors for different step types
         self.step_executors: Dict[StepType, Callable] = {
             StepType.CLI_COMMAND: self._execute_cli_command,
@@ -325,26 +322,26 @@ class TaskExecutor:
             StepType.LOOP: self._execute_loop,
             StepType.PARALLEL: self._execute_parallel
         }
-        
-    def create_task_plan(self, name: str, description: str, steps: List[TaskStep], 
+
+    def create_task_plan(self, name: str, description: str, steps: List[TaskStep],
                         priority: TaskPriority = TaskPriority.NORMAL) -> TaskPlan:
         """
         Create a new task plan with the given specifications
-        
+
         Args:
             name: Name of the task plan
             description: Description of what the task does
             steps: List of task steps to execute
             priority: Priority level for the task
-            
+
         Returns:
             TaskPlan: Newly created task plan ready for execution
         """
         import time
         from datetime import timedelta
-        
+
         task_id = f"task_{int(time.time())}_{len(name)}"
-        
+
         task_plan = TaskPlan(
             task_id=task_id,
             name=name,
@@ -357,76 +354,76 @@ class TaskExecutor:
             requires_approval=False,
             created_at=time.time()
         )
-        
+
         logger.info(f"Created task plan: {name} ({task_id}) with {len(steps)} steps")
         return task_plan
-        
+
     async def execute_task(self, task_plan: TaskPlan) -> bool:
         """
         Execute a complete task plan
-        
+
         Returns:
             bool: True if task completed successfully, False otherwise
         """
         task_plan.status = TaskStatus.EXECUTING
         task_plan.start_time = datetime.now()
         self.running_tasks[task_plan.task_id] = task_plan
-        
+
         context = ExecutionContext(task_plan)
         progress_tracker = ProgressTracker(task_plan)
-        
+
         try:
             logger.info(f"Starting task execution: {task_plan.name} ({task_plan.task_id})")
-            
+
             # Pre-execution safety checks
             if self.safety_checks_enabled:
                 if not await self._perform_safety_checks(task_plan, context):
                     task_plan.status = TaskStatus.FAILED
                     context.add_safety_violation("Pre-execution safety checks failed")
                     return False
-                    
+
             # Execute steps in sequence
             for i, step in enumerate(task_plan.steps):
                 if task_plan.status in [TaskStatus.CANCELLED, TaskStatus.FAILED]:
                     break
-                    
+
                 progress_tracker.update_progress(i, TaskStatus.EXECUTING, f"Executing: {step.description}")
-                
+
                 success = await self._execute_step(step, context)
                 if not success and step.safety_level >= 4:  # High-risk step failed
                     task_plan.status = TaskStatus.FAILED
                     break
-                    
+
             # Determine final status
             if task_plan.status == TaskStatus.EXECUTING:
                 if all(step.status in [TaskStatus.COMPLETED, TaskStatus.FAILED] for step in task_plan.steps):
-                    failed_critical_steps = [s for s in task_plan.steps 
+                    failed_critical_steps = [s for s in task_plan.steps
                                            if s.status == TaskStatus.FAILED and s.safety_level >= 4]
                     if not failed_critical_steps:
                         task_plan.status = TaskStatus.COMPLETED
                         progress_tracker.update_progress(len(task_plan.steps), TaskStatus.COMPLETED, "Task completed successfully")
                     else:
                         task_plan.status = TaskStatus.FAILED
-                        
+
         except Exception as e:
             logger.error(f"Task execution error: {e}")
             task_plan.status = TaskStatus.FAILED
             context.log_event("task_execution_error", {"error": str(e)})
-            
+
         finally:
             task_plan.end_time = datetime.now()
             self.running_tasks.pop(task_plan.task_id, None)
             self.completed_tasks[task_plan.task_id] = task_plan
-            
+
             logger.info(f"Task execution completed: {task_plan.name} - Status: {task_plan.status.value}")
-            
+
         return task_plan.status == TaskStatus.COMPLETED
-        
+
     async def _execute_step(self, step: TaskStep, context: ExecutionContext) -> bool:
         """Execute a single step with error handling and retries"""
         step.status = TaskStatus.EXECUTING
         step.start_time = datetime.now()
-        
+
         while step.retries_attempted <= step.retry_count:
             try:
                 # Check dependencies
@@ -434,32 +431,32 @@ class TaskExecutor:
                     step.status = TaskStatus.FAILED
                     step.error = "Dependencies not satisfied"
                     return False
-                    
+
                 # Get appropriate executor
                 executor = self.step_executors.get(step.step_type)
                 if not executor:
                     raise ValueError(f"No executor found for step type: {step.step_type}")
-                    
+
                 # Execute with timeout
                 result = await asyncio.wait_for(
                     executor(step, context),
                     timeout=step.timeout_seconds
                 )
-                
+
                 step.result = result
                 step.status = TaskStatus.COMPLETED
                 step.end_time = datetime.now()
                 context.set_step_result(step.step_id, result)
-                
+
                 logger.debug(f"Step completed: {step.step_id} - {step.description}")
                 return True
-                
+
             except Exception as e:
                 logger.error(f"Step execution error: {step.step_id} - {e}")
-                
+
                 # Handle error with recovery strategy
                 should_continue, recovery_action = await self.error_recovery.handle_error(step, e, context)
-                
+
                 if recovery_action == "retry":
                     continue  # Try again
                 elif recovery_action == "skip":
@@ -469,12 +466,12 @@ class TaskExecutor:
                     step.error = str(e)
                     step.end_time = datetime.now()
                     return False
-                    
+
         # If we get here, all retries failed
         step.status = TaskStatus.FAILED
         step.end_time = datetime.now()
         return False
-        
+
     def _check_dependencies(self, step: TaskStep, context: ExecutionContext) -> bool:
         """Check if step dependencies are satisfied"""
         for dep_id in step.dependencies:
@@ -482,47 +479,47 @@ class TaskExecutor:
             if dep_result is None:
                 return False
         return True
-        
+
     async def _perform_safety_checks(self, task_plan: TaskPlan, context: ExecutionContext) -> bool:
         """Perform pre-execution safety checks"""
         # Check overall task safety score
         if task_plan.safety_score >= 4.0 and not task_plan.approved_by:
             context.add_safety_violation("High-risk task requires approval")
             return False
-            
+
         # Check for dangerous step combinations
         high_risk_steps = [s for s in task_plan.steps if s.safety_level >= 4]
         if len(high_risk_steps) > 3:
             context.add_safety_violation("Too many high-risk steps in single task")
             return False
-            
+
         # Check for required confirmations
         confirmation_steps = [s for s in task_plan.steps if s.confirmation_required]
         for step in confirmation_steps:
             # In a real implementation, this would prompt for confirmation
             context.log_event("confirmation_required", {"step_id": step.step_id})
-            
+
         return True
-        
+
     # Step execution methods
     async def _execute_cli_command(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a CLI command step"""
         import subprocess
-        
+
         try:
             command = step.command
-            
+
             # Validate command safety
             if not command or not command.strip():
                 raise ValueError("Empty command provided")
-                
+
             # Substitute variables from context
             try:
                 for var_name, var_value in context.variables.items():
                     command = command.replace(f"{{{var_name}}}", str(var_value))
             except Exception as var_error:
                 raise ValueError(f"Variable substitution failed: {var_error}")
-                
+
             # Execute command with comprehensive error handling
             try:
                 result = subprocess.run(
@@ -532,45 +529,45 @@ class TaskExecutor:
                     text=True,
                     timeout=step.timeout_seconds
                 )
-            except subprocess.TimeoutExpired as timeout_error:
+            except subprocess.TimeoutExpired:
                 raise RuntimeError(f"Command timeout after {step.timeout_seconds} seconds: {command}")
             except OSError as os_error:
                 raise RuntimeError(f"OS error executing command: {os_error}")
-                
+
             if result.returncode != 0:
                 raise RuntimeError(f"Command failed with code {result.returncode}: {result.stderr}")
-                
+
             return result.stdout.strip() if result.stdout else ""
-            
+
         except Exception as e:
             context.log_event("cli_command_error", {"step_id": step.step_id, "error": str(e)})
             raise
-        
+
     async def _execute_api_call(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute an API call step"""
         # Implementation would depend on the specific API
         # For now, return a mock result
         await asyncio.sleep(0.1)  # Simulate API call
         return {"status": "success", "data": step.parameters}
-        
+
     async def _execute_file_operation(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a file operation step"""
         import os
-        
+
         try:
             operation = step.parameters.get("operation", "read")
             file_path = step.parameters.get("path", "")
-            
+
             # Validate file path
             if not file_path or not file_path.strip():
                 raise ValueError("File path cannot be empty")
-                
+
             # Normalize and validate path security
             try:
                 file_path = os.path.abspath(file_path)
             except Exception as path_error:
                 raise ValueError(f"Invalid file path: {path_error}")
-                
+
             if operation == "read":
                 try:
                     # Check if file exists and is readable
@@ -578,87 +575,87 @@ class TaskExecutor:
                         raise FileNotFoundError(f"File not found: {file_path}")
                     if not os.access(file_path, os.R_OK):
                         raise PermissionError(f"No read permission for file: {file_path}")
-                        
-                    with open(file_path, 'r', encoding='utf-8') as f:
+
+                    with open(file_path, encoding='utf-8') as f:
                         content = f.read()
                     context.log_event("file_read", {"path": file_path, "size": len(content)})
                     return content
                 except UnicodeDecodeError as decode_error:
                     raise ValueError(f"File encoding error: {decode_error}")
-                except IOError as io_error:
+                except OSError as io_error:
                     raise RuntimeError(f"IO error reading file: {io_error}")
-                    
+
             elif operation == "write":
                 try:
                     content = step.parameters.get("content", "")
-                    
+
                     # Check directory exists and is writable
                     directory = os.path.dirname(file_path)
                     if directory and not os.path.exists(directory):
                         raise FileNotFoundError(f"Directory not found: {directory}")
                     if directory and not os.access(directory, os.W_OK):
                         raise PermissionError(f"No write permission for directory: {directory}")
-                        
+
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(content)
                     context.log_event("file_write", {"path": file_path, "size": len(content)})
                     return f"Written {len(content)} characters to {file_path}"
-                except IOError as io_error:
+                except OSError as io_error:
                     raise RuntimeError(f"IO error writing file: {io_error}")
             else:
                 raise ValueError(f"Unknown file operation: {operation}")
-                
+
         except Exception as e:
             context.log_event("file_operation_error", {"step_id": step.step_id, "error": str(e)})
             raise
-            
+
     async def _execute_database_query(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a database query step"""
         try:
             query = step.parameters.get("query", "")
             if not query or not query.strip():
                 raise ValueError("Database query cannot be empty")
-                
+
             # Validate query safety (basic SQL injection prevention)
             dangerous_keywords = ["DROP", "DELETE", "TRUNCATE", "ALTER"]
             query_upper = query.upper()
             for keyword in dangerous_keywords:
                 if keyword in query_upper:
                     raise ValueError(f"Dangerous SQL keyword detected: {keyword}")
-                    
+
             try:
                 # Implementation would depend on the database type
                 await asyncio.sleep(0.1)  # Simulate query execution time
-                
+
                 # Log successful query execution
                 context.log_event("database_query", {"query_length": len(query)})
                 return {"rows_affected": 1, "data": [], "query_time": 0.1}
-                
+
             except asyncio.TimeoutError:
                 raise RuntimeError("Database query timeout")
             except ConnectionError as conn_error:
                 raise RuntimeError(f"Database connection error: {conn_error}")
-                
+
         except Exception as e:
             context.log_event("database_error", {"step_id": step.step_id, "error": str(e)})
             raise
-        
+
     async def _execute_validation(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a validation step"""
         try:
             validation_type = step.parameters.get("type", "generic")
             variable_name = step.parameters.get("variable", "")
-            
+
             if not variable_name:
                 raise ValueError("Variable name required for validation")
-                
+
             try:
                 value = context.get_variable(variable_name)
             except KeyError:
                 raise ValueError(f"Variable '{variable_name}' not found in context")
             except Exception as var_error:
                 raise RuntimeError(f"Error accessing variable '{variable_name}': {var_error}")
-            
+
             # Comprehensive validation patterns
             try:
                 if validation_type == "not_empty":
@@ -684,63 +681,63 @@ class TaskExecutor:
                         raise ValueError(f"Value '{value}' does not match pattern '{pattern}'")
                 else:
                     raise ValueError(f"Unknown validation type: {validation_type}")
-                    
+
                 context.log_event("validation_success", {
-                    "variable": variable_name, 
-                    "type": validation_type, 
+                    "variable": variable_name,
+                    "type": validation_type,
                     "value": str(value)[:100]  # Truncate long values
                 })
                 return f"Validation passed for {variable_name}"
-                
+
             except Exception as validation_error:
                 context.log_event("validation_failed", {
-                    "variable": variable_name, 
+                    "variable": variable_name,
                     "type": validation_type,
                     "error": str(validation_error)
                 })
                 raise
-                
+
         except Exception as e:
             context.log_event("validation_error", {"step_id": step.step_id, "error": str(e)})
             raise
-                
+
         return True
-        
+
     async def _execute_safety_check(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a safety check step"""
         check_type = step.parameters.get("type", "generic")
-        
+
         # Example safety checks
         if check_type == "system_resources":
             # Check system resources
             import psutil
             cpu_usage = psutil.cpu_percent()
             memory_usage = psutil.virtual_memory().percent
-            
+
             if cpu_usage > 90:
                 raise RuntimeError("CPU usage too high for safe operation")
             if memory_usage > 90:
                 raise RuntimeError("Memory usage too high for safe operation")
-                
+
         return True
-        
+
     async def _execute_user_confirmation(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a user confirmation step"""
         message = step.parameters.get("message", "Confirm to continue")
-        
+
         # In a real implementation, this would prompt the user
         # For now, we'll auto-confirm for testing
         context.log_event("user_confirmation", {"message": message, "auto_confirmed": True})
         return True
-        
+
     async def _execute_conditional(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a conditional step"""
         condition = step.parameters.get("condition", "true")
         variable_name = step.parameters.get("variable", "")
         expected_value = step.parameters.get("expected_value", True)
-        
+
         actual_value = context.get_variable(variable_name)
-        
+
         if condition == "equals":
             result = actual_value == expected_value
         elif condition == "not_equals":
@@ -751,37 +748,37 @@ class TaskExecutor:
             result = actual_value < expected_value
         else:
             result = True  # Default to true
-            
+
         return result
-        
+
     async def _execute_loop(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute a loop step"""
         iterations = step.parameters.get("iterations", 1)
         loop_variable = step.parameters.get("loop_variable", "i")
-        
+
         results = []
         for i in range(iterations):
             context.set_variable(loop_variable, i)
             results.append(f"Loop iteration {i}")
-            
+
         return results
-        
+
     async def _execute_parallel(self, step: TaskStep, context: ExecutionContext) -> Any:
         """Execute parallel steps"""
         parallel_steps = step.parameters.get("steps", [])
-        
+
         # For simplicity, we'll execute them sequentially
         # In a real implementation, these would run in parallel
         results = []
         for parallel_step_data in parallel_steps:
             results.append(f"Parallel step: {parallel_step_data}")
-            
+
         return results
-        
+
     def get_task_status(self, task_id: str) -> Optional[TaskPlan]:
         """Get the current status of a task"""
         return self.running_tasks.get(task_id) or self.completed_tasks.get(task_id)
-        
+
     def cancel_task(self, task_id: str) -> bool:
         """Cancel a running task"""
         task = self.running_tasks.get(task_id)
@@ -790,11 +787,11 @@ class TaskExecutor:
             logger.info(f"Task cancelled: {task_id}")
             return True
         return False
-        
+
     def get_running_tasks(self) -> List[TaskPlan]:
         """Get all currently running tasks"""
         return list(self.running_tasks.values())
-        
+
     def get_completed_tasks(self) -> List[TaskPlan]:
         """Get all completed tasks"""
         return list(self.completed_tasks.values())
@@ -803,7 +800,7 @@ class TaskExecutor:
 def create_control_loop_analysis_task(loop_name: str, data_source: str) -> TaskPlan:
     """Create a task plan for control loop analysis"""
     task_id = f"analysis_{loop_name}_{int(time.time())}"
-    
+
     steps = [
         TaskStep(
             step_id=f"{task_id}_validate_data",
@@ -838,7 +835,7 @@ def create_control_loop_analysis_task(loop_name: str, data_source: str) -> TaskP
             safety_level=1
         )
     ]
-    
+
     return TaskPlan(
         task_id=task_id,
         name=f"Analyze Control Loop: {loop_name}",
@@ -853,9 +850,9 @@ def create_control_loop_analysis_task(loop_name: str, data_source: str) -> TaskP
 def create_schema_management_task(operation: str, schema_name: str) -> TaskPlan:
     """Create a task plan for schema management operations"""
     task_id = f"schema_{operation}_{schema_name}_{int(time.time())}"
-    
+
     steps = []
-    
+
     if operation == "create":
         steps = [
             TaskStep(
@@ -913,7 +910,7 @@ def create_schema_management_task(operation: str, schema_name: str) -> TaskPlan:
                 rollback_command=f"plc-control-loop schema restore --name {schema_name}"
             )
         ]
-        
+
     return TaskPlan(
         task_id=task_id,
         name=f"Schema {operation.title()}: {schema_name}",
@@ -938,13 +935,13 @@ if __name__ == "__main__":
     # Example usage
     async def main():
         executor = TaskExecutor()
-        
+
         # Create a sample task
         task = create_control_loop_analysis_task("TIC-101", "/path/to/data.csv")
-        
+
         # Execute the task
         success = await executor.execute_task(task)
         print(f"Task execution result: {success}")
         print(f"Final status: {task.status}")
-        
-    asyncio.run(main()) 
+
+    asyncio.run(main())

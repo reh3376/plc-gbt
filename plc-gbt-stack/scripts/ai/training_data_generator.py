@@ -11,25 +11,25 @@ This module:
 - Creates target 300-1000 high-quality pairs
 """
 
-import json
-import uuid
 import asyncio
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+import json
 import logging
 import random
 
-# Database connections
-from neo4j import GraphDatabase
-from qdrant_client import QdrantClient
+# Internal imports
+import sys
+import uuid
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import openai
 
-# Internal imports  
-import sys
+# Database connections
+
 sys.path.append(str(Path(__file__).parent.parent))
-from query.knowledge_graph_interface import PLCKnowledgeGraph
 from etl.embedding_generator import EmbeddingGenerator
+from query.knowledge_graph_interface import PLCKnowledgeGraph
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -38,25 +38,25 @@ logger = logging.getLogger(__name__)
 
 class TrainingDataGenerator:
     """Generates high-quality training data for PLC domain fine-tuning."""
-    
-    def __init__(self, 
+
+    def __init__(self,
                  neo4j_uri: str = "bolt://localhost:7687",
-                 neo4j_user: str = "neo4j", 
+                 neo4j_user: str = "neo4j",
                  neo4j_password: str = "plc-gpt-2024",
                  openai_api_key: Optional[str] = None):
         """Initialize training data generator."""
-        
+
         self.neo4j_uri = neo4j_uri
         self.neo4j_user = neo4j_user
         self.neo4j_password = neo4j_password
-        
+
         # Initialize OpenAI for data generation
         if openai_api_key:
             openai.api_key = openai_api_key
-        
+
         self.kg = PLCKnowledgeGraph()
         self.embedding_generator = EmbeddingGenerator()
-        
+
         # Training data categories
         self.categories = {
             "component_identification": "Identifying PLC components and their purposes",
@@ -68,7 +68,7 @@ class TrainingDataGenerator:
             "programming_concepts": "PLC programming fundamentals and advanced techniques",
             "hardware_specifications": "Device specifications and compatibility"
         }
-        
+
         self.target_counts = {
             "component_identification": 150,
             "configuration_guidance": 200,
@@ -79,11 +79,11 @@ class TrainingDataGenerator:
             "programming_concepts": 150,
             "hardware_specifications": 50
         }
-        
+
     async def generate_complete_training_dataset(self) -> Dict[str, Any]:
         """Generate complete training dataset with target 1000 Q&A pairs."""
         logger.info("Starting complete training dataset generation")
-        
+
         dataset = {
             "metadata": {
                 "generated_date": datetime.now().isoformat(),
@@ -96,42 +96,42 @@ class TrainingDataGenerator:
             "validation_data": [],
             "statistics": {}
         }
-        
+
         # Step 1: Extract existing Q&A pairs
         existing_pairs = await self.extract_existing_qa_pairs()
         logger.info(f"Extracted {len(existing_pairs)} existing Q&A pairs")
-        
+
         # Step 2: Generate new Q&A pairs by category
         generated_pairs = []
         for category, count in self.target_counts.items():
             logger.info(f"Generating {count} pairs for category: {category}")
             category_pairs = await self.generate_category_qa_pairs(category, count)
             generated_pairs.extend(category_pairs)
-        
+
         # Step 3: Combine and enhance all pairs
         all_pairs = existing_pairs + generated_pairs
         enhanced_pairs = await self.enhance_qa_pairs(all_pairs)
-        
+
         # Step 4: Split into training/validation (90/10)
         random.shuffle(enhanced_pairs)
         split_index = int(len(enhanced_pairs) * 0.9)
-        
+
         dataset["training_data"] = enhanced_pairs[:split_index]
         dataset["validation_data"] = enhanced_pairs[split_index:]
-        
+
         # Step 5: Generate statistics
         dataset["statistics"] = self.generate_dataset_statistics(enhanced_pairs)
-        
+
         # Step 6: Export to JSONL format
         await self.export_to_jsonl(dataset)
-        
+
         logger.info(f"Complete dataset generated: {len(enhanced_pairs)} total pairs")
         return dataset
-    
+
     async def extract_existing_qa_pairs(self) -> List[Dict[str, Any]]:
         """Extract existing Q&A pairs from knowledge graph."""
         pairs = []
-        
+
         try:
             # Get all Q&A pairs from Neo4j
             with self.kg.driver.session() as session:
@@ -145,7 +145,7 @@ class TrainingDataGenerator:
                            doc.title as source_document
                     ORDER BY qa.confidence DESC
                 """)
-                
+
                 for record in result:
                     if record["question"] and record["answer"]:
                         pairs.append({
@@ -156,36 +156,36 @@ class TrainingDataGenerator:
                             "category": self.classify_qa_category(record["question"], record["answer"]),
                             "enhanced": False
                         })
-        
+
         except Exception as e:
             logger.warning(f"Could not extract from Neo4j: {e}")
-        
+
         return pairs
-    
+
     async def generate_category_qa_pairs(self, category: str, target_count: int) -> List[Dict[str, Any]]:
         """Generate Q&A pairs for specific category using domain knowledge."""
         pairs = []
-        
+
         # Category-specific templates and knowledge
         templates = self.get_category_templates(category)
         domain_knowledge = await self.get_domain_knowledge_for_category(category)
-        
+
         for i in range(target_count):
             try:
                 # Generate using templates and domain knowledge
                 pair = await self.generate_single_qa_pair(category, templates, domain_knowledge)
                 if pair:
                     pairs.append(pair)
-                    
+
                 # Add delay to respect API rate limits
                 await asyncio.sleep(0.1)
-                
+
             except Exception as e:
                 logger.warning(f"Error generating pair {i} for {category}: {e}")
                 continue
-        
+
         return pairs
-    
+
     def get_category_templates(self, category: str) -> Dict[str, List[str]]:
         """Get question/answer templates for each category."""
         templates = {
@@ -270,25 +270,25 @@ class TrainingDataGenerator:
                 "contexts": ["CompactLogix", "ControlLogix", "I/O modules", "communication cards", "power supplies"]
             }
         }
-        
+
         return templates.get(category, {"questions": [], "contexts": []})
-    
+
     async def get_domain_knowledge_for_category(self, category: str) -> Dict[str, Any]:
         """Get relevant domain knowledge from knowledge graph for category."""
         knowledge = {"components": [], "relationships": [], "procedures": []}
-        
+
         try:
             with self.kg.driver.session() as session:
                 # Get relevant components based on category
                 if category == "component_identification":
                     result = session.run("""
                         MATCH (n) WHERE n:AOI OR n:UDT OR n:Device OR n:Routine
-                        RETURN labels(n)[0] as type, n.name as name, 
+                        RETURN labels(n)[0] as type, n.name as name,
                                coalesce(n.description, '') as description
                         LIMIT 50
                     """)
                     knowledge["components"] = [dict(record) for record in result]
-                
+
                 elif category in ["configuration_guidance", "integration_methods"]:
                     result = session.run("""
                         MATCH (d:Device)
@@ -297,37 +297,37 @@ class TrainingDataGenerator:
                         LIMIT 30
                     """)
                     knowledge["components"] = [dict(record) for record in result]
-                
+
                 elif category == "troubleshooting":
                     result = session.run("""
                         MATCH (qa:QuestionAnswer)
-                        WHERE toLower(qa.question) CONTAINS 'error' 
+                        WHERE toLower(qa.question) CONTAINS 'error'
                            OR toLower(qa.question) CONTAINS 'fault'
                            OR toLower(qa.question) CONTAINS 'problem'
                         RETURN qa.question as question, qa.answer as answer
                         LIMIT 20
                     """)
                     knowledge["procedures"] = [dict(record) for record in result]
-        
+
         except Exception as e:
             logger.warning(f"Could not get domain knowledge: {e}")
-        
+
         return knowledge
-    
+
     async def generate_single_qa_pair(self, category: str, templates: Dict, domain_knowledge: Dict) -> Optional[Dict[str, Any]]:
         """Generate a single Q&A pair using templates and domain knowledge."""
-        
+
         # For now, generate using templates (in production, you'd use OpenAI API)
         template_questions = templates.get("questions", [])
         contexts = templates.get("contexts", [])
-        
+
         if not template_questions or not contexts:
             return None
-        
+
         # Select random template and context
         question_template = random.choice(template_questions)
         context = random.choice(contexts)
-        
+
         # Generate question
         if "{component}" in question_template:
             question = question_template.replace("{component}", context)
@@ -337,10 +337,10 @@ class TrainingDataGenerator:
             question = question_template.replace("{system}", context)
         else:
             question = question_template
-        
+
         # Generate appropriate answer based on category and context
         answer = self.generate_answer_for_context(category, context, question)
-        
+
         return {
             "question": question,
             "answer": answer,
@@ -349,10 +349,10 @@ class TrainingDataGenerator:
             "category": category,
             "enhanced": False
         }
-    
+
     def generate_answer_for_context(self, category: str, context: str, question: str) -> str:
         """Generate contextually appropriate answers."""
-        
+
         # Domain-specific answer templates
         answer_templates = {
             "component_identification": {
@@ -373,15 +373,15 @@ class TrainingDataGenerator:
                 "program errors": f"To resolve {context}, review program logic, check data types, verify tag references, and use online monitoring to identify the problem area."
             }
         }
-        
+
         category_templates = answer_templates.get(category, {})
         return category_templates.get(context, f"This relates to {context} in the context of {category}. Proper implementation requires following industry best practices and manufacturer guidelines.")
-    
+
     def classify_qa_category(self, question: str, answer: str) -> str:
         """Classify Q&A pair into appropriate category."""
         question_lower = question.lower()
-        answer_lower = answer.lower()
-        
+        answer.lower()
+
         # Classification keywords
         if any(word in question_lower for word in ["what is", "purpose", "function"]):
             return "component_identification"
@@ -401,54 +401,54 @@ class TrainingDataGenerator:
             return "hardware_specifications"
         else:
             return "component_identification"  # Default category
-    
+
     async def enhance_qa_pairs(self, qa_pairs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Enhance Q&A pairs with additional context and validation."""
         enhanced_pairs = []
-        
+
         for pair in qa_pairs:
             try:
                 # Add unique ID
                 pair["id"] = str(uuid.uuid4())
-                
+
                 # Add metadata
                 pair["word_count"] = len(pair["answer"].split())
                 pair["created_date"] = datetime.now().isoformat()
-                
+
                 # Validate quality
                 if self.validate_qa_quality(pair):
                     enhanced_pairs.append(pair)
                 else:
                     logger.debug(f"Filtered out low-quality pair: {pair['question'][:50]}...")
-                    
+
             except Exception as e:
                 logger.warning(f"Error enhancing pair: {e}")
                 continue
-        
+
         return enhanced_pairs
-    
+
     def validate_qa_quality(self, pair: Dict[str, Any]) -> bool:
         """Validate Q&A pair quality."""
         question = pair.get("question", "")
         answer = pair.get("answer", "")
-        
+
         # Basic quality checks
         if len(question) < 10 or len(answer) < 20:
             return False
-        
+
         if len(question) > 500 or len(answer) > 2000:
             return False
-        
+
         # Check for meaningful content
         if question.count("?") != 1:
             return False
-        
+
         # Check confidence threshold
         if pair.get("confidence", 0) < 0.7:
             return False
-        
+
         return True
-    
+
     def generate_dataset_statistics(self, qa_pairs: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Generate comprehensive dataset statistics."""
         stats = {
@@ -457,44 +457,44 @@ class TrainingDataGenerator:
             "quality_metrics": {},
             "content_analysis": {}
         }
-        
+
         # Category distribution
         for pair in qa_pairs:
             category = pair.get("category", "unknown")
             stats["category_distribution"][category] = stats["category_distribution"].get(category, 0) + 1
-        
+
         # Quality metrics
         confidences = [pair.get("confidence", 0) for pair in qa_pairs]
         word_counts = [pair.get("word_count", 0) for pair in qa_pairs]
-        
+
         stats["quality_metrics"] = {
             "avg_confidence": sum(confidences) / len(confidences) if confidences else 0,
             "min_confidence": min(confidences) if confidences else 0,
             "max_confidence": max(confidences) if confidences else 0,
             "avg_answer_length": sum(word_counts) / len(word_counts) if word_counts else 0
         }
-        
+
         # Content analysis
         all_text = " ".join([pair.get("question", "") + " " + pair.get("answer", "") for pair in qa_pairs])
         unique_words = len(set(all_text.lower().split()))
-        
+
         stats["content_analysis"] = {
             "total_words": len(all_text.split()),
             "unique_words": unique_words,
             "vocabulary_richness": unique_words / len(all_text.split()) if all_text.split() else 0
         }
-        
+
         return stats
-    
+
     async def export_to_jsonl(self, dataset: Dict[str, Any]) -> None:
         """Export training data to JSONL format for OpenAI fine-tuning."""
-        
+
         # Create output directory
         output_dir = Path("training_data")
         output_dir.mkdir(exist_ok=True)
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
+
         # Export training data
         training_file = output_dir / f"plc_training_{timestamp}.jsonl"
         with open(training_file, 'w') as f:
@@ -506,7 +506,7 @@ class TrainingDataGenerator:
                             "content": "You are a PLC expert assistant. Provide accurate, detailed answers about PLC programming, configuration, and troubleshooting."
                         },
                         {
-                            "role": "user", 
+                            "role": "user",
                             "content": pair["question"]
                         },
                         {
@@ -516,7 +516,7 @@ class TrainingDataGenerator:
                     ]
                 }
                 f.write(json.dumps(training_example) + "\n")
-        
+
         # Export validation data
         validation_file = output_dir / f"plc_validation_{timestamp}.jsonl"
         with open(validation_file, 'w') as f:
@@ -538,18 +538,18 @@ class TrainingDataGenerator:
                     ]
                 }
                 f.write(json.dumps(validation_example) + "\n")
-        
+
         # Export metadata
         metadata_file = output_dir / f"dataset_metadata_{timestamp}.json"
         with open(metadata_file, 'w') as f:
             json.dump(dataset["metadata"], f, indent=2)
-        
+
         # Export statistics
         stats_file = output_dir / f"dataset_statistics_{timestamp}.json"
         with open(stats_file, 'w') as f:
             json.dump(dataset["statistics"], f, indent=2)
-        
-        logger.info(f"Training data exported to:")
+
+        logger.info("Training data exported to:")
         logger.info(f"  Training: {training_file}")
         logger.info(f"  Validation: {validation_file}")
         logger.info(f"  Metadata: {metadata_file}")
@@ -559,10 +559,10 @@ class TrainingDataGenerator:
 async def main():
     """Main execution for training data generation."""
     generator = TrainingDataGenerator()
-    
+
     try:
         dataset = await generator.generate_complete_training_dataset()
-        
+
         print("\n" + "="*60)
         print("TRAINING DATA GENERATION COMPLETE")
         print("="*60)
@@ -572,18 +572,18 @@ async def main():
         print("\nCategory Distribution:")
         for category, count in dataset['statistics']['category_distribution'].items():
             print(f"  {category}: {count}")
-        
-        print(f"\nQuality Metrics:")
+
+        print("\nQuality Metrics:")
         print(f"  Avg Confidence: {dataset['statistics']['quality_metrics']['avg_confidence']:.2f}")
         print(f"  Avg Answer Length: {dataset['statistics']['quality_metrics']['avg_answer_length']:.1f} words")
-        
+
         print("\nFiles exported to training_data/ directory")
         print("Ready for OpenAI fine-tuning!")
-        
+
     except Exception as e:
         logger.error(f"Error generating training data: {e}")
         raise
 
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

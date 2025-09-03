@@ -12,19 +12,26 @@ Phase: 26.8 - Industrial Automation MCP Integration (Refactored)
 """
 
 import time
-from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone
+from typing import Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException, Query, Body, Path
+from fastapi import APIRouter, Query
 
-from .models import (
-    ControlLoopRequest, ControlLoopResponse, PIDTuningRequest, PIDTuningResponse,
-    PLCConnectionRequest, PLCConnectionResponse, SafetySystemRequest, SafetySystemResponse,
-    SystemStatusResponse, IndustrialKnowledgeRequest, IndustrialKnowledgeResponse
-)
 from .clients import IndustrialMCPClient
-from .utils import handle_http_error, create_success_response, create_error_response
+from .models import (
+    ControlLoopRequest,
+    ControlLoopResponse,
+    IndustrialKnowledgeResponse,
+    PIDTuningRequest,
+    PIDTuningResponse,
+    PLCConnectionRequest,
+    PLCConnectionResponse,
+    SafetySystemRequest,
+    SafetySystemResponse,
+    SystemStatusResponse,
+)
+from .utils import handle_http_error
 
 # Configure logging
 logger = structlog.get_logger()
@@ -51,18 +58,18 @@ async def check_health():
     """Check Industrial MCP service health"""
     start_time = time.time()
     client = await get_client()
-    
+
     try:
         server_info = await client.get_server_info()
         response_time = (time.time() - start_time) * 1000
-        
+
         return {
             "status": "healthy" if server_info.get("status") != "error" else "unhealthy",
             "server_info": server_info,
             "response_time_ms": response_time,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         raise handle_http_error(e, "Industrial MCP health check", 503)
 
@@ -70,7 +77,7 @@ async def check_health():
 async def create_control_loop(request: ControlLoopRequest):
     """Create industrial control loop"""
     client = await get_client()
-    
+
     try:
         result = await client.create_control_loop(
             name=request.name,
@@ -81,7 +88,7 @@ async def create_control_loop(request: ControlLoopRequest):
             tuning_params=request.tuning_params,
             safety_limits=request.safety_limits
         )
-        
+
         if result.get("success"):
             return ControlLoopResponse(
                 success=True,
@@ -100,7 +107,7 @@ async def create_control_loop(request: ControlLoopRequest):
                 validation_score=0.0,
                 recommendations=[f"Error: {result.get('error', 'Unknown error')}"]
             )
-            
+
     except Exception as e:
         raise handle_http_error(e, "Control loop creation", 500)
 
@@ -108,7 +115,7 @@ async def create_control_loop(request: ControlLoopRequest):
 async def tune_pid_controller(request: PIDTuningRequest):
     """Tune PID controller parameters"""
     client = await get_client()
-    
+
     try:
         result = await client.tune_pid_controller(
             control_loop_id=request.control_loop_id,
@@ -116,7 +123,7 @@ async def tune_pid_controller(request: PIDTuningRequest):
             criteria=request.performance_criteria,
             process_data=request.process_data
         )
-        
+
         if result.get("success"):
             return PIDTuningResponse(
                 success=True,
@@ -133,7 +140,7 @@ async def tune_pid_controller(request: PIDTuningRequest):
                 tuning_method_used="",
                 recommendations=[f"Error: {result.get('error', 'Tuning failed')}"]
             )
-            
+
     except Exception as e:
         raise handle_http_error(e, "PID tuning", 500)
 
@@ -141,7 +148,7 @@ async def tune_pid_controller(request: PIDTuningRequest):
 async def connect_to_plc(request: PLCConnectionRequest):
     """Connect to PLC system"""
     client = await get_client()
-    
+
     try:
         result = await client.connect_to_plc(
             address=request.plc_address,
@@ -150,7 +157,7 @@ async def connect_to_plc(request: PLCConnectionRequest):
             timeout=request.timeout,
             protocol=request.protocol
         )
-        
+
         if result.get("success"):
             return PLCConnectionResponse(
                 success=True,
@@ -167,7 +174,7 @@ async def connect_to_plc(request: PLCConnectionRequest):
                 available_tags=[],
                 connection_status=f"Failed: {result.get('error', 'Connection failed')}"
             )
-            
+
     except Exception as e:
         raise handle_http_error(e, "PLC connection", 500)
 
@@ -175,7 +182,7 @@ async def connect_to_plc(request: PLCConnectionRequest):
 async def validate_safety_system(request: SafetySystemRequest):
     """Validate safety system"""
     client = await get_client()
-    
+
     try:
         result = await client.validate_safety_system(
             name=request.safety_system_name,
@@ -184,7 +191,7 @@ async def validate_safety_system(request: SafetySystemRequest):
             fail_safe_actions=request.fail_safe_actions,
             sil_level=request.sil_level
         )
-        
+
         if result.get("success"):
             return SafetySystemResponse(
                 validation_passed=result.get("validation_passed", False),
@@ -201,7 +208,7 @@ async def validate_safety_system(request: SafetySystemRequest):
                 compliance_issues=[f"Validation error: {result.get('error', 'Unknown error')}"],
                 recommendations=["Review safety system configuration"]
             )
-            
+
     except Exception as e:
         raise handle_http_error(e, "Safety system validation", 500)
 
@@ -209,10 +216,10 @@ async def validate_safety_system(request: SafetySystemRequest):
 async def get_system_status():
     """Get system status"""
     client = await get_client()
-    
+
     try:
         result = await client.get_system_status()
-        
+
         if result.get("success"):
             status_data = result.get("status", {})
             return SystemStatusResponse(
@@ -232,7 +239,7 @@ async def get_system_status():
                 performance_metrics={"error": "Metrics unavailable"},
                 alerts=[f"System status error: {result.get('error', 'Unknown error')}"]
             )
-            
+
     except Exception as e:
         raise handle_http_error(e, "System status check", 500)
 
@@ -244,10 +251,10 @@ async def search_industrial_knowledge(
 ):
     """Search industrial knowledge base"""
     client = await get_client()
-    
+
     try:
         result = await client.search_knowledge(query, domain, limit=limit)
-        
+
         if result.get("success"):
             return IndustrialKnowledgeResponse(
                 results=result.get("results", []),
@@ -262,7 +269,7 @@ async def search_industrial_knowledge(
                 search_time_ms=0.0,
                 knowledge_domains=["Control Theory", "PLC Programming", "Safety Systems"]
             )
-            
+
     except Exception as e:
         raise handle_http_error(e, "Industrial knowledge search", 500)
 
@@ -274,18 +281,18 @@ async def search_industrial_knowledge(
 async def get_integration_status():
     """Get comprehensive integration status"""
     client = await get_client()
-    
+
     try:
         server_info = await client.get_server_info()
         mcp_healthy = server_info.get("status") not in ["error", "unavailable"]
-        
+
         return {
             "integration_status": "active" if mcp_healthy else "degraded",
             "mcp_server_healthy": mcp_healthy,
             "server_info": server_info,
             "capabilities": [
                 "Control Loop Management",
-                "PID Auto-Tuning", 
+                "PID Auto-Tuning",
                 "PLC Integration",
                 "Safety System Validation",
                 "Industrial Knowledge Search"
@@ -295,7 +302,7 @@ async def get_integration_status():
             "proxy_version": "2.0.0-refactored",
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
     except Exception as e:
         return {
             "integration_status": "error",
@@ -311,14 +318,14 @@ async def get_integration_status():
 async def startup_industrial_mcp_proxy():
     """Initialize Industrial MCP proxy on startup"""
     logger.info("Initializing refactored Industrial MCP proxy integration")
-    
+
     try:
         client = await get_client()
         server_info = await client.get_server_info()
-        
-        logger.info("Refactored Industrial MCP proxy integration ready", 
+
+        logger.info("Refactored Industrial MCP proxy integration ready",
                    status=server_info.get("status"))
-                   
+
     except Exception as e:
         logger.warning("Industrial MCP server not immediately available", error=str(e))
 
@@ -329,4 +336,4 @@ async def shutdown_industrial_mcp_proxy():
     logger.info("Refactored Industrial MCP proxy integration shut down")
 
 # Export router and handlers
-__all__ = ["router", "startup_industrial_mcp_proxy", "shutdown_industrial_mcp_proxy"] 
+__all__ = ["router", "startup_industrial_mcp_proxy", "shutdown_industrial_mcp_proxy"]

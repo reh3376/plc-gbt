@@ -14,24 +14,26 @@ Dependencies: Phase 23 (Fine-tuned LLM), Phase 21 (CLI), RESTful API
 import asyncio
 import json
 import logging
-import aiohttp
-import uuid
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional, Union, Callable
-from dataclasses import dataclass, field, asdict
-from enum import Enum
-from pathlib import Path
 import traceback
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 
 # MCP Protocol imports
 from mcp import types
 from mcp.server import Server
-from mcp.server.models import InitializationOptions
-from mcp.server.session import ServerSession
 from mcp.types import (
-    Tool, TextContent, ImageContent, EmbeddedResource,
-    CallToolResult, ListToolsResult, GetPromptResult,
-    ListPromptsResult, ListResourcesResult, ReadResourceResult
+    CallToolResult,
+    GetPromptResult,
+    ListPromptsResult,
+    ListResourcesResult,
+    ListToolsResult,
+    ReadResourceResult,
+    TextContent,
+    Tool,
 )
 
 # Configure logging
@@ -51,7 +53,7 @@ REQUEST_TIMEOUT = 30
 class MCPCapability(str, Enum):
     """MCP server capabilities"""
     TOOLS = "tools"
-    PROMPTS = "prompts"  
+    PROMPTS = "prompts"
     RESOURCES = "resources"
 
 class OperationCategory(str, Enum):
@@ -116,7 +118,7 @@ class APIResponse:
 
 class PLCGBTMCPServer:
     """Main MCP server implementation for PLC-GBT system"""
-    
+
     def __init__(self, api_base_url: str = API_BASE_URL):
         self.api_base_url = api_base_url
         self.server = Server(SERVER_NAME)
@@ -124,45 +126,45 @@ class PLCGBTMCPServer:
         self.tools: Dict[str, MCPToolDefinition] = {}
         self.prompts: Dict[str, MCPPromptDefinition] = {}
         self.resources: Dict[str, MCPResourceDefinition] = {}
-        
+
         # Initialize server capabilities
         self._register_tools()
         self._register_prompts()
         self._register_resources()
-        
+
         # Register MCP handlers
         self._register_mcp_handlers()
-        
+
         logger.info(f"Initialized PLC-GBT MCP Server v{SERVER_VERSION}")
         logger.info(f"API Base URL: {self.api_base_url}")
         logger.info(f"Registered {len(self.tools)} tools, {len(self.prompts)} prompts, {len(self.resources)} resources")
-    
+
     async def start(self, transport_options: Dict[str, Any] = None):
         """Start the MCP server"""
         self.session = aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=REQUEST_TIMEOUT),
             connector=aiohttp.TCPConnector(limit=MAX_CONCURRENT_REQUESTS)
         )
-        
+
         logger.info("PLC-GBT MCP Server started successfully")
         logger.info(f"Available capabilities: {[cap.value for cap in MCPCapability]}")
-        
+
         # Test API connectivity
         try:
             await self._test_api_connectivity()
             logger.info("✅ API connectivity verified")
         except Exception as e:
             logger.warning(f"⚠️ API connectivity test failed: {e}")
-    
+
     async def stop(self):
         """Stop the MCP server"""
         if self.session:
             await self.session.close()
         logger.info("PLC-GBT MCP Server stopped")
-    
+
     def _register_mcp_handlers(self):
         """Register all MCP protocol handlers"""
-        
+
         @self.server.list_tools()
         async def list_tools() -> ListToolsResult:
             """List all available tools"""
@@ -178,7 +180,7 @@ class PLCGBTMCPServer:
                     }
                 ))
             return ListToolsResult(tools=tools)
-        
+
         @self.server.call_tool()
         async def call_tool(name: str, arguments: dict) -> CallToolResult:
             """Execute a tool"""
@@ -191,22 +193,22 @@ class PLCGBTMCPServer:
                         )],
                         isError=True
                     )
-                
+
                 tool_def = self.tools[name]
-                
+
                 # Execute the tool via API call
                 result = await self._execute_tool(tool_def, arguments)
-                
+
                 if result.success:
                     response_text = self._format_success_response(tool_def, result)
                 else:
                     response_text = self._format_error_response(tool_def, result)
-                
+
                 return CallToolResult(
                     content=[TextContent(type="text", text=response_text)],
                     isError=not result.success
                 )
-                
+
             except Exception as e:
                 error_text = f"Error executing tool '{name}': {str(e)}\n{traceback.format_exc()}"
                 logger.error(error_text)
@@ -214,7 +216,7 @@ class PLCGBTMCPServer:
                     content=[TextContent(type="text", text=error_text)],
                     isError=True
                 )
-        
+
         @self.server.list_prompts()
         async def list_prompts() -> ListPromptsResult:
             """List all available prompts"""
@@ -229,20 +231,20 @@ class PLCGBTMCPServer:
                     ]
                 ))
             return ListPromptsResult(prompts=prompts)
-        
+
         @self.server.get_prompt()
         async def get_prompt(name: str, arguments: dict) -> GetPromptResult:
             """Get a prompt template with filled parameters"""
             if name not in self.prompts:
                 raise ValueError(f"Prompt '{name}' not found")
-            
+
             prompt_def = self.prompts[name]
             filled_template = prompt_def.template
-            
+
             # Fill in parameters
             for param, value in arguments.items():
                 filled_template = filled_template.replace(f"{{{param}}}", str(value))
-            
+
             return GetPromptResult(
                 description=prompt_def.description,
                 messages=[
@@ -252,7 +254,7 @@ class PLCGBTMCPServer:
                     )
                 ]
             )
-        
+
         @self.server.list_resources()
         async def list_resources() -> ListResourcesResult:
             """List all available resources"""
@@ -265,7 +267,7 @@ class PLCGBTMCPServer:
                     mimeType="application/json"
                 ))
             return ListResourcesResult(resources=resources)
-        
+
         @self.server.read_resource()
         async def read_resource(uri: str) -> ReadResourceResult:
             """Read a resource"""
@@ -274,23 +276,23 @@ class PLCGBTMCPServer:
                 if res.uri == uri:
                     resource_def = res
                     break
-            
+
             if not resource_def:
                 raise ValueError(f"Resource with URI '{uri}' not found")
-            
+
             # Fetch resource content
             content = await self._fetch_resource_content(resource_def)
-            
+
             return ReadResourceResult(
                 contents=[TextContent(
                     type="text",
                     text=json.dumps(content, indent=2)
                 )]
             )
-    
+
     def _register_tools(self):
         """Register all available tools"""
-        
+
         # Control Loop Schema Tools
         self.tools["list_schemas"] = MCPToolDefinition(
             name="list_schemas",
@@ -306,7 +308,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-cl schema list"
         )
-        
+
         self.tools["create_schema"] = MCPToolDefinition(
             name="create_schema",
             description="Create a new control loop schema",
@@ -324,7 +326,7 @@ class PLCGBTMCPServer:
             safety_level="caution",
             requires_confirmation=True
         )
-        
+
         self.tools["get_schema"] = MCPToolDefinition(
             name="get_schema",
             description="Get detailed information about a specific schema",
@@ -336,7 +338,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-cl schema info {schema_id}"
         )
-        
+
         # Control Loop Instance Tools
         self.tools["list_instances"] = MCPToolDefinition(
             name="list_instances",
@@ -353,7 +355,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-cl instance list"
         )
-        
+
         self.tools["create_instance"] = MCPToolDefinition(
             name="create_instance",
             description="Create a new control loop instance",
@@ -371,7 +373,7 @@ class PLCGBTMCPServer:
             safety_level="caution",
             requires_confirmation=True
         )
-        
+
         # Natural Language Workflow Tools
         self.tools["create_workflow"] = MCPToolDefinition(
             name="create_workflow",
@@ -389,7 +391,7 @@ class PLCGBTMCPServer:
             cli_equivalent="plc-cl workflow create {description}",
             safety_level="caution"
         )
-        
+
         self.tools["list_workflows"] = MCPToolDefinition(
             name="list_workflows",
             description="List all available workflows",
@@ -404,7 +406,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-cl workflow list"
         )
-        
+
         self.tools["analyze_workflow"] = MCPToolDefinition(
             name="analyze_workflow",
             description="Analyze workflow performance and generate recommendations",
@@ -418,7 +420,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-cl workflow analyze {workflow_id}"
         )
-        
+
         self.tools["optimize_workflow"] = MCPToolDefinition(
             name="optimize_workflow",
             description="Optimize workflow based on analysis",
@@ -433,7 +435,7 @@ class PLCGBTMCPServer:
             cli_equivalent="plc-cl workflow optimize {workflow_id}",
             safety_level="caution"
         )
-        
+
         self.tools["workflow_chat"] = MCPToolDefinition(
             name="workflow_chat",
             description="Interactive workflow management through conversation",
@@ -448,7 +450,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-cl workflow chat"
         )
-        
+
         # Memory System Tools
         self.tools["ingest_memory"] = MCPToolDefinition(
             name="ingest_memory",
@@ -466,7 +468,7 @@ class PLCGBTMCPServer:
             cli_equivalent="plc-memory ingest {paths}",
             safety_level="caution"
         )
-        
+
         self.tools["query_memory"] = MCPToolDefinition(
             name="query_memory",
             description="Query the memory system with intelligent routing",
@@ -481,7 +483,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-memory query {query}"
         )
-        
+
         self.tools["memory_status"] = MCPToolDefinition(
             name="memory_status",
             description="Get memory system status and performance metrics",
@@ -494,7 +496,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-memory status"
         )
-        
+
         # PLC Integration Tools
         self.tools["connect_plc"] = MCPToolDefinition(
             name="connect_plc",
@@ -511,7 +513,7 @@ class PLCGBTMCPServer:
             cli_equivalent="plc-cl instance plc connect --host {host} --slot {slot}",
             safety_level="caution"
         )
-        
+
         self.tools["read_plc_tags"] = MCPToolDefinition(
             name="read_plc_tags",
             description="Read values from PLC tags",
@@ -524,7 +526,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-cl instance plc read {tags}"
         )
-        
+
         self.tools["discover_plcs"] = MCPToolDefinition(
             name="discover_plcs",
             description="Discover ControlLogix PLCs on the network",
@@ -537,7 +539,7 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-cl instance plc discover"
         )
-        
+
         # System and Monitoring Tools
         self.tools["system_status"] = MCPToolDefinition(
             name="system_status",
@@ -548,7 +550,7 @@ class PLCGBTMCPServer:
             parameters={},
             cli_equivalent="plc-cl status"
         )
-        
+
         self.tools["system_config"] = MCPToolDefinition(
             name="system_config",
             description="Get system configuration settings",
@@ -558,7 +560,7 @@ class PLCGBTMCPServer:
             parameters={},
             cli_equivalent="plc-cl config show"
         )
-        
+
         self.tools["system_metrics"] = MCPToolDefinition(
             name="system_metrics",
             description="Get system performance metrics",
@@ -571,12 +573,12 @@ class PLCGBTMCPServer:
             },
             cli_equivalent="plc-cl metrics --type {metric_type} --range {time_range}"
         )
-        
+
         logger.info(f"Registered {len(self.tools)} MCP tools")
-    
+
     def _register_prompts(self):
         """Register prompt templates for common operations"""
-        
+
         self.prompts["create_temperature_control"] = MCPPromptDefinition(
             name="create_temperature_control",
             description="Create a temperature control loop with PID controller",
@@ -596,7 +598,7 @@ Please use the create_instance tool with a standard-pid schema.""",
                 "Create temperature control for reactor with TT_101 sensor, 85°C setpoint, and TIC_101 output"
             ]
         )
-        
+
         self.prompts["create_data_logging_workflow"] = MCPPromptDefinition(
             name="create_data_logging_workflow",
             description="Create a data logging workflow for industrial processes",
@@ -615,7 +617,7 @@ Please use the create_workflow tool with appropriate natural language descriptio
                 "Create data logging for temperature and pressure sensors every 30 seconds to historian database"
             ]
         )
-        
+
         self.prompts["troubleshoot_control_loop"] = MCPPromptDefinition(
             name="troubleshoot_control_loop",
             description="Troubleshoot control loop performance issues",
@@ -633,12 +635,12 @@ Please analyze the loop configuration and provide recommendations for tuning or 
                 "Troubleshoot temperature control loop with oscillating behavior and slow response"
             ]
         )
-        
+
         logger.info(f"Registered {len(self.prompts)} MCP prompts")
-    
+
     def _register_resources(self):
         """Register available resources"""
-        
+
         self.resources["schema_catalog"] = MCPResourceDefinition(
             name="schema_catalog",
             description="Complete catalog of available control loop schemas",
@@ -647,7 +649,7 @@ Please analyze the loop configuration and provide recommendations for tuning or 
             category=OperationCategory.CONTROL_LOOPS,
             metadata={"source": "schema_management_system"}
         )
-        
+
         self.resources["workflow_templates"] = MCPResourceDefinition(
             name="workflow_templates",
             description="Library of industrial automation workflow templates",
@@ -656,7 +658,7 @@ Please analyze the loop configuration and provide recommendations for tuning or 
             category=OperationCategory.WORKFLOWS,
             metadata={"source": "template_library"}
         )
-        
+
         self.resources["system_documentation"] = MCPResourceDefinition(
             name="system_documentation",
             description="Complete system documentation and API reference",
@@ -665,7 +667,7 @@ Please analyze the loop configuration and provide recommendations for tuning or 
             category=OperationCategory.SYSTEM,
             metadata={"source": "documentation_system"}
         )
-        
+
         self.resources["plc_tag_database"] = MCPResourceDefinition(
             name="plc_tag_database",
             description="Database of available PLC tags and their definitions",
@@ -674,25 +676,25 @@ Please analyze the loop configuration and provide recommendations for tuning or 
             category=OperationCategory.PLC,
             metadata={"source": "plc_integration_system"}
         )
-        
+
         logger.info(f"Registered {len(self.resources)} MCP resources")
-    
+
     async def _execute_tool(self, tool_def: MCPToolDefinition, arguments: Dict[str, Any]) -> APIResponse:
         """Execute a tool by calling the corresponding API endpoint"""
         try:
             # Build URL
             url = f"{self.api_base_url}{tool_def.endpoint}"
-            
+
             # Replace path parameters
             for key, value in arguments.items():
                 if f"{{{key}}}" in url:
                     url = url.replace(f"{{{key}}}", str(value))
                     # Remove from arguments so it's not sent in body
                     arguments = {k: v for k, v in arguments.items() if k != key}
-            
+
             # Make API request
             start_time = datetime.now()
-            
+
             if tool_def.method == "GET":
                 response = await self.session.get(url, params=arguments)
             elif tool_def.method == "POST":
@@ -703,15 +705,15 @@ Please analyze the loop configuration and provide recommendations for tuning or 
                 response = await self.session.delete(url)
             else:
                 raise ValueError(f"Unsupported HTTP method: {tool_def.method}")
-            
+
             execution_time = (datetime.now() - start_time).total_seconds() * 1000
-            
+
             # Parse response
             if response.content_type == "application/json":
                 data = await response.json()
             else:
                 data = {"response": await response.text()}
-            
+
             return APIResponse(
                 success=response.status < 400,
                 data=data,
@@ -719,7 +721,7 @@ Please analyze the loop configuration and provide recommendations for tuning or 
                 execution_time_ms=execution_time,
                 status_code=response.status
             )
-            
+
         except Exception as e:
             logger.error(f"Error executing tool {tool_def.name}: {e}")
             return APIResponse(
@@ -729,7 +731,7 @@ Please analyze the loop configuration and provide recommendations for tuning or 
                 execution_time_ms=None,
                 status_code=500
             )
-    
+
     async def _fetch_resource_content(self, resource_def: MCPResourceDefinition) -> Dict[str, Any]:
         """Fetch content for a resource"""
         try:
@@ -740,23 +742,23 @@ Please analyze the loop configuration and provide recommendations for tuning or 
                 "plc-gbt://system/documentation": "/system/config",
                 "plc-gbt://plc/tags": "/plc/connections"
             }
-            
+
             endpoint = uri_mapping.get(resource_def.uri)
             if not endpoint:
                 return {"error": f"Resource URI not mapped: {resource_def.uri}"}
-            
+
             url = f"{self.api_base_url}{endpoint}"
             response = await self.session.get(url)
-            
+
             if response.status < 400:
                 return await response.json()
             else:
                 return {"error": f"Failed to fetch resource: HTTP {response.status}"}
-                
+
         except Exception as e:
             logger.error(f"Error fetching resource {resource_def.name}: {e}")
             return {"error": str(e)}
-    
+
     def _format_success_response(self, tool_def: MCPToolDefinition, result: APIResponse) -> str:
         """Format successful tool execution response"""
         response_parts = [
@@ -766,7 +768,7 @@ Please analyze the loop configuration and provide recommendations for tuning or 
             "",
             "📋 Results:"
         ]
-        
+
         if result.data:
             # Format the data nicely
             if isinstance(result.data, dict):
@@ -777,9 +779,9 @@ Please analyze the loop configuration and provide recommendations for tuning or 
                     response_parts.append(json.dumps(result.data["data"], indent=2))
             else:
                 response_parts.append(json.dumps(result.data, indent=2))
-        
+
         return "\n".join(response_parts)
-    
+
     def _format_error_response(self, tool_def: MCPToolDefinition, result: APIResponse) -> str:
         """Format error tool execution response"""
         response_parts = [
@@ -789,15 +791,15 @@ Please analyze the loop configuration and provide recommendations for tuning or 
             "",
             "Error details:"
         ]
-        
+
         if result.error:
             response_parts.append(result.error)
-        
+
         if result.data and isinstance(result.data, dict) and "error" in result.data:
             response_parts.append(f"API Error: {result.data['error']}")
-        
+
         return "\n".join(response_parts)
-    
+
     async def _test_api_connectivity(self):
         """Test connectivity to the REST API"""
         try:
@@ -817,40 +819,40 @@ Please analyze the loop configuration and provide recommendations for tuning or 
 
 class MCPServerManager:
     """Manager for MCP server lifecycle and operations"""
-    
+
     def __init__(self, api_base_url: str = API_BASE_URL):
         self.api_base_url = api_base_url
         self.server_instance: Optional[PLCGBTMCPServer] = None
         self.is_running = False
-    
+
     async def start_server(self, **options) -> PLCGBTMCPServer:
         """Start the MCP server"""
         if self.is_running:
             raise RuntimeError("MCP server is already running")
-        
+
         self.server_instance = PLCGBTMCPServer(self.api_base_url)
         await self.server_instance.start(options)
         self.is_running = True
-        
+
         logger.info("MCP Server Manager: Server started successfully")
         return self.server_instance
-    
+
     async def stop_server(self):
         """Stop the MCP server"""
         if not self.is_running or not self.server_instance:
             return
-        
+
         await self.server_instance.stop()
         self.server_instance = None
         self.is_running = False
-        
+
         logger.info("MCP Server Manager: Server stopped")
-    
+
     def get_server_info(self) -> Dict[str, Any]:
         """Get information about the MCP server"""
         if not self.server_instance:
             return {"status": "stopped", "server": None}
-        
+
         return {
             "status": "running" if self.is_running else "stopped",
             "server_name": SERVER_NAME,
@@ -870,40 +872,40 @@ async def test_mcp_server():
     """Test the MCP server functionality"""
     print("🧪 Testing PLC-GBT MCP Server")
     print("=" * 50)
-    
+
     manager = MCPServerManager()
-    
+
     try:
         # Start server
         server = await manager.start_server()
-        
+
         # Test server info
         info = manager.get_server_info()
         print(f"✅ Server Info: {json.dumps(info, indent=2)}")
-        
+
         # Test tool discovery
         print(f"\n📋 Available Tools: {len(server.tools)}")
         for tool_name, tool_def in list(server.tools.items())[:5]:  # Show first 5
             print(f"  • {tool_name}: {tool_def.description}")
-        
+
         # Test prompt discovery
         print(f"\n💬 Available Prompts: {len(server.prompts)}")
         for prompt_name, prompt_def in server.prompts.items():
             print(f"  • {prompt_name}: {prompt_def.description}")
-        
+
         # Test resource discovery
         print(f"\n📄 Available Resources: {len(server.resources)}")
         for resource_name, resource_def in server.resources.items():
             print(f"  • {resource_name}: {resource_def.description}")
-        
-        print(f"\n✅ MCP Server test completed successfully!")
-        
+
+        print("\n✅ MCP Server test completed successfully!")
+
     except Exception as e:
         print(f"❌ MCP Server test failed: {e}")
         traceback.print_exc()
-    
+
     finally:
         await manager.stop_server()
 
 if __name__ == "__main__":
-    asyncio.run(test_mcp_server()) 
+    asyncio.run(test_mcp_server())

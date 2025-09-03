@@ -18,4 +18,4 @@ __version__ = "1.0.0"
 # Export main components
 __all__ = [
     'registry_manager'
-] 
+]

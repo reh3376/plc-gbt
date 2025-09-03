@@ -12,16 +12,16 @@ Phase: 24.1 - Context Discovery & Analysis
 
 import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Set
-from dataclasses import dataclass, asdict
+from collections import Counter
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from collections import defaultdict, Counter
-import re
+from pathlib import Path
+from typing import Any, Dict, List
+
+from analyzer import ContentAnalysisResults, ContentAnalyzer
 
 # Import from previous modules
-from scanner import ScanResult, ContextScanner
-from analyzer import ContentAnalysisResults, ContentAnalyzer
+from scanner import ContextScanner, ScanResult
 
 logger = logging.getLogger(__name__)
 
@@ -73,16 +73,16 @@ class ExtractedKnowledge:
 class KnowledgeExtractor:
     """
     Advanced knowledge extractor for Phase 24.1
-    
+
     Extracts structured, actionable knowledge from content analysis
     results and prepares it for ingestion into the PLC memory system.
     """
-    
+
     def __init__(self):
         self.entities: List[KnowledgeEntity] = []
         self.relationships: List[KnowledgeRelationship] = []
         self.training_examples: List[TrainingExample] = []
-        
+
         # Knowledge extraction templates
         self.entity_templates = {
             'control_schema': {
@@ -91,7 +91,7 @@ class KnowledgeExtractor:
                 'tags': ['control', 'schema', 'configuration']
             },
             'control_algorithm': {
-                'type': 'algorithm', 
+                'type': 'algorithm',
                 'required_properties': ['algorithm_name', 'implementation_approach'],
                 'tags': ['algorithm', 'control', 'implementation']
             },
@@ -106,7 +106,7 @@ class KnowledgeExtractor:
                 'tags': ['concept', 'theory', 'control']
             }
         }
-        
+
         # Training example templates
         self.qa_templates = {
             'schema_explanation': {
@@ -130,38 +130,38 @@ class KnowledgeExtractor:
                 'tags': ['tuning', 'guidance', 'parameters']
             }
         }
-        
+
         logger.info("KnowledgeExtractor initialized")
-    
-    def extract_knowledge(self, scan_results: List[ScanResult], 
+
+    def extract_knowledge(self, scan_results: List[ScanResult],
                          analysis_results: ContentAnalysisResults) -> ExtractedKnowledge:
         """
         Extract comprehensive knowledge from scan and analysis results
-        
+
         Args:
             scan_results: Original scan results from ContextScanner
             analysis_results: Analysis results from ContentAnalyzer
-            
+
         Returns:
             Complete extracted knowledge ready for memory ingestion
         """
         logger.info(f"🔍 Starting knowledge extraction from {len(scan_results)} files")
-        
+
         # Extract entities
         self._extract_entities(scan_results, analysis_results)
-        
+
         # Extract relationships
         self._extract_relationships(analysis_results)
-        
+
         # Generate training examples
         self._generate_training_examples(scan_results, analysis_results)
-        
+
         # Build knowledge graph structure
         knowledge_graph = self._build_knowledge_graph_structure()
-        
+
         # Create ingestion metadata
         ingestion_metadata = self._create_ingestion_metadata(scan_results)
-        
+
         extracted_knowledge = ExtractedKnowledge(
             entities=self.entities,
             relationships=self.relationships,
@@ -169,41 +169,41 @@ class KnowledgeExtractor:
             knowledge_graph=knowledge_graph,
             ingestion_metadata=ingestion_metadata
         )
-        
+
         logger.info(f"✅ Knowledge extraction complete: {len(self.entities)} entities, "
                    f"{len(self.relationships)} relationships, {len(self.training_examples)} training examples")
-        
+
         return extracted_knowledge
-    
-    def _extract_entities(self, scan_results: List[ScanResult], 
+
+    def _extract_entities(self, scan_results: List[ScanResult],
                          analysis_results: ContentAnalysisResults):
         """Extract knowledge entities from scan and analysis results"""
         logger.info("📋 Extracting knowledge entities")
-        
+
         # Extract schema entities
         self._extract_schema_entities(scan_results)
-        
+
         # Extract algorithm entities
         self._extract_algorithm_entities(analysis_results.algorithm_patterns)
-        
+
         # Extract concept entities
         self._extract_concept_entities(analysis_results.knowledge_graph)
-        
+
         # Extract best practice entities
         self._extract_best_practice_entities(scan_results)
-        
+
         # Extract data pattern entities
         self._extract_data_pattern_entities(analysis_results.data_insights)
-        
+
         logger.info(f"📋 Extracted {len(self.entities)} knowledge entities")
-    
+
     def _extract_schema_entities(self, scan_results: List[ScanResult]):
         """Extract entities from control schemas"""
         schema_results = [r for r in scan_results if r.schema_analysis]
-        
+
         for result in schema_results:
             schema = result.schema_analysis
-            
+
             entity = KnowledgeEntity(
                 entity_id=f"schema_{result.metadata.name.replace('.json', '')}",
                 entity_type="schema",
@@ -220,12 +220,12 @@ class KnowledgeExtractor:
                 relationships=[],  # Will be populated later
                 source_files=[result.metadata.name],
                 confidence_score=1.0,  # High confidence for structured schemas
-                tags=["control", "schema", schema.control_type.lower(), 
+                tags=["control", "schema", schema.control_type.lower(),
                       schema.complexity_level.lower()]
             )
-            
+
             self.entities.append(entity)
-    
+
     def _extract_algorithm_entities(self, algorithm_patterns):
         """Extract entities from algorithm patterns"""
         for pattern in algorithm_patterns:
@@ -246,9 +246,9 @@ class KnowledgeExtractor:
                 confidence_score=0.8,  # Good confidence for detected algorithms
                 tags=["algorithm", "control", pattern.algorithm_name.lower().replace(' ', '_')]
             )
-            
+
             self.entities.append(entity)
-    
+
     def _extract_concept_entities(self, knowledge_graph):
         """Extract entities from knowledge graph concepts"""
         for category, concepts in knowledge_graph.concepts.items():
@@ -267,23 +267,23 @@ class KnowledgeExtractor:
                     confidence_score=0.7,  # Moderate confidence for extracted concepts
                     tags=["concept", "control", category.lower()]
                 )
-                
+
                 self.entities.append(entity)
-    
+
     def _extract_best_practice_entities(self, scan_results: List[ScanResult]):
         """Extract best practice entities from documentation"""
         doc_results = [r for r in scan_results if r.document_analysis]
-        
+
         practice_id = 0
         for result in doc_results:
             doc = result.document_analysis
-            
+
             for practice in doc.best_practices:
                 practice_id += 1
-                
+
                 # Determine domain from practice content
                 domain = self._determine_practice_domain(practice)
-                
+
                 entity = KnowledgeEntity(
                     entity_id=f"best_practice_{practice_id:03d}",
                     entity_type="best_practice",
@@ -299,13 +299,13 @@ class KnowledgeExtractor:
                     confidence_score=0.6,  # Moderate confidence for extracted practices
                     tags=["best_practice", domain.lower(), "guidance"]
                 )
-                
+
                 self.entities.append(entity)
-    
+
     def _determine_practice_domain(self, practice_text: str) -> str:
         """Determine the domain of a best practice"""
         text_lower = practice_text.lower()
-        
+
         if any(term in text_lower for term in ['pid', 'controller', 'tuning']):
             return "PID_Control"
         elif any(term in text_lower for term in ['cascade', 'feedforward']):
@@ -316,7 +316,7 @@ class KnowledgeExtractor:
             return "Commissioning"
         else:
             return "General"
-    
+
     def _extract_data_pattern_entities(self, data_insights: Dict[str, Any]):
         """Extract entities from data patterns"""
         for file_name, insights in data_insights.items():
@@ -337,41 +337,41 @@ class KnowledgeExtractor:
                 confidence_score=0.9,  # High confidence for data analysis
                 tags=["data", "pattern", "variables"]
             )
-            
+
             self.entities.append(entity)
-    
+
     def _extract_relationships(self, analysis_results: ContentAnalysisResults):
         """Extract relationships between entities"""
         logger.info("🔗 Extracting knowledge relationships")
-        
+
         # Extract schema relationships
         self._extract_schema_relationships(analysis_results.control_relationships)
-        
+
         # Extract hierarchical relationships
         self._extract_hierarchical_relationships(analysis_results.knowledge_graph)
-        
+
         # Extract dependency relationships
         self._extract_dependency_relationships(analysis_results.knowledge_graph)
-        
+
         # Extract similarity relationships
         self._extract_similarity_relationships(analysis_results.schema_patterns)
-        
+
         logger.info(f"🔗 Extracted {len(self.relationships)} knowledge relationships")
-    
+
     def _extract_schema_relationships(self, control_relationships):
         """Extract relationships from control analysis"""
         for rel in control_relationships:
             # Map source and target to entity IDs
             source_id = f"schema_{rel.source_schema.replace('.json', '')}"
             target_id = f"schema_{rel.target_schema.replace('.json', '')}"
-            
+
             # Determine relationship type based on analysis
             rel_type = "similar_to"
             if rel.relationship_type == "extends":
                 rel_type = "extends"
             elif rel.relationship_type == "variant":
                 rel_type = "variant_of"
-            
+
             relationship = KnowledgeRelationship(
                 relationship_id=f"rel_{source_id}_{target_id}",
                 source_entity_id=source_id,
@@ -383,20 +383,20 @@ class KnowledgeExtractor:
                     "differences": rel.differences,
                     "similarity_score": rel.similarity_score
                 },
-                evidence=[f"Shared properties: {len(rel.shared_properties)}", 
+                evidence=[f"Shared properties: {len(rel.shared_properties)}",
                           f"Similarity score: {rel.similarity_score:.2f}"]
             )
-            
+
             self.relationships.append(relationship)
-    
+
     def _extract_hierarchical_relationships(self, knowledge_graph):
         """Extract hierarchical relationships"""
         for parent, children in knowledge_graph.hierarchies.items():
             parent_id = f"concept_control_types_{parent.lower().replace(' ', '_')}"
-            
+
             for child in children:
                 child_id = f"concept_complexity_{child.lower().replace(' ', '_')}"
-                
+
                 relationship = KnowledgeRelationship(
                     relationship_id=f"hierarchy_{parent_id}_{child_id}",
                     source_entity_id=child_id,
@@ -406,18 +406,18 @@ class KnowledgeExtractor:
                     properties={"hierarchy_type": "complexity"},
                     evidence=["Identified from schema complexity analysis"]
                 )
-                
+
                 self.relationships.append(relationship)
-    
+
     def _extract_dependency_relationships(self, knowledge_graph):
         """Extract dependency relationships"""
         for item, dependencies in knowledge_graph.dependencies.items():
             item_id = f"algorithm_{item.lower().replace(' ', '_').replace('-', '_')}"
-            
+
             for dep in dependencies[:3]:  # Limit to top 3 dependencies
                 # Create dependency entity if it doesn't exist
                 dep_id = f"dependency_{dep.replace(' ', '_').replace('.', '_')}"
-                
+
                 relationship = KnowledgeRelationship(
                     relationship_id=f"depends_{item_id}_{dep_id}",
                     source_entity_id=item_id,
@@ -427,21 +427,21 @@ class KnowledgeExtractor:
                     properties={"dependency_type": "implementation"},
                     evidence=[f"Identified from import analysis: {dep}"]
                 )
-                
+
                 self.relationships.append(relationship)
-    
+
     def _extract_similarity_relationships(self, schema_patterns):
         """Extract similarity relationships from patterns"""
         for pattern in schema_patterns:
             if pattern.pattern_type == "common_property" and pattern.occurrences >= 2:
                 # Create relationships between schemas that share this property
                 schema_files = pattern.schema_files
-                
+
                 for i, schema1 in enumerate(schema_files):
                     for schema2 in schema_files[i+1:]:
                         source_id = f"schema_{schema1.replace('.json', '')}"
                         target_id = f"schema_{schema2.replace('.json', '')}"
-                        
+
                         relationship = KnowledgeRelationship(
                             relationship_id=f"similar_prop_{source_id}_{target_id}_{pattern.properties[0]}",
                             source_entity_id=source_id,
@@ -454,41 +454,41 @@ class KnowledgeExtractor:
                             },
                             evidence=[f"Both schemas have property: {pattern.properties[0]}"]
                         )
-                        
+
                         self.relationships.append(relationship)
-    
-    def _generate_training_examples(self, scan_results: List[ScanResult], 
+
+    def _generate_training_examples(self, scan_results: List[ScanResult],
                                   analysis_results: ContentAnalysisResults):
         """Generate training examples for model enhancement"""
         logger.info("📚 Generating training examples")
-        
+
         # Generate schema-based examples
         self._generate_schema_examples(scan_results)
-        
+
         # Generate algorithm examples
         self._generate_algorithm_examples(analysis_results.algorithm_patterns)
-        
+
         # Generate best practice examples
         self._generate_best_practice_examples(scan_results)
-        
+
         # Generate comparison examples
         self._generate_comparison_examples(analysis_results.control_relationships)
-        
+
         logger.info(f"📚 Generated {len(self.training_examples)} training examples")
-    
+
     def _generate_schema_examples(self, scan_results: List[ScanResult]):
         """Generate training examples from schemas"""
         schema_results = [r for r in scan_results if r.schema_analysis]
-        
+
         for result in schema_results:
             schema = result.schema_analysis
-            
+
             # Schema explanation example
             question = f"What is the purpose of the {schema.title} schema?"
             answer = (f"The {schema.title} schema is used for {schema.description[:200]}... "
                      f"It has {schema.property_count} properties and is classified as "
                      f"{schema.complexity_level} complexity in the {schema.control_type} category.")
-            
+
             example = TrainingExample(
                 example_id=f"schema_explain_{result.metadata.name.replace('.json', '')}",
                 question=question,
@@ -499,15 +499,15 @@ class KnowledgeExtractor:
                 tags=["schema", "explanation", schema.control_type.lower()],
                 source_files=[result.metadata.name]
             )
-            
+
             self.training_examples.append(example)
-            
+
             # Property usage examples
             if len(schema.required_fields) > 0:
                 prop = schema.required_fields[0]  # Use first required field
                 question = f"How is the {prop} property used in {schema.title}?"
                 answer = f"In {schema.title}, the {prop} property is a required field that defines {prop.lower()} for the control loop configuration."
-                
+
                 example = TrainingExample(
                     example_id=f"prop_usage_{result.metadata.name.replace('.json', '')}_{prop}",
                     question=question,
@@ -518,9 +518,9 @@ class KnowledgeExtractor:
                     tags=["property", "usage", schema.control_type.lower()],
                     source_files=[result.metadata.name]
                 )
-                
+
                 self.training_examples.append(example)
-    
+
     def _generate_algorithm_examples(self, algorithm_patterns):
         """Generate training examples from algorithms"""
         for pattern in algorithm_patterns:
@@ -530,7 +530,7 @@ class KnowledgeExtractor:
                      f"{pattern.implementation_approach} approach with {pattern.complexity_level} "
                      f"complexity. It uses functions like {', '.join(pattern.function_names[:3])} "
                      f"and relies on libraries such as {', '.join(pattern.used_libraries[:2])}.")
-            
+
             example = TrainingExample(
                 example_id=f"algo_impl_{pattern.algorithm_name.lower().replace(' ', '_')}",
                 question=question,
@@ -541,23 +541,23 @@ class KnowledgeExtractor:
                 tags=["algorithm", "implementation", pattern.algorithm_name.lower().replace(' ', '_')],
                 source_files=[]
             )
-            
+
             self.training_examples.append(example)
-    
+
     def _generate_best_practice_examples(self, scan_results: List[ScanResult]):
         """Generate training examples from best practices"""
         doc_results = [r for r in scan_results if r.document_analysis]
-        
+
         for result in doc_results:
             doc = result.document_analysis
-            
+
             for i, practice in enumerate(doc.best_practices[:3]):  # Limit to first 3
                 # Extract domain from practice
                 domain = self._determine_practice_domain(practice)
-                
+
                 question = f"What is a best practice for {domain.lower().replace('_', ' ')}?"
                 answer = practice
-                
+
                 example = TrainingExample(
                     example_id=f"best_practice_{result.metadata.name.replace('.', '_')}_{i}",
                     question=question,
@@ -568,22 +568,22 @@ class KnowledgeExtractor:
                     tags=["best_practice", domain.lower(), "guidance"],
                     source_files=[result.metadata.name]
                 )
-                
+
                 self.training_examples.append(example)
-    
+
     def _generate_comparison_examples(self, control_relationships):
         """Generate comparison examples from relationships"""
         for rel in control_relationships[:5]:  # Limit to first 5
             if rel.similarity_score > 0.5:
                 schema1 = rel.source_schema.replace('.json', '').replace('-', ' ').title()
                 schema2 = rel.target_schema.replace('.json', '').replace('-', ' ').title()
-                
+
                 question = f"What's the difference between {schema1} and {schema2}?"
                 answer = (f"{schema1} and {schema2} are similar control configurations with "
                          f"{len(rel.shared_properties)} shared properties. The main differences are "
                          f"in {', '.join(rel.differences[:3])}. They have a similarity score of "
                          f"{rel.similarity_score:.2f}.")
-                
+
                 example = TrainingExample(
                     example_id=f"compare_{rel.source_schema.replace('.json', '')}_{rel.target_schema.replace('.json', '')}",
                     question=question,
@@ -594,9 +594,9 @@ class KnowledgeExtractor:
                     tags=["comparison", "schema", "differences"],
                     source_files=[rel.source_schema, rel.target_schema]
                 )
-                
+
                 self.training_examples.append(example)
-    
+
     def _build_knowledge_graph_structure(self) -> Dict[str, Any]:
         """Build the knowledge graph structure for ingestion"""
         graph = {
@@ -609,7 +609,7 @@ class KnowledgeExtractor:
                 "relationship_types": dict(Counter([r.relationship_type for r in self.relationships]))
             }
         }
-        
+
         # Add nodes
         for entity in self.entities:
             node = {
@@ -622,7 +622,7 @@ class KnowledgeExtractor:
                 "confidence": entity.confidence_score
             }
             graph["nodes"].append(node)
-        
+
         # Add edges
         for relationship in self.relationships:
             edge = {
@@ -634,9 +634,9 @@ class KnowledgeExtractor:
                 "properties": relationship.properties
             }
             graph["edges"].append(edge)
-        
+
         return graph
-    
+
     def _create_ingestion_metadata(self, scan_results: List[ScanResult]) -> Dict[str, Any]:
         """Create metadata for memory ingestion"""
         return {
@@ -663,12 +663,12 @@ class KnowledgeExtractor:
                 "data_patterns"  # High confidence, data-derived
             ]
         }
-    
+
     def export_knowledge(self, output_path: str) -> str:
         """Export extracted knowledge to JSON file"""
         if not self.entities:
             raise ValueError("No knowledge extracted. Run extract_knowledge() first.")
-        
+
         try:
             # Create extracted knowledge object
             knowledge = ExtractedKnowledge(
@@ -678,29 +678,29 @@ class KnowledgeExtractor:
                 knowledge_graph=self._build_knowledge_graph_structure(),
                 ingestion_metadata=self._create_ingestion_metadata([])  # Basic metadata
             )
-            
+
             # Convert to serializable format
             export_data = asdict(knowledge)
-            
+
             # Write to file
             output_file = Path(output_path)
             output_file.parent.mkdir(parents=True, exist_ok=True)
-            
+
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(export_data, f, indent=2, ensure_ascii=False)
-            
+
             logger.info(f"✅ Knowledge exported to: {output_file}")
             return str(output_file)
-            
+
         except Exception as e:
             logger.error(f"Failed to export knowledge: {e}")
             raise
-    
+
     def get_extraction_summary(self) -> Dict[str, Any]:
         """Get a summary of extracted knowledge"""
         if not self.entities:
             return {"error": "No knowledge extracted"}
-        
+
         return {
             "total_entities": len(self.entities),
             "total_relationships": len(self.relationships),
@@ -720,31 +720,31 @@ class KnowledgeExtractor:
 def main():
     """CLI entry point for knowledge extractor"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Knowledge Extractor for Phase 24.1")
     parser.add_argument("context_path", help="Path to context directory")
     parser.add_argument("--output", "-o", help="Output file for extracted knowledge")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    
+
     args = parser.parse_args()
-    
+
     # Configure logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    
+
     # Run complete pipeline: scan -> analyze -> extract
     scanner = ContextScanner(args.context_path)
     scan_results = scanner.scan_directory(recursive=True)
-    
+
     analyzer = ContentAnalyzer()
     analysis_results = analyzer.analyze_content(scan_results)
-    
+
     extractor = KnowledgeExtractor()
-    knowledge = extractor.extract_knowledge(scan_results, analysis_results)
-    
+    extractor.extract_knowledge(scan_results, analysis_results)
+
     # Print summary
     summary = extractor.get_extraction_summary()
-    print(f"\n📊 Knowledge Extraction Complete!")
+    print("\n📊 Knowledge Extraction Complete!")
     print(f"🎯 Total entities: {summary['total_entities']}")
     print(f"🔗 Total relationships: {summary['total_relationships']}")
     print(f"📚 Total training examples: {summary['total_training_examples']}")
@@ -752,11 +752,11 @@ def main():
     print(f"🔗 Relationship types: {summary['relationship_types']}")
     print(f"📈 Average confidence: {summary['confidence_scores']['average']:.2f}")
     print(f"✅ High confidence entities: {summary['confidence_scores']['high_confidence_count']}")
-    
+
     # Export if requested
     if args.output:
         extractor.export_knowledge(args.output)
 
 
 if __name__ == "__main__":
-    main() 
+    main()

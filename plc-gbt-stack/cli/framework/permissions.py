@@ -13,19 +13,20 @@ from enum import Enum
 from functools import wraps
 from typing import Callable
 
+
 class Permission(Enum):
     """Permission levels for CLI operations"""
     READ = "read"
     WRITE = "write"
     ADMIN = "admin"
-    
+
 def requires_permission(permission: Permission) -> Callable:
     """
     Decorator to enforce permission requirements on CLI commands.
-    
+
     Args:
         permission: Required permission level
-        
+
     Returns:
         Decorated function that checks permissions before execution
     """
@@ -42,4 +43,4 @@ def requires_permission(permission: Permission) -> Callable:
 
 class CLICommand:
     """Base class marker for CLI commands"""
-    pass 
+    pass

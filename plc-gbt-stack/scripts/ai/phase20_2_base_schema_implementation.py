@@ -6,26 +6,21 @@ Detailed implementation of the 4 main control loop type schemas with comprehensi
 parameters, validation rules, and production-ready configurations.
 
 Author: AI Task Orchestrator
-Created: 2025-01-17  
+Created: 2025-01-17
 Phase: 20.2 - Base Schema Implementation
 Dependencies: Phase 20.1 (Schema Architecture & Management System)
 """
 
-import os
-import json
 import asyncio
+import json
 import logging
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-import re
-import hashlib
-import uuid
-from contextlib import asynccontextmanager
-import jsonschema
-from jsonschema import Draft7Validator, validators
+from pathlib import Path
+from typing import Any, Dict
+
+from jsonschema import Draft7Validator
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -86,10 +81,10 @@ class SchemaVersion:
     major: int
     minor: int
     patch: int
-    
+
     def __str__(self) -> str:
         return f"{self.major:02d}.{self.minor:02d}.{self.patch:03d}"
-    
+
     @classmethod
     def from_string(cls, version_str: str) -> 'SchemaVersion':
         """Parse version string in XX.YY.ZZZ format"""
@@ -138,16 +133,16 @@ class Phase20_2BaseSchemaImplementation:
     Comprehensive implementation of 4 main control loop type schemas
     following AI Task Orchestrator methodology
     """
-    
+
     def __init__(self):
         self.session_id = f"phase20_2_{int(datetime.now().timestamp())}"
         self.start_time = datetime.now()
         self.schemas = {}
         self.base_path = Path("plc-gbt-stack/schemas/control-loops/base")
         self.base_path.mkdir(parents=True, exist_ok=True)
-        
+
         logger.info(f"Phase 20.2 Base Schema Implementation initialized - Session: {self.session_id}")
-    
+
     def _create_common_properties(self) -> Dict[str, Any]:
         """Create common properties shared by all control loop types"""
         return {
@@ -268,7 +263,7 @@ class Phase20_2BaseSchemaImplementation:
                 "description": "Controller execution scan time in seconds"
             }
         }
-    
+
     def _create_pid_parameters_schema(self, advanced: bool = False) -> Dict[str, Any]:
         """Create PID parameters schema"""
         base_params = {
@@ -303,7 +298,7 @@ class Phase20_2BaseSchemaImplementation:
             },
             "required": ["proportional_gain", "integral_time", "derivative_time"]
         }
-        
+
         if advanced:
             # Add advanced PID parameters
             base_params["properties"].update({
@@ -338,9 +333,9 @@ class Phase20_2BaseSchemaImplementation:
                     "description": "Controller deadband (prevents oscillation)"
                 }
             })
-        
+
         return base_params
-    
+
     def _create_alarm_schema(self) -> Dict[str, Any]:
         """Create alarm configuration schema"""
         return {
@@ -409,7 +404,7 @@ class Phase20_2BaseSchemaImplementation:
             },
             "description": "Comprehensive alarm configuration"
         }
-    
+
     def create_ladder_logic_standard_pid_schema(self) -> Dict[str, Any]:
         """
         Task 20.2.1: Implement Ladder Logic Standard PID schema
@@ -424,10 +419,10 @@ class Phase20_2BaseSchemaImplementation:
             "properties": {
                 # Include all common properties
                 **self._create_common_properties(),
-                
+
                 # Standard PID specific properties
                 "pid_parameters": self._create_pid_parameters_schema(advanced=False),
-                
+
                 "scaling": {
                     "type": "object",
                     "properties": {
@@ -465,7 +460,7 @@ class Phase20_2BaseSchemaImplementation:
                     "required": ["process_variable", "setpoint", "control_output"],
                     "description": "Input/output scaling configuration"
                 },
-                
+
                 "limits": {
                     "type": "object",
                     "properties": {
@@ -493,7 +488,7 @@ class Phase20_2BaseSchemaImplementation:
                     "required": ["output_high_limit", "output_low_limit"],
                     "description": "Control limits configuration"
                 },
-                
+
                 "controller_options": {
                     "type": "object",
                     "properties": {
@@ -525,9 +520,9 @@ class Phase20_2BaseSchemaImplementation:
             ],
             "additionalProperties": False
         }
-        
+
         return schema
-    
+
     def create_ladder_logic_advanced_pid_schema(self) -> Dict[str, Any]:
         """
         Task 20.2.2: Implement Ladder Logic Advanced PID schema
@@ -542,10 +537,10 @@ class Phase20_2BaseSchemaImplementation:
             "properties": {
                 # Include all common properties
                 **self._create_common_properties(),
-                
+
                 # Advanced PID specific properties
                 "pid_parameters": self._create_pid_parameters_schema(advanced=True),
-                
+
                 # Advanced scaling with additional features
                 "scaling": {
                     "type": "object",
@@ -604,10 +599,10 @@ class Phase20_2BaseSchemaImplementation:
                     },
                     "required": ["process_variable", "setpoint", "control_output"]
                 },
-                
+
                 # Comprehensive alarm configuration
                 "alarms": self._create_alarm_schema(),
-                
+
                 # Advanced controller features
                 "advanced_features": {
                     "type": "object",
@@ -658,7 +653,7 @@ class Phase20_2BaseSchemaImplementation:
                     },
                     "description": "Advanced PID controller features"
                 },
-                
+
                 # Enhanced monitoring and diagnostics
                 "monitoring": {
                     "type": "object",
@@ -690,9 +685,9 @@ class Phase20_2BaseSchemaImplementation:
             ],
             "additionalProperties": False
         }
-        
+
         return schema
-    
+
     def create_function_block_standard_pide_schema(self) -> Dict[str, Any]:
         """
         Task 20.2.3: Implement Function Block Standard PIDE schema
@@ -707,7 +702,7 @@ class Phase20_2BaseSchemaImplementation:
             "properties": {
                 # Include all common properties
                 **self._create_common_properties(),
-                
+
                 # PIDE specific parameters (enhanced PID)
                 "pide_parameters": {
                     "type": "object",
@@ -756,7 +751,7 @@ class Phase20_2BaseSchemaImplementation:
                     "required": ["proportional_gain", "integral_gain", "derivative_gain"],
                     "description": "PIDE parameter configuration"
                 },
-                
+
                 # Function block execution parameters
                 "execution_parameters": {
                     "type": "object",
@@ -789,7 +784,7 @@ class Phase20_2BaseSchemaImplementation:
                     "required": ["update_time"],
                     "description": "Function block execution configuration"
                 },
-                
+
                 # PIDE specific I/O configuration
                 "io_configuration": {
                     "type": "object",
@@ -834,7 +829,7 @@ class Phase20_2BaseSchemaImplementation:
                     "required": ["process_variable_input", "setpoint_input", "control_output"],
                     "description": "PIDE I/O configuration"
                 },
-                
+
                 # Enhanced control features for PIDE
                 "enhanced_features": {
                     "type": "object",
@@ -871,9 +866,9 @@ class Phase20_2BaseSchemaImplementation:
             ],
             "additionalProperties": False
         }
-        
+
         return schema
-    
+
     def create_function_block_advanced_pide_schema(self) -> Dict[str, Any]:
         """
         Task 20.2.4: Implement Function Block Advanced PIDE schema
@@ -888,7 +883,7 @@ class Phase20_2BaseSchemaImplementation:
             "properties": {
                 # Include all common properties
                 **self._create_common_properties(),
-                
+
                 # Advanced PIDE parameters with full tuning suite
                 "advanced_pide_parameters": {
                     "type": "object",
@@ -896,7 +891,7 @@ class Phase20_2BaseSchemaImplementation:
                         "proportional_gain": {"type": "number", "minimum": 0.001, "maximum": 999.9},
                         "integral_gain": {"type": "number", "minimum": 0.0, "maximum": 999.9},
                         "derivative_gain": {"type": "number", "minimum": 0.0, "maximum": 999.9},
-                        
+
                         # Advanced tuning parameters
                         "lambda_tuning": {
                             "type": "object",
@@ -914,7 +909,7 @@ class Phase20_2BaseSchemaImplementation:
                                 "dead_time": {"type": "number", "minimum": 0}
                             }
                         },
-                        
+
                         # Multiple setpoint weighting
                         "setpoint_weighting": {
                             "type": "object",
@@ -923,7 +918,7 @@ class Phase20_2BaseSchemaImplementation:
                                 "derivative_weight": {"type": "number", "minimum": 0, "maximum": 1}
                             }
                         },
-                        
+
                         # Enhanced filtering
                         "filtering": {
                             "type": "object",
@@ -937,13 +932,13 @@ class Phase20_2BaseSchemaImplementation:
                     "required": ["proportional_gain", "integral_gain", "derivative_gain"],
                     "description": "Advanced PIDE parameter configuration"
                 },
-                
+
                 # Comprehensive alarm system
                 "advanced_alarms": {
                     "type": "object",
                     "properties": {
                         **self._create_alarm_schema()["properties"],
-                        
+
                         # Additional advanced alarms
                         "controller_performance_alarms": {
                             "type": "object",
@@ -968,7 +963,7 @@ class Phase20_2BaseSchemaImplementation:
                     },
                     "description": "Advanced alarm configuration"
                 },
-                
+
                 # Multiple control strategies
                 "control_strategies": {
                     "type": "object",
@@ -1001,7 +996,7 @@ class Phase20_2BaseSchemaImplementation:
                     },
                     "description": "Multiple control strategies configuration"
                 },
-                
+
                 # Advanced diagnostics and monitoring
                 "advanced_diagnostics": {
                     "type": "object",
@@ -1046,7 +1041,7 @@ class Phase20_2BaseSchemaImplementation:
                     },
                     "description": "Advanced diagnostic capabilities"
                 },
-                
+
                 # Multi-variable control integration
                 "multivariable_integration": {
                     "type": "object",
@@ -1077,9 +1072,9 @@ class Phase20_2BaseSchemaImplementation:
             ],
             "additionalProperties": False
         }
-        
+
         return schema
-    
+
     async def implement_all_schemas(self) -> Dict[str, Any]:
         """
         Main implementation method for Phase 20.2
@@ -1095,54 +1090,54 @@ class Phase20_2BaseSchemaImplementation:
             "errors": [],
             "summary": {}
         }
-        
+
         try:
             logger.info("🚀 Starting Phase 20.2: Base Schema Implementation")
-            
+
             # Task 20.2.1: Ladder Logic Standard PID
             logger.info("📋 Task 20.2.1: Creating Ladder Logic Standard PID schema...")
             std_pid_schema = self.create_ladder_logic_standard_pid_schema()
             self.schemas["ladder_logic_standard_pid"] = std_pid_schema
-            
+
             # Save to file
             std_pid_file = self.base_path / "ladder-logic-standard-pid.json"
             with open(std_pid_file, 'w') as f:
                 json.dump(std_pid_schema, f, indent=2)
             results["files_created"].append(str(std_pid_file))
-            
+
             # Task 20.2.2: Ladder Logic Advanced PID
             logger.info("📋 Task 20.2.2: Creating Ladder Logic Advanced PID schema...")
             adv_pid_schema = self.create_ladder_logic_advanced_pid_schema()
             self.schemas["ladder_logic_advanced_pid"] = adv_pid_schema
-            
+
             # Save to file
             adv_pid_file = self.base_path / "ladder-logic-advanced-pid.json"
             with open(adv_pid_file, 'w') as f:
                 json.dump(adv_pid_schema, f, indent=2)
             results["files_created"].append(str(adv_pid_file))
-            
+
             # Task 20.2.3: Function Block Standard PIDE
             logger.info("📋 Task 20.2.3: Creating Function Block Standard PIDE schema...")
             std_pide_schema = self.create_function_block_standard_pide_schema()
             self.schemas["function_block_standard_pide"] = std_pide_schema
-            
+
             # Save to file
             std_pide_file = self.base_path / "function-block-standard-pide.json"
             with open(std_pide_file, 'w') as f:
                 json.dump(std_pide_schema, f, indent=2)
             results["files_created"].append(str(std_pide_file))
-            
+
             # Task 20.2.4: Function Block Advanced PIDE
             logger.info("📋 Task 20.2.4: Creating Function Block Advanced PIDE schema...")
             adv_pide_schema = self.create_function_block_advanced_pide_schema()
             self.schemas["function_block_advanced_pide"] = adv_pide_schema
-            
+
             # Save to file
             adv_pide_file = self.base_path / "function-block-advanced-pide.json"
             with open(adv_pide_file, 'w') as f:
                 json.dump(adv_pide_schema, f, indent=2)
             results["files_created"].append(str(adv_pide_file))
-            
+
             # Validate all schemas
             logger.info("✅ Validating all schemas...")
             validation_count = 0
@@ -1163,13 +1158,13 @@ class Phase20_2BaseSchemaImplementation:
                         "errors": [str(e)]
                     })
                     logger.error(f"❌ {schema_name}: INVALID - {str(e)}")
-            
+
             results["schemas_implemented"] = list(self.schemas.keys())
-            
+
             # Generate completion summary
             end_time = datetime.now()
             execution_time = (end_time - self.start_time).total_seconds()
-            
+
             results["summary"] = {
                 "total_schemas_targeted": 4,
                 "total_schemas_implemented": len(self.schemas),
@@ -1180,17 +1175,17 @@ class Phase20_2BaseSchemaImplementation:
                 "completion_time": end_time.isoformat(),
                 "status": "COMPLETED" if validation_count == 4 else "PARTIAL_COMPLETION"
             }
-            
+
             logger.info(f"🎉 Phase 20.2 Implementation: {results['summary']['status']}")
             logger.info(f"📊 Success Rate: {results['summary']['success_rate']}%")
             logger.info(f"⏱️ Execution Time: {execution_time:.2f} seconds")
-            
+
         except Exception as e:
             error_msg = f"Phase 20.2 implementation failed: {str(e)}"
             results["errors"].append(error_msg)
             results["summary"]["status"] = "FAILED"
             logger.error(error_msg)
-        
+
         return results
 
 # =============================================================================
@@ -1203,22 +1198,22 @@ async def execute_phase_20_2():
     Following AI Task Orchestrator methodology
     """
     logger.info("🚀 Phase 20.2: Base Schema Implementation - Starting...")
-    
+
     # Initialize implementation engine
     implementation = Phase20_2BaseSchemaImplementation()
-    
+
     try:
         # Execute comprehensive schema implementation
         results = await implementation.implement_all_schemas()
-        
+
         # Save results to file
         results_path = Path("plc-gbt-stack/results/phase20_2")
         results_path.mkdir(parents=True, exist_ok=True)
-        
+
         results_file = results_path / f"phase20_2_results_{implementation.session_id}.json"
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2)
-        
+
         # Print summary
         print("\n" + "="*80)
         print("🎯 PHASE 20.2: BASE SCHEMA IMPLEMENTATION - EXECUTION SUMMARY")
@@ -1230,7 +1225,7 @@ async def execute_phase_20_2():
         print(f"📁 Files Created: {results['summary']['files_created_count']}")
         print(f"⏱️ Execution Time: {results['summary']['execution_time_seconds']:.2f} seconds")
         print(f"💾 Results Saved: {results_file}")
-        
+
         if results['summary']['status'] == "COMPLETED":
             print("\n🎉 Phase 20.2 SUCCESSFULLY COMPLETED!")
             print("✅ All 4 base schema types implemented and validated")
@@ -1241,15 +1236,15 @@ async def execute_phase_20_2():
                 print("❌ Errors encountered:")
                 for error in results['errors']:
                     print(f"   - {error}")
-        
+
         print("="*80)
-        
+
         return results
-        
+
     except Exception as e:
         logger.error(f"Phase 20.2 execution failed: {str(e)}")
         return {"status": "FAILED", "error": str(e)}
 
 if __name__ == "__main__":
     # Execute Phase 20.2 implementation
-    asyncio.run(execute_phase_20_2()) 
+    asyncio.run(execute_phase_20_2())

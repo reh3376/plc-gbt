@@ -26,21 +26,18 @@ Dependencies: Phase 21.1 (CLI Framework), importlib, packaging
 """
 
 # Import optimization - lazy load heavy dependencies
-import os
-import sys
-import json
 import importlib
 import importlib.util
+import json
 import logging
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Callable, Type
-from dataclasses import dataclass, asdict, field
-from enum import Enum
-import uuid
-import inspect
+import sys
 from abc import ABC, abstractmethod
-import hashlib
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
+
 
 # Lazy imports for heavy dependencies
 def _lazy_import_file_ops():
@@ -72,12 +69,12 @@ def _lazy_import_pandas():
 def _lazy_import_rich():
     """Lazy import rich components"""
     try:
+        from rich import print as rprint
         from rich.console import Console
-        from rich.table import Table
         from rich.panel import Panel
         from rich.progress import Progress, SpinnerColumn, TextColumn
         from rich.prompt import Confirm, Prompt
-        from rich import print as rprint
+        from rich.table import Table
         return Console, Table, Panel, Progress, SpinnerColumn, TextColumn, Confirm, Prompt, rprint
     except ImportError:
         return None
@@ -95,7 +92,7 @@ else:
     class FallbackConsole:
         def print(self, text): print(text)
     console = FallbackConsole()
-    
+
 # Project imports with error handling
 try:
     project_root = Path(__file__).parent.parent.parent
@@ -168,26 +165,26 @@ class PluginInstance:
 
 class PluginInterface(ABC):
     """Base interface for plugins"""
-    
+
     @abstractmethod
     def get_metadata(self) -> PluginMetadata:
         """Return plugin metadata"""
         pass
-    
+
     @abstractmethod
     def initialize(self, cli_context, config: Dict[str, Any]) -> bool:
         """Initialize the plugin"""
         pass
-    
+
     @abstractmethod
     def get_commands(self) -> List[click.Command]:
         """Return list of CLI commands provided by this plugin"""
         pass
-    
+
     def cleanup(self):
         """Cleanup plugin resources"""
         pass
-    
+
     def validate_config(self, config: Dict[str, Any]) -> bool:
         """Validate plugin configuration"""
         return True
@@ -211,15 +208,15 @@ class MarketplacePlugin:
     tags: List[str] = field(default_factory=list)
     requirements: List[str] = field(default_factory=list)
     last_updated: datetime = None
-    
+
 class PluginMarketplace:
     """Plugin marketplace integration"""
-    
+
     def __init__(self, registry_url: str = "https://api.plc-plugins.io"):
         self.registry_url = registry_url
         self.cache_file = Path.home() / ".plc-cl" / "marketplace_cache.json"
         self.cache_ttl = 3600  # 1 hour cache
-        
+
     def _get_http_client(self):
         """Get HTTP client with lazy loading"""
         try:
@@ -228,23 +225,23 @@ class PluginMarketplace:
         except ImportError:
             logger.warning("requests module not available for marketplace features")
             return None
-    
+
     def search_plugins(self, query: str = "", category: str = "", limit: int = 20) -> List[MarketplacePlugin]:
         """Search plugins in marketplace"""
         try:
             http = self._get_http_client()
             if not http:
                 return []
-            
+
             params = {
                 "q": query,
                 "category": category,
                 "limit": limit
             }
-            
+
             response = http.get(f"{self.registry_url}/search", params=params, timeout=10)
             response.raise_for_status()
-            
+
             plugins = []
             for item in response.json().get("plugins", []):
                 plugin = MarketplacePlugin(
@@ -261,23 +258,23 @@ class PluginMarketplace:
                     requirements=item.get("requirements", [])
                 )
                 plugins.append(plugin)
-            
+
             return plugins
-            
+
         except Exception as e:
             logger.error(f"Failed to search marketplace: {e}")
             return []
-    
+
     def get_plugin_info(self, plugin_name: str) -> Optional[MarketplacePlugin]:
         """Get detailed plugin information"""
         try:
             http = self._get_http_client()
             if not http:
                 return None
-            
+
             response = http.get(f"{self.registry_url}/plugins/{plugin_name}", timeout=10)
             response.raise_for_status()
-            
+
             data = response.json()
             return MarketplacePlugin(
                 name=data["name"],
@@ -292,50 +289,50 @@ class PluginMarketplace:
                 tags=data.get("tags", []),
                 requirements=data.get("requirements", [])
             )
-            
+
         except Exception as e:
             logger.error(f"Failed to get plugin info: {e}")
             return None
-    
+
     def download_plugin(self, plugin: MarketplacePlugin, target_dir: Path) -> bool:
         """Download plugin from marketplace"""
         try:
             http = self._get_http_client()
             if not http:
                 return False
-            
+
             shutil, tempfile_mod, zipfile = _lazy_import_file_ops()
             if not all([shutil, tempfile_mod, zipfile]):
                 logger.error("File operation modules not available")
                 return False
-            
+
             # Download plugin
             response = http.get(plugin.download_url, timeout=30)
             response.raise_for_status()
-            
+
             # Save to temporary file
             with tempfile_mod.NamedTemporaryFile(suffix='.zip', delete=False) as tmp_file:
                 tmp_file.write(response.content)
                 tmp_path = Path(tmp_file.name)
-            
+
             try:
                 # Extract to target directory
                 plugin_dir = target_dir / plugin.name
                 plugin_dir.mkdir(exist_ok=True)
-                
+
                 with zipfile.ZipFile(tmp_path, 'r') as zip_ref:
                     zip_ref.extractall(plugin_dir)
-                
+
                 return True
-                
+
             finally:
                 # Cleanup temp file
                 tmp_path.unlink(missing_ok=True)
-                
+
         except Exception as e:
             logger.error(f"Failed to download plugin: {e}")
             return False
-    
+
     def check_updates(self, installed_plugins: Dict[str, PluginInstance]) -> Dict[str, str]:
         """Check for plugin updates"""
         updates = {}
@@ -345,14 +342,14 @@ class PluginMarketplace:
                 if marketplace_info:
                     current_version = plugin_instance.metadata.version
                     latest_version = marketplace_info.version
-                    
+
                     # Simple version comparison (in real implementation, use packaging.version)
                     if latest_version != current_version:
                         updates[plugin_name] = latest_version
-                        
+
         except Exception as e:
             logger.error(f"Failed to check updates: {e}")
-            
+
         return updates
 
 # =============================================================================
@@ -361,41 +358,41 @@ class PluginMarketplace:
 
 class PluginManager:
     """Comprehensive plugin management system with marketplace integration"""
-    
+
     def __init__(self, plugins_dir: Path = None, cli_context=None):
         self.cli_context = cli_context
         self.plugins_dir = plugins_dir or Path.home() / ".plc-cl" / "plugins"
         self.plugins_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Plugin registry
         self.plugins: Dict[str, PluginInstance] = {}
         self.plugin_commands: Dict[str, List[click.Command]] = {}
-        
+
         # Configuration
         self.config_file = self.plugins_dir / "plugins.json"
         self.config = self._load_config()
-        
+
         # Security settings
         self.allow_unsigned = self.config.get("allow_unsigned_plugins", False)
         self.auto_enable = self.config.get("auto_enable_plugins", False)
-        
+
         # Plugin templates directory
         self.templates_dir = Path(__file__).parent / "templates"
-        
+
         # Marketplace integration
         self.marketplace = PluginMarketplace(
             registry_url=self.config.get("marketplace_url", "https://api.plc-plugins.io")
         )
-    
+
     def _load_config(self) -> Dict[str, Any]:
         """Load plugin configuration"""
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file) as f:
                     return json.load(f)
             except Exception as e:
                 logger.warning(f"Failed to load plugin config: {e}")
-        
+
         return {
             "allow_unsigned_plugins": False,
             "auto_enable_plugins": False,
@@ -404,7 +401,7 @@ class PluginManager:
             "plugin_configs": {},
             "marketplace_url": "https://api.plc-plugins.io"
         }
-    
+
     def _save_config(self):
         """Save plugin configuration"""
         try:
@@ -412,11 +409,11 @@ class PluginManager:
                 json.dump(self.config, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to save plugin config: {e}")
-    
+
     def discover_plugins(self) -> List[Path]:
         """Discover available plugins in plugin directories"""
         plugin_paths = []
-        
+
         for plugin_dir in self.config.get("plugin_directories", []):
             plugin_dir = Path(plugin_dir)
             if plugin_dir.exists():
@@ -432,9 +429,9 @@ class PluginManager:
                             plugin_paths.append(init_file)
                         elif main_file.exists():
                             plugin_paths.append(main_file)
-        
+
         return plugin_paths
-    
+
     def load_plugin_metadata(self, plugin_path: Path) -> Optional[PluginMetadata]:
         """Load plugin metadata from file"""
         try:
@@ -442,35 +439,35 @@ class PluginManager:
             spec = importlib.util.spec_from_file_location("plugin_module", plugin_path)
             if not spec or not spec.loader:
                 return None
-            
+
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-            
+
             # Look for metadata in various forms
             metadata = None
-            
+
             # Check for PLUGIN_METADATA constant
             if hasattr(module, 'PLUGIN_METADATA'):
                 metadata_dict = module.PLUGIN_METADATA
                 metadata = PluginMetadata(**metadata_dict)
-            
+
             # Check for get_metadata function
             elif hasattr(module, 'get_metadata'):
                 metadata = module.get_metadata()
-            
+
             # Check for plugin class implementing PluginInterface
             elif hasattr(module, 'Plugin'):
                 plugin_class = module.Plugin
                 if issubclass(plugin_class, PluginInterface):
                     plugin_instance = plugin_class()
                     metadata = plugin_instance.get_metadata()
-            
+
             return metadata
-            
+
         except Exception as e:
             logger.error(f"Failed to load metadata from {plugin_path}: {e}")
             return None
-    
+
     def validate_plugin(self, plugin_path: Path, metadata: PluginMetadata) -> bool:
         """Validate plugin before loading"""
         try:
@@ -478,35 +475,35 @@ class PluginManager:
             packaging_version, packaging_available = _lazy_import_packaging()
             if packaging_available:
                 cli_version = "1.0.0"  # Would get from actual CLI version
-                if not (packaging_version.parse(metadata.cli_version_min) <= 
-                       packaging_version.parse(cli_version) <= 
+                if not (packaging_version.parse(metadata.cli_version_min) <=
+                       packaging_version.parse(cli_version) <=
                        packaging_version.parse(metadata.cli_version_max)):
                     logger.error(f"Plugin {metadata.name} incompatible with CLI version {cli_version}")
                     return False
-            
+
             # Check dependencies
             for dep in metadata.dependencies:
                 if dep not in self.plugins:
                     logger.error(f"Plugin {metadata.name} depends on missing plugin: {dep}")
                     return False
-            
+
             # Security check (basic)
             if not self.allow_unsigned and not self._is_plugin_signed(plugin_path):
                 logger.warning(f"Plugin {metadata.name} is not signed")
                 return False
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Plugin validation failed: {e}")
             return False
-    
+
     def _is_plugin_signed(self, plugin_path: Path) -> bool:
         """Check if plugin is digitally signed (mock implementation)"""
         # In a real implementation, would check digital signatures
         signature_file = plugin_path.parent / f"{plugin_path.stem}.sig"
         return signature_file.exists() or self.allow_unsigned
-    
+
     def load_plugin(self, plugin_path: Path) -> bool:
         """Load a single plugin with optimized loading"""
         try:
@@ -514,32 +511,32 @@ class PluginManager:
             if not plugin_path.exists():
                 logger.error(f"Plugin file not found: {plugin_path}")
                 return False
-            
+
             # Load metadata with caching
             metadata = self._load_plugin_metadata_cached(plugin_path)
             if not metadata:
                 logger.error(f"Failed to load metadata from {plugin_path}")
                 return False
-            
+
             # Validate plugin
             if not self.validate_plugin(plugin_path, metadata):
                 return False
-            
+
             # Check if already loaded
             if metadata.name in self.plugins:
                 logger.warning(f"Plugin {metadata.name} already loaded")
                 return False
-            
+
             # Check if disabled
             if metadata.name in self.config.get("disabled_plugins", []):
                 logger.info(f"Plugin {metadata.name} is disabled")
                 return False
-            
+
             # Load the module with error recovery
             module = self._load_plugin_module(plugin_path, metadata.name)
             if not module:
                 return False
-            
+
             # Create plugin instance
             plugin_instance = PluginInstance(
                 metadata=metadata,
@@ -548,43 +545,43 @@ class PluginManager:
                 install_path=plugin_path,
                 config=self.config.get("plugin_configs", {}).get(metadata.name, {})
             )
-            
+
             # Initialize plugin with timeout
             if not self._initialize_plugin_safely(plugin_instance):
                 return False
-            
+
             # Get commands with validation
             commands = self._get_plugin_commands_safely(module)
-            
+
             # Register plugin
             plugin_instance.status = PluginStatus.ENABLED
             plugin_instance.load_time = datetime.now()
             self.plugins[metadata.name] = plugin_instance
             self.plugin_commands[metadata.name] = commands
-            
+
             logger.info(f"Loaded plugin: {metadata.name} v{metadata.version}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to load plugin {plugin_path}: {e}")
             return False
-    
+
     def _load_plugin_metadata_cached(self, plugin_path: Path) -> Optional[PluginMetadata]:
         """Load plugin metadata with caching"""
         # Simple caching based on file modification time
         cache_key = f"{plugin_path}_{plugin_path.stat().st_mtime}"
         if hasattr(self, '_metadata_cache') and cache_key in self._metadata_cache:
             return self._metadata_cache[cache_key]
-        
+
         metadata = self.load_plugin_metadata(plugin_path)
-        
+
         # Initialize cache if needed
         if not hasattr(self, '_metadata_cache'):
             self._metadata_cache = {}
-        
+
         self._metadata_cache[cache_key] = metadata
         return metadata
-    
+
     def _load_plugin_module(self, plugin_path: Path, plugin_name: str):
         """Load plugin module with better error handling"""
         try:
@@ -592,17 +589,17 @@ class PluginManager:
             if not spec or not spec.loader:
                 logger.error(f"Could not create module spec for {plugin_path}")
                 return None
-            
+
             module = importlib.util.module_from_spec(spec)
-            
+
             # Add to sys.modules to enable relative imports
             sys.modules[f"plugin_{plugin_name}"] = module
-            
+
             # Execute module
             spec.loader.exec_module(module)
-            
+
             return module
-            
+
         except Exception as e:
             logger.error(f"Failed to load module from {plugin_path}: {e}")
             # Clean up sys.modules if we added it
@@ -610,7 +607,7 @@ class PluginManager:
             if module_name in sys.modules:
                 del sys.modules[module_name]
             return None
-    
+
     def _initialize_plugin_safely(self, plugin_instance: PluginInstance) -> bool:
         """Initialize plugin with timeout and error handling"""
         try:
@@ -626,7 +623,7 @@ class PluginManager:
             plugin_instance.error_message = f"Initialization error: {str(e)}"
             logger.error(f"Plugin initialization failed: {e}")
             return False
-    
+
     def _get_plugin_commands_safely(self, module) -> List[click.Command]:
         """Get plugin commands with validation"""
         commands = []
@@ -635,7 +632,7 @@ class PluginManager:
                 commands = module.get_commands()
             elif hasattr(module, 'commands'):
                 commands = module.commands
-            
+
             # Validate commands are actually Click commands
             validated_commands = []
             for cmd in commands:
@@ -643,37 +640,37 @@ class PluginManager:
                     validated_commands.append(cmd)
                 else:
                     logger.warning(f"Invalid command type: {type(cmd)}")
-            
+
             return validated_commands
-            
+
         except Exception as e:
             logger.error(f"Failed to get plugin commands: {e}")
             return []
-    
+
     def unload_plugin(self, plugin_name: str) -> bool:
         """Unload a plugin"""
         try:
             if plugin_name not in self.plugins:
                 return False
-            
+
             plugin = self.plugins[plugin_name]
-            
+
             # Call cleanup if available
             if plugin.module and hasattr(plugin.module, 'cleanup'):
                 plugin.module.cleanup()
-            
+
             # Remove from registry
             del self.plugins[plugin_name]
             if plugin_name in self.plugin_commands:
                 del self.plugin_commands[plugin_name]
-            
+
             logger.info(f"Unloaded plugin: {plugin_name}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to unload plugin {plugin_name}: {e}")
             return False
-    
+
     def enable_plugin(self, plugin_name: str) -> bool:
         """Enable a plugin"""
         try:
@@ -682,17 +679,17 @@ class PluginManager:
                 disabled_plugins.remove(plugin_name)
                 self.config["disabled_plugins"] = disabled_plugins
                 self._save_config()
-            
+
             # If plugin is loaded, mark as enabled
             if plugin_name in self.plugins:
                 self.plugins[plugin_name].status = PluginStatus.ENABLED
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to enable plugin {plugin_name}: {e}")
             return False
-    
+
     def disable_plugin(self, plugin_name: str) -> bool:
         """Disable a plugin"""
         try:
@@ -701,37 +698,37 @@ class PluginManager:
                 disabled_plugins.append(plugin_name)
                 self.config["disabled_plugins"] = disabled_plugins
                 self._save_config()
-            
+
             # If plugin is loaded, mark as disabled and unload
             if plugin_name in self.plugins:
                 self.plugins[plugin_name].status = PluginStatus.DISABLED
                 return self.unload_plugin(plugin_name)
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to disable plugin {plugin_name}: {e}")
             return False
-    
+
     def install_plugin(self, plugin_source: Union[str, Path]) -> bool:
         """Install a plugin from file or URL"""
         try:
             plugin_source = Path(plugin_source)
-            
+
             if not plugin_source.exists():
                 logger.error(f"Plugin file not found: {plugin_source}")
                 return False
-            
+
             # Load metadata to get plugin name
             metadata = self.load_plugin_metadata(plugin_source)
             if not metadata:
                 logger.error("Failed to load plugin metadata")
                 return False
-            
+
             # Create plugin directory
             plugin_dir = self.plugins_dir / metadata.name
             plugin_dir.mkdir(exist_ok=True)
-            
+
             # Copy plugin file
             if plugin_source.is_file():
                 if plugin_source.suffix == '.zip':
@@ -741,83 +738,83 @@ class PluginManager:
                 else:
                     # Copy single file
                     shutil.copy2(plugin_source, plugin_dir / "main.py")
-            
+
             console.print(f"✅ Plugin {metadata.name} installed successfully")
-            
+
             # Auto-enable if configured
             if self.auto_enable:
                 return self.load_plugin(plugin_dir / "main.py")
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to install plugin: {e}")
             console.print(f"❌ Plugin installation failed: {e}")
             return False
-    
+
     def uninstall_plugin(self, plugin_name: str) -> bool:
         """Uninstall a plugin"""
         try:
             # Unload first if loaded
             if plugin_name in self.plugins:
                 self.unload_plugin(plugin_name)
-            
+
             # Remove plugin directory
             plugin_dir = self.plugins_dir / plugin_name
             if plugin_dir.exists():
                 shutil.rmtree(plugin_dir)
-            
+
             # Remove from config
             disabled_plugins = self.config.get("disabled_plugins", [])
             if plugin_name in disabled_plugins:
                 disabled_plugins.remove(plugin_name)
-            
+
             plugin_configs = self.config.get("plugin_configs", {})
             if plugin_name in plugin_configs:
                 del plugin_configs[plugin_name]
-            
+
             self._save_config()
-            
+
             console.print(f"✅ Plugin {plugin_name} uninstalled successfully")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to uninstall plugin {plugin_name}: {e}")
             console.print(f"❌ Plugin uninstall failed: {e}")
             return False
-    
+
     def load_all_plugins(self):
         """Load all available plugins"""
         plugin_paths = self.discover_plugins()
-        
+
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             console=console
         ) as progress:
             task = progress.add_task("Loading plugins...", total=len(plugin_paths))
-            
+
             for plugin_path in plugin_paths:
                 progress.update(task, description=f"Loading {plugin_path.name}")
                 self.load_plugin(plugin_path)
                 progress.advance(task)
-        
+
         console.print(f"✅ Loaded {len(self.plugins)} plugins")
-    
+
     def get_plugin_commands(self) -> List[click.Command]:
         """Get all commands from loaded plugins"""
         commands = []
-        for plugin_name, plugin_commands in self.plugin_commands.items():
+        for _plugin_name, plugin_commands in self.plugin_commands.items():
             commands.extend(plugin_commands)
         return commands
-    
+
     def create_plugin_template(self, plugin_name: str, plugin_type: PluginType, output_dir: Path = None) -> bool:
         """Create a plugin template"""
         try:
             output_dir = output_dir or Path.cwd()
             plugin_dir = output_dir / plugin_name
             plugin_dir.mkdir(exist_ok=True)
-            
+
             # Template content based on plugin type
             if plugin_type == PluginType.COMMAND:
                 template_content = self._get_command_plugin_template(plugin_name)
@@ -825,18 +822,18 @@ class PluginManager:
                 template_content = self._get_processor_plugin_template(plugin_name)
             else:
                 template_content = self._get_basic_plugin_template(plugin_name)
-            
+
             # Write template files
             (plugin_dir / "main.py").write_text(template_content)
             (plugin_dir / "README.md").write_text(f"# {plugin_name} Plugin\n\nDescription of your plugin here.")
-            
+
             console.print(f"✅ Plugin template created: {plugin_dir}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to create plugin template: {e}")
             return False
-    
+
     def _get_command_plugin_template(self, plugin_name: str) -> str:
         """Get command plugin template"""
         return f'''#!/usr/bin/env python3
@@ -868,11 +865,11 @@ def my_command(verbose):
 class Plugin(PluginInterface):
     def get_metadata(self):
         return PluginMetadata(**PLUGIN_METADATA)
-    
+
     def initialize(self, cli_context, config):
         # Initialize your plugin here
         return True
-    
+
     def get_commands(self):
         return [my_command]
 
@@ -880,7 +877,7 @@ def main():
     """Plugin entry point"""
     return Plugin()
 '''
-    
+
     def _get_processor_plugin_template(self, plugin_name: str) -> str:
         """Get processor plugin template"""
         return f'''#!/usr/bin/env python3
@@ -892,7 +889,7 @@ from cli.plugins.plugin_manager import PluginInterface, PluginMetadata, PluginTy
 
 PLUGIN_METADATA = {{
     "name": "{plugin_name}",
-    "version": "1.0.0", 
+    "version": "1.0.0",
     "description": "Custom processor plugin",
     "author": "Your Name",
     "plugin_type": PluginType.PROCESSOR,
@@ -902,14 +899,14 @@ PLUGIN_METADATA = {{
 class Plugin(PluginInterface):
     def get_metadata(self):
         return PluginMetadata(**PLUGIN_METADATA)
-    
+
     def initialize(self, cli_context, config):
         # Initialize your processor here
         return True
-    
+
     def get_commands(self):
         return []  # Processors typically don't add commands
-    
+
     def process_data(self, data):
         """Process data - implement your custom logic here"""
         # Your processing logic here
@@ -919,7 +916,7 @@ def main():
     """Plugin entry point"""
     return Plugin()
 '''
-    
+
     def _get_basic_plugin_template(self, plugin_name: str) -> str:
         """Get basic plugin template"""
         return f'''#!/usr/bin/env python3
@@ -933,7 +930,7 @@ PLUGIN_METADATA = {{
     "name": "{plugin_name}",
     "version": "1.0.0",
     "description": "Basic plugin template",
-    "author": "Your Name", 
+    "author": "Your Name",
     "plugin_type": PluginType.EXTENSION,
     "entry_point": "main"
 }}
@@ -941,11 +938,11 @@ PLUGIN_METADATA = {{
 class Plugin(PluginInterface):
     def get_metadata(self):
         return PluginMetadata(**PLUGIN_METADATA)
-    
+
     def initialize(self, cli_context, config):
         # Initialize your plugin here
         return True
-    
+
     def get_commands(self):
         return []
 
@@ -970,16 +967,16 @@ def plugin_commands(ctx):
 @plugin_commands.command('list')
 @click.option('--status', type=click.Choice(['all', 'enabled', 'disabled', 'error']),
               default='all', help='Filter by plugin status')
-@click.option('--format', type=click.Choice(['table', 'json']), 
+@click.option('--format', type=click.Choice(['table', 'json']),
               default='table', help='Output format')
 def plugin_list(status, format):
     """List installed plugins"""
     plugins = plugin_manager.plugins
-    
+
     if status != 'all':
-        plugins = {name: plugin for name, plugin in plugins.items() 
+        plugins = {name: plugin for name, plugin in plugins.items()
                   if plugin.status.value == status}
-    
+
     if format == 'json':
         result = {}
         for name, plugin in plugins.items():
@@ -998,14 +995,14 @@ def plugin_list(status, format):
         table.add_column("Status", style="green")
         table.add_column("Type", style="yellow")
         table.add_column("Description", style="white")
-        
+
         for plugin in plugins.values():
             status_color = {
                 PluginStatus.ENABLED: "green",
                 PluginStatus.DISABLED: "yellow",
                 PluginStatus.ERROR: "red"
             }.get(plugin.status, "white")
-            
+
             table.add_row(
                 plugin.metadata.name,
                 plugin.metadata.version,
@@ -1013,7 +1010,7 @@ def plugin_list(status, format):
                 plugin.metadata.plugin_type.value,
                 plugin.metadata.description[:50] + ("..." if len(plugin.metadata.description) > 50 else "")
             )
-        
+
         console.print(table)
 
 @plugin_commands.command('install')
@@ -1022,7 +1019,7 @@ def plugin_list(status, format):
 def plugin_install(plugin_path, enable):
     """Install a plugin from file"""
     success = plugin_manager.install_plugin(plugin_path)
-    
+
     if success and enable:
         # Get plugin name from metadata
         metadata = plugin_manager.load_plugin_metadata(Path(plugin_path))
@@ -1037,7 +1034,7 @@ def plugin_uninstall(plugin_name, force):
     if not force:
         if not Confirm.ask(f"Are you sure you want to uninstall plugin '{plugin_name}'?"):
             return
-    
+
     plugin_manager.uninstall_plugin(plugin_name)
 
 @plugin_commands.command('enable')
@@ -1065,10 +1062,10 @@ def plugin_info(plugin_name):
     if plugin_name not in plugin_manager.plugins:
         console.print(f"❌ Plugin {plugin_name} not found")
         return
-    
+
     plugin = plugin_manager.plugins[plugin_name]
     metadata = plugin.metadata
-    
+
     info_text = f"""
 [bold cyan]{metadata.name}[/bold cyan] v{metadata.version}
 
@@ -1079,27 +1076,27 @@ def plugin_info(plugin_name):
 [bold]Priority:[/bold] {metadata.priority.value}
 [bold]License:[/bold] {metadata.license}
 """
-    
+
     if metadata.website:
         info_text += f"[bold]Website:[/bold] {metadata.website}\n"
-    
+
     if metadata.dependencies:
         info_text += f"[bold]Dependencies:[/bold] {', '.join(metadata.dependencies)}\n"
-    
+
     if metadata.tags:
         info_text += f"[bold]Tags:[/bold] {', '.join(metadata.tags)}\n"
-    
+
     if plugin.load_time:
         info_text += f"[bold]Loaded:[/bold] {plugin.load_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
-    
+
     if plugin.error_message:
         info_text += f"[bold red]Error:[/bold red] {plugin.error_message}\n"
-    
+
     console.print(Panel(info_text, border_style="blue"))
 
 @plugin_commands.command('create')
 @click.argument('plugin_name')
-@click.option('--type', 'plugin_type', 
+@click.option('--type', 'plugin_type',
               type=click.Choice(['command', 'processor', 'integration', 'extension']),
               default='command', help='Plugin type')
 @click.option('--output-dir', type=click.Path(), help='Output directory')
@@ -1107,7 +1104,7 @@ def plugin_create(plugin_name, plugin_type, output_dir):
     """Create a new plugin template"""
     output_path = Path(output_dir) if output_dir else Path.cwd()
     plugin_type_enum = PluginType(plugin_type)
-    
+
     if plugin_manager.create_plugin_template(plugin_name, plugin_type_enum, output_path):
         console.print(f"✅ Plugin template '{plugin_name}' created successfully")
         console.print(f"📁 Location: {output_path / plugin_name}")
@@ -1145,23 +1142,23 @@ def plugin_reload(plugin_name):
 @click.argument('query', required=False)
 @click.option('--category', help='Filter by plugin category')
 @click.option('--limit', default=20, help='Maximum number of results')
-@click.option('--format', type=click.Choice(['table', 'json']), 
+@click.option('--format', type=click.Choice(['table', 'json']),
               default='table', help='Output format')
 def plugin_search(query, category, limit, format):
     """Search plugins in marketplace"""
     if not _rich_components:
         console.print("Rich formatting not available, using basic output")
-    
+
     plugins = plugin_manager.marketplace.search_plugins(
-        query=query or "", 
-        category=category or "", 
+        query=query or "",
+        category=category or "",
         limit=limit
     )
-    
+
     if not plugins:
         console.print("No plugins found")
         return
-    
+
     if format == 'json':
         result = [asdict(plugin) for plugin in plugins]
         console.print(json.dumps(result, indent=2, default=str))
@@ -1169,12 +1166,12 @@ def plugin_search(query, category, limit, format):
         if _rich_components:
             table = Table(title=f"Marketplace Search Results ({len(plugins)} found)")
             table.add_column("Name", style="cyan")
-            table.add_column("Version", style="magenta")  
+            table.add_column("Version", style="magenta")
             table.add_column("Author", style="green")
             table.add_column("Rating", style="yellow")
             table.add_column("Downloads", style="blue")
             table.add_column("Description", style="white")
-            
+
             for plugin in plugins:
                 table.add_row(
                     plugin.name,
@@ -1184,7 +1181,7 @@ def plugin_search(query, category, limit, format):
                     str(plugin.downloads),
                     plugin.description[:60] + ("..." if len(plugin.description) > 60 else "")
                 )
-            
+
             console.print(table)
         else:
             # Fallback text output
@@ -1204,35 +1201,35 @@ def plugin_install_remote(plugin_name, enable, force):
     if plugin_name in plugin_manager.plugins and not force:
         console.print(f"❌ Plugin {plugin_name} already installed. Use --force to reinstall.")
         return
-    
+
     # Get plugin info from marketplace
     plugin_info = plugin_manager.marketplace.get_plugin_info(plugin_name)
     if not plugin_info:
         console.print(f"❌ Plugin {plugin_name} not found in marketplace")
         return
-    
+
     console.print(f"📦 Installing {plugin_name} v{plugin_info.version}...")
-    
+
     # Download and install
     success = plugin_manager.marketplace.download_plugin(plugin_info, plugin_manager.plugins_dir)
-    
+
     if success:
         console.print(f"✅ Plugin {plugin_name} downloaded successfully")
-        
+
         # Load the plugin
         plugin_dir = plugin_manager.plugins_dir / plugin_name
         main_file = plugin_dir / "main.py"
         if main_file.exists():
             if plugin_manager.load_plugin(main_file):
                 console.print(f"✅ Plugin {plugin_name} loaded successfully")
-                
+
                 if enable:
                     plugin_manager.enable_plugin(plugin_name)
                     console.print(f"✅ Plugin {plugin_name} enabled")
             else:
                 console.print(f"❌ Failed to load plugin {plugin_name}")
         else:
-            console.print(f"⚠️  Plugin downloaded but main.py not found")
+            console.print("⚠️  Plugin downloaded but main.py not found")
     else:
         console.print(f"❌ Failed to download plugin {plugin_name}")
 
@@ -1246,44 +1243,44 @@ def plugin_update(plugin_name, check_only):
         if plugin_name not in plugin_manager.plugins:
             console.print(f"❌ Plugin {plugin_name} not installed")
             return
-        
+
         plugins_to_check = {plugin_name: plugin_manager.plugins[plugin_name]}
     else:
         # Check all plugins
         plugins_to_check = plugin_manager.plugins
-    
+
     console.print("🔍 Checking for updates...")
     updates = plugin_manager.marketplace.check_updates(plugins_to_check)
-    
+
     if not updates:
         console.print("✅ All plugins are up to date")
         return
-    
+
     if _rich_components:
         table = Table(title="Available Updates")
         table.add_column("Plugin", style="cyan")
         table.add_column("Current", style="yellow")
         table.add_column("Latest", style="green")
-        
+
         for plugin_name, latest_version in updates.items():
             current_version = plugin_manager.plugins[plugin_name].metadata.version
             table.add_row(plugin_name, current_version, latest_version)
-        
+
         console.print(table)
     else:
         console.print("Available updates:")
         for plugin_name, latest_version in updates.items():
             current_version = plugin_manager.plugins[plugin_name].metadata.version
             console.print(f"  {plugin_name}: {current_version} → {latest_version}")
-    
+
     if check_only:
         return
-    
+
     # Install updates
     for plugin_name, latest_version in updates.items():
         if _rich_components and not Confirm.ask(f"Update {plugin_name} to v{latest_version}?"):
             continue
-        
+
         console.print(f"🔄 Updating {plugin_name}...")
         # Implement update logic here
         console.print(f"✅ {plugin_name} updated to v{latest_version}")
@@ -1293,11 +1290,11 @@ def plugin_update(plugin_name, check_only):
 def plugin_marketplace_info(plugin_name):
     """Show detailed marketplace information for a plugin"""
     plugin_info = plugin_manager.marketplace.get_plugin_info(plugin_name)
-    
+
     if not plugin_info:
         console.print(f"❌ Plugin {plugin_name} not found in marketplace")
         return
-    
+
     info_text = f"""
 [bold cyan]{plugin_info.name}[/bold cyan] v{plugin_info.version}
 
@@ -1307,16 +1304,16 @@ def plugin_marketplace_info(plugin_name):
 [bold]Rating:[/bold] ⭐ {plugin_info.rating:.1f}/5.0
 [bold]Downloads:[/bold] {plugin_info.downloads:,}
 """
-    
+
     if plugin_info.homepage:
         info_text += f"[bold]Homepage:[/bold] {plugin_info.homepage}\n"
-    
+
     if plugin_info.tags:
         info_text += f"[bold]Tags:[/bold] {', '.join(plugin_info.tags)}\n"
-    
+
     if plugin_info.requirements:
         info_text += f"[bold]Requirements:[/bold] {', '.join(plugin_info.requirements)}\n"
-    
+
     if _rich_components:
         console.print(Panel(info_text, border_style="blue"))
     else:
@@ -1329,4 +1326,4 @@ def register_plugin_commands(main_cli):
 
 # For standalone testing
 if __name__ == "__main__":
-    plugin_commands() 
+    plugin_commands()

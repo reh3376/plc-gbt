@@ -5,22 +5,23 @@ Provides REST API for querying the knowledge graph and vector store
 """
 
 import os
-from typing import Dict, List, Optional
 from datetime import datetime
+from typing import Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Depends, Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
 import structlog
 from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, HTTPException, Security
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel, Field
 
 # Load environment variables
 load_dotenv()
 
 # Import n8n-MCP proxy integration
 try:
-    from .n8n_mcp_proxy import router as n8n_mcp_router, startup_n8n_mcp_proxy, shutdown_n8n_mcp_proxy
+    from .n8n_mcp_proxy import router as n8n_mcp_router
+    from .n8n_mcp_proxy import shutdown_n8n_mcp_proxy, startup_n8n_mcp_proxy
     N8N_MCP_AVAILABLE = True
 except ImportError as e:
     N8N_MCP_AVAILABLE = False
@@ -28,7 +29,11 @@ except ImportError as e:
 
 # Import industrial-automation MCP proxy integration
 try:
-    from .industrial_automation_mcp_proxy import router as industrial_mcp_router, startup_industrial_mcp_proxy, shutdown_industrial_mcp_proxy
+    from .industrial_automation_mcp_proxy import router as industrial_mcp_router
+    from .industrial_automation_mcp_proxy import (
+        shutdown_industrial_mcp_proxy,
+        startup_industrial_mcp_proxy,
+    )
     INDUSTRIAL_MCP_AVAILABLE = True
 except ImportError as e:
     INDUSTRIAL_MCP_AVAILABLE = False
@@ -90,14 +95,14 @@ else:
 async def startup_event():
     """Initialize services on startup"""
     logger.info("Gateway API starting up")
-    
+
     if N8N_MCP_AVAILABLE:
         try:
             await startup_n8n_mcp_proxy()
             logger.info("n8n-MCP proxy initialized")
         except Exception as e:
             logger.error("Failed to initialize n8n-MCP proxy", error=str(e))
-    
+
     if INDUSTRIAL_MCP_AVAILABLE:
         try:
             await startup_industrial_mcp_proxy()
@@ -109,14 +114,14 @@ async def startup_event():
 async def shutdown_event():
     """Clean up services on shutdown"""
     logger.info("Gateway API shutting down")
-    
+
     if N8N_MCP_AVAILABLE:
         try:
             await shutdown_n8n_mcp_proxy()
             logger.info("n8n-MCP proxy cleaned up")
         except Exception as e:
             logger.error("Error during n8n-MCP proxy cleanup", error=str(e))
-    
+
     if INDUSTRIAL_MCP_AVAILABLE:
         try:
             await shutdown_industrial_mcp_proxy()
@@ -183,19 +188,19 @@ async def query_knowledge(
     """
     Query the PLC knowledge graph and vector store
     """
-    start_time = datetime.utcnow()
-    
-    logger.info("query_received", 
+    datetime.utcnow()
+
+    logger.info("query_received",
                 question=request.question,
                 max_results=request.max_results)
-    
+
     try:
         # Import query service
-        import sys
         import os
+        import sys
         sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'query'))
         from query_service import QueryService
-        
+
         # Initialize query service
         query_service = QueryService(
             neo4j_uri=os.environ.get("NEO4J_URI", "bolt://localhost:7687"),
@@ -205,7 +210,7 @@ async def query_knowledge(
             qdrant_port=int(os.environ.get("QDRANT_PORT", "6333")),
             openai_api_key=os.environ.get("OPENAI_API_KEY")
         )
-        
+
         # Execute query using the service
         query_result = await query_service.query(
             question=request.question,
@@ -216,7 +221,7 @@ async def query_knowledge(
             vector_threshold=0.7,
             expand_graph=True
         )
-        
+
         # Convert query result to response format
         response = QueryResponse(
             question=request.question,
@@ -233,17 +238,17 @@ async def query_knowledge(
             processing_time_ms=query_result.processing_time_ms,
             timestamp=query_result.timestamp
         )
-        
+
         query_service.close()
-        
+
         logger.info("query_completed",
                    question=request.question,
                    processing_time_ms=response.processing_time_ms)
-        
+
         return response
-        
+
     except Exception as e:
-        logger.error("query_error", 
+        logger.error("query_error",
                     question=request.question,
                     error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -262,4 +267,4 @@ async def get_stats(token: str = Depends(verify_token)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run(app, host="0.0.0.0", port=8000)

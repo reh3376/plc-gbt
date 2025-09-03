@@ -17,16 +17,16 @@ Following AI Task Orchestrator methodology for systematic security enhancement.
 """
 
 import asyncio
+import json
 import logging
 import os
-import json
 import time
-from typing import Dict, List, Any, Optional, Union
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
-from pathlib import Path
-from enum import Enum
 import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Vault client library
 try:
@@ -38,10 +38,11 @@ except ImportError:
 
 # Cryptography for local encryption
 try:
+    import base64
+
     from cryptography.fernet import Fernet
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-    import base64
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
@@ -109,7 +110,7 @@ class APIKeyCredentials:
 class VaultSecretsManager:
     """
     Enterprise-grade secrets management using HashiCorp Vault.
-    
+
     This class provides secure credential management with:
     - Vault integration for centralized secrets
     - Automatic credential rotation
@@ -117,7 +118,7 @@ class VaultSecretsManager:
     - High availability with failsafe mechanisms
     - Local encryption for development environments
     """
-    
+
     def __init__(
         self,
         vault_url: str = None,
@@ -128,7 +129,7 @@ class VaultSecretsManager:
     ):
         """
         Initialize Vault secrets manager.
-        
+
         Args:
             vault_url: Vault server URL (default: VAULT_ADDR env var)
             vault_token: Vault authentication token (default: VAULT_TOKEN env var)
@@ -140,60 +141,60 @@ class VaultSecretsManager:
         self.vault_token = vault_token or os.getenv("VAULT_TOKEN")
         self.vault_namespace = vault_namespace or os.getenv("VAULT_NAMESPACE")
         self.enable_local_fallback = enable_local_fallback
-        
+
         # Initialize Vault client
         self.vault_client = None
         self.vault_available = False
-        
+
         # Local encryption setup
         self.local_encryption_key = local_encryption_key
         self.cipher_suite = None
-        
+
         # Secrets cache for performance
         self.secrets_cache: Dict[str, Dict[str, Any]] = {}
         self.cache_ttl = 300  # 5 minutes
-        
+
         # Audit logging
         self.audit_log_path = Path("logs/vault_audit.log")
         self.audit_log_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Initialize components
         self._initialize_vault_client()
         self._initialize_local_encryption()
-        
+
         logger.info(f"VaultSecretsManager initialized - Vault: {self.vault_available}, Local: {self.enable_local_fallback}")
-    
+
     def _initialize_vault_client(self):
         """Initialize HashiCorp Vault client."""
         if not VAULT_AVAILABLE:
             logger.warning("Vault client not available - using local fallback only")
             return
-        
+
         try:
             self.vault_client = hvac.Client(
                 url=self.vault_url,
                 token=self.vault_token,
                 namespace=self.vault_namespace
             )
-            
+
             # Test connection
             if self.vault_client.is_authenticated():
                 self.vault_available = True
                 logger.info(f"✅ Vault connection established: {self.vault_url}")
             else:
                 logger.warning("❌ Vault authentication failed - using local fallback")
-                
+
         except Exception as e:
             logger.error(f"Failed to initialize Vault client: {e}")
             if not self.enable_local_fallback:
                 raise
-    
+
     def _initialize_local_encryption(self):
         """Initialize local encryption for fallback storage."""
         if not CRYPTO_AVAILABLE:
             logger.warning("Cryptography not available - secrets will be stored in plaintext")
             return
-        
+
         try:
             if not self.local_encryption_key:
                 # Generate or load encryption key
@@ -208,15 +209,15 @@ class VaultSecretsManager:
                     with open(key_file, 'wb') as f:
                         f.write(self.local_encryption_key)
                     logger.info("Generated new local encryption key")
-            
+
             self.cipher_suite = Fernet(self.local_encryption_key)
             logger.info("✅ Local encryption initialized")
-            
+
         except Exception as e:
             logger.error(f"Failed to initialize local encryption: {e}")
             if not self.vault_available:
                 raise
-    
+
     def _audit_log(self, operation: str, secret_path: str, success: bool, details: Dict[str, Any] = None):
         """Log audit events for compliance."""
         audit_event = {
@@ -228,13 +229,13 @@ class VaultSecretsManager:
             "user": os.getenv("USER", "system"),
             "session_id": str(uuid.uuid4())
         }
-        
+
         try:
             with open(self.audit_log_path, 'a') as f:
                 f.write(json.dumps(audit_event) + '\n')
         except Exception as e:
             logger.error(f"Failed to write audit log: {e}")
-    
+
     async def store_secret(
         self,
         path: str,
@@ -244,13 +245,13 @@ class VaultSecretsManager:
     ) -> bool:
         """
         Store a secret in Vault or local encrypted storage.
-        
+
         Args:
             path: Secret path (e.g., "database/postgresql")
             secret_data: Secret data dictionary
             secret_type: Type of secret
             metadata: Optional metadata for the secret
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -261,22 +262,22 @@ class VaultSecretsManager:
                 if success:
                     self._audit_log("store_secret", path, True, {"method": "vault", "type": secret_type.value})
                     return True
-            
+
             # Fallback to local storage
             if self.enable_local_fallback:
                 success = await self._store_secret_local(path, secret_data, metadata)
                 if success:
                     self._audit_log("store_secret", path, True, {"method": "local", "type": secret_type.value})
                     return True
-            
+
             self._audit_log("store_secret", path, False, {"error": "no_storage_available"})
             return False
-            
+
         except Exception as e:
             logger.error(f"Failed to store secret at {path}: {e}")
             self._audit_log("store_secret", path, False, {"error": str(e)})
             return False
-    
+
     async def _store_secret_vault(self, path: str, secret_data: Dict[str, Any], metadata: Optional[SecretMetadata]) -> bool:
         """Store secret in HashiCorp Vault."""
         try:
@@ -285,20 +286,20 @@ class VaultSecretsManager:
                 "data": secret_data,
                 "metadata": asdict(metadata) if metadata else {}
             }
-            
+
             # Store in Vault KV v2
-            response = self.vault_client.secrets.kv.v2.create_or_update_secret(
+            self.vault_client.secrets.kv.v2.create_or_update_secret(
                 path=path,
                 secret=payload
             )
-            
+
             logger.info(f"✅ Secret stored in Vault: {path}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to store secret in Vault: {e}")
             return False
-    
+
     async def _store_secret_local(self, path: str, secret_data: Dict[str, Any], metadata: Optional[SecretMetadata]) -> bool:
         """Store secret in local encrypted storage."""
         try:
@@ -318,42 +319,42 @@ class VaultSecretsManager:
                     metadata_dict['last_accessed'] = metadata_dict['last_accessed'].isoformat()
                 if 'rotation_interval' in metadata_dict and metadata_dict['rotation_interval']:
                     metadata_dict['rotation_interval'] = str(metadata_dict['rotation_interval'])
-            
+
             payload = {
                 "data": secret_data,
                 "metadata": metadata_dict,
                 "stored_at": datetime.utcnow().isoformat()
             }
-            
+
             # Encrypt payload
             if self.cipher_suite:
                 encrypted_data = self.cipher_suite.encrypt(json.dumps(payload).encode())
             else:
                 encrypted_data = json.dumps(payload).encode()
                 logger.warning("Storing secret without encryption - cryptography not available")
-            
+
             # Store to file
             secret_file = Path(f"security/secrets/{path.replace('/', '_')}.enc")
             secret_file.parent.mkdir(parents=True, exist_ok=True)
-            
+
             with open(secret_file, 'wb') as f:
                 f.write(encrypted_data)
-            
+
             logger.info(f"✅ Secret stored locally: {path}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to store secret locally: {e}")
             return False
-    
+
     async def get_secret(self, path: str, use_cache: bool = True) -> Optional[Dict[str, Any]]:
         """
         Retrieve a secret from Vault or local storage.
-        
+
         Args:
             path: Secret path
             use_cache: Whether to use cached values
-            
+
         Returns:
             Secret data dictionary or None if not found
         """
@@ -364,7 +365,7 @@ class VaultSecretsManager:
                 if time.time() - cache_entry.get("cached_at", 0) < self.cache_ttl:
                     self._audit_log("get_secret", path, True, {"method": "cache"})
                     return cache_entry.get("data")
-            
+
             # Try Vault first
             if self.vault_available:
                 secret_data = await self._get_secret_vault(path)
@@ -376,7 +377,7 @@ class VaultSecretsManager:
                     }
                     self._audit_log("get_secret", path, True, {"method": "vault"})
                     return secret_data
-            
+
             # Fallback to local storage
             if self.enable_local_fallback:
                 secret_data = await self._get_secret_local(path)
@@ -388,95 +389,95 @@ class VaultSecretsManager:
                     }
                     self._audit_log("get_secret", path, True, {"method": "local"})
                     return secret_data
-            
+
             self._audit_log("get_secret", path, False, {"error": "secret_not_found"})
             return None
-            
+
         except Exception as e:
             logger.error(f"Failed to retrieve secret from {path}: {e}")
             self._audit_log("get_secret", path, False, {"error": str(e)})
             return None
-    
+
     async def _get_secret_vault(self, path: str) -> Optional[Dict[str, Any]]:
         """Retrieve secret from HashiCorp Vault."""
         try:
             response = self.vault_client.secrets.kv.v2.read_secret_version(path=path)
-            
+
             if response and "data" in response:
                 return response["data"]["data"]
-            
+
             return None
-            
+
         except Exception as e:
             logger.error(f"Failed to retrieve secret from Vault: {e}")
             return None
-    
+
     async def _get_secret_local(self, path: str) -> Optional[Dict[str, Any]]:
         """Retrieve secret from local encrypted storage."""
         try:
             secret_file = Path(f"security/secrets/{path.replace('/', '_')}.enc")
-            
+
             if not secret_file.exists():
                 return None
-            
+
             # Read encrypted data
             with open(secret_file, 'rb') as f:
                 encrypted_data = f.read()
-            
+
             # Decrypt payload
             if self.cipher_suite:
                 decrypted_data = self.cipher_suite.decrypt(encrypted_data)
                 payload = json.loads(decrypted_data.decode())
             else:
                 payload = json.loads(encrypted_data.decode())
-            
+
             return payload.get("data")
-            
+
         except Exception as e:
             logger.error(f"Failed to retrieve secret from local storage: {e}")
             return None
-    
+
     async def get_database_credentials(self, database_name: str) -> Optional[DatabaseCredentials]:
         """
         Get database credentials for a specific database.
-        
+
         Args:
             database_name: Database identifier (e.g., "postgresql", "neo4j", "redis")
-            
+
         Returns:
             DatabaseCredentials object or None if not found
         """
         secret_data = await self.get_secret(f"database/{database_name}")
-        
+
         if secret_data:
             return DatabaseCredentials(**secret_data)
-        
+
         return None
-    
+
     async def get_api_key(self, service_name: str) -> Optional[APIKeyCredentials]:
         """
         Get API key credentials for a specific service.
-        
+
         Args:
             service_name: Service identifier (e.g., "openai", "wolfram")
-            
+
         Returns:
             APIKeyCredentials object or None if not found
         """
         secret_data = await self.get_secret(f"api_key/{service_name}")
-        
+
         if secret_data:
             return APIKeyCredentials(**secret_data)
-        
+
         return None
-    
+
     async def rotate_secret(self, path: str) -> bool:
         """
         Rotate a secret (generate new credentials).
-        
+
         Args:
             path: Secret path to rotate
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -485,91 +486,91 @@ class VaultSecretsManager:
             # For now, we'll log the rotation request
             logger.info(f"Secret rotation requested for: {path}")
             self._audit_log("rotate_secret", path, True, {"action": "rotation_requested"})
-            
+
             # TODO: Implement actual rotation logic based on secret type
             # - Database passwords: Connect to DB and change password
             # - API keys: Call service API to generate new key
             # - Certificates: Generate new certificate
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to rotate secret at {path}: {e}")
             self._audit_log("rotate_secret", path, False, {"error": str(e)})
             return False
-    
+
     async def list_secrets(self, path_prefix: str = "") -> List[str]:
         """
         List all secrets under a path prefix.
-        
+
         Args:
             path_prefix: Path prefix to filter secrets
-            
+
         Returns:
             List of secret paths
         """
         secrets = []
-        
+
         try:
             # Try Vault first
             if self.vault_available:
                 vault_secrets = await self._list_secrets_vault(path_prefix)
                 secrets.extend(vault_secrets)
-            
+
             # Add local secrets
             if self.enable_local_fallback:
                 local_secrets = await self._list_secrets_local(path_prefix)
                 secrets.extend(local_secrets)
-            
+
             # Remove duplicates and sort
-            secrets = sorted(list(set(secrets)))
-            
+            secrets = sorted(set(secrets))
+
             self._audit_log("list_secrets", path_prefix, True, {"count": len(secrets)})
             return secrets
-            
+
         except Exception as e:
             logger.error(f"Failed to list secrets: {e}")
             self._audit_log("list_secrets", path_prefix, False, {"error": str(e)})
             return []
-    
+
     async def _list_secrets_vault(self, path_prefix: str) -> List[str]:
         """List secrets from Vault."""
         try:
             response = self.vault_client.secrets.kv.v2.list_secrets(path=path_prefix)
-            
+
             if response and "data" in response:
                 return response["data"]["keys"]
-            
+
             return []
-            
+
         except Exception as e:
             logger.error(f"Failed to list secrets from Vault: {e}")
             return []
-    
+
     async def _list_secrets_local(self, path_prefix: str) -> List[str]:
         """List secrets from local storage."""
         try:
             secrets_dir = Path("security/secrets")
             if not secrets_dir.exists():
                 return []
-            
+
             secrets = []
             for secret_file in secrets_dir.glob("*.enc"):
                 # Convert filename back to path
                 secret_path = secret_file.stem.replace("_", "/")
                 if not path_prefix or secret_path.startswith(path_prefix):
                     secrets.append(secret_path)
-            
+
             return secrets
-            
+
         except Exception as e:
             logger.error(f"Failed to list local secrets: {e}")
             return []
-    
+
     async def health_check(self) -> Dict[str, Any]:
         """
         Perform health check on secrets management system.
-        
+
         Returns:
             Health status dictionary
         """
@@ -581,7 +582,7 @@ class VaultSecretsManager:
             "encryption_available": CRYPTO_AVAILABLE,
             "status": "healthy"
         }
-        
+
         # Test Vault connection
         if self.vault_available:
             try:
@@ -593,7 +594,7 @@ class VaultSecretsManager:
             except Exception as e:
                 health_status["vault_status"] = f"error: {str(e)}"
                 health_status["status"] = "degraded"
-        
+
         # Test local encryption
         if self.enable_local_fallback:
             if self.cipher_suite:
@@ -601,7 +602,7 @@ class VaultSecretsManager:
             else:
                 health_status["local_encryption"] = "unavailable"
                 health_status["status"] = "degraded"
-        
+
         logger.info(f"Health check completed: {health_status['status']}")
         return health_status
 
@@ -613,17 +614,17 @@ _vault_secrets_manager = None
 def get_vault_secrets_manager() -> VaultSecretsManager:
     """Get global VaultSecretsManager instance."""
     global _vault_secrets_manager
-    
+
     if _vault_secrets_manager is None:
         _vault_secrets_manager = VaultSecretsManager()
-    
+
     return _vault_secrets_manager
 
 
 async def initialize_default_secrets():
     """Initialize default secrets for development environment."""
     vault_manager = get_vault_secrets_manager()
-    
+
     # Default database credentials
     default_secrets = {
         "database/postgresql": {
@@ -678,13 +679,13 @@ async def initialize_default_secrets():
             "expiration_hours": 24
         }
     }
-    
+
     # Store all default secrets
     for path, secret_data in default_secrets.items():
         secret_type = SecretType.DATABASE if path.startswith("database/") else SecretType.API_KEY
         if path.startswith("jwt_secret/"):
             secret_type = SecretType.JWT_SECRET
-        
+
         metadata = SecretMetadata(
             secret_id=str(uuid.uuid4()),
             secret_type=secret_type,
@@ -697,7 +698,7 @@ async def initialize_default_secrets():
             auto_rotate=False,
             tags={"environment": "development", "created_by": "phase15_initialization"}
         )
-        
+
         success = await vault_manager.store_secret(path, secret_data, secret_type, metadata)
         if success:
             logger.info(f"✅ Default secret initialized: {path}")
@@ -709,31 +710,31 @@ if __name__ == "__main__":
     # Test the VaultSecretsManager
     async def test_vault_manager():
         print("🔐 Testing VaultSecretsManager...")
-        
+
         # Initialize manager
         vault_manager = VaultSecretsManager()
-        
+
         # Health check
         health = await vault_manager.health_check()
         print(f"Health Status: {health}")
-        
+
         # Initialize default secrets
         await initialize_default_secrets()
-        
+
         # Test secret retrieval
         db_creds = await vault_manager.get_database_credentials("postgresql")
         if db_creds:
             print(f"✅ PostgreSQL credentials retrieved: {db_creds.host}:{db_creds.port}")
-        
+
         api_key = await vault_manager.get_api_key("openai")
         if api_key:
             print(f"✅ OpenAI API key retrieved: {api_key.api_key[:10]}...")
-        
+
         # List secrets
         secrets = await vault_manager.list_secrets()
         print(f"📋 Available secrets: {secrets}")
-        
+
         print("🎉 VaultSecretsManager test completed!")
-    
+
     # Run test
-    asyncio.run(test_vault_manager()) 
+    asyncio.run(test_vault_manager())

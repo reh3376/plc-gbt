@@ -9,8 +9,8 @@ __all__ = [
     'ControlLoopRequest', 'ControlLoopResponse', 'PIDTuningRequest', 'PIDTuningResponse',
     'PLCConnectionRequest', 'PLCConnectionResponse', 'SafetySystemRequest', 'SafetySystemResponse',
     'SystemStatusResponse', 'IndustrialKnowledgeRequest', 'IndustrialKnowledgeResponse',
-    
+
     # N8N MCP Models
     'NodeSearchRequest', 'NodeSearchResponse', 'WorkflowValidationRequest', 'WorkflowValidationResponse',
     'NodeEssentialsResponse', 'AIToolsResponse'
-] 
+]

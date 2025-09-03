@@ -5,7 +5,7 @@ Phase 22.4: Task 22.4.3 - Diagnostic System Package
 
 Comprehensive diagnostic system including:
 - Valve stiction detection
-- Oscillation diagnosis  
+- Oscillation diagnosis
 - Controller health monitoring
 - Sensor fault detection
 
@@ -77,12 +77,14 @@ DIAGNOSTICS_CONFIG = {
 }
 
 # Diagnostic types and severity levels
-from enum import Enum
-from typing import Dict, List, Any, Optional, Tuple
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
-import logging
+
 
 class DiagnosticType(Enum):
     """Types of diagnostic analysis"""
@@ -189,11 +191,11 @@ class ComprehensiveDiagnosticResult:
 
 # Import diagnostic modules
 try:
-    from .valve_stiction import ValveStictionDetector
-    from .oscillation_detector import OscillationDetector
     from .controller_health import ControllerHealthMonitor
-    from .sensor_diagnostics import SensorFaultDetector
     from .diagnostic_engine import DiagnosticEngine
+    from .oscillation_detector import OscillationDetector
+    from .sensor_diagnostics import SensorFaultDetector
+    from .valve_stiction import ValveStictionDetector
     DIAGNOSTIC_MODULES_AVAILABLE = True
 except ImportError:
     DIAGNOSTIC_MODULES_AVAILABLE = False
@@ -254,9 +256,9 @@ def get_diagnostic_info(diagnostic_type: str):
 
 def assess_overall_health(diagnostic_results: List[Any]) -> HealthStatus:
     """Assess overall system health from individual diagnostic results"""
-    
+
     health_scores = []
-    
+
     for result in diagnostic_results:
         if hasattr(result, 'health_status'):
             status = result.health_status
@@ -281,7 +283,7 @@ def assess_overall_health(diagnostic_results: List[Any]) -> HealthStatus:
                 status = HealthStatus.FAULTY
             else:
                 status = HealthStatus.HEALTHY
-        
+
         # Convert status to numeric score
         status_scores = {
             HealthStatus.HEALTHY: 1.0,
@@ -291,13 +293,13 @@ def assess_overall_health(diagnostic_results: List[Any]) -> HealthStatus:
             HealthStatus.UNKNOWN: 0.5
         }
         health_scores.append(status_scores.get(status, 0.5))
-    
+
     if not health_scores:
         return HealthStatus.UNKNOWN
-    
+
     # Calculate overall health score
     overall_score = min(health_scores)  # Use worst case
-    
+
     # Map back to health status
     if overall_score >= 0.9:
         return HealthStatus.HEALTHY
@@ -310,104 +312,104 @@ def assess_overall_health(diagnostic_results: List[Any]) -> HealthStatus:
 
 def generate_diagnostic_recommendations(results: ComprehensiveDiagnosticResult) -> List[str]:
     """Generate comprehensive diagnostic recommendations"""
-    
+
     recommendations = []
-    
+
     # Valve stiction recommendations
     if results.valve_stiction.stiction_detected:
         recommendations.extend(results.valve_stiction.recommendations)
         if results.valve_stiction.stiction_index > 0.7:
             recommendations.append("CRITICAL: Valve stiction severely affecting control - immediate maintenance required")
-        
+
     # Oscillation recommendations
     if results.oscillation.oscillation_detected:
         recommendations.extend(results.oscillation.recommendations)
         if results.oscillation.harris_index > 0.3:
             recommendations.append("Significant oscillation detected - review controller tuning")
-    
+
     # Controller health recommendations
     if results.controller_health.health_status in [HealthStatus.DEGRADED, HealthStatus.FAULTY]:
         recommendations.extend(results.controller_health.recommendations)
-        
+
     # Sensor fault recommendations
     if results.sensor_fault.fault_detected:
         recommendations.extend(results.sensor_fault.recommendations)
         if results.sensor_fault.fault_severity in [FaultSeverity.HIGH, FaultSeverity.CRITICAL]:
             recommendations.append("CRITICAL: Sensor fault affecting measurement quality - immediate attention required")
-    
+
     # Overall system recommendations
     if results.overall_health == HealthStatus.FAULTY:
         recommendations.insert(0, "SYSTEM ALERT: Multiple faults detected - comprehensive system review recommended")
     elif results.overall_health == HealthStatus.DEGRADED:
         recommendations.insert(0, "PERFORMANCE DEGRADED: Proactive maintenance recommended to prevent failures")
-    
+
     # Remove duplicates while preserving order
     unique_recommendations = []
     for rec in recommendations:
         if rec not in unique_recommendations:
             unique_recommendations.append(rec)
-    
+
     if not unique_recommendations:
         unique_recommendations.append("System operating normally - continue routine monitoring")
-    
+
     return unique_recommendations
 
 def calculate_diagnostic_confidence(individual_confidences: List[float]) -> float:
     """Calculate overall diagnostic confidence"""
-    
+
     if not individual_confidences:
         return 0.0
-    
+
     # Use harmonic mean for conservative confidence estimate
     harmonic_mean = len(individual_confidences) / sum(1/c for c in individual_confidences if c > 0)
     return min(harmonic_mean, 1.0)
 
 def prioritize_diagnostics(results: ComprehensiveDiagnosticResult) -> List[Tuple[str, str, float]]:
     """Prioritize diagnostic findings by severity and impact"""
-    
+
     priorities = []
-    
+
     # Valve stiction priority
     if results.valve_stiction.stiction_detected:
         severity = "HIGH" if results.valve_stiction.stiction_index > 0.7 else "MEDIUM"
         priority_score = results.valve_stiction.stiction_index * 100
         priorities.append(("Valve Stiction", severity, priority_score))
-    
+
     # Oscillation priority
     if results.oscillation.oscillation_detected:
         severity = "HIGH" if results.oscillation.harris_index > 0.3 else "MEDIUM"
         priority_score = results.oscillation.harris_index * 100
         priorities.append(("Oscillation", severity, priority_score))
-    
+
     # Controller health priority
     if results.controller_health.health_status in [HealthStatus.DEGRADED, HealthStatus.FAULTY]:
         severity = "HIGH" if results.controller_health.health_status == HealthStatus.FAULTY else "MEDIUM"
         priority_score = (1.0 - results.controller_health.performance_index) * 100
         priorities.append(("Controller Health", severity, priority_score))
-    
+
     # Sensor fault priority
     if results.sensor_fault.fault_detected:
         severity_map = {
             FaultSeverity.CRITICAL: "CRITICAL",
-            FaultSeverity.HIGH: "HIGH", 
+            FaultSeverity.HIGH: "HIGH",
             FaultSeverity.MEDIUM: "MEDIUM",
             FaultSeverity.LOW: "LOW"
         }
         severity = severity_map.get(results.sensor_fault.fault_severity, "MEDIUM")
         priority_score = len(results.sensor_fault.fault_types) * 25  # 25 points per fault type
         priorities.append(("Sensor Fault", severity, priority_score))
-    
+
     # Sort by priority score (highest first)
     priorities.sort(key=lambda x: x[2], reverse=True)
-    
+
     return priorities
 
 def create_diagnostic_summary(results: ComprehensiveDiagnosticResult) -> Dict[str, Any]:
     """Create a comprehensive diagnostic summary"""
-    
+
     priorities = prioritize_diagnostics(results)
     recommendations = generate_diagnostic_recommendations(results)
-    
+
     # Calculate overall system score
     health_scores = {
         HealthStatus.HEALTHY: 100,
@@ -416,16 +418,16 @@ def create_diagnostic_summary(results: ComprehensiveDiagnosticResult) -> Dict[st
         HealthStatus.FAULTY: 25,
         HealthStatus.UNKNOWN: 0
     }
-    
+
     individual_confidences = [
         results.valve_stiction.confidence,
         results.oscillation.power_ratio,  # Use power ratio as confidence proxy
         results.controller_health.performance_index,
         1.0 - (len(results.sensor_fault.fault_types) * 0.2)  # Decrease confidence with more faults
     ]
-    
+
     overall_confidence = calculate_diagnostic_confidence(individual_confidences)
-    
+
     summary = {
         "diagnostic_id": results.diagnostic_id,
         "timestamp": results.timestamp.isoformat(),
@@ -434,15 +436,15 @@ def create_diagnostic_summary(results: ComprehensiveDiagnosticResult) -> Dict[st
         "overall_confidence": overall_confidence,
         "analysis_quality": results.analysis_quality,
         "processing_time": results.processing_time,
-        
+
         "priority_issues": [
             {
                 "issue": priority[0],
-                "severity": priority[1], 
+                "severity": priority[1],
                 "score": priority[2]
             } for priority in priorities
         ],
-        
+
         "detailed_findings": {
             "valve_stiction": {
                 "detected": results.valve_stiction.stiction_detected,
@@ -466,36 +468,36 @@ def create_diagnostic_summary(results: ComprehensiveDiagnosticResult) -> Dict[st
                 "severity": results.sensor_fault.fault_severity.value
             }
         },
-        
+
         "recommendations": recommendations,
         "next_analysis": results.next_analysis.isoformat(),
-        
+
         "system_metrics": {
             "total_issues": len(priorities),
             "critical_issues": len([p for p in priorities if p[1] == "CRITICAL"]),
             "high_priority_issues": len([p for p in priorities if p[1] == "HIGH"]),
-            "maintenance_urgency": "IMMEDIATE" if any(p[1] == "CRITICAL" for p in priorities) else 
+            "maintenance_urgency": "IMMEDIATE" if any(p[1] == "CRITICAL" for p in priorities) else
                                   "HIGH" if any(p[1] == "HIGH" for p in priorities) else
                                   "MEDIUM" if priorities else "LOW"
         }
     }
-    
+
     return summary
 
 # Utility functions for diagnostic analysis
 def detect_pattern_in_signal(signal: np.ndarray, pattern_type: str) -> Dict[str, Any]:
     """Generic pattern detection in signals"""
-    
+
     if len(signal) < 10:
         return {"pattern_detected": False, "confidence": 0.0}
-    
+
     try:
         if pattern_type == "stiction":
             # Look for characteristic stick-slip behavior
             derivative = np.diff(signal)
             zero_crossings = np.sum(np.diff(np.sign(derivative)) != 0)
             pattern_strength = zero_crossings / len(derivative)
-            
+
             return {
                 "pattern_detected": pattern_strength > 0.1,
                 "confidence": min(pattern_strength * 5, 1.0),
@@ -504,18 +506,18 @@ def detect_pattern_in_signal(signal: np.ndarray, pattern_type: str) -> Dict[str,
                     "pattern_strength": pattern_strength
                 }
             }
-            
+
         elif pattern_type == "oscillation":
             # Look for periodic behavior
             autocorr = np.correlate(signal, signal, mode='full')
             autocorr = autocorr[autocorr.size // 2:]
-            
+
             # Find peaks in autocorrelation
             peaks = []
             for i in range(1, len(autocorr) - 1):
                 if autocorr[i] > autocorr[i-1] and autocorr[i] > autocorr[i+1]:
                     peaks.append(i)
-            
+
             if peaks:
                 max_autocorr = max(autocorr[peaks]) / autocorr[0] if autocorr[0] != 0 else 0
                 return {
@@ -526,32 +528,32 @@ def detect_pattern_in_signal(signal: np.ndarray, pattern_type: str) -> Dict[str,
                         "peak_locations": peaks[:5]  # First 5 peaks
                     }
                 }
-        
+
     except Exception:
         pass
-    
+
     return {"pattern_detected": False, "confidence": 0.0}
 
 def calculate_signal_quality(signal: np.ndarray) -> Dict[str, float]:
     """Calculate signal quality metrics"""
-    
+
     if len(signal) < 2:
         return {"quality_score": 0.0, "snr": 0.0, "completeness": 0.0}
-    
+
     # Signal-to-noise ratio estimation
     signal_power = np.var(signal)
     noise_estimate = np.var(np.diff(signal)) / 2  # High-frequency noise estimate
     snr = signal_power / noise_estimate if noise_estimate > 0 else float('inf')
     snr_db = 10 * np.log10(snr) if snr > 0 else 0
-    
+
     # Data completeness
     nan_count = np.sum(np.isnan(signal))
     completeness = 1.0 - (nan_count / len(signal))
-    
+
     # Overall quality score
     snr_score = min(snr_db / 20.0, 1.0)  # Normalize to 0-1 (20 dB = good)
     quality_score = (snr_score + completeness) / 2.0
-    
+
     return {
         "quality_score": quality_score,
         "snr_db": snr_db,
@@ -565,21 +567,21 @@ __all__ = [
     # Configuration
     "DIAGNOSTICS_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Data classes
     "DiagnosticConfiguration",
     "ValveStictionResult",
-    "OscillationResult", 
+    "OscillationResult",
     "ControllerHealthResult",
     "SensorFaultResult",
     "ComprehensiveDiagnosticResult",
-    
+
     # Enums
     "DiagnosticType",
     "FaultSeverity",
     "HealthStatus",
     "OscillationType",
-    
+
     # Utility functions
     "get_available_diagnostics",
     "get_diagnostic_info",
@@ -590,7 +592,7 @@ __all__ = [
     "create_diagnostic_summary",
     "detect_pattern_in_signal",
     "calculate_signal_quality",
-    
+
     # Classes (if available)
 ]
 
@@ -616,4 +618,4 @@ def get_package_info():
         "total_modules": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "implementation_status": AVAILABILITY_STATUS
-    } 
+    }

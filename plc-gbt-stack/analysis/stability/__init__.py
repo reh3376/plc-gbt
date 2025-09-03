@@ -24,7 +24,7 @@ STABILITY_CONFIG = {
     "version": __version__,
     "supported_analyses": [
         "nyquist_plot",
-        "bode_plot", 
+        "bode_plot",
         "root_locus",
         "sensitivity_analysis",
         "complementary_sensitivity",
@@ -61,6 +61,7 @@ STABILITY_CONFIG = {
 # Stability analysis types
 from enum import Enum
 
+
 class StabilityAnalysisType(Enum):
     """Stability analysis types"""
     NYQUIST = "nyquist"
@@ -87,11 +88,11 @@ class RobustnessLevel(Enum):
 
 # Import stability analysis modules
 try:
-    from .nyquist import NyquistAnalyzer
     from .bode import BodeAnalyzer
+    from .nyquist import NyquistAnalyzer
+    from .robust_stability import RobustStabilityAnalyzer
     from .root_locus import RootLocusAnalyzer
     from .sensitivity import SensitivityAnalyzer
-    from .robust_stability import RobustStabilityAnalyzer
     from .stability_assessor import StabilityAssessor
     STABILITY_MODULES_AVAILABLE = True
 except ImportError:
@@ -121,7 +122,7 @@ def get_analysis_info(analysis_type: str):
             "best_for": ["Closed-loop stability", "Gain/phase margins", "Conditional stability"]
         },
         "bode": {
-            "name": "Bode Plot Analysis", 
+            "name": "Bode Plot Analysis",
             "description": "Magnitude and phase frequency response analysis",
             "outputs": ["magnitude_plot", "phase_plot", "margins", "crossover_frequencies"],
             "best_for": ["System identification", "Controller design", "Frequency response"]
@@ -147,17 +148,17 @@ def get_analysis_info(analysis_type: str):
     }
     return info.get(analysis_type, {"description": "Unknown analysis type"})
 
-def assess_stability_margins(gain_margin: float, phase_margin: float, 
+def assess_stability_margins(gain_margin: float, phase_margin: float,
                            delay_margin: float = None) -> StabilityStatus:
     """Assess overall stability based on margins"""
-    
+
     gm_min = STABILITY_CONFIG["default_settings"]["stability_margins"]["gain_margin_min"]
     pm_min = STABILITY_CONFIG["default_settings"]["stability_margins"]["phase_margin_min"]
-    
+
     # Basic margin assessment
     gm_adequate = gain_margin >= gm_min
     pm_adequate = phase_margin >= pm_min
-    
+
     if gm_adequate and pm_adequate:
         if gain_margin >= 10 and phase_margin >= 60:
             return StabilityStatus.STABLE
@@ -170,15 +171,15 @@ def assess_stability_margins(gain_margin: float, phase_margin: float,
 
 def assess_robustness_level(robustness_metrics: dict) -> RobustnessLevel:
     """Assess robustness level from various metrics"""
-    
+
     # Extract key metrics
     gain_margin = robustness_metrics.get('gain_margin', 0)
     phase_margin = robustness_metrics.get('phase_margin', 0)
     sensitivity_peak = robustness_metrics.get('sensitivity_peak', float('inf'))
-    
+
     # Calculate robustness score
     score = 0
-    
+
     # Gain margin contribution (30%)
     if gain_margin >= 12:
         score += 0.3
@@ -186,7 +187,7 @@ def assess_robustness_level(robustness_metrics: dict) -> RobustnessLevel:
         score += 0.2
     elif gain_margin >= 6:
         score += 0.1
-    
+
     # Phase margin contribution (40%)
     if phase_margin >= 70:
         score += 0.4
@@ -196,7 +197,7 @@ def assess_robustness_level(robustness_metrics: dict) -> RobustnessLevel:
         score += 0.2
     elif phase_margin >= 30:
         score += 0.1
-    
+
     # Sensitivity peak contribution (30%)
     if sensitivity_peak <= 1.5:
         score += 0.3
@@ -204,7 +205,7 @@ def assess_robustness_level(robustness_metrics: dict) -> RobustnessLevel:
         score += 0.2
     elif sensitivity_peak <= 3.0:
         score += 0.1
-    
+
     # Map score to robustness level
     if score >= 0.8:
         return RobustnessLevel.EXCELLENT
@@ -221,39 +222,39 @@ def generate_stability_recommendations(stability_status: StabilityStatus,
                                      robustness_level: RobustnessLevel,
                                      margins: dict) -> list:
     """Generate stability improvement recommendations"""
-    
+
     recommendations = []
-    
+
     if stability_status == StabilityStatus.UNSTABLE:
         recommendations.append("System is unstable - immediate controller redesign required")
         recommendations.append("Reduce controller gain to achieve stability")
-        
+
     elif stability_status == StabilityStatus.CONDITIONALLY_STABLE:
         recommendations.append("System has conditional stability - careful gain adjustment needed")
-        
+
     elif stability_status == StabilityStatus.MARGINALLY_STABLE:
         recommendations.append("Stability margins are minimal - consider increasing margins")
-    
+
     # Specific margin recommendations
     gain_margin = margins.get('gain_margin', 0)
     phase_margin = margins.get('phase_margin', 0)
-    
+
     if gain_margin < 6:
         recommendations.append(f"Gain margin ({gain_margin:.1f} dB) is below minimum (6 dB)")
         recommendations.append("Reduce proportional gain or add lead compensation")
-        
+
     if phase_margin < 45:
         recommendations.append(f"Phase margin ({phase_margin:.1f}°) is below minimum (45°)")
         recommendations.append("Add phase lead compensation or reduce integral action")
-    
+
     # Robustness recommendations
     if robustness_level in [RobustnessLevel.POOR, RobustnessLevel.INADEQUATE]:
         recommendations.append("Poor robustness - controller may be sensitive to model uncertainty")
         recommendations.append("Consider robust control design techniques")
-    
+
     if not recommendations:
         recommendations.append("Stability and robustness are adequate")
-    
+
     return recommendations
 
 # Export configuration for external use
@@ -261,19 +262,19 @@ __all__ = [
     # Configuration
     "STABILITY_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Enums
     "StabilityAnalysisType",
     "StabilityStatus",
     "RobustnessLevel",
-    
+
     # Utility functions
     "get_available_analyses",
     "get_analysis_info",
     "assess_stability_margins",
     "assess_robustness_level",
     "generate_stability_recommendations",
-    
+
     # Classes (if available)
 ]
 
@@ -300,4 +301,4 @@ def get_package_info():
         "total_modules": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "implementation_status": AVAILABILITY_STATUS
-    } 
+    }

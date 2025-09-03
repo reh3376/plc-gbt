@@ -14,10 +14,10 @@ Task: 23.5.2 - Voice Interface
 Status: Architecture Ready - Implementation framework prepared
 """
 
-from .voice_interface import VoiceInterface
 from .speech_processor import SpeechProcessor
+from .voice_interface import VoiceInterface
 
 __all__ = [
     "VoiceInterface",
     "SpeechProcessor"
-] 
+]

@@ -18,25 +18,22 @@ Phase: 17.1 - Advanced Security & Compliance Framework
 """
 
 import asyncio
-import logging
 import json
-import hashlib
-import time
-from typing import Dict, List, Any, Optional, Tuple, Set, Union
-from dataclasses import dataclass, asdict, field
-from datetime import datetime, timedelta
-from pathlib import Path
-from enum import Enum, IntEnum
-import uuid
-import subprocess
-import yaml
-import re
+import logging
 import os
+import time
+import uuid
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum, IntEnum
+from typing import Any, Dict, List, Optional
+
+import yaml
 
 # Security scanning libraries
 try:
-    import requests
     import aiohttp
+    import requests
     NETWORK_AVAILABLE = True
 except ImportError:
     NETWORK_AVAILABLE = False
@@ -121,35 +118,35 @@ class IEC62443Requirement(Enum):
     # Identification and authentication control (IAC)
     IAC_1 = "iac_1_human_user_identification"
     IAC_2 = "iac_2_software_process_identification"
-    
+
     # Use control (UC)
     UC_1 = "uc_1_authorization_enforcement"
     UC_2 = "uc_2_wireless_use_control"
     UC_3 = "uc_3_use_control_for_portable_devices"
-    
+
     # System integrity (SI)
     SI_1 = "si_1_communication_integrity"
     SI_2 = "si_2_malicious_code_protection"
     SI_3 = "si_3_security_functionality_verification"
     SI_4 = "si_4_software_and_information_integrity"
-    
+
     # Data confidentiality (DC)
     DC_1 = "dc_1_data_confidentiality"
     DC_2 = "dc_2_information_persistence"
     DC_3 = "dc_3_use_of_cryptography"
     DC_4 = "dc_4_public_key_infrastructure"
-    
+
     # Restricted data flow (RDF)
     RDF_1 = "rdf_1_network_segmentation"
     RDF_2 = "rdf_2_zone_boundary_protection"
     RDF_3 = "rdf_3_general_purpose_person_to_person_communication"
-    
+
     # Timely response to events (TRE)
     TRE_1 = "tre_1_audit_log_accessibility"
     TRE_2 = "tre_2_audit_logging"
     TRE_3 = "tre_3_system_use_notification"
     TRE_4 = "tre_4_system_monitoring"
-    
+
     # Resource availability (RA)
     RA_1 = "ra_1_denial_of_service_protection"
     RA_2 = "ra_2_managed_resource_allocation"
@@ -229,26 +226,26 @@ class AdvancedSecurityComplianceFramework:
     Advanced Security & Compliance Framework for PLC-GPT
     Implements STRIDE threat modeling and IEC 62443-3-3 compliance
     """
-    
+
     def __init__(self, config_path: Optional[str] = None):
         """Initialize the security compliance framework"""
         self.config_path = config_path or "security/compliance_config.yaml"
         self.session_id = str(uuid.uuid4())
         self.created_at = datetime.now()
-        
+
         # Initialize components
         self.threat_models: Dict[str, ThreatModel] = {}
         self.compliance_mappings: Dict[str, IEC62443ComplianceMapping] = {}
         self.sbom_reports: Dict[str, SBOMReport] = {}
         self.vulnerabilities: Dict[str, VulnerabilityAssessment] = {}
-        
+
         # Initialize logging first
         self.logger = logging.getLogger(f"{__name__}.{self.session_id[:8]}")
-        
+
         # Load configuration
         self.config = self._load_config()
-        
-        self.logger.info(f"🛡️ Advanced Security Compliance Framework initialized")
+
+        self.logger.info("🛡️ Advanced Security Compliance Framework initialized")
         self.logger.info(f"📋 Session ID: {self.session_id}")
         self.logger.info(f"🔧 Config: {self.config_path}")
 
@@ -256,7 +253,7 @@ class AdvancedSecurityComplianceFramework:
         """Load configuration from YAML file"""
         try:
             if os.path.exists(self.config_path):
-                with open(self.config_path, 'r') as f:
+                with open(self.config_path) as f:
                     return yaml.safe_load(f)
             else:
                 # Default configuration
@@ -265,7 +262,7 @@ class AdvancedSecurityComplianceFramework:
                         "enabled": True,
                         "components": [
                             "plc_controller",
-                            "hmi_interface", 
+                            "hmi_interface",
                             "database_layer",
                             "api_gateway",
                             "authentication_service",
@@ -300,15 +297,15 @@ class AdvancedSecurityComplianceFramework:
     async def perform_stride_analysis(self, component: str) -> Dict[str, Any]:
         """
         Perform comprehensive STRIDE threat analysis for a component
-        
+
         Args:
             component: System component to analyze
-            
+
         Returns:
             Dictionary containing threat analysis results
         """
         self.logger.info(f"🔍 Starting STRIDE analysis for component: {component}")
-        
+
         analysis_results = {
             "component": component,
             "analysis_id": str(uuid.uuid4()),
@@ -323,48 +320,48 @@ class AdvancedSecurityComplianceFramework:
                 "average_risk_score": 0.0
             }
         }
-        
+
         # Analyze each STRIDE category
         for category in STRIDECategory:
             threats = await self._analyze_stride_category(component, category)
             analysis_results["threats"].extend(threats)
-        
+
         # Calculate summary statistics
         analysis_results["summary"]["total_threats"] = len(analysis_results["threats"])
-        
+
         if analysis_results["threats"]:
             severity_counts = {}
             risk_scores = []
-            
+
             for threat in analysis_results["threats"]:
                 severity = threat["severity"]
                 severity_counts[severity] = severity_counts.get(severity, 0) + 1
                 risk_scores.append(threat["risk_score"])
-            
+
             analysis_results["summary"]["critical_threats"] = severity_counts.get("CRITICAL", 0)
             analysis_results["summary"]["high_threats"] = severity_counts.get("HIGH", 0)
             analysis_results["summary"]["medium_threats"] = severity_counts.get("MEDIUM", 0)
             analysis_results["summary"]["low_threats"] = severity_counts.get("LOW", 0)
             analysis_results["summary"]["average_risk_score"] = sum(risk_scores) / len(risk_scores)
-        
+
         self.logger.info(f"✅ STRIDE analysis complete for {component}")
         self.logger.info(f"📊 Found {analysis_results['summary']['total_threats']} threats")
-        
+
         return analysis_results
 
     async def _analyze_stride_category(self, component: str, category: STRIDECategory) -> List[Dict[str, Any]]:
         """Analyze specific STRIDE category for component"""
         threats = []
-        
+
         # Component-specific threat patterns
         threat_patterns = self._get_threat_patterns(component, category)
-        
+
         for pattern in threat_patterns:
             threat_id = f"{component}_{category.value}_{len(threats)+1}"
-            
+
             # Calculate risk score (likelihood × impact)
             risk_score = pattern["likelihood"] * pattern["impact"]
-            
+
             threat = {
                 "id": threat_id,
                 "category": category.value,
@@ -378,9 +375,9 @@ class AdvancedSecurityComplianceFramework:
                 "status": "identified",
                 "created_at": datetime.now().isoformat()
             }
-            
+
             threats.append(threat)
-            
+
             # Store in threat models
             self.threat_models[threat_id] = ThreatModel(
                 id=threat_id,
@@ -397,7 +394,7 @@ class AdvancedSecurityComplianceFramework:
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             )
-        
+
         return threats
 
     def _get_threat_patterns(self, component: str, category: STRIDECategory) -> List[Dict[str, Any]]:
@@ -518,7 +515,7 @@ class AdvancedSecurityComplianceFramework:
                 ]
             }
         }
-        
+
         # Return patterns for the specific component and category
         component_patterns = patterns.get(component, {})
         return component_patterns.get(category, [])
@@ -546,16 +543,16 @@ class AdvancedSecurityComplianceFramework:
     async def assess_iec62443_compliance(self, target_security_level: int = 3) -> Dict[str, Any]:
         """
         Assess IEC 62443-3-3 compliance for specified security level
-        
+
         Args:
             target_security_level: Target security level (1-4)
-            
+
         Returns:
             Dictionary containing compliance assessment results
         """
-        self.logger.info(f"🔍 Starting IEC 62443-3-3 compliance assessment")
+        self.logger.info("🔍 Starting IEC 62443-3-3 compliance assessment")
         self.logger.info(f"🎯 Target Security Level: SL{target_security_level}")
-        
+
         assessment_results = {
             "assessment_id": str(uuid.uuid4()),
             "timestamp": datetime.now().isoformat(),
@@ -570,57 +567,57 @@ class AdvancedSecurityComplianceFramework:
                 "remediation_items": 0
             }
         }
-        
+
         # Assess each IEC 62443 requirement
         for requirement in IEC62443Requirement:
             compliance_result = await self._assess_requirement_compliance(
                 requirement, target_security_level
             )
             assessment_results["requirements"].append(compliance_result)
-        
+
         # Calculate summary statistics
         total_reqs = len(assessment_results["requirements"])
-        compliant_reqs = sum(1 for req in assessment_results["requirements"] 
+        compliant_reqs = sum(1 for req in assessment_results["requirements"]
                            if req["compliance_percentage"] >= 85.0)
-        
+
         assessment_results["summary"]["total_requirements"] = total_reqs
         assessment_results["summary"]["compliant_requirements"] = compliant_reqs
         assessment_results["summary"]["non_compliant_requirements"] = total_reqs - compliant_reqs
-        
+
         if total_reqs > 0:
-            avg_compliance = sum(req["compliance_percentage"] 
+            avg_compliance = sum(req["compliance_percentage"]
                                for req in assessment_results["requirements"]) / total_reqs
             assessment_results["summary"]["overall_compliance_percentage"] = avg_compliance
-        
+
         gaps_count = sum(len(req["gap_analysis"]) for req in assessment_results["requirements"])
         assessment_results["summary"]["gaps_identified"] = gaps_count
         assessment_results["summary"]["remediation_items"] = gaps_count
-        
-        self.logger.info(f"✅ IEC 62443-3-3 compliance assessment complete")
+
+        self.logger.info("✅ IEC 62443-3-3 compliance assessment complete")
         self.logger.info(f"📊 Overall compliance: {assessment_results['summary']['overall_compliance_percentage']:.1f}%")
-        
+
         return assessment_results
 
-    async def _assess_requirement_compliance(self, requirement: IEC62443Requirement, 
+    async def _assess_requirement_compliance(self, requirement: IEC62443Requirement,
                                            target_level: int) -> Dict[str, Any]:
         """Assess compliance for specific IEC 62443 requirement"""
-        
+
         # Get requirement implementation details
         implementation_details = self._get_requirement_implementation(requirement)
-        
+
         # Calculate compliance percentage based on implementation
         compliance_percentage = self._calculate_compliance_percentage(
             requirement, implementation_details, target_level
         )
-        
+
         # Identify gaps
         gap_analysis = self._identify_compliance_gaps(
             requirement, implementation_details, target_level
         )
-        
+
         # Generate remediation plan
         remediation_plan = self._generate_remediation_plan(requirement, gap_analysis)
-        
+
         result = {
             "requirement": requirement.value,
             "requirement_name": requirement.name,
@@ -634,7 +631,7 @@ class AdvancedSecurityComplianceFramework:
             "last_assessment": datetime.now().isoformat(),
             "next_review": (datetime.now() + timedelta(days=90)).isoformat()
         }
-        
+
         # Store compliance mapping
         mapping_id = f"{requirement.value}_sl{target_level}"
         self.compliance_mappings[mapping_id] = IEC62443ComplianceMapping(
@@ -650,12 +647,12 @@ class AdvancedSecurityComplianceFramework:
             last_assessment=datetime.now(),
             next_review=datetime.now() + timedelta(days=90)
         )
-        
+
         return result
 
     def _get_requirement_implementation(self, requirement: IEC62443Requirement) -> Dict[str, Any]:
         """Get current implementation details for requirement"""
-        
+
         # Implementation mapping based on existing Phase 15 security components
         implementations = {
             IEC62443Requirement.IAC_1: {
@@ -725,7 +722,7 @@ class AdvancedSecurityComplianceFramework:
                 "validation_method": "stress_testing"
             }
         }
-        
+
         return implementations.get(requirement, {
             "component": "not_implemented",
             "implementation_level": 0,
@@ -733,16 +730,16 @@ class AdvancedSecurityComplianceFramework:
             "validation_method": "manual_review"
         })
 
-    def _calculate_compliance_percentage(self, requirement: IEC62443Requirement, 
-                                       implementation: Dict[str, Any], 
+    def _calculate_compliance_percentage(self, requirement: IEC62443Requirement,
+                                       implementation: Dict[str, Any],
                                        target_level: int) -> float:
         """Calculate compliance percentage for requirement"""
         base_level = implementation.get("implementation_level", 0)
-        
+
         # Adjust for security level requirements
         level_multiplier = {1: 0.7, 2: 0.8, 3: 0.9, 4: 1.0}
         adjusted_level = base_level * level_multiplier.get(target_level, 1.0)
-        
+
         return min(100.0, adjusted_level)
 
     def _identify_compliance_gaps(self, requirement: IEC62443Requirement,
@@ -750,26 +747,26 @@ class AdvancedSecurityComplianceFramework:
                                 target_level: int) -> List[str]:
         """Identify compliance gaps for requirement"""
         gaps = []
-        
+
         compliance_percentage = self._calculate_compliance_percentage(
             requirement, implementation, target_level
         )
-        
+
         if compliance_percentage < 85.0:
-            gaps.append(f"Implementation level below compliance threshold (85%)")
-        
+            gaps.append("Implementation level below compliance threshold (85%)")
+
         if target_level >= 3:
             if requirement in [IEC62443Requirement.DC_3, IEC62443Requirement.SI_1]:
                 if "PKI" not in str(implementation.get("evidence", [])):
                     gaps.append("PKI implementation required for SL3+")
-            
+
             if requirement == IEC62443Requirement.TRE_2:
                 if "real_time_monitoring" not in str(implementation.get("evidence", [])):
                     gaps.append("Real-time monitoring required for SL3+")
-        
+
         if target_level >= 4:
             gaps.append("Additional hardening required for SL4 compliance")
-        
+
         return gaps
 
     def _generate_remediation_plan(self, requirement: IEC62443Requirement,
@@ -777,14 +774,14 @@ class AdvancedSecurityComplianceFramework:
         """Generate remediation plan for compliance gaps"""
         if not gaps:
             return "No remediation required - requirement is compliant"
-        
+
         remediation_templates = {
             "implementation_level": "Enhance implementation through additional security controls and testing",
             "PKI": "Implement comprehensive PKI infrastructure with certificate lifecycle management",
             "real_time_monitoring": "Deploy real-time security monitoring and alerting systems",
             "SL4": "Implement state-of-the-art security controls including advanced threat detection"
         }
-        
+
         plans = []
         for gap in gaps:
             for key, template in remediation_templates.items():
@@ -793,7 +790,7 @@ class AdvancedSecurityComplianceFramework:
                     break
             else:
                 plans.append(f"Address gap: {gap}")
-        
+
         return "; ".join(plans)
 
     # ========================================================================
@@ -803,15 +800,15 @@ class AdvancedSecurityComplianceFramework:
     async def generate_sbom_report(self, project_path: str = ".") -> Dict[str, Any]:
         """
         Generate Software Bill of Materials (SBOM) report
-        
+
         Args:
             project_path: Path to project directory
-            
+
         Returns:
             Dictionary containing SBOM report
         """
         self.logger.info(f"📋 Generating SBOM report for project: {project_path}")
-        
+
         sbom_report = {
             "document_name": "PLC-GPT-SBOM",
             "document_namespace": f"https://plc-gbt.com/sbom/{self.session_id}",
@@ -830,25 +827,25 @@ class AdvancedSecurityComplianceFramework:
                 "low_vulnerabilities": 0
             }
         }
-        
+
         # Analyze Python dependencies
         python_components = await self._analyze_python_dependencies(project_path)
         sbom_report["components"].extend(python_components)
-        
+
         # Analyze JavaScript/Node.js dependencies if present
         js_components = await self._analyze_javascript_dependencies(project_path)
         sbom_report["components"].extend(js_components)
-        
+
         # Generate relationships
         relationships = self._generate_component_relationships(sbom_report["components"])
         sbom_report["relationships"] = relationships
-        
+
         # Perform vulnerability analysis
         vulnerability_summary = await self._analyze_component_vulnerabilities(
             sbom_report["components"]
         )
         sbom_report["vulnerability_summary"] = vulnerability_summary
-        
+
         # Store SBOM report
         report_id = f"sbom_{int(time.time())}"
         self.sbom_reports[report_id] = SBOMReport(
@@ -860,36 +857,36 @@ class AdvancedSecurityComplianceFramework:
             generated_at=datetime.now(),
             format_version="2.3"
         )
-        
+
         self.logger.info(f"✅ SBOM report generated with {len(sbom_report['components'])} components")
-        
+
         return sbom_report
 
     async def _analyze_python_dependencies(self, project_path: str) -> List[Dict[str, Any]]:
         """Analyze Python dependencies for SBOM"""
         components = []
-        
+
         # Look for requirements files
         req_files = ["requirements.txt", "requirements-dev.txt", "Pipfile", "pyproject.toml"]
-        
+
         for req_file in req_files:
             req_path = os.path.join(project_path, req_file)
             if os.path.exists(req_path):
                 self.logger.info(f"📦 Analyzing {req_file}")
-                
+
                 if req_file == "requirements.txt":
                     components.extend(await self._parse_requirements_txt(req_path))
                 elif req_file == "pyproject.toml":
                     components.extend(await self._parse_pyproject_toml(req_path))
-        
+
         return components
 
     async def _parse_requirements_txt(self, file_path: str) -> List[Dict[str, Any]]:
         """Parse requirements.txt file"""
         components = []
-        
+
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith('#'):
@@ -902,7 +899,7 @@ class AdvancedSecurityComplianceFramework:
                         else:
                             name = line
                             version = "unknown"
-                        
+
                         component = {
                             "name": name.strip(),
                             "version": version.strip(),
@@ -915,36 +912,36 @@ class AdvancedSecurityComplianceFramework:
                             "vulnerabilities": [],
                             "risk_score": 0.0
                         }
-                        
+
                         components.append(component)
-        
+
         except Exception as e:
             self.logger.error(f"❌ Error parsing {file_path}: {e}")
-        
+
         return components
 
     async def _parse_pyproject_toml(self, file_path: str) -> List[Dict[str, Any]]:
         """Parse pyproject.toml file"""
         components = []
-        
+
         try:
             import toml
-            
-            with open(file_path, 'r') as f:
+
+            with open(file_path) as f:
                 data = toml.load(f)
-            
+
             # Extract dependencies
             dependencies = data.get("tool", {}).get("poetry", {}).get("dependencies", {})
-            
+
             for name, version_spec in dependencies.items():
                 if name == "python":
                     continue
-                
+
                 if isinstance(version_spec, dict):
                     version = version_spec.get("version", "unknown")
                 else:
                     version = version_spec
-                
+
                 component = {
                     "name": name,
                     "version": version,
@@ -957,30 +954,30 @@ class AdvancedSecurityComplianceFramework:
                     "vulnerabilities": [],
                     "risk_score": 0.0
                 }
-                
+
                 components.append(component)
-        
+
         except Exception as e:
             self.logger.error(f"❌ Error parsing {file_path}: {e}")
-        
+
         return components
 
     async def _analyze_javascript_dependencies(self, project_path: str) -> List[Dict[str, Any]]:
         """Analyze JavaScript/Node.js dependencies"""
         components = []
-        
+
         package_json_path = os.path.join(project_path, "package.json")
         if os.path.exists(package_json_path):
             try:
-                with open(package_json_path, 'r') as f:
+                with open(package_json_path) as f:
                     package_data = json.load(f)
-                
+
                 # Process dependencies
                 dependencies = package_data.get("dependencies", {})
                 dev_dependencies = package_data.get("devDependencies", {})
-                
+
                 all_deps = {**dependencies, **dev_dependencies}
-                
+
                 for name, version in all_deps.items():
                     component = {
                         "name": name,
@@ -994,18 +991,18 @@ class AdvancedSecurityComplianceFramework:
                         "vulnerabilities": [],
                         "risk_score": 0.0
                     }
-                    
+
                     components.append(component)
-            
+
             except Exception as e:
                 self.logger.error(f"❌ Error parsing package.json: {e}")
-        
+
         return components
 
     def _generate_component_relationships(self, components: List[Dict[str, Any]]) -> List[Dict[str, str]]:
         """Generate relationships between components"""
         relationships = []
-        
+
         # Create dependency relationships
         for component in components:
             relationship = {
@@ -1014,7 +1011,7 @@ class AdvancedSecurityComplianceFramework:
                 "relationship_type": "DEPENDS_ON"
             }
             relationships.append(relationship)
-        
+
         return relationships
 
     async def _analyze_component_vulnerabilities(self, components: List[Dict[str, Any]]) -> Dict[str, int]:
@@ -1026,17 +1023,17 @@ class AdvancedSecurityComplianceFramework:
             "medium_vulnerabilities": 0,
             "low_vulnerabilities": 0
         }
-        
+
         # For each component, check for known vulnerabilities
         for component in components:
             vulnerabilities = await self._check_component_vulnerabilities(component)
             component["vulnerabilities"] = vulnerabilities
-            
+
             # Update summary
             for vuln in vulnerabilities:
                 vulnerability_summary["total_vulnerabilities"] += 1
                 severity = vuln.get("severity", "").lower()
-                
+
                 if severity == "critical":
                     vulnerability_summary["critical_vulnerabilities"] += 1
                 elif severity == "high":
@@ -1045,16 +1042,16 @@ class AdvancedSecurityComplianceFramework:
                     vulnerability_summary["medium_vulnerabilities"] += 1
                 elif severity == "low":
                     vulnerability_summary["low_vulnerabilities"] += 1
-        
+
         return vulnerability_summary
 
     async def _check_component_vulnerabilities(self, component: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Check for vulnerabilities in a specific component"""
         vulnerabilities = []
-        
+
         # This would integrate with vulnerability databases like NVD, OSV, etc.
         # For now, we'll simulate some common vulnerabilities
-        
+
         known_vulnerable_packages = {
             "requests": [
                 {
@@ -1075,11 +1072,11 @@ class AdvancedSecurityComplianceFramework:
                 }
             ]
         }
-        
+
         package_name = component["name"].lower()
         if package_name in known_vulnerable_packages:
             vulnerabilities.extend(known_vulnerable_packages[package_name])
-        
+
         return vulnerabilities
 
     # ========================================================================
@@ -1088,9 +1085,9 @@ class AdvancedSecurityComplianceFramework:
 
     async def generate_comprehensive_report(self, output_path: str = "security_compliance_report.json") -> str:
         """Generate comprehensive security compliance report"""
-        
-        self.logger.info(f"📊 Generating comprehensive security compliance report")
-        
+
+        self.logger.info("📊 Generating comprehensive security compliance report")
+
         report = {
             "report_metadata": {
                 "generated_at": datetime.now().isoformat(),
@@ -1099,7 +1096,7 @@ class AdvancedSecurityComplianceFramework:
                 "framework_version": "17.1.0"
             },
             "stride_analysis": {
-                "total_components_analyzed": len(set(tm.component for tm in self.threat_models.values())),
+                "total_components_analyzed": len({tm.component for tm in self.threat_models.values()}),
                 "total_threats_identified": len(self.threat_models),
                 "threat_summary": self._generate_threat_summary(),
                 "threats": [asdict(tm) for tm in self.threat_models.values()]
@@ -1120,31 +1117,31 @@ class AdvancedSecurityComplianceFramework:
             },
             "recommendations": self._generate_security_recommendations()
         }
-        
+
         # Save report
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, 'w') as f:
             json.dump(report, f, indent=2, default=str)
-        
+
         self.logger.info(f"✅ Comprehensive report saved to: {output_path}")
-        
+
         return output_path
 
     def _generate_threat_summary(self) -> Dict[str, Any]:
         """Generate threat analysis summary"""
         if not self.threat_models:
             return {"no_threats": True}
-        
+
         severity_counts = {}
         category_counts = {}
-        
+
         for threat in self.threat_models.values():
             severity = threat.severity.name
             category = threat.category.value
-            
+
             severity_counts[severity] = severity_counts.get(severity, 0) + 1
             category_counts[category] = category_counts.get(category, 0) + 1
-        
+
         return {
             "severity_distribution": severity_counts,
             "category_distribution": category_counts,
@@ -1155,13 +1152,13 @@ class AdvancedSecurityComplianceFramework:
         """Generate compliance assessment summary"""
         if not self.compliance_mappings:
             return {"no_assessments": True}
-        
+
         total_compliance = sum(cm.compliance_percentage for cm in self.compliance_mappings.values())
         average_compliance = total_compliance / len(self.compliance_mappings)
-        
-        compliant_count = sum(1 for cm in self.compliance_mappings.values() 
+
+        compliant_count = sum(1 for cm in self.compliance_mappings.values()
                              if cm.compliance_percentage >= 85.0)
-        
+
         return {
             "average_compliance_percentage": average_compliance,
             "compliant_requirements": compliant_count,
@@ -1173,12 +1170,12 @@ class AdvancedSecurityComplianceFramework:
         """Generate vulnerability assessment summary"""
         if not self.vulnerabilities:
             return {"no_vulnerabilities": True}
-        
+
         severity_counts = {}
         for vuln in self.vulnerabilities.values():
             severity = vuln.severity.upper()
             severity_counts[severity] = severity_counts.get(severity, 0) + 1
-        
+
         return {
             "severity_distribution": severity_counts,
             "average_cvss_score": sum(va.cvss_score for va in self.vulnerabilities.values()) / len(self.vulnerabilities)
@@ -1187,11 +1184,11 @@ class AdvancedSecurityComplianceFramework:
     def _generate_security_recommendations(self) -> List[Dict[str, Any]]:
         """Generate security recommendations based on analysis"""
         recommendations = []
-        
+
         # Threat-based recommendations
-        critical_threats = [tm for tm in self.threat_models.values() 
+        critical_threats = [tm for tm in self.threat_models.values()
                           if tm.severity == ThreatSeverity.CRITICAL]
-        
+
         if critical_threats:
             recommendations.append({
                 "priority": "HIGH",
@@ -1200,11 +1197,11 @@ class AdvancedSecurityComplianceFramework:
                 "description": f"Immediately address {len(critical_threats)} critical threats identified",
                 "action_items": [tm.mitigation_strategy for tm in critical_threats[:3]]
             })
-        
+
         # Compliance-based recommendations
-        non_compliant = [cm for cm in self.compliance_mappings.values() 
+        non_compliant = [cm for cm in self.compliance_mappings.values()
                         if cm.compliance_percentage < 85.0]
-        
+
         if non_compliant:
             recommendations.append({
                 "priority": "MEDIUM",
@@ -1213,11 +1210,11 @@ class AdvancedSecurityComplianceFramework:
                 "description": f"Address {len(non_compliant)} non-compliant requirements",
                 "action_items": [cm.remediation_plan for cm in non_compliant[:3]]
             })
-        
+
         # Vulnerability-based recommendations
-        high_vulns = [va for va in self.vulnerabilities.values() 
+        high_vulns = [va for va in self.vulnerabilities.values()
                      if va.severity.upper() in ["HIGH", "CRITICAL"]]
-        
+
         if high_vulns:
             recommendations.append({
                 "priority": "HIGH",
@@ -1226,7 +1223,7 @@ class AdvancedSecurityComplianceFramework:
                 "description": f"Patch {len(high_vulns)} high-severity vulnerabilities",
                 "action_items": [va.mitigation_strategy for va in high_vulns[:3]]
             })
-        
+
         return recommendations
 
 # ============================================================================
@@ -1235,47 +1232,47 @@ class AdvancedSecurityComplianceFramework:
 
 async def main():
     """Main execution function for Phase 17.1 implementation"""
-    
+
     print("🛡️ Phase 17.1: Advanced Security & Compliance Framework")
     print("=" * 70)
-    
+
     # Initialize framework
     framework = AdvancedSecurityComplianceFramework()
-    
+
     # Components to analyze
     components = [
         "plc_controller",
-        "hmi_interface", 
+        "hmi_interface",
         "database_layer",
         "api_gateway",
         "authentication_service",
         "vault_secrets",
         "network_communications"
     ]
-    
+
     print("🔍 Performing STRIDE Threat Analysis...")
     stride_results = {}
     for component in components:
         result = await framework.perform_stride_analysis(component)
         stride_results[component] = result
         print(f"   ✅ {component}: {result['summary']['total_threats']} threats identified")
-    
+
     print("\n📋 Assessing IEC 62443-3-3 Compliance...")
     compliance_result = await framework.assess_iec62443_compliance(target_security_level=3)
     print(f"   ✅ Overall compliance: {compliance_result['summary']['overall_compliance_percentage']:.1f}%")
-    
+
     print("\n📦 Generating SBOM Report...")
     sbom_result = await framework.generate_sbom_report()
     print(f"   ✅ SBOM generated with {len(sbom_result['components'])} components")
-    
+
     print("\n📊 Generating Comprehensive Report...")
     report_path = await framework.generate_comprehensive_report(
         "results/phase17/phase17_1_security_compliance_report.json"
     )
     print(f"   ✅ Report saved to: {report_path}")
-    
+
     print("\n🎯 Phase 17.1 Implementation Complete!")
     print("=" * 70)
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

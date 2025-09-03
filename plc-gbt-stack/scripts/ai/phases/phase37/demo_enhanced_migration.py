@@ -31,11 +31,11 @@ def demo_enhanced_capabilities():
     print("🚀 Enhanced PLC Format Converter - Complete Demo")
     print("=" * 60)
     
-    try:
+        try:
         # Use import utility
-from plc_converter_import import import_plc_converter
-PLCConverter = import_plc_converter()
-        
+        from plc_converter_import import import_plc_converter
+        PLCConverter = import_plc_converter()
+
         # Initialize converter
         converter = PLCConverter()
         print("✅ PLCConverter initialized with enhanced capabilities")

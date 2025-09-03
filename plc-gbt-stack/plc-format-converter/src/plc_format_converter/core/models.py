@@ -6,13 +6,12 @@ Comprehensive data models supporting 95%+ data preservation with full
 PLC component extraction and validation capabilities.
 """
 
-from typing import Dict, List, Optional, Any, Union, Tuple
+import hashlib
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass, field
 from pathlib import Path
-import hashlib
-import json
+from typing import Any, Dict, List, Optional
 
 try:
     from pydantic import BaseModel, Field, validator
@@ -20,8 +19,10 @@ try:
 except ImportError:
     # Fallback for environments without pydantic
     BaseModel = object
-    Field = lambda **kwargs: None
-    validator = lambda *args, **kwargs: lambda f: f
+    def Field(**kwargs):
+        return None
+    def validator(*args, **kwargs):
+        return lambda f: f
     PYDANTIC_AVAILABLE = False
 
 
@@ -53,14 +54,14 @@ class PLCInstructionType(Enum):
     OTE = "OTE"  # Output Energize
     OTL = "OTL"  # Output Latch
     OTU = "OTU"  # Output Unlatch
-    
+
     # Math Instructions
     ADD = "ADD"
-    SUB = "SUB" 
+    SUB = "SUB"
     MUL = "MUL"
     DIV = "DIV"
     MOD = "MOD"
-    
+
     # Motion Control Instructions
     MAM = "MAM"   # Motion Axis Move
     MAJ = "MAJ"   # Motion Axis Jog
@@ -68,16 +69,16 @@ class PLCInstructionType(Enum):
     MAOC = "MAOC" # Motion Axis Output Cam
     MAPC = "MAPC" # Motion Axis Position Cam
     MAAT = "MAAT" # Motion Axis Absolute Time
-    
+
     # Safety Instructions (GuardLogix)
     ESTOP = "ESTOP"
     SAFEIN = "SAFEIN"
     SAFEOUT = "SAFEOUT"
-    
+
     # Process Control
     PID = "PID"
     PIDE = "PIDE"
-    
+
     # Communication
     MSG = "MSG"
     CIP = "CIP"
@@ -89,24 +90,24 @@ class DataIntegrityScore:
     overall_score: float = 0.0  # 0-100%
     component_scores: Dict[str, float] = field(default_factory=dict)
     preservation_level: DataPreservationLevel = DataPreservationLevel.METADATA_ONLY
-    
+
     # Detailed scoring breakdown
     logic_preservation: float = 0.0      # Ladder logic completeness
-    tag_preservation: float = 0.0        # Tag database completeness  
+    tag_preservation: float = 0.0        # Tag database completeness
     io_preservation: float = 0.0         # I/O configuration completeness
     motion_preservation: float = 0.0     # Motion control completeness
     safety_preservation: float = 0.0     # Safety system completeness
-    
+
     # Quality metrics
     instruction_count: int = 0
     preserved_instructions: int = 0
     tag_count: int = 0
     preserved_tags: int = 0
-    
+
     # Validation metadata
     validation_timestamp: datetime = field(default_factory=datetime.now)
     validation_method: str = "enhanced_phase39"
-    
+
     def calculate_overall_score(self) -> float:
         """Calculate weighted overall score"""
         weights = {
@@ -116,12 +117,12 @@ class DataIntegrityScore:
             'motion_preservation': 0.1,
             'safety_preservation': 0.1
         }
-        
+
         self.overall_score = sum(
-            getattr(self, metric) * weight 
+            getattr(self, metric) * weight
             for metric, weight in weights.items()
         )
-        
+
         # Determine preservation level
         if self.overall_score >= 95:
             self.preservation_level = DataPreservationLevel.INDUSTRY_STANDARD
@@ -133,11 +134,11 @@ class DataIntegrityScore:
             self.preservation_level = DataPreservationLevel.BASIC_STRUCTURE
         else:
             self.preservation_level = DataPreservationLevel.METADATA_ONLY
-            
+
         return self.overall_score
 
 
-@dataclass 
+@dataclass
 class BinaryDataBlock:
     """Represents a binary data block extracted from ACD file"""
     block_type: str
@@ -145,7 +146,7 @@ class BinaryDataBlock:
     size: int
     data: bytes
     checksum: str = ""
-    
+
     def __post_init__(self):
         if not self.checksum:
             self.checksum = hashlib.md5(self.data).hexdigest()
@@ -164,21 +165,21 @@ class ComponentExtraction:
 
 class EnhancedPLCComponent(BaseModel if PYDANTIC_AVAILABLE else object):
     """Enhanced base class for all PLC components with binary extraction support"""
-    
+
     if PYDANTIC_AVAILABLE:
         name: str = Field(..., description="Component name")
         component_type: str = Field(..., description="Type of PLC component")
         uuid: str = Field(default="", description="Unique identifier")
-        
+
         # Enhanced Phase 3.9 fields
         binary_source: Optional[BinaryDataBlock] = Field(None, description="Source binary data")
         extraction_info: Optional[ComponentExtraction] = Field(None, description="Extraction metadata")
         data_integrity: Optional[DataIntegrityScore] = Field(None, description="Data integrity metrics")
-        
+
         # Version tracking
         studio5000_version: Optional[str] = Field(None, description="Studio 5000 version")
         firmware_version: Optional[str] = Field(None, description="Controller firmware version")
-        
+
         class Config:
             arbitrary_types_allowed = True
     else:
@@ -195,17 +196,17 @@ class EnhancedPLCComponent(BaseModel if PYDANTIC_AVAILABLE else object):
 
 class PLCInstruction(EnhancedPLCComponent):
     """Enhanced PLC instruction with complete parameter preservation"""
-    
+
     if PYDANTIC_AVAILABLE:
         instruction_type: PLCInstructionType = Field(..., description="Instruction type")
         parameters: Dict[str, Any] = Field(default_factory=dict, description="Instruction parameters")
         operands: List[str] = Field(default_factory=list, description="Instruction operands")
-        
+
         # Enhanced fields for Phase 3.9
         raw_binary: Optional[bytes] = Field(None, description="Raw instruction binary")
         assembly_code: Optional[str] = Field(None, description="Assembly representation")
         execution_time: Optional[float] = Field(None, description="Estimated execution time (ms)")
-        
+
         # Motion control specific
         motion_parameters: Optional[Dict[str, Any]] = Field(None, description="Motion control parameters")
         safety_parameters: Optional[Dict[str, Any]] = Field(None, description="Safety parameters")
@@ -213,21 +214,21 @@ class PLCInstruction(EnhancedPLCComponent):
 
 class PLCTag(EnhancedPLCComponent):
     """Enhanced PLC tag with complete data type preservation"""
-    
+
     if PYDANTIC_AVAILABLE:
         data_type: str = Field(..., description="Tag data type")
         scope: str = Field(default="Controller", description="Tag scope")
         initial_value: Optional[Any] = Field(None, description="Initial value")
-        
+
         # Enhanced Phase 3.9 fields
         memory_address: Optional[str] = Field(None, description="Physical memory address")
         access_rights: Optional[str] = Field(None, description="Read/Write permissions")
         alias_for: Optional[str] = Field(None, description="Alias target tag")
-        
+
         # Complex data type support
         udt_definition: Optional[Dict[str, Any]] = Field(None, description="UDT structure definition")
         array_dimensions: Optional[List[int]] = Field(None, description="Array dimensions")
-        
+
         # I/O mapping
         io_module: Optional[str] = Field(None, description="Associated I/O module")
         io_channel: Optional[int] = Field(None, description="I/O channel number")
@@ -235,20 +236,20 @@ class PLCTag(EnhancedPLCComponent):
 
 class PLCRoutine(EnhancedPLCComponent):
     """Enhanced PLC routine with complete logic preservation"""
-    
+
     if PYDANTIC_AVAILABLE:
         routine_type: str = Field(..., description="Routine type (RLL, ST, FBD)")
         instructions: List[PLCInstruction] = Field(default_factory=list, description="Routine instructions")
-        
+
         # Enhanced Phase 3.9 fields
         raw_logic: Optional[str] = Field(None, description="Raw logic representation")
         compiled_code: Optional[bytes] = Field(None, description="Compiled routine code")
         execution_order: Optional[int] = Field(None, description="Execution order in program")
-        
+
         # Performance metrics
         scan_time: Optional[float] = Field(None, description="Typical scan time (ms)")
         memory_usage: Optional[int] = Field(None, description="Memory usage (bytes)")
-        
+
         # Dependencies
         called_routines: List[str] = Field(default_factory=list, description="Called routine names")
         used_tags: List[str] = Field(default_factory=list, description="Referenced tag names")
@@ -257,16 +258,16 @@ class PLCRoutine(EnhancedPLCComponent):
 
 class PLCProgram(EnhancedPLCComponent):
     """Enhanced PLC program with complete structure preservation"""
-    
+
     if PYDANTIC_AVAILABLE:
         routines: List[PLCRoutine] = Field(default_factory=list, description="Program routines")
         main_routine: Optional[str] = Field(None, description="Main routine name")
-        
+
         # Enhanced Phase 3.9 fields
         program_type: str = Field(default="Normal", description="Program type")
         task_assignment: Optional[str] = Field(None, description="Assigned task name")
         inhibit_state: bool = Field(default=False, description="Program inhibit state")
-        
+
         # Safety program support
         safety_signature: Optional[str] = Field(None, description="Safety program signature")
         safety_lock_state: Optional[str] = Field(None, description="Safety lock state")
@@ -274,25 +275,25 @@ class PLCProgram(EnhancedPLCComponent):
 
 class PLCController(EnhancedPLCComponent):
     """Enhanced PLC controller with complete configuration preservation"""
-    
+
     if PYDANTIC_AVAILABLE:
         processor_type: str = Field(..., description="Processor type")
         programs: List[PLCProgram] = Field(default_factory=list, description="Controller programs")
         tags: List[PLCTag] = Field(default_factory=list, description="Controller tags")
-        
+
         # Enhanced Phase 3.9 fields
         catalog_number: str = Field(default="", description="Controller catalog number")
         series: str = Field(default="", description="Controller series")
         revision: str = Field(default="", description="Hardware revision")
-        
+
         # Communication configuration
         ethernet_config: Optional[Dict[str, Any]] = Field(None, description="Ethernet configuration")
         serial_config: Optional[Dict[str, Any]] = Field(None, description="Serial configuration")
-        
+
         # Motion configuration
         motion_groups: List[Dict[str, Any]] = Field(default_factory=list, description="Motion groups")
         axes_configuration: List[Dict[str, Any]] = Field(default_factory=list, description="Axes configuration")
-        
+
         # Safety configuration (GuardLogix)
         safety_config: Optional[Dict[str, Any]] = Field(None, description="Safety configuration")
         safety_signature: Optional[str] = Field(None, description="Safety signature")
@@ -300,22 +301,22 @@ class PLCController(EnhancedPLCComponent):
 
 class PLCDevice(EnhancedPLCComponent):
     """Enhanced PLC device/module configuration"""
-    
+
     if PYDANTIC_AVAILABLE:
         device_type: str = Field(..., description="Device type (Local, Remote, etc.)")
         catalog_number: str = Field(default="", description="Device catalog number")
         vendor_id: Optional[int] = Field(None, description="Vendor ID")
         product_code: Optional[int] = Field(None, description="Product code")
-        
+
         # Enhanced Phase 3.9 fields
         slot_number: Optional[int] = Field(None, description="Chassis slot number")
         ip_address: Optional[str] = Field(None, description="IP address for Ethernet devices")
         node_address: Optional[int] = Field(None, description="Node address")
-        
+
         # Configuration data
         configuration_data: Dict[str, Any] = Field(default_factory=dict, description="Device configuration")
         connection_parameters: Dict[str, Any] = Field(default_factory=dict, description="Connection parameters")
-        
+
         # I/O mapping
         input_tags: List[str] = Field(default_factory=list, description="Input tag mappings")
         output_tags: List[str] = Field(default_factory=list, description="Output tag mappings")
@@ -323,24 +324,24 @@ class PLCDevice(EnhancedPLCComponent):
 
 class PLCProject(EnhancedPLCComponent):
     """Enhanced PLC project with complete project preservation"""
-    
+
     if PYDANTIC_AVAILABLE:
         controllers: List[PLCController] = Field(default_factory=list, description="Project controllers")
         devices: List[PLCDevice] = Field(default_factory=list, description="Project devices/modules")
-        
+
         # Enhanced Phase 3.9 fields
         project_creation_date: Optional[datetime] = Field(None, description="Project creation date")
         last_modified_date: Optional[datetime] = Field(None, description="Last modification date")
         created_by: Optional[str] = Field(None, description="Project creator")
-        
+
         # Version information
         studio5000_version: str = Field(default="", description="Studio 5000 version")
         logix_designer_version: str = Field(default="", description="Logix Designer version")
-        
+
         # Project settings
         project_description: str = Field(default="", description="Project description")
         company_name: str = Field(default="", description="Company name")
-        
+
         # Enhanced metadata for migration
         source_file_path: Optional[Path] = Field(None, description="Source ACD file path")
         source_file_hash: Optional[str] = Field(None, description="Source file hash")
@@ -352,33 +353,33 @@ class ConversionResult:
     """Enhanced conversion result with comprehensive metrics"""
     success: bool
     status: ConversionStatus
-    
+
     # File information
     source_file: Optional[Path] = None
     target_file: Optional[Path] = None
     source_size: int = 0
     target_size: int = 0
-    
+
     # Enhanced Phase 3.9 metrics
     data_integrity: Optional[DataIntegrityScore] = None
     extraction_summary: Dict[str, ComponentExtraction] = field(default_factory=dict)
-    
+
     # Performance metrics
     conversion_time: float = 0.0
     memory_usage: int = 0
-    
+
     # Issues and warnings
     issues: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
-    
+
     # Validation results
     round_trip_validated: bool = False
     git_optimized: bool = False
-    
+
     # Migration readiness
     migration_ready: bool = False
     compatibility_score: float = 0.0
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
         result = {
@@ -397,7 +398,7 @@ class ConversionResult:
             'migration_ready': self.migration_ready,
             'compatibility_score': self.compatibility_score
         }
-        
+
         if self.data_integrity:
             result['data_integrity'] = {
                 'overall_score': self.data_integrity.overall_score,
@@ -412,5 +413,5 @@ class ConversionResult:
                 'tag_count': self.data_integrity.tag_count,
                 'preserved_tags': self.data_integrity.preserved_tags
             }
-        
-        return result 
+
+        return result

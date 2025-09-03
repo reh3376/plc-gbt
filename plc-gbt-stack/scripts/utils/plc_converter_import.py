@@ -7,19 +7,19 @@ library from the separate acd-l5x-tool-lib repository.
 """
 
 import sys
-import os
 from pathlib import Path
+
 
 def setup_plc_converter_import():
     """
     Set up the import path for plc_format_converter from the separate repository.
-    
+
     Returns:
         bool: True if setup successful, False otherwise
     """
     # Path to the separate acd-l5x-tool-lib repository
     acd_l5x_repo_path = Path("/Users/reh3376/repos/acd-l5x-tool-lib/src")
-    
+
     if acd_l5x_repo_path.exists():
         if str(acd_l5x_repo_path) not in sys.path:
             sys.path.insert(0, str(acd_l5x_repo_path))
@@ -31,7 +31,7 @@ def setup_plc_converter_import():
 def import_plc_converter():
     """
     Import and return the PLCConverter class.
-    
+
     Returns:
         PLCConverter class if successful, None otherwise
     """
@@ -47,15 +47,21 @@ def import_plc_converter():
 def import_plc_models():
     """
     Import and return common PLC model classes.
-    
+
     Returns:
         dict: Dictionary of model classes if successful, empty dict otherwise
     """
     if setup_plc_converter_import():
         try:
             from plc_format_converter.core.models import (
-                PLCProject, PLCController, PLCProgram, PLCRoutine, 
-                PLCTag, PLCDevice, ConversionResult, ConversionStatus
+                ConversionResult,
+                ConversionStatus,
+                PLCController,
+                PLCDevice,
+                PLCProgram,
+                PLCProject,
+                PLCRoutine,
+                PLCTag,
             )
             return {
                 'PLCProject': PLCProject,
@@ -75,7 +81,7 @@ def import_plc_models():
 def import_format_handlers():
     """
     Import and return format handler classes.
-    
+
     Returns:
         dict: Dictionary of handler classes if successful, empty dict otherwise
     """
@@ -96,33 +102,33 @@ def import_format_handlers():
 def quick_setup():
     """
     Quick setup function that returns commonly used classes.
-    
+
     Returns:
         tuple: (PLCConverter, models_dict, handlers_dict)
     """
     converter = import_plc_converter()
     models = import_plc_models()
     handlers = import_format_handlers()
-    
+
     return converter, models, handlers
 
 if __name__ == "__main__":
     # Test the import functionality
     print("Testing PLC Format Converter import utility...")
-    
+
     PLCConverter, models, handlers = quick_setup()
-    
+
     if PLCConverter:
         print("✅ PLCConverter imported successfully")
     else:
         print("❌ Failed to import PLCConverter")
-    
+
     if models:
         print(f"✅ Imported {len(models)} model classes")
     else:
         print("❌ Failed to import model classes")
-    
+
     if handlers:
         print(f"✅ Imported {len(handlers)} handler classes")
     else:
-        print("❌ Failed to import handler classes") 
+        print("❌ Failed to import handler classes")

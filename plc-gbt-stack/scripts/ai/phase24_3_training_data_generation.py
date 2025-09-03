@@ -8,13 +8,13 @@ from context directory processing results (Phase 24.1) and memory integration (P
 
 Leverages existing infrastructure:
 - Phase 24.1: 50 training examples already generated
-- Phase 24.2: Context ingested into PLC memory system 
+- Phase 24.2: Context ingested into PLC memory system
 - Existing training data generators and OpenAI formatting
 - plc-memory CLI for knowledge retrieval
 
 Tasks:
 - 24.3.1: Generate Q&A pairs from context
-- 24.3.2: Create conversation examples  
+- 24.3.2: Create conversation examples
 - 24.3.3: Develop instruction datasets
 - 24.3.4: Build validation datasets
 
@@ -22,15 +22,14 @@ Author: PLC-GPT Development Team
 Date: January 17, 2025
 """
 
-import json
 import asyncio
+import json
 import logging
 import subprocess
-import uuid
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Tuple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -59,18 +58,18 @@ class ValidationMetrics:
 class Phase24_3_TrainingDataGeneration:
     """
     Phase 24.3: Training Data Generation
-    
+
     Leverages existing infrastructure to generate comprehensive training data
     from context processing results.
     """
-    
+
     def __init__(self):
         """Initialize the training data generator"""
         self.session_id = f"phase24_3_{int(datetime.now().timestamp())}"
         self.context_dir = Path("docs/context")
         self.results_dir = Path("results/phase24")
         self.results_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Training data categories aligned with context directory content
         self.training_categories = {
             'schema_based_qa': {
@@ -104,57 +103,57 @@ class Phase24_3_TrainingDataGeneration:
                 'complexity_levels': ['intermediate', 'advanced']
             }
         }
-        
+
         # Initialize tracking
         self.generated_examples = []
         self.validation_metrics = None
-        
+
         logger.info(f"🚀 Phase 24.3 Training Data Generation initialized - Session: {self.session_id}")
 
     async def execute_task_24_3_1(self) -> List[TrainingExample]:
         """
         Task 24.3.1: Generate Q&A pairs from context
-        
+
         Uses Phase 24.1 results and plc-memory queries to generate
         schema-based questions and control theory Q&A pairs.
         """
         logger.info("🔄 Starting Task 24.3.1: Generate Q&A pairs from context")
-        
+
         qa_examples = []
-        
+
         # Step 1: Load Phase 24.1 training examples (already generated)
         phase24_1_examples = self._load_phase24_1_examples()
         logger.info(f"📚 Loaded {len(phase24_1_examples)} examples from Phase 24.1")
-        
+
         # Step 2: Generate schema-based Q&A using plc-memory queries
         schema_qa = await self._generate_schema_qa_pairs()
         logger.info(f"🗂️ Generated {len(schema_qa)} schema Q&A pairs")
         qa_examples.extend(schema_qa)
-        
+
         # Step 3: Generate control theory Q&A from memory system
         control_qa = await self._generate_control_theory_qa()
         logger.info(f"🎛️ Generated {len(control_qa)} control theory Q&A pairs")
         qa_examples.extend(control_qa)
-        
+
         # Step 4: Convert Phase 24.1 examples to training format
         converted_examples = self._convert_phase24_1_to_training_format(phase24_1_examples)
         logger.info(f"🔄 Converted {len(converted_examples)} Phase 24.1 examples")
         qa_examples.extend(converted_examples)
-        
+
         logger.info(f"✅ Task 24.3.1 completed: {len(qa_examples)} Q&A examples generated")
         return qa_examples
 
     async def execute_task_24_3_2(self) -> List[TrainingExample]:
         """
         Task 24.3.2: Create conversation examples
-        
+
         Generate multi-turn conversation examples showing how users
         interact with the system for complex tasks.
         """
         logger.info("🔄 Starting Task 24.3.2: Create conversation examples")
-        
+
         conversation_examples = []
-        
+
         # Conversation scenarios based on context directory content
         scenarios = [
             {
@@ -182,26 +181,26 @@ class Phase24_3_TrainingDataGeneration:
                 'complexity': 'advanced'
             }
         ]
-        
+
         for scenario in scenarios:
             conversations = await self._generate_conversation_scenario(scenario)
             conversation_examples.extend(conversations)
             logger.info(f"💬 Generated {len(conversations)} conversations for {scenario['category']}")
-        
+
         logger.info(f"✅ Task 24.3.2 completed: {len(conversation_examples)} conversation examples")
         return conversation_examples
 
     async def execute_task_24_3_3(self) -> List[TrainingExample]:
         """
         Task 24.3.3: Develop instruction datasets
-        
+
         Create step-by-step instruction examples for complex tasks
         like schema creation, PID tuning, and analysis workflows.
         """
         logger.info("🔄 Starting Task 24.3.3: Develop instruction datasets")
-        
+
         instruction_examples = []
-        
+
         # Generate instructions for common tasks
         instruction_tasks = [
             {
@@ -213,7 +212,7 @@ class Phase24_3_TrainingDataGeneration:
             {
                 'task': 'tune_pid_parameters',
                 'title': 'Tuning PID Parameters for Temperature Control',
-                'complexity': 'advanced', 
+                'complexity': 'advanced',
                 'steps': 12
             },
             {
@@ -229,39 +228,39 @@ class Phase24_3_TrainingDataGeneration:
                 'steps': 10
             }
         ]
-        
+
         for task_spec in instruction_tasks:
             instructions = await self._generate_instruction_dataset(task_spec)
             instruction_examples.extend(instructions)
             logger.info(f"📋 Generated instructions for {task_spec['task']}")
-        
+
         logger.info(f"✅ Task 24.3.3 completed: {len(instruction_examples)} instruction examples")
         return instruction_examples
 
     async def execute_task_24_3_4(self) -> Tuple[List[TrainingExample], ValidationMetrics]:
         """
         Task 24.3.4: Build validation datasets and validate training data
-        
+
         Create validation examples and comprehensive quality metrics
         for all generated training data.
         """
         logger.info("🔄 Starting Task 24.3.4: Build validation datasets")
-        
+
         # Gather all generated examples from previous tasks
         all_examples = self.generated_examples
         logger.info(f"📊 Validating {len(all_examples)} total training examples")
-        
+
         # Generate validation examples (edge cases, common mistakes)
         validation_examples = await self._generate_validation_examples()
         logger.info(f"✅ Generated {len(validation_examples)} validation examples")
-        
+
         # Comprehensive quality validation
         validation_metrics = self._validate_training_data_quality(all_examples + validation_examples)
-        
+
         # Format validation for OpenAI compliance
         format_validation = self._validate_openai_format_compliance(all_examples + validation_examples)
         logger.info(f"📋 Format validation: {format_validation['compliance_rate']:.1%} compliant")
-        
+
         # Combine validation metrics
         comprehensive_metrics = ValidationMetrics(
             total_examples=len(all_examples + validation_examples),
@@ -271,16 +270,16 @@ class Phase24_3_TrainingDataGeneration:
             confidence_score=validation_metrics['avg_confidence'],
             format_compliance=format_validation['compliance_rate']
         )
-        
+
         logger.info(f"✅ Task 24.3.4 completed: Validation complete with {comprehensive_metrics.confidence_score:.2f} confidence")
         return validation_examples, comprehensive_metrics
 
     async def _generate_schema_qa_pairs(self) -> List[TrainingExample]:
         """Generate Q&A pairs based on JSON schemas using plc-memory CLI"""
         logger.info("🗂️ Generating schema-based Q&A pairs")
-        
+
         qa_pairs = []
-        
+
         # Use plc-memory CLI to query schema information
         try:
             # Query for control loop schemas
@@ -289,41 +288,41 @@ class Phase24_3_TrainingDataGeneration:
                 'query', 'control loop schemas',
                 '--format', 'json'
             ], capture_output=True, text=True, cwd='.')
-            
+
             if result.returncode == 0:
                 schema_data = json.loads(result.stdout)
                 logger.info(f"📊 Retrieved schema data: {len(schema_data.get('results', []))} items")
-                
+
                 # Generate Q&A from schema data
                 for item in schema_data.get('results', [])[:20]:  # Limit to 20 for quality
                     qa_pair = self._create_schema_qa_pair(item)
                     if qa_pair:
                         qa_pairs.append(qa_pair)
-                        
+
         except Exception as e:
             logger.warning(f"Could not query schemas via plc-memory: {e}")
-            
+
         # Generate additional schema questions using templates
         template_qa = self._generate_template_schema_qa()
         qa_pairs.extend(template_qa)
-        
+
         return qa_pairs
 
     async def _generate_control_theory_qa(self) -> List[TrainingExample]:
         """Generate control theory Q&A using memory system"""
         logger.info("🎛️ Generating control theory Q&A pairs")
-        
+
         control_qa = []
-        
+
         # Control theory topics from context directory
         topics = [
             'PID controller tuning',
-            'temperature control strategies', 
+            'temperature control strategies',
             'cascade control implementation',
             'feedforward control design',
             'control loop performance analysis'
         ]
-        
+
         for topic in topics:
             try:
                 # Query plc-memory for topic information
@@ -332,49 +331,49 @@ class Phase24_3_TrainingDataGeneration:
                     'query', topic,
                     '--format', 'json'
                 ], capture_output=True, text=True, cwd='.')
-                
+
                 if result.returncode == 0:
                     topic_data = json.loads(result.stdout)
-                    
+
                     # Generate Q&A from topic data
                     qa_pairs = self._create_control_theory_qa(topic, topic_data)
                     control_qa.extend(qa_pairs)
-                    
+
             except Exception as e:
                 logger.warning(f"Could not query topic {topic}: {e}")
-        
+
         # Add template-based control theory Q&A
         template_qa = self._generate_template_control_qa()
         control_qa.extend(template_qa)
-        
+
         return control_qa
 
     def _load_phase24_1_examples(self) -> List[Dict[str, Any]]:
         """Load existing training examples from Phase 24.1"""
         examples = []
-        
+
         # Look for Phase 24.1 ingestion package
         phase24_1_files = list(self.results_dir.glob("*ingestion_package.json"))
-        
+
         for file_path in phase24_1_files:
             try:
                 with open(file_path) as f:
                     data = json.load(f)
-                    
+
                 # Extract training examples
                 if 'training_examples' in data:
                     examples.extend(data['training_examples'])
                     logger.info(f"📚 Loaded {len(data['training_examples'])} examples from {file_path.name}")
-                    
+
             except Exception as e:
                 logger.warning(f"Could not load Phase 24.1 examples from {file_path}: {e}")
-        
+
         return examples
 
     def _convert_phase24_1_to_training_format(self, examples: List[Dict[str, Any]]) -> List[TrainingExample]:
         """Convert Phase 24.1 examples to OpenAI training format"""
         converted = []
-        
+
         for example in examples:
             if 'question' in example and 'answer' in example:
                 training_example = TrainingExample(
@@ -384,7 +383,7 @@ class Phase24_3_TrainingDataGeneration:
                             "content": "You are an expert in industrial control systems and PLC programming. Provide accurate, detailed answers based on the context directory knowledge."
                         },
                         {
-                            "role": "user", 
+                            "role": "user",
                             "content": example['question']
                         },
                         {
@@ -403,7 +402,7 @@ class Phase24_3_TrainingDataGeneration:
                     confidence=example.get('confidence', 0.8)
                 )
                 converted.append(training_example)
-        
+
         return converted
 
     def _create_schema_qa_pair(self, schema_item: Dict[str, Any]) -> Optional[TrainingExample]:
@@ -412,14 +411,14 @@ class Phase24_3_TrainingDataGeneration:
             # Extract schema information
             schema_name = schema_item.get('title', 'Unknown Schema')
             description = schema_item.get('description', '')
-            
+
             # Generate question
             question = f"What is the purpose and structure of the {schema_name} schema?"
-            
+
             # Generate answer from schema properties
             properties = schema_item.get('properties', {})
             answer = f"The {schema_name} schema is used for {description}. "
-            
+
             if properties:
                 answer += f"It contains {len(properties)} properties: "
                 prop_names = list(properties.keys())[:5]  # Limit to 5 properties
@@ -427,7 +426,7 @@ class Phase24_3_TrainingDataGeneration:
                 if len(properties) > 5:
                     answer += f" and {len(properties) - 5} more properties"
                 answer += "."
-            
+
             return TrainingExample(
                 messages=[
                     {
@@ -439,7 +438,7 @@ class Phase24_3_TrainingDataGeneration:
                         "content": question
                     },
                     {
-                        "role": "assistant", 
+                        "role": "assistant",
                         "content": answer
                     }
                 ],
@@ -452,7 +451,7 @@ class Phase24_3_TrainingDataGeneration:
                 source='schema_analysis',
                 confidence=0.85
             )
-            
+
         except Exception as e:
             logger.warning(f"Error creating schema Q&A: {e}")
             return None
@@ -460,21 +459,21 @@ class Phase24_3_TrainingDataGeneration:
     def _create_control_theory_qa(self, topic: str, topic_data: Dict[str, Any]) -> List[TrainingExample]:
         """Create control theory Q&A from topic data"""
         qa_pairs = []
-        
+
         # Basic question template
         question = f"How do you implement {topic} in industrial control systems?"
-        
+
         # Generate answer from topic data
         results = topic_data.get('results', [])
         if results:
             answer = f"To implement {topic}, you need to consider several key factors: "
-            
+
             # Extract relevant information from results
             for result in results[:3]:  # Use first 3 results
                 content = result.get('content', '')
                 if content:
                     answer += f"{content[:200]}... "
-            
+
             qa_pair = TrainingExample(
                 messages=[
                     {
@@ -500,13 +499,13 @@ class Phase24_3_TrainingDataGeneration:
                 confidence=0.8
             )
             qa_pairs.append(qa_pair)
-        
+
         return qa_pairs
 
     def _generate_template_schema_qa(self) -> List[TrainingExample]:
         """Generate schema Q&A using templates"""
         template_qa = []
-        
+
         # Schema templates based on context directory content
         schemas = [
             {
@@ -515,7 +514,7 @@ class Phase24_3_TrainingDataGeneration:
                 'complexity': 'basic'
             },
             {
-                'name': 'Advanced PIDE Controller', 
+                'name': 'Advanced PIDE Controller',
                 'description': 'enhanced PID with derivative filtering and advanced features',
                 'complexity': 'intermediate'
             },
@@ -525,11 +524,11 @@ class Phase24_3_TrainingDataGeneration:
                 'complexity': 'advanced'
             }
         ]
-        
+
         for schema in schemas:
             question = f"What are the key components of a {schema['name']} schema?"
             answer = f"A {schema['name']} schema is designed for {schema['description']}. The key components include the process variable input, setpoint configuration, controller parameters (Kp, Ki, Kd), and control output specifications."
-            
+
             template_qa.append(TrainingExample(
                 messages=[
                     {
@@ -554,13 +553,13 @@ class Phase24_3_TrainingDataGeneration:
                 source='template_generation',
                 confidence=0.9
             ))
-        
+
         return template_qa
 
     def _generate_template_control_qa(self) -> List[TrainingExample]:
         """Generate control theory Q&A using templates"""
         template_qa = []
-        
+
         # Control theory templates
         topics = [
             {
@@ -579,7 +578,7 @@ class Phase24_3_TrainingDataGeneration:
                 'complexity': 'intermediate'
             }
         ]
-        
+
         for topic in topics:
             template_qa.append(TrainingExample(
                 messages=[
@@ -605,13 +604,13 @@ class Phase24_3_TrainingDataGeneration:
                 source='template_generation',
                 confidence=0.9
             ))
-        
+
         return template_qa
 
     async def _generate_conversation_scenario(self, scenario: Dict[str, Any]) -> List[TrainingExample]:
         """Generate multi-turn conversation examples"""
         conversations = []
-        
+
         # Generate conversation based on scenario type
         if scenario['category'] == 'schema_configuration':
             conversation = self._create_schema_configuration_conversation(scenario)
@@ -623,10 +622,10 @@ class Phase24_3_TrainingDataGeneration:
             conversation = self._create_implementation_conversation(scenario)
         else:
             conversation = None
-        
+
         if conversation:
             conversations.append(conversation)
-            
+
         return conversations
 
     def _create_schema_configuration_conversation(self, scenario: Dict[str, Any]) -> TrainingExample:
@@ -654,7 +653,7 @@ class Phase24_3_TrainingDataGeneration:
                     "content": "Perfect! For a distillation column in that temperature range, I recommend: PV range: 150-250°F (with safety margins), SP range: 180-220°F, initial PID gains: Kp=0.5, Ki=0.1, Kd=0.05, output limits: 0-100%, derivative filter: 0.1 seconds. The process is typically slow, so conservative tuning prevents oscillations. Start with these values and adjust based on your step response test."
                 },
                 {
-                    "role": "user", 
+                    "role": "user",
                     "content": "How do I determine if these initial values are working well?"
                 },
                 {
@@ -808,7 +807,7 @@ class Phase24_3_TrainingDataGeneration:
     async def _generate_instruction_dataset(self, task_spec: Dict[str, Any]) -> List[TrainingExample]:
         """Generate instruction dataset for specific task"""
         instructions = []
-        
+
         if task_spec['task'] == 'create_pid_schema':
             instruction = self._create_pid_schema_instruction(task_spec)
         elif task_spec['task'] == 'tune_pid_parameters':
@@ -819,10 +818,10 @@ class Phase24_3_TrainingDataGeneration:
             instruction = self._create_cascade_instruction(task_spec)
         else:
             instruction = None
-            
+
         if instruction:
             instructions.append(instruction)
-            
+
         return instructions
 
     def _create_pid_schema_instruction(self, task_spec: Dict[str, Any]) -> TrainingExample:
@@ -858,7 +857,7 @@ class Phase24_3_TrainingDataGeneration:
 
 4. **Define PID Parameters**
    - Proportional gain (Kp): range 0.1-10.0, default 1.0
-   - Integral time (Ki): range 0.01-100.0, default 1.0  
+   - Integral time (Ki): range 0.01-100.0, default 1.0
    - Derivative time (Kd): range 0.0-10.0, default 0.1
 
 5. **Configure Controller Output (CV)**
@@ -1066,7 +1065,7 @@ class Phase24_3_TrainingDataGeneration:
 
 2. **Hardware Configuration**
    - Install primary process sensor
-   - Install secondary process sensor  
+   - Install secondary process sensor
    - Configure control valve on secondary loop
 
 3. **Primary Controller Setup**
@@ -1124,7 +1123,7 @@ class Phase24_3_TrainingDataGeneration:
     async def _generate_validation_examples(self) -> List[TrainingExample]:
         """Generate validation examples including edge cases and common mistakes"""
         validation_examples = []
-        
+
         # Edge case examples
         edge_cases = [
             {
@@ -1140,7 +1139,7 @@ class Phase24_3_TrainingDataGeneration:
                 'complexity': 'advanced'
             }
         ]
-        
+
         for case in edge_cases:
             validation_examples.append(TrainingExample(
                 messages=[
@@ -1166,28 +1165,28 @@ class Phase24_3_TrainingDataGeneration:
                 source='validation_generation',
                 confidence=0.95
             ))
-        
+
         return validation_examples
 
     def _validate_training_data_quality(self, examples: List[TrainingExample]) -> Dict[str, float]:
         """Validate training data quality metrics"""
         if not examples:
             return {'avg_question_length': 0, 'avg_answer_length': 0, 'avg_confidence': 0}
-        
+
         question_lengths = []
         answer_lengths = []
         confidences = []
-        
+
         for example in examples:
             # Find user and assistant messages
             user_msg = next((msg for msg in example.messages if msg['role'] == 'user'), None)
             assistant_msg = next((msg for msg in example.messages if msg['role'] == 'assistant'), None)
-            
+
             if user_msg and assistant_msg:
                 question_lengths.append(len(user_msg['content'].split()))
                 answer_lengths.append(len(assistant_msg['content'].split()))
                 confidences.append(example.confidence)
-        
+
         return {
             'avg_question_length': sum(question_lengths) / len(question_lengths) if question_lengths else 0,
             'avg_answer_length': sum(answer_lengths) / len(answer_lengths) if answer_lengths else 0,
@@ -1199,33 +1198,33 @@ class Phase24_3_TrainingDataGeneration:
         compliant_count = 0
         total_count = len(examples)
         issues = []
-        
+
         for i, example in enumerate(examples):
             is_compliant = True
-            
+
             # Check required structure
             if not isinstance(example.messages, list):
                 is_compliant = False
                 issues.append(f"Example {i}: messages is not a list")
-            
+
             # Check message structure
             for j, msg in enumerate(example.messages):
                 if not isinstance(msg, dict):
                     is_compliant = False
                     issues.append(f"Example {i}, message {j}: not a dict")
                     continue
-                    
+
                 if 'role' not in msg or 'content' not in msg:
                     is_compliant = False
                     issues.append(f"Example {i}, message {j}: missing role or content")
-                    
+
                 if msg['role'] not in ['system', 'user', 'assistant']:
                     is_compliant = False
                     issues.append(f"Example {i}, message {j}: invalid role")
-            
+
             if is_compliant:
                 compliant_count += 1
-        
+
         return {
             'compliance_rate': compliant_count / total_count if total_count > 0 else 0,
             'compliant_examples': compliant_count,
@@ -1244,19 +1243,19 @@ class Phase24_3_TrainingDataGeneration:
     def export_training_data(self, examples: List[TrainingExample], metrics: ValidationMetrics) -> Dict[str, str]:
         """Export training data in OpenAI JSONL format"""
         logger.info("📁 Exporting training data to JSONL format")
-        
+
         # Create output files
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         training_file = self.results_dir / f"phase24_3_training_data_{timestamp}.jsonl"
         validation_file = self.results_dir / f"phase24_3_validation_data_{timestamp}.jsonl"
         summary_file = self.results_dir / f"phase24_3_summary_{timestamp}.json"
-        
+
         # Split into training/validation (90/10)
         total_examples = len(examples)
         split_index = int(total_examples * 0.9)
         training_examples = examples[:split_index]
         validation_examples = examples[split_index:]
-        
+
         # Export training data
         with open(training_file, 'w') as f:
             for example in training_examples:
@@ -1271,7 +1270,7 @@ class Phase24_3_TrainingDataGeneration:
                     }
                 }
                 f.write(json.dumps(training_record) + '\n')
-        
+
         # Export validation data
         with open(validation_file, 'w') as f:
             for example in validation_examples:
@@ -1286,7 +1285,7 @@ class Phase24_3_TrainingDataGeneration:
                     }
                 }
                 f.write(json.dumps(validation_record) + '\n')
-        
+
         # Export summary
         summary = {
             'generation_date': datetime.now().isoformat(),
@@ -1312,15 +1311,15 @@ class Phase24_3_TrainingDataGeneration:
                 'existing_infrastructure_leveraged': True
             }
         }
-        
+
         with open(summary_file, 'w') as f:
             json.dump(summary, f, indent=2)
-        
-        logger.info(f"📁 Training data exported:")
+
+        logger.info("📁 Training data exported:")
         logger.info(f"   Training: {training_file}")
         logger.info(f"   Validation: {validation_file}")
         logger.info(f"   Summary: {summary_file}")
-        
+
         return {
             'training_file': str(training_file),
             'validation_file': str(validation_file),
@@ -1330,43 +1329,43 @@ class Phase24_3_TrainingDataGeneration:
     async def run_phase_24_3_complete(self) -> Dict[str, Any]:
         """
         Run complete Phase 24.3: Training Data Generation
-        
+
         Executes all 4 tasks following AI Task Orchestrator methodology
         """
         logger.info("🚀 Starting Phase 24.3: Training Data Generation")
         start_time = datetime.now()
-        
+
         try:
             # Task 24.3.1: Generate Q&A pairs from context
             qa_examples = await self.execute_task_24_3_1()
             self.generated_examples.extend(qa_examples)
-            
+
             # Task 24.3.2: Create conversation examples
             conversation_examples = await self.execute_task_24_3_2()
             self.generated_examples.extend(conversation_examples)
-            
+
             # Task 24.3.3: Develop instruction datasets
             instruction_examples = await self.execute_task_24_3_3()
             self.generated_examples.extend(instruction_examples)
-            
+
             # Task 24.3.4: Build validation datasets and validate
             validation_examples, metrics = await self.execute_task_24_3_4()
             all_examples = self.generated_examples + validation_examples
-            
+
             # Export training data
             export_results = self.export_training_data(all_examples, metrics)
-            
+
             # Calculate completion summary
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds()
-            
+
             completion_summary = {
                 'status': 'completed',
                 'session_id': self.session_id,
                 'duration_seconds': duration,
                 'tasks_completed': {
                     '24.3.1': f"{len(qa_examples)} Q&A examples generated",
-                    '24.3.2': f"{len(conversation_examples)} conversation examples created", 
+                    '24.3.2': f"{len(conversation_examples)} conversation examples created",
                     '24.3.3': f"{len(instruction_examples)} instruction examples developed",
                     '24.3.4': f"{len(validation_examples)} validation examples + metrics"
                 },
@@ -1388,15 +1387,15 @@ class Phase24_3_TrainingDataGeneration:
                 'ai_task_orchestrator_compliance': True,
                 'ready_for_phase_24_4': True
             }
-            
+
             logger.info("✅ Phase 24.3 Training Data Generation completed successfully!")
             logger.info(f"📊 Generated {len(all_examples)} total training examples")
             logger.info(f"⏱️ Duration: {duration:.1f} seconds")
             logger.info(f"📈 Average confidence: {metrics.confidence_score:.2f}")
             logger.info(f"📋 Format compliance: {metrics.format_compliance:.1%}")
-            
+
             return completion_summary
-            
+
         except Exception as e:
             logger.error(f"❌ Phase 24.3 failed: {str(e)}")
             raise
@@ -1405,36 +1404,36 @@ class Phase24_3_TrainingDataGeneration:
 async def main():
     """Main execution for Phase 24.3"""
     generator = Phase24_3_TrainingDataGeneration()
-    
+
     try:
         results = await generator.run_phase_24_3_complete()
-        
-        print(f"\n🎉 Phase 24.3: Training Data Generation Complete!")
-        print(f"=" * 70)
+
+        print("\n🎉 Phase 24.3: Training Data Generation Complete!")
+        print("=" * 70)
         print(f"Session ID: {results['session_id']}")
         print(f"Duration: {results['duration_seconds']:.1f} seconds")
         print(f"Total Examples: {results['total_examples']}")
-        
-        print(f"\n📊 Task Completion:")
+
+        print("\n📊 Task Completion:")
         for task, result in results['tasks_completed'].items():
             print(f"  • {task}: {result}")
-        
-        print(f"\n📈 Quality Metrics:")
+
+        print("\n📈 Quality Metrics:")
         print(f"  • Average Confidence: {results['quality_metrics']['avg_confidence']:.2f}")
         print(f"  • Format Compliance: {results['quality_metrics']['format_compliance']:.1%}")
         print(f"  • Avg Question Length: {results['quality_metrics']['avg_question_length']:.1f} words")
         print(f"  • Avg Answer Length: {results['quality_metrics']['avg_answer_length']:.1f} words")
-        
-        print(f"\n📁 Files Generated:")
+
+        print("\n📁 Files Generated:")
         for file_type, path in results['files_generated'].items():
             print(f"  • {file_type}: {path}")
-        
-        print(f"\n🔧 Infrastructure Usage:")
+
+        print("\n🔧 Infrastructure Usage:")
         for component, usage in results['infrastructure_usage'].items():
             print(f"  • {component}: {usage}")
-        
-        print(f"\n✅ Ready for Phase 24.4: Model Fine-tuning Enhancement")
-        
+
+        print("\n✅ Ready for Phase 24.4: Model Fine-tuning Enhancement")
+
     except Exception as e:
         logger.error(f"Phase 24.3 execution failed: {e}")
         print(f"\n❌ Phase 24.3 failed: {e}")
@@ -1442,4 +1441,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

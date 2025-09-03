@@ -3,8 +3,10 @@ N8N MCP Pydantic Models
 Extracted from n8n_mcp_proxy.py to reduce complexity
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
+
 
 class NodeSearchRequest(BaseModel):
     query: str = Field(..., description="Search query for n8n nodes")
@@ -36,4 +38,4 @@ class NodeEssentialsResponse(BaseModel):
 class AIToolsResponse(BaseModel):
     ai_tools: List[Dict[str, Any]] = Field(..., description="Available AI-capable nodes")
     total_count: int = Field(..., description="Total AI tools available")
-    categories: List[str] = Field(..., description="AI tool categories") 
+    categories: List[str] = Field(..., description="AI tool categories")

@@ -7,11 +7,12 @@ Shows how to easily customize metrics and performance ranges for different scena
 """
 
 from configurable_control_loop_analyzer import (
-    ConfigurableControlLoopAnalyzer, 
-    MetricConfiguration, 
-    PerformanceRanges, 
-    MetricType
+    ConfigurableControlLoopAnalyzer,
+    MetricConfiguration,
+    MetricType,
+    PerformanceRanges,
 )
+
 
 def create_mse_focused_config():
     """Configuration focused primarily on MSE metrics"""
@@ -114,25 +115,25 @@ def create_research_config():
 
 def demo_configurations():
     """Demonstrate different configurations"""
-    
+
     configs = {
         "MSE-Focused (ML/Optimization)": create_mse_focused_config(),
-        "MAE-Focused (Robust Control)": create_mae_focused_config(), 
+        "MAE-Focused (Robust Control)": create_mae_focused_config(),
         "Process Control (Industrial)": create_process_control_config(),
         "Research (Comprehensive)": create_research_config()
     }
-    
+
     dataset_path = "/Users/reh3376/repos/control_loop01/control_loop/.datasets/data_beerfeed_03_02-05_09-2025.csv"
-    
+
     print("🔬 CONFIGURATION COMPARISON DEMO")
     print("=" * 80)
-    
+
     results_summary = {}
-    
+
     for config_name, config in configs.items():
         print(f"\n📊 Configuration: {config_name}")
         print("-" * 60)
-        
+
         # Show configuration details
         print("📋 Metrics Configuration:")
         for metric_config in config:
@@ -140,40 +141,40 @@ def demo_configurations():
             weight = metric_config.weight
             ranges = metric_config.ranges
             print(f"   {metric_name}: Weight={weight}, Range=({ranges.excellent_max}, {ranges.good_max}, {ranges.acceptable_max})")
-        
+
         # Run analysis
         analyzer = ConfigurableControlLoopAnalyzer(config)
         try:
             results = analyzer.analyze_control_loop(dataset_path)
-            
+
             # Store key results
             results_summary[config_name] = {
                 "overall_score": results.overall_score,
                 "classification": results.performance_classification["overall_classification"],
                 "metric_count": len(results.metric_results)
             }
-            
-            print(f"\n🎯 Results:")
+
+            print("\n🎯 Results:")
             print(f"   Overall Score: {results.overall_score:.1f}%")
             print(f"   Classification: {results.performance_classification['overall_classification'].upper()}")
-            
+
             # Show metric results
-            print(f"   Detailed Metrics:")
+            print("   Detailed Metrics:")
             for metric_name, result in results.metric_results.items():
                 if "error" not in result:
                     value = result["value"]
                     classification = result["classification"]
                     weight = result["weight"]
                     print(f"     {metric_name.upper()}: {value:.4f} ({classification}) [weight: {weight}]")
-            
+
         except Exception as e:
             print(f"   ❌ Analysis failed: {e}")
             results_summary[config_name] = {"error": str(e)}
-    
+
     # Comparison summary
-    print(f"\n📊 CONFIGURATION COMPARISON SUMMARY")
+    print("\n📊 CONFIGURATION COMPARISON SUMMARY")
     print("=" * 80)
-    
+
     for config_name, result in results_summary.items():
         if "error" not in result:
             score = result["overall_score"]
@@ -182,15 +183,15 @@ def demo_configurations():
             print(f"{config_name:30} | Score: {score:5.1f}% | Class: {classification:10} | Metrics: {metric_count}")
         else:
             print(f"{config_name:30} | ERROR: {result['error']}")
-    
-    print(f"\n💡 Key Insights:")
-    print(f"   • Different configurations yield different performance assessments")
-    print(f"   • Metric weights and ranges significantly impact overall scoring")
-    print(f"   • Choose configuration based on your specific control objectives")
-    print(f"   • MSE-focused configs are ideal for gradient-based optimization")
-    print(f"   • MAE-focused configs are robust to outliers and noise")
-    print(f"   • Process control configs emphasize stability and response")
-    print(f"   • Research configs provide comprehensive analysis")
+
+    print("\n💡 Key Insights:")
+    print("   • Different configurations yield different performance assessments")
+    print("   • Metric weights and ranges significantly impact overall scoring")
+    print("   • Choose configuration based on your specific control objectives")
+    print("   • MSE-focused configs are ideal for gradient-based optimization")
+    print("   • MAE-focused configs are robust to outliers and noise")
+    print("   • Process control configs emphasize stability and response")
+    print("   • Research configs provide comprehensive analysis")
 
 if __name__ == "__main__":
-    demo_configurations() 
+    demo_configurations()

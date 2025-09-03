@@ -17,9 +17,6 @@ from .models import (
     BatchConversionRequest,
     ConversionJobStatus,
     ConversionOptions,
-    ConversionProgress,
-    ConversionStatus,
-    L5XOutput,
     ValidationResult,
 )
 from .service import PLCConversionAdapter
@@ -82,7 +79,7 @@ async def convert_acd_to_l5x(
 ) -> ConversionResponse:
     """
     Convert ACD file to L5X format
-    
+
     This endpoint accepts an ACD file upload and converts it to L5X format
     with comprehensive validation and optional caching.
     """
@@ -92,13 +89,13 @@ async def convert_acd_to_l5x(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File must be an ACD file"
         )
-    
+
     # Read file content
     content = await file.read()
-    
+
     # Generate content hash for caching
     content_hash = hashlib.sha256(content).hexdigest()
-    
+
     # Check cache first
     cached_l5x = await cache_service.get_cached_conversion(content_hash)
     if cached_l5x:
@@ -109,7 +106,7 @@ async def convert_acd_to_l5x(
             warnings=[],
             conversion_time_ms=0  # No conversion time for cached results
         )
-    
+
     # Create conversion options
     options = ConversionOptions(
         preserve_comments=preserve_comments,
@@ -118,11 +115,11 @@ async def convert_acd_to_l5x(
         target_version=target_version,
         optimization_level=optimization_level
     )
-    
+
     try:
         # Perform conversion
         result = await conversion_service.convert_file(content, options)
-        
+
         # Cache the result
         await cache_service.cache_conversion(
             content_hash,
@@ -133,14 +130,14 @@ async def convert_acd_to_l5x(
                 "conversion_time": result.conversion_time_ms
             }
         )
-        
+
         return ConversionResponse(
             l5x_content=result.content,
             validation_score=result.validation_result.is_valid and 1.0 or 0.0,
             warnings=result.validation_result.warnings,
             conversion_time_ms=result.conversion_time_ms
         )
-        
+
     except Exception as e:
         logger.error(f"Conversion failed: {str(e)}")
         raise HTTPException(
@@ -158,7 +155,7 @@ async def convert_acd_to_l5x(
 async def convert_batch(request: BatchConversionRequest) -> ConversionJobStatus:
     """
     Batch conversion endpoint
-    
+
     Converts multiple ACD files with progress tracking.
     Returns a job ID for monitoring progress.
     """
@@ -180,7 +177,7 @@ async def validate_acd(
 ) -> ValidationResult:
     """
     Validate ACD file format
-    
+
     Checks if the ACD file is valid and can be converted.
     """
     if not file.filename.lower().endswith('.acd'):
@@ -188,13 +185,13 @@ async def validate_acd(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File must be an ACD file"
         )
-    
+
     content = await file.read()
-    
+
     try:
         result = await conversion_service.validate_acd_file(content)
         return result
-        
+
     except Exception as e:
         logger.error(f"Validation failed: {str(e)}")
         raise HTTPException(
@@ -242,7 +239,7 @@ async def clear_cache() -> dict:
 async def download_l5x(conversion_id: str) -> Response:
     """
     Download converted L5X file
-    
+
     Returns the L5X file as an XML download.
     """
     # TODO: Implement file storage and retrieval

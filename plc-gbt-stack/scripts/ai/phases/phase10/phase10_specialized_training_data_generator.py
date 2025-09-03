@@ -14,16 +14,17 @@ Author: PLC-GPT Development Team
 Date: January 17, 2025
 """
 
-import pandas as pd
-import numpy as np
+import asyncio
 import json
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple
+
+import numpy as np
 import openai
-import asyncio
-from dataclasses import dataclass
+import pandas as pd
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -45,14 +46,14 @@ class SpecializedTrainingDataGenerator:
     """
     Generate specialized control theory Q&A pairs from distillation dataset
     """
-    
+
     def __init__(self, dataset_path: str):
         """Initialize the generator with dataset path"""
         self.dataset_path = Path(dataset_path)
         self.df = None
         self.openai_client = None
         self.session_id = f"phase10_training_{int(datetime.now().timestamp())}"
-        
+
         # Training data categories with specialized focus
         self.training_categories = {
             'temperature_control': {
@@ -86,10 +87,10 @@ class SpecializedTrainingDataGenerator:
                 'complexity_levels': ['basic', 'intermediate', 'advanced']
             }
         }
-        
+
         # Initialize OpenAI client
         self.setup_openai_client()
-    
+
     def setup_openai_client(self):
         """Setup OpenAI client for Q&A generation"""
         try:
@@ -100,54 +101,54 @@ class SpecializedTrainingDataGenerator:
         except Exception as e:
             logger.error(f"Failed to initialize OpenAI client: {str(e)}")
             self.openai_client = None
-    
+
     def load_dataset(self) -> bool:
         """Load the distillation control dataset"""
         try:
             logger.info(f"Loading distillation control dataset from: {self.dataset_path}")
-            
+
             # Load dataset
             self.df = pd.read_csv(self.dataset_path, dtype='object')
-            
+
             # Clean numeric columns
             numeric_columns = ['PV01', 'PV02', 'PV03', 'CV01', 'CV01_SP', 'DV01', 'DV02', 'DV03']
             for col in numeric_columns:
                 if col in self.df.columns:
                     self.df[col] = pd.to_numeric(self.df[col], errors='coerce')
-            
+
             # Parse timestamps
             if 'Timestamp' in self.df.columns:
                 self.df['Timestamp'] = pd.to_datetime(self.df['Timestamp'], format='%m/%d/%y:%H:%M:%S:%f', errors='coerce')
-            
+
             # Remove incomplete records
             self.df = self.df.dropna()
-            
+
             logger.info(f"Dataset loaded successfully: {len(self.df):,} records")
             return True
-            
+
         except Exception as e:
             logger.error(f"Error loading dataset: {str(e)}")
             return False
-    
+
     def extract_control_scenarios(self) -> List[ControlScenario]:
         """Extract interesting control scenarios from the dataset"""
         logger.info("Extracting control scenarios from dataset...")
-        
+
         scenarios = []
-        
+
         # 1. Setpoint tracking scenarios
         sp_changes = self.df['CV01_SP'].diff().abs() > 0.1
         change_indices = self.df.index[sp_changes].tolist()
-        
+
         for i, idx in enumerate(change_indices[:20]):  # First 20 setpoint changes
             start_idx = max(0, idx - 100)
             end_idx = min(len(self.df), idx + 200)
-            
+
             scenario_data = self.df.iloc[start_idx:end_idx]
-            
+
             scenario = ControlScenario(
                 scenario_type='setpoint_tracking',
-                time_range=(scenario_data['Timestamp'].iloc[0].isoformat(), 
+                time_range=(scenario_data['Timestamp'].iloc[0].isoformat(),
                           scenario_data['Timestamp'].iloc[-1].isoformat()),
                 pv_values=scenario_data['PV01'].tolist(),
                 cv_values=scenario_data['CV01'].tolist(),
@@ -165,21 +166,21 @@ class SpecializedTrainingDataGenerator:
                 description=f"Setpoint tracking scenario {i+1}: temperature setpoint change"
             )
             scenarios.append(scenario)
-        
+
         # 2. Disturbance rejection scenarios
         for dv_col in ['DV01', 'DV02', 'DV03']:
             dv_changes = self.df[dv_col].diff().abs() > 2 * self.df[dv_col].std()
             disturbance_indices = self.df.index[dv_changes].tolist()
-            
+
             for i, idx in enumerate(disturbance_indices[:10]):  # First 10 disturbances per variable
                 start_idx = max(0, idx - 50)
                 end_idx = min(len(self.df), idx + 150)
-                
+
                 scenario_data = self.df.iloc[start_idx:end_idx]
-                
+
                 scenario = ControlScenario(
                     scenario_type='disturbance_rejection',
-                    time_range=(scenario_data['Timestamp'].iloc[0].isoformat(), 
+                    time_range=(scenario_data['Timestamp'].iloc[0].isoformat(),
                               scenario_data['Timestamp'].iloc[-1].isoformat()),
                     pv_values=scenario_data['PV01'].tolist(),
                     cv_values=scenario_data['CV01'].tolist(),
@@ -197,20 +198,20 @@ class SpecializedTrainingDataGenerator:
                     description=f"Disturbance rejection scenario: {dv_col} disturbance"
                 )
                 scenarios.append(scenario)
-        
+
         # 3. Performance comparison scenarios
         error = self.df['PV01'] - self.df['CV01_SP']
         error_rolling = error.rolling(window=500).apply(lambda x: np.mean(np.abs(x)))
-        
+
         # Best performance period
         best_idx = error_rolling.idxmin()
         best_start = max(0, best_idx - 250)
         best_end = min(len(self.df), best_idx + 250)
         best_data = self.df.iloc[best_start:best_end]
-        
+
         best_scenario = ControlScenario(
             scenario_type='excellent_control',
-            time_range=(best_data['Timestamp'].iloc[0].isoformat(), 
+            time_range=(best_data['Timestamp'].iloc[0].isoformat(),
                       best_data['Timestamp'].iloc[-1].isoformat()),
             pv_values=best_data['PV01'].tolist(),
             cv_values=best_data['CV01'].tolist(),
@@ -228,16 +229,16 @@ class SpecializedTrainingDataGenerator:
             description="Excellent control performance period"
         )
         scenarios.append(best_scenario)
-        
+
         # Worst performance period
         worst_idx = error_rolling.idxmax()
         worst_start = max(0, worst_idx - 250)
         worst_end = min(len(self.df), worst_idx + 250)
         worst_data = self.df.iloc[worst_start:worst_end]
-        
+
         worst_scenario = ControlScenario(
             scenario_type='poor_control',
-            time_range=(worst_data['Timestamp'].iloc[0].isoformat(), 
+            time_range=(worst_data['Timestamp'].iloc[0].isoformat(),
                       worst_data['Timestamp'].iloc[-1].isoformat()),
             pv_values=worst_data['PV01'].tolist(),
             cv_values=worst_data['CV01'].tolist(),
@@ -255,16 +256,16 @@ class SpecializedTrainingDataGenerator:
             description="Poor control performance period requiring improvement"
         )
         scenarios.append(worst_scenario)
-        
+
         logger.info(f"Extracted {len(scenarios)} control scenarios")
         return scenarios
-    
+
     async def generate_temperature_control_qa(self, scenarios: List[ControlScenario]) -> List[Dict]:
         """Generate Q&A pairs for temperature control"""
         logger.info("Generating temperature control Q&A pairs...")
-        
+
         qa_pairs = []
-        
+
         # Template questions for different complexity levels
         templates = {
             'basic': [
@@ -286,7 +287,7 @@ class SpecializedTrainingDataGenerator:
                 "Evaluate the economic impact of temperature control performance."
             ]
         }
-        
+
         for scenario in scenarios[:10]:  # Use first 10 scenarios
             for level, questions in templates.items():
                 for question in questions:
@@ -298,7 +299,7 @@ class SpecializedTrainingDataGenerator:
                     Controller Output: {min(scenario.cv_values):.1f}% to {max(scenario.cv_values):.1f}%
                     Performance: MAE = {scenario.performance_metrics['mae']:.2f}°F
                     """
-                    
+
                     # Generate answer using OpenAI
                     if self.openai_client:
                         try:
@@ -313,33 +314,33 @@ class SpecializedTrainingDataGenerator:
                             })
                         except Exception as e:
                             logger.error(f"Error generating response: {str(e)}")
-        
+
         logger.info(f"Generated {len(qa_pairs)} temperature control Q&A pairs")
         return qa_pairs
-    
+
     async def generate_openai_response(self, question: str, context: str, complexity: str) -> str:
         """Generate response using OpenAI API"""
-        
+
         system_prompt = f"""
         You are an expert in industrial control theory specializing in distillation column control.
         Generate a comprehensive, technically accurate answer for a {complexity} level question.
-        
+
         For basic questions: Focus on fundamental concepts and definitions.
         For intermediate questions: Include analysis, calculations, and comparisons.
         For advanced questions: Provide detailed technical analysis, design recommendations, and economic considerations.
-        
+
         Always include specific numerical values from the provided data when relevant.
         Use proper control theory terminology and cite relevant industry standards when applicable.
         """
-        
+
         user_prompt = f"""
         Context: {context}
-        
+
         Question: {question}
-        
+
         Please provide a comprehensive answer that demonstrates expert knowledge of industrial control theory.
         """
-        
+
         try:
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
@@ -350,52 +351,52 @@ class SpecializedTrainingDataGenerator:
                 max_tokens=1000,
                 temperature=0.3
             )
-            
+
             return response.choices[0].message.content
-            
+
         except Exception as e:
             logger.error(f"OpenAI API error: {str(e)}")
             return f"Error generating response: {str(e)}"
-    
+
     async def generate_all_categories(self, scenarios: List[ControlScenario]) -> Dict[str, List[Dict]]:
         """Generate Q&A pairs for all categories"""
         logger.info("Generating Q&A pairs for all categories...")
-        
+
         all_qa_pairs = {}
-        
+
         # Generate for each category
         for category, config in self.training_categories.items():
             logger.info(f"Generating {category} Q&A pairs...")
-            
+
             if category == 'temperature_control':
                 qa_pairs = await self.generate_temperature_control_qa(scenarios)
             else:
                 # For other categories, use scenario-based generation
                 qa_pairs = await self.generate_category_qa(category, scenarios, config['target_count'])
-            
+
             all_qa_pairs[category] = qa_pairs
-        
+
         return all_qa_pairs
-    
+
     async def generate_category_qa(self, category: str, scenarios: List[ControlScenario], target_count: int) -> List[Dict]:
         """Generate Q&A pairs for a specific category"""
         # Implementation for other categories would go here
         # For now, return placeholder
         return []
-    
+
     def export_training_data(self, qa_pairs: Dict[str, List[Dict]]) -> str:
         """Export training data in OpenAI fine-tuning format"""
         logger.info("Exporting training data...")
-        
+
         # Create results directory
         results_dir = Path('results/phase10')
         results_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Flatten all Q&A pairs
         all_pairs = []
-        for category, pairs in qa_pairs.items():
+        for _category, pairs in qa_pairs.items():
             all_pairs.extend(pairs)
-        
+
         # Create training data in OpenAI format
         training_data = []
         for pair in all_pairs:
@@ -410,13 +411,13 @@ class SpecializedTrainingDataGenerator:
                     "scenario_type": pair.get('scenario_type', 'general')
                 }
             })
-        
+
         # Export to JSONL
         output_file = results_dir / f"phase10_specialized_training_data_{self.session_id}.jsonl"
         with open(output_file, 'w') as f:
             for item in training_data:
                 f.write(json.dumps(item) + '\n')
-        
+
         # Export summary
         summary_file = results_dir / f"phase10_training_summary_{self.session_id}.json"
         summary = {
@@ -427,35 +428,35 @@ class SpecializedTrainingDataGenerator:
             'training_file': str(output_file),
             'dataset_source': str(self.dataset_path)
         }
-        
+
         with open(summary_file, 'w') as f:
             json.dump(summary, f, indent=2)
-        
+
         logger.info(f"Training data exported to: {output_file}")
         logger.info(f"Summary exported to: {summary_file}")
-        
+
         return str(output_file)
-    
+
     async def run_training_data_generation(self) -> Dict[str, Any]:
         """Run complete training data generation process"""
         logger.info("🚀 Starting specialized training data generation...")
-        
+
         # Step 1: Load dataset
         if not self.load_dataset():
             raise Exception("Failed to load dataset")
-        
+
         # Step 2: Extract control scenarios
         scenarios = self.extract_control_scenarios()
-        
+
         # Step 3: Generate Q&A pairs for all categories
         qa_pairs = await self.generate_all_categories(scenarios)
-        
+
         # Step 4: Export training data
         output_file = self.export_training_data(qa_pairs)
-        
+
         # Generate summary
         total_pairs = sum(len(pairs) for pairs in qa_pairs.values())
-        
+
         summary = {
             'status': 'completed',
             'session_id': self.session_id,
@@ -465,28 +466,28 @@ class SpecializedTrainingDataGenerator:
             'output_file': output_file,
             'phase10_progress': f"{total_pairs:,} Q&A pairs generated"
         }
-        
+
         logger.info("✅ Specialized training data generation completed!")
         return summary
 
 def main():
     """Main execution function"""
     dataset_path = "/Users/reh3376/repos/plc-gbt/docs/context/dataset_still_steam_till_03_02.csv"
-    
+
     generator = SpecializedTrainingDataGenerator(dataset_path)
-    
+
     # Run async generation
     results = asyncio.run(generator.run_training_data_generation())
-    
-    print(f"\n🎉 Training Data Generation Complete!")
+
+    print("\n🎉 Training Data Generation Complete!")
     print(f"Session ID: {results['session_id']}")
     print(f"Total Scenarios: {results['total_scenarios']}")
     print(f"Total Q&A Pairs: {results['total_qa_pairs']:,}")
     print(f"Output File: {results['output_file']}")
-    
-    print(f"\n📊 Category Breakdown:")
+
+    print("\n📊 Category Breakdown:")
     for category, count in results['categories'].items():
         print(f"  • {category}: {count} pairs")
 
 if __name__ == "__main__":
-    main() 
+    main()

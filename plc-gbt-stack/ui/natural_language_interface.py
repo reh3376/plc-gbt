@@ -15,27 +15,24 @@ import asyncio
 import json
 import logging
 import uuid
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-import traceback
-
-# FastAPI and web framework imports
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, Depends
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
+from typing import Any, Dict, List, Optional
 
 # OpenAI integration
-import openai
-from openai import AsyncOpenAI
+import uvicorn
+
+# FastAPI and web framework imports
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 # Local imports
-from mcp.plc_gbt_mcp_server import PLCGBTMCPServer, MCPServerManager
+from mcp.plc_gbt_mcp_server import MCPServerManager, PLCGBTMCPServer
+from openai import AsyncOpenAI
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -125,18 +122,18 @@ class UIResponse:
 
 class OpenAILLMManager:
     """Manages OpenAI fine-tuned LLM integration"""
-    
+
     def __init__(self, api_key: str, model: str = FINE_TUNED_MODEL):
         self.client = AsyncOpenAI(api_key=api_key)
         self.model = model
         self.system_prompt = self._get_system_prompt()
-        
+
         logger.info(f"Initialized OpenAI LLM Manager with model: {model}")
-    
+
     def _get_system_prompt(self) -> str:
         """Get the system prompt for the industrial automation LLM"""
-        return """You are PLC-GBT, an expert AI assistant for industrial automation and control systems. 
-You have access to a comprehensive set of tools for managing control loops, creating workflows, 
+        return """You are PLC-GBT, an expert AI assistant for industrial automation and control systems.
+You have access to a comprehensive set of tools for managing control loops, creating workflows,
 managing memory systems, integrating with PLCs, and monitoring industrial systems.
 
 Your capabilities include:
@@ -154,22 +151,22 @@ Key principles:
 - Confirm potentially dangerous operations before execution
 - Maintain awareness of industrial control theory and best practices
 
-When users ask for help with industrial automation tasks, analyze their request and use the 
+When users ask for help with industrial automation tasks, analyze their request and use the
 available tools to provide comprehensive assistance. Always explain what you're doing and why."""
 
-    async def generate_response(self, messages: List[ConversationMessage], 
+    async def generate_response(self, messages: List[ConversationMessage],
                               available_tools: List[Dict[str, Any]]) -> LLMResponse:
         """Generate response from OpenAI LLM with tool calling capability"""
         try:
             # Convert messages to OpenAI format
             openai_messages = [{"role": "system", "content": self.system_prompt}]
-            
+
             for msg in messages[-MAX_CONVERSATION_HISTORY:]:  # Limit context window
                 openai_messages.append({
                     "role": msg.role.value,
                     "content": msg.content
                 })
-                
+
                 # Add tool results if present
                 if msg.tool_results:
                     for result in msg.tool_results:
@@ -178,7 +175,7 @@ available tools to provide comprehensive assistance. Always explain what you're 
                             "content": json.dumps(result),
                             "tool_call_id": result.get("tool_call_id", "unknown")
                         })
-            
+
             # Make API call with tools
             response = await self.client.chat.completions.create(
                 model=self.model,
@@ -188,9 +185,9 @@ available tools to provide comprehensive assistance. Always explain what you're 
                 temperature=0.3,  # Lower temperature for more consistent industrial advice
                 max_tokens=1500
             )
-            
+
             message = response.choices[0].message
-            
+
             return LLMResponse(
                 content=message.content or "",
                 tool_calls=message.tool_calls,
@@ -198,15 +195,15 @@ available tools to provide comprehensive assistance. Always explain what you're 
                 model=response.model,
                 finish_reason=response.choices[0].finish_reason
             )
-            
+
         except Exception as e:
             logger.error(f"Error generating LLM response: {e}")
             raise
-    
+
     def format_tools_for_openai(self, mcp_tools: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Convert MCP tools to OpenAI function calling format"""
         openai_tools = []
-        
+
         for tool_name, tool_def in mcp_tools.items():
             openai_tool = {
                 "type": "function",
@@ -221,7 +218,7 @@ available tools to provide comprehensive assistance. Always explain what you're 
                 }
             }
             openai_tools.append(openai_tool)
-        
+
         return openai_tools
 
 # =============================================================================
@@ -230,28 +227,28 @@ available tools to provide comprehensive assistance. Always explain what you're 
 
 class ConversationManager:
     """Manages conversation sessions and context"""
-    
+
     def __init__(self):
         self.sessions: Dict[str, ConversationSession] = {}
         self.llm_manager: Optional[OpenAILLMManager] = None
         self.mcp_server: Optional[PLCGBTMCPServer] = None
-        
+
         logger.info("Initialized Conversation Manager")
-    
+
     def set_llm_manager(self, llm_manager: OpenAILLMManager):
         """Set the LLM manager"""
         self.llm_manager = llm_manager
         logger.info("LLM manager set for conversation manager")
-    
+
     def set_mcp_server(self, mcp_server: PLCGBTMCPServer):
         """Set the MCP server"""
         self.mcp_server = mcp_server
         logger.info("MCP server set for conversation manager")
-    
+
     def create_session(self, user_id: str) -> str:
         """Create a new conversation session"""
         session_id = str(uuid.uuid4())
-        
+
         session = ConversationSession(
             session_id=session_id,
             user_id=user_id,
@@ -260,23 +257,23 @@ class ConversationManager:
             created_at=datetime.now(timezone.utc),
             last_activity=datetime.now(timezone.utc)
         )
-        
+
         self.sessions[session_id] = session
         logger.info(f"Created new conversation session: {session_id}")
-        
+
         return session_id
-    
+
     def get_session(self, session_id: str) -> Optional[ConversationSession]:
         """Get a conversation session"""
         return self.sessions.get(session_id)
-    
-    def add_message(self, session_id: str, role: ConversationRole, 
+
+    def add_message(self, session_id: str, role: ConversationRole,
                    content: str, metadata: Dict[str, Any] = None) -> str:
         """Add a message to conversation session"""
         session = self.get_session(session_id)
         if not session:
             raise ValueError(f"Session {session_id} not found")
-        
+
         message_id = str(uuid.uuid4())
         message = ConversationMessage(
             id=message_id,
@@ -285,52 +282,52 @@ class ConversationManager:
             timestamp=datetime.now(timezone.utc),
             metadata=metadata or {}
         )
-        
+
         session.messages.append(message)
         session.last_activity = datetime.now(timezone.utc)
-        
+
         return message_id
-    
+
     async def process_user_message(self, session_id: str, user_message: str) -> UIResponse:
         """Process user message and generate response"""
         try:
             session = self.get_session(session_id)
             if not session:
                 raise ValueError(f"Session {session_id} not found")
-            
+
             # Add user message
             self.add_message(session_id, ConversationRole.USER, user_message)
-            
+
             # Get available tools from MCP server
             available_tools = []
             if self.mcp_server:
                 available_tools = self.llm_manager.format_tools_for_openai(self.mcp_server.tools)
-            
+
             # Generate LLM response
             llm_response = await self.llm_manager.generate_response(
                 session.messages, available_tools
             )
-            
+
             # Process tool calls if present
             tool_results = []
             if llm_response.tool_calls and self.mcp_server:
                 tool_results = await self._execute_tool_calls(llm_response.tool_calls)
-            
+
             # Add assistant message
             assistant_message_id = self.add_message(
-                session_id, 
-                ConversationRole.ASSISTANT, 
+                session_id,
+                ConversationRole.ASSISTANT,
                 llm_response.content
             )
-            
+
             # Update message with tool information
             assistant_message = next(m for m in session.messages if m.id == assistant_message_id)
             assistant_message.tool_calls = llm_response.tool_calls
             assistant_message.tool_results = tool_results
-            
+
             # Generate suggestions
             suggestions = self._generate_suggestions(session, llm_response)
-            
+
             return UIResponse(
                 message=llm_response.content,
                 suggestions=suggestions,
@@ -339,7 +336,7 @@ class ConversationManager:
                 session_id=session_id,
                 timestamp=datetime.now(timezone.utc)
             )
-            
+
         except Exception as e:
             logger.error(f"Error processing user message: {e}")
             return UIResponse(
@@ -350,26 +347,26 @@ class ConversationManager:
                 session_id=session_id,
                 timestamp=datetime.now(timezone.utc)
             )
-    
+
     async def _execute_tool_calls(self, tool_calls: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Execute tool calls via MCP server"""
         results = []
-        
+
         for tool_call in tool_calls:
             try:
                 function_name = tool_call["function"]["name"]
                 function_args = json.loads(tool_call["function"]["arguments"])
-                
+
                 # Execute via MCP server
                 result = await self.mcp_server.call_tool(function_name, function_args)
-                
+
                 results.append({
                     "tool_call_id": tool_call["id"],
                     "function_name": function_name,
                     "result": result.content[0].text if result.content else "No result",
                     "success": not result.isError
                 })
-                
+
             except Exception as e:
                 logger.error(f"Error executing tool call {tool_call}: {e}")
                 results.append({
@@ -378,14 +375,14 @@ class ConversationManager:
                     "result": f"Error: {str(e)}",
                     "success": False
                 })
-        
+
         return results
-    
-    def _generate_suggestions(self, session: ConversationSession, 
+
+    def _generate_suggestions(self, session: ConversationSession,
                             llm_response: LLMResponse) -> List[str]:
         """Generate contextual suggestions for next actions"""
         suggestions = []
-        
+
         # Base suggestions
         if llm_response.tool_calls:
             suggestions.extend([
@@ -399,24 +396,24 @@ class ConversationManager:
                 "Show me system status",
                 "Create a workflow for data logging"
             ])
-        
+
         # Context-based suggestions
         recent_intents = session.intent_history[-3:] if session.intent_history else []
-        
+
         if IntentType.CONTROL_LOOP_MANAGEMENT in recent_intents:
             suggestions.extend([
                 "Optimize the control loop",
                 "Check loop performance",
                 "Connect to PLC"
             ])
-        
+
         if IntentType.WORKFLOW_CREATION in recent_intents:
             suggestions.extend([
                 "Analyze the workflow",
                 "Deploy the workflow",
                 "Create another workflow"
             ])
-        
+
         # Limit suggestions
         return suggestions[:5]
 
@@ -426,22 +423,22 @@ class ConversationManager:
 
 class NaturalLanguageUIApp:
     """Main FastAPI application for natural language interface"""
-    
+
     def __init__(self, openai_api_key: str):
         self.app = FastAPI(
             title="PLC-GBT Natural Language Interface",
             description="Conversational interface for industrial automation control",
             version=UI_VERSION
         )
-        
+
         # Initialize components
         self.conversation_manager = ConversationManager()
         self.llm_manager = OpenAILLMManager(openai_api_key)
         self.mcp_manager = MCPServerManager()
-        
+
         # Set up templates and static files
         self.templates = Jinja2Templates(directory="templates")
-        
+
         # Configure CORS
         self.app.add_middleware(
             CORSMiddleware,
@@ -450,34 +447,34 @@ class NaturalLanguageUIApp:
             allow_methods=["*"],
             allow_headers=["*"],
         )
-        
+
         # Active WebSocket connections
         self.active_connections: Dict[str, WebSocket] = {}
-        
+
         # Register routes
         self._register_routes()
-        
+
         logger.info("Initialized Natural Language UI App")
-    
+
     async def startup(self):
         """Start up the application"""
         # Start MCP server
         mcp_server = await self.mcp_manager.start_server()
-        
+
         # Set managers
         self.conversation_manager.set_llm_manager(self.llm_manager)
         self.conversation_manager.set_mcp_server(mcp_server)
-        
+
         logger.info("Natural Language UI App started successfully")
-    
+
     async def shutdown(self):
         """Shut down the application"""
         await self.mcp_manager.stop_server()
         logger.info("Natural Language UI App shut down")
-    
+
     def _register_routes(self):
         """Register all FastAPI routes"""
-        
+
         @self.app.get("/", response_class=HTMLResponse)
         async def home(request: Request):
             """Serve the main chat interface"""
@@ -485,20 +482,20 @@ class NaturalLanguageUIApp:
                 "chat_interface.html",
                 {"request": request, "title": "PLC-GBT Industrial Automation Assistant"}
             )
-        
+
         @self.app.post("/api/sessions")
         async def create_session(user_id: str = "default_user"):
             """Create a new conversation session"""
             session_id = self.conversation_manager.create_session(user_id)
             return {"session_id": session_id, "status": "created"}
-        
+
         @self.app.get("/api/sessions/{session_id}")
         async def get_session(session_id: str):
             """Get conversation session details"""
             session = self.conversation_manager.get_session(session_id)
             if not session:
                 raise HTTPException(status_code=404, detail="Session not found")
-            
+
             return {
                 "session_id": session.session_id,
                 "user_id": session.user_id,
@@ -507,34 +504,34 @@ class NaturalLanguageUIApp:
                 "message_count": len(session.messages),
                 "active_task": session.active_task
             }
-        
+
         @self.app.post("/api/sessions/{session_id}/messages")
         async def send_message(session_id: str, message: Dict[str, str]):
             """Send a message and get response"""
             user_message = message.get("message", "")
             if not user_message:
                 raise HTTPException(status_code=400, detail="Message content required")
-            
+
             response = await self.conversation_manager.process_user_message(
                 session_id, user_message
             )
-            
+
             return {
                 "response": response.message,
                 "suggestions": response.suggestions,
                 "tool_results": response.tool_results,
                 "timestamp": response.timestamp.isoformat()
             }
-        
+
         @self.app.get("/api/sessions/{session_id}/history")
         async def get_conversation_history(session_id: str, limit: int = 50):
             """Get conversation history"""
             session = self.conversation_manager.get_session(session_id)
             if not session:
                 raise HTTPException(status_code=404, detail="Session not found")
-            
+
             messages = session.messages[-limit:] if limit else session.messages
-            
+
             return {
                 "session_id": session_id,
                 "messages": [
@@ -549,25 +546,25 @@ class NaturalLanguageUIApp:
                     for msg in messages
                 ]
             }
-        
+
         @self.app.websocket("/ws/{session_id}")
         async def websocket_endpoint(websocket: WebSocket, session_id: str):
             """WebSocket endpoint for real-time chat"""
             await websocket.accept()
             self.active_connections[session_id] = websocket
-            
+
             try:
                 while True:
                     # Receive message from client
                     data = await websocket.receive_json()
                     user_message = data.get("message", "")
-                    
+
                     if user_message:
                         # Process message
                         response = await self.conversation_manager.process_user_message(
                             session_id, user_message
                         )
-                        
+
                         # Send response back
                         await websocket.send_json({
                             "type": "response",
@@ -576,7 +573,7 @@ class NaturalLanguageUIApp:
                             "tool_results": response.tool_results,
                             "timestamp": response.timestamp.isoformat()
                         })
-                        
+
             except WebSocketDisconnect:
                 del self.active_connections[session_id]
                 logger.info(f"WebSocket disconnected for session: {session_id}")
@@ -586,12 +583,12 @@ class NaturalLanguageUIApp:
                     "type": "error",
                     "message": f"Error processing message: {str(e)}"
                 })
-        
+
         @self.app.get("/api/system/status")
         async def system_status():
             """Get system status"""
             mcp_info = self.mcp_manager.get_server_info()
-            
+
             return {
                 "ui_version": UI_VERSION,
                 "llm_model": self.llm_manager.model,
@@ -600,15 +597,15 @@ class NaturalLanguageUIApp:
                 "active_connections": len(self.active_connections),
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
-        
+
         @self.app.get("/api/capabilities")
         async def get_capabilities():
             """Get available capabilities and tools"""
             if not self.mcp_manager.server_instance:
                 return {"tools": [], "prompts": [], "resources": []}
-            
+
             server = self.mcp_manager.server_instance
-            
+
             return {
                 "tools": [
                     {
@@ -657,7 +654,7 @@ CHAT_INTERFACE_TEMPLATE = """
             margin: 0;
             padding: 0;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -666,7 +663,7 @@ CHAT_INTERFACE_TEMPLATE = """
             justify-content: center;
             align-items: center;
         }
-        
+
         .chat-container {
             width: 90%;
             max-width: 1200px;
@@ -678,91 +675,91 @@ CHAT_INTERFACE_TEMPLATE = """
             flex-direction: column;
             overflow: hidden;
         }
-        
+
         .chat-header {
             background: linear-gradient(90deg, #1e3c72, #2a5298);
             color: white;
             padding: 20px;
             text-align: center;
         }
-        
+
         .chat-header h1 {
             margin: 0;
             font-size: 24px;
         }
-        
+
         .chat-header p {
             margin: 5px 0 0 0;
             opacity: 0.9;
             font-size: 14px;
         }
-        
+
         .chat-messages {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
             background: #f8f9fa;
         }
-        
+
         .message {
             margin-bottom: 15px;
             max-width: 80%;
         }
-        
+
         .message.user {
             margin-left: auto;
         }
-        
+
         .message.assistant {
             margin-right: auto;
         }
-        
+
         .message-content {
             padding: 12px 16px;
             border-radius: 18px;
             word-wrap: break-word;
         }
-        
+
         .message.user .message-content {
             background: #007bff;
             color: white;
         }
-        
+
         .message.assistant .message-content {
             background: #e9ecef;
             color: #333;
             border: 1px solid #dee2e6;
         }
-        
+
         .message-timestamp {
             font-size: 11px;
             opacity: 0.6;
             margin-top: 4px;
             text-align: right;
         }
-        
+
         .message.assistant .message-timestamp {
             text-align: left;
         }
-        
+
         .suggestions {
             padding: 10px 20px;
             background: #fff;
             border-top: 1px solid #dee2e6;
         }
-        
+
         .suggestions h4 {
             margin: 0 0 8px 0;
             font-size: 14px;
             color: #666;
         }
-        
+
         .suggestion-chips {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
-        
+
         .suggestion-chip {
             padding: 6px 12px;
             background: #e9ecef;
@@ -772,24 +769,24 @@ CHAT_INTERFACE_TEMPLATE = """
             cursor: pointer;
             transition: background 0.2s;
         }
-        
+
         .suggestion-chip:hover {
             background: #007bff;
             color: white;
         }
-        
+
         .chat-input-container {
             padding: 20px;
             background: white;
             border-top: 1px solid #dee2e6;
         }
-        
+
         .chat-input-form {
             display: flex;
             gap: 10px;
             align-items: center;
         }
-        
+
         .chat-input {
             flex: 1;
             padding: 12px 16px;
@@ -799,11 +796,11 @@ CHAT_INTERFACE_TEMPLATE = """
             outline: none;
             transition: border-color 0.2s;
         }
-        
+
         .chat-input:focus {
             border-color: #007bff;
         }
-        
+
         .send-button {
             padding: 12px 20px;
             background: #007bff;
@@ -814,16 +811,16 @@ CHAT_INTERFACE_TEMPLATE = """
             font-size: 14px;
             transition: background 0.2s;
         }
-        
+
         .send-button:hover {
             background: #0056b3;
         }
-        
+
         .send-button:disabled {
             background: #6c757d;
             cursor: not-allowed;
         }
-        
+
         .typing-indicator {
             display: none;
             padding: 12px 16px;
@@ -832,12 +829,12 @@ CHAT_INTERFACE_TEMPLATE = """
             max-width: 80px;
             margin-bottom: 15px;
         }
-        
+
         .typing-dots {
             display: flex;
             gap: 4px;
         }
-        
+
         .typing-dot {
             width: 8px;
             height: 8px;
@@ -845,16 +842,16 @@ CHAT_INTERFACE_TEMPLATE = """
             border-radius: 50%;
             animation: typing 1.4s infinite ease-in-out;
         }
-        
+
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         .typing-dot:nth-child(3) { animation-delay: 0s; }
-        
+
         @keyframes typing {
             0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
             40% { transform: scale(1); opacity: 1; }
         }
-        
+
         .tool-results {
             margin-top: 10px;
             padding: 10px;
@@ -863,15 +860,15 @@ CHAT_INTERFACE_TEMPLATE = """
             border-radius: 4px;
             font-size: 12px;
         }
-        
+
         .tool-result {
             margin-bottom: 8px;
         }
-        
+
         .tool-result.success {
             color: #28a745;
         }
-        
+
         .tool-result.error {
             color: #dc3545;
         }
@@ -883,7 +880,7 @@ CHAT_INTERFACE_TEMPLATE = """
             <h1>🏭 PLC-GBT Industrial Automation Assistant</h1>
             <p>Conversational interface for control loops, workflows, and industrial automation</p>
         </div>
-        
+
         <div class="chat-messages" id="messages">
             <div class="message assistant">
                 <div class="message-content">
@@ -900,7 +897,7 @@ CHAT_INTERFACE_TEMPLATE = """
                 <div class="message-timestamp">Just now</div>
             </div>
         </div>
-        
+
         <div class="typing-indicator" id="typing">
             <div class="typing-dots">
                 <div class="typing-dot"></div>
@@ -908,7 +905,7 @@ CHAT_INTERFACE_TEMPLATE = """
                 <div class="typing-dot"></div>
             </div>
         </div>
-        
+
         <div class="suggestions" id="suggestions">
             <h4>Suggestions:</h4>
             <div class="suggestion-chips">
@@ -919,10 +916,10 @@ CHAT_INTERFACE_TEMPLATE = """
                 <button class="suggestion-chip" onclick="sendSuggestion('Help me get started')">Help me get started</button>
             </div>
         </div>
-        
+
         <div class="chat-input-container">
             <form class="chat-input-form" onsubmit="sendMessage(event)">
-                <input type="text" class="chat-input" id="messageInput" 
+                <input type="text" class="chat-input" id="messageInput"
                        placeholder="Ask me about industrial automation..." autocomplete="off">
                 <button type="submit" class="send-button" id="sendButton">Send</button>
             </form>
@@ -932,7 +929,7 @@ CHAT_INTERFACE_TEMPLATE = """
     <script>
         let sessionId = null;
         let websocket = null;
-        
+
         // Initialize session and WebSocket
         async function init() {
             try {
@@ -944,11 +941,11 @@ CHAT_INTERFACE_TEMPLATE = """
                 });
                 const data = await response.json();
                 sessionId = data.session_id;
-                
+
                 // Connect WebSocket
                 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                 websocket = new WebSocket(`${protocol}//${window.location.host}/ws/${sessionId}`);
-                
+
                 websocket.onmessage = function(event) {
                     const data = JSON.parse(event.data);
                     if (data.type === 'response') {
@@ -962,41 +959,41 @@ CHAT_INTERFACE_TEMPLATE = """
                         enableInput();
                     }
                 };
-                
+
                 websocket.onclose = function() {
                     console.log('WebSocket connection closed');
                 };
-                
+
             } catch (error) {
                 console.error('Failed to initialize:', error);
             }
         }
-        
+
         function sendMessage(event) {
             event.preventDefault();
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
-            
+
             if (message && websocket) {
                 addMessage('user', message);
                 input.value = '';
                 showTyping();
                 disableInput();
-                
+
                 websocket.send(JSON.stringify({ message: message }));
             }
         }
-        
+
         function sendSuggestion(text) {
             document.getElementById('messageInput').value = text;
             sendMessage(new Event('submit'));
         }
-        
+
         function addMessage(role, content, toolResults = null) {
             const messagesContainer = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}`;
-            
+
             let toolResultsHtml = '';
             if (toolResults && toolResults.length > 0) {
                 toolResultsHtml = '<div class="tool-results">';
@@ -1006,20 +1003,20 @@ CHAT_INTERFACE_TEMPLATE = """
                 });
                 toolResultsHtml += '</div>';
             }
-            
+
             messageDiv.innerHTML = `
                 <div class="message-content">${content}${toolResultsHtml}</div>
                 <div class="message-timestamp">${new Date().toLocaleTimeString()}</div>
             `;
-            
+
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
-        
+
         function updateSuggestions(suggestions) {
             const suggestionsContainer = document.querySelector('.suggestion-chips');
             suggestionsContainer.innerHTML = '';
-            
+
             suggestions.forEach(suggestion => {
                 const chip = document.createElement('button');
                 chip.className = 'suggestion-chip';
@@ -1028,28 +1025,28 @@ CHAT_INTERFACE_TEMPLATE = """
                 suggestionsContainer.appendChild(chip);
             });
         }
-        
+
         function showTyping() {
             document.getElementById('typing').style.display = 'block';
             const messagesContainer = document.getElementById('messages');
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
-        
+
         function hideTyping() {
             document.getElementById('typing').style.display = 'none';
         }
-        
+
         function disableInput() {
             document.getElementById('messageInput').disabled = true;
             document.getElementById('sendButton').disabled = true;
         }
-        
+
         function enableInput() {
             document.getElementById('messageInput').disabled = false;
             document.getElementById('sendButton').disabled = false;
             document.getElementById('messageInput').focus();
         }
-        
+
         // Handle Enter key
         document.getElementById('messageInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -1057,7 +1054,7 @@ CHAT_INTERFACE_TEMPLATE = """
                 sendMessage(e);
             }
         });
-        
+
         // Initialize on load
         window.addEventListener('load', init);
     </script>
@@ -1072,29 +1069,29 @@ CHAT_INTERFACE_TEMPLATE = """
 def create_app(openai_api_key: str) -> NaturalLanguageUIApp:
     """Create and configure the Natural Language UI application"""
     app = NaturalLanguageUIApp(openai_api_key)
-    
+
     # Create templates directory and file
     templates_dir = Path("templates")
     templates_dir.mkdir(exist_ok=True)
-    
+
     chat_template_file = templates_dir / "chat_interface.html"
     chat_template_file.write_text(CHAT_INTERFACE_TEMPLATE)
-    
+
     return app
 
 async def run_server(openai_api_key: str, host: str = "0.0.0.0", port: int = 8080):
     """Run the Natural Language UI server"""
     app_instance = create_app(openai_api_key)
-    
+
     # Add startup and shutdown events
     @app_instance.app.on_event("startup")
     async def startup_event():
         await app_instance.startup()
-    
+
     @app_instance.app.on_event("shutdown")
     async def shutdown_event():
         await app_instance.shutdown()
-    
+
     # Run with uvicorn
     config = uvicorn.Config(
         app_instance.app,
@@ -1103,17 +1100,17 @@ async def run_server(openai_api_key: str, host: str = "0.0.0.0", port: int = 808
         log_level="info"
     )
     server = uvicorn.Server(config)
-    
+
     logger.info(f"Starting Natural Language UI server on {host}:{port}")
     await server.serve()
 
 if __name__ == "__main__":
     import os
-    
+
     # Get OpenAI API key from environment
     openai_api_key = os.getenv("OPENAI_API_KEY")
     if not openai_api_key:
         raise ValueError("OPENAI_API_KEY environment variable required")
-    
+
     # Run the server
-    asyncio.run(run_server(openai_api_key)) 
+    asyncio.run(run_server(openai_api_key))

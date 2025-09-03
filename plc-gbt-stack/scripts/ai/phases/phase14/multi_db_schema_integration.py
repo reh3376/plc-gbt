@@ -21,21 +21,18 @@ Phase: 14.3.3 - JSON Schema Governance Framework
 Dependencies: Phase 14.3.1 (SchemaRegistry), Phase 14.3.2 (ComplianceEngine)
 """
 
-import os
-import sys
 import json
-import asyncio
-import redis.asyncio as redis
-import neo4j
-import psycopg2
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Set, Union
-from dataclasses import dataclass, asdict
+import sys
+import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-import hashlib
-import uuid
-from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import neo4j
+import psycopg2
+import redis.asyncio as redis
 
 # Add modules to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent / "modules"))
@@ -43,11 +40,10 @@ from core import BaseOrchestrator, TaskAnalysis
 
 # Import dependencies
 try:
-    from .schema_registry import SchemaRegistry, SchemaDefinition
     from .compliance_engine import ComplianceEngine
+    from .schema_registry import SchemaDefinition, SchemaRegistry
 except ImportError:
-    from schema_registry import SchemaRegistry, SchemaDefinition
-    from compliance_engine import ComplianceEngine
+    from schema_registry import SchemaDefinition, SchemaRegistry
 
 @dataclass
 class DatabaseConnection:
@@ -105,18 +101,18 @@ class DatabaseType(Enum):
 class MultiDBSchemaIntegration(BaseOrchestrator):
     """
     Multi-database schema integration and synchronization system.
-    
+
     Provides comprehensive schema management across Redis, Neo4j, PostgreSQL,
     and Qdrant databases with consistency validation and conflict resolution.
     """
 
-    def __init__(self, schema_registry: SchemaRegistry, 
+    def __init__(self, schema_registry: SchemaRegistry,
                  task_id: str = "multi_db_schema_integration", config_file: Optional[str] = None):
         super().__init__(task_id, config_file)
-        
+
         # Dependencies
         self.schema_registry = schema_registry
-        
+
         # Database connections configuration
         self.db_config = {
             "redis": {
@@ -143,7 +139,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 "timeout": 30
             }
         }
-        
+
         # Integration configuration
         self.integration_config = {
             "sync_interval_hours": 24,
@@ -154,16 +150,16 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
             "max_sync_retries": 3,
             "schema_cache_ttl": 3600  # 1 hour
         }
-        
+
         # Connection state
         self.connections: Dict[str, Any] = {}
         self.connection_status: Dict[str, DatabaseConnection] = {}
-        
+
         # Integration state
         self.sync_history: List[SyncResult] = []
         self.consistency_reports: List[ConsistencyReport] = []
         self.detected_conflicts: List[SchemaConflict] = []
-        
+
         # Performance metrics
         self.integration_metrics = {
             "databases_connected": 0,
@@ -208,12 +204,12 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
     def execute(self) -> Dict[str, Any]:
         """Execute multi-database schema integration"""
         self.log_execution_step("Multi-DB Schema Integration", "started")
-        
+
         try:
             # Validate requirements
             if not self.validate_requirements():
                 return {"status": "failed", "error": "Requirements validation failed"}
-            
+
             # Phase 1: Initialize database connections
             self.log_execution_step("Database Connection Setup", "started")
             connection_results = self._initialize_database_connections()
@@ -221,7 +217,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 "databases_connected": self.integration_metrics["databases_connected"],
                 "connection_failures": len([r for r in connection_results if not r["success"]])
             })
-            
+
             # Phase 2: Validate database consistency
             self.log_execution_step("Consistency Validation", "started")
             consistency_report = self.validate_database_consistency()
@@ -229,7 +225,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 "consistency_score": consistency_report.consistency_score,
                 "inconsistencies_found": len(consistency_report.inconsistencies)
             })
-            
+
             # Phase 3: Synchronize schemas (if needed)
             sync_results = []
             if consistency_report.consistency_score < 0.95:
@@ -239,7 +235,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                     "sync_operations": len(sync_results),
                     "successful_syncs": len([s for s in sync_results if s.success])
                 })
-            
+
             # Prepare results
             results = {
                 "integration_status": "operational",
@@ -254,18 +250,18 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                     "configuration": self.integration_config
                 }
             }
-            
+
             # Add performance metrics
             self.add_performance_metric("consistency_score", consistency_report.consistency_score)
             self.add_performance_metric("databases_connected", self.integration_metrics["databases_connected"])
-            
+
             self.log_execution_step("Multi-DB Schema Integration", "completed", {
                 "consistency_score": consistency_report.consistency_score,
                 "databases_integrated": self.integration_metrics["databases_connected"]
             })
-            
+
             return results
-            
+
         except Exception as e:
             self.log_error("Multi-database schema integration failed", e)
             return {"status": "failed", "error": str(e)}
@@ -273,44 +269,44 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
     def sync_schemas_across_databases(self) -> List[SyncResult]:
         """
         Synchronize schema definitions across all database systems.
-        
+
         Returns:
             List of synchronization results for each database
         """
         sync_results = []
-        
+
         # Get all schemas from registry
         schemas_to_sync = self._get_schemas_for_sync()
-        
+
         # Sync to each database type
         for db_type in DatabaseType:
             if db_type.value not in self.connections:
                 continue
-            
+
             sync_result = self._sync_schemas_to_database(db_type.value, schemas_to_sync)
             sync_results.append(sync_result)
-            
+
             if sync_result.success:
                 self.integration_metrics["schemas_synchronized"] += sync_result.schemas_synced
-        
+
         self.integration_metrics["sync_operations"] += len(sync_results)
         self.sync_history.extend(sync_results)
-        
+
         return sync_results
 
     def validate_database_consistency(self) -> ConsistencyReport:
         """
         Validate schema consistency across all connected databases.
-        
+
         Returns:
             Comprehensive consistency report with recommendations
         """
         report_id = str(uuid.uuid4())
         check_timestamp = datetime.now().isoformat()
-        
+
         # Check which databases are available
         available_databases = list(self.connections.keys())
-        
+
         # Get schemas from each database
         database_schemas = {}
         for db_type in available_databases:
@@ -320,17 +316,17 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
             except Exception as e:
                 self.log_error(f"Failed to get schemas from {db_type}", e)
                 database_schemas[db_type] = {}
-        
+
         # Analyze consistency
         inconsistencies = self._analyze_schema_consistency(database_schemas)
-        
+
         # Calculate consistency score
         total_schemas = sum(len(schemas) for schemas in database_schemas.values())
         consistency_score = self._calculate_consistency_score(database_schemas, inconsistencies)
-        
+
         # Generate recommendations
         recommendations = self._generate_consistency_recommendations(inconsistencies, consistency_score)
-        
+
         # Create report
         report = ConsistencyReport(
             report_id=report_id,
@@ -344,21 +340,21 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 hours=self.integration_config["consistency_check_interval_hours"]
             )).isoformat()
         )
-        
+
         self.integration_metrics["consistency_checks_performed"] += 1
         self.consistency_reports.append(report)
-        
+
         return report
 
     def _initialize_database_connections(self) -> List[Dict[str, Any]]:
         """Initialize connections to all configured databases"""
         connection_results = []
-        
+
         for db_type, config in self.db_config.items():
             try:
                 connection = self._create_database_connection(db_type, config)
                 health_status = self._check_database_health(db_type, connection)
-                
+
                 self.connections[db_type] = connection
                 self.connection_status[db_type] = DatabaseConnection(
                     database_type=db_type,
@@ -368,16 +364,16 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                     last_health_check=datetime.now().isoformat(),
                     schema_version=self._get_database_schema_version(db_type, connection)
                 )
-                
+
                 self.integration_metrics["databases_connected"] += 1
-                
+
                 connection_results.append({
                     "database_type": db_type,
                     "success": True,
                     "health_status": health_status,
                     "error_message": None
                 })
-                
+
             except Exception as e:
                 self.log_error(f"Failed to connect to {db_type}", e)
                 connection_results.append({
@@ -386,20 +382,20 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                     "health_status": "failed",
                     "error_message": str(e)
                 })
-        
+
         return connection_results
 
     def _create_database_connection(self, db_type: str, config: Dict[str, Any]) -> Any:
         """Create connection to specific database type"""
         if db_type == DatabaseType.REDIS.value:
             return redis.Redis(**config)
-        
+
         elif db_type == DatabaseType.NEO4J.value:
             return neo4j.GraphDatabase.driver(
-                config["uri"], 
+                config["uri"],
                 auth=(config["user"], config["password"])
             )
-        
+
         elif db_type == DatabaseType.POSTGRESQL.value:
             return psycopg2.connect(
                 host=config["host"],
@@ -408,11 +404,11 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 user=config["user"],
                 password=config["password"]
             )
-        
+
         elif db_type == DatabaseType.QDRANT.value:
             # Simulated Qdrant connection - in production would use qdrant-client
             return {"host": config["host"], "port": config["port"], "connected": True}
-        
+
         else:
             raise ValueError(f"Unsupported database type: {db_type}")
 
@@ -423,14 +419,14 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 # Redis health check
                 connection.ping()
                 return "healthy"
-            
+
             elif db_type == DatabaseType.NEO4J.value:
                 # Neo4j health check
                 with connection.session() as session:
                     result = session.run("RETURN 1")
                     result.single()
                 return "healthy"
-            
+
             elif db_type == DatabaseType.POSTGRESQL.value:
                 # PostgreSQL health check
                 cursor = connection.cursor()
@@ -438,13 +434,13 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 cursor.fetchone()
                 cursor.close()
                 return "healthy"
-            
+
             elif db_type == DatabaseType.QDRANT.value:
                 # Simulated Qdrant health check
                 return "healthy" if connection.get("connected") else "failed"
-            
+
             return "unknown"
-            
+
         except Exception as e:
             self.log_error(f"Health check failed for {db_type}", e)
             return "failed"
@@ -455,13 +451,13 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
             if db_type == DatabaseType.REDIS.value:
                 # Redis doesn't have traditional schema versioning
                 return "redis_key_structure"
-            
+
             elif db_type == DatabaseType.NEO4J.value:
                 # Neo4j schema version check
                 with connection.session() as session:
-                    result = session.run("CALL db.schema.visualization()")
+                    session.run("CALL db.schema.visualization()")
                     return "neo4j_graph_schema"
-            
+
             elif db_type == DatabaseType.POSTGRESQL.value:
                 # PostgreSQL schema version
                 cursor = connection.cursor()
@@ -469,14 +465,14 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 version = cursor.fetchone()[0]
                 cursor.close()
                 return version.split()[0:2]  # Return first two parts
-            
+
             elif db_type == DatabaseType.QDRANT.value:
                 # Simulated Qdrant version
                 return "qdrant_collections_schema"
-            
+
         except Exception as e:
             self.log_error(f"Failed to get schema version for {db_type}", e)
-        
+
         return None
 
     def _sanitize_connection_string(self, config: Dict[str, Any]) -> str:
@@ -501,32 +497,32 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
         """Synchronize schemas to specific database"""
         sync_id = str(uuid.uuid4())
         start_time = datetime.now()
-        
+
         try:
-            connection = self.connections[db_type]
+            self.connections[db_type]
             schemas_synced = 0
             conflicts_detected = 0
-            
+
             for schema in schemas:
                 try:
                     # Check if schema exists in database
                     existing_schema = self._get_schema_from_database(db_type, schema.schema_name)
-                    
+
                     if existing_schema:
                         # Check for conflicts
                         if self._schemas_differ(schema, existing_schema):
                             conflicts_detected += 1
                             self._handle_schema_conflict(db_type, schema, existing_schema)
-                    
+
                     # Sync schema to database
                     self._store_schema_in_database(db_type, schema)
                     schemas_synced += 1
-                    
+
                 except Exception as e:
                     self.log_error(f"Failed to sync schema {schema.schema_name} to {db_type}", e)
-            
+
             duration = (datetime.now() - start_time).total_seconds()
-            
+
             return SyncResult(
                 sync_id=sync_id,
                 database_type=db_type,
@@ -537,7 +533,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 error_message=None,
                 timestamp=datetime.now().isoformat()
             )
-            
+
         except Exception as e:
             duration = (datetime.now() - start_time).total_seconds()
             return SyncResult(
@@ -554,7 +550,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
     def _get_schemas_from_database(self, db_type: str) -> Dict[str, Any]:
         """Get all schemas from specific database"""
         schemas = {}
-        
+
         try:
             if db_type == DatabaseType.REDIS.value:
                 # Redis schema retrieval
@@ -563,7 +559,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 for key in schema_keys:
                     schema_data = connection.hgetall(key)
                     schemas[key] = schema_data
-            
+
             elif db_type == DatabaseType.NEO4J.value:
                 # Neo4j schema retrieval
                 connection = self.connections[db_type]
@@ -572,17 +568,17 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                     for record in result:
                         schema_node = record["s"]
                         schemas[schema_node["name"]] = dict(schema_node)
-            
+
             elif db_type == DatabaseType.POSTGRESQL.value:
                 # PostgreSQL schema retrieval
                 connection = self.connections[db_type]
                 cursor = connection.cursor()
                 cursor.execute("""
-                    SELECT schema_name, version, schema_content 
-                    FROM schemas 
+                    SELECT schema_name, version, schema_content
+                    FROM schemas
                     ORDER BY schema_name, version
                 """)
-                
+
                 for row in cursor.fetchall():
                     key = f"{row[0]}:{row[1]}"
                     schemas[key] = {
@@ -591,28 +587,28 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                         "content": row[2]
                     }
                 cursor.close()
-            
+
             elif db_type == DatabaseType.QDRANT.value:
                 # Simulated Qdrant schema retrieval
                 schemas["qdrant_collections"] = {"collections": ["plc_embeddings", "schema_vectors"]}
-            
+
         except Exception as e:
             self.log_error(f"Failed to get schemas from {db_type}", e)
-        
+
         return schemas
 
     def _get_schema_from_database(self, db_type: str, schema_name: str) -> Optional[Dict[str, Any]]:
         """Get specific schema from database"""
         try:
             all_schemas = self._get_schemas_from_database(db_type)
-            
+
             # Look for schema by name
             for key, schema in all_schemas.items():
                 if schema_name in key or schema.get("name") == schema_name:
                     return schema
-            
+
             return None
-            
+
         except Exception as e:
             self.log_error(f"Failed to get schema {schema_name} from {db_type}", e)
             return None
@@ -631,7 +627,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                     "created_at": schema.created_at,
                     "hash": schema.hash_signature
                 })
-            
+
             elif db_type == DatabaseType.NEO4J.value:
                 # Store in Neo4j as node
                 connection = self.connections[db_type]
@@ -648,15 +644,15 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                         "created_at": schema.created_at,
                         "hash": schema.hash_signature
                     })
-            
+
             elif db_type == DatabaseType.POSTGRESQL.value:
                 # Already stored in PostgreSQL via schema registry
                 pass
-            
+
             elif db_type == DatabaseType.QDRANT.value:
                 # Simulated Qdrant storage
                 pass
-            
+
         except Exception as e:
             self.log_error(f"Failed to store schema {schema.schema_name} in {db_type}", e)
             raise
@@ -670,7 +666,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
         except Exception:
             return True
 
-    def _handle_schema_conflict(self, db_type: str, registry_schema: SchemaDefinition, 
+    def _handle_schema_conflict(self, db_type: str, registry_schema: SchemaDefinition,
                               db_schema: Dict[str, Any]):
         """Handle schema conflict between registry and database"""
         conflict = SchemaConflict(
@@ -688,13 +684,13 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
             resolution_suggestion="Update database schema to match registry",
             detected_at=datetime.now().isoformat()
         )
-        
+
         self.detected_conflicts.append(conflict)
 
     def _analyze_schema_consistency(self, database_schemas: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Analyze consistency across all database schemas"""
         inconsistencies = []
-        
+
         # Find schemas that exist in some databases but not others
         all_schema_names = set()
         for db_schemas in database_schemas.values():
@@ -702,12 +698,12 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 # Extract schema name from key
                 schema_name = schema_key.split(":")[0] if ":" in schema_key else schema_key
                 all_schema_names.add(schema_name)
-        
+
         # Check each schema across all databases
         for schema_name in all_schema_names:
             db_presence = {}
             schema_versions = {}
-            
+
             for db_type, db_schemas in database_schemas.items():
                 found = False
                 for schema_key, schema_data in db_schemas.items():
@@ -716,9 +712,9 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                         version = schema_data.get("version", "unknown")
                         schema_versions[db_type] = version
                         break
-                
+
                 db_presence[db_type] = found
-            
+
             # Check for missing schemas
             missing_dbs = [db for db, present in db_presence.items() if not present]
             if missing_dbs:
@@ -728,7 +724,7 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                     "missing_from": missing_dbs,
                     "severity": "major"
                 })
-            
+
             # Check for version mismatches
             unique_versions = set(schema_versions.values())
             if len(unique_versions) > 1:
@@ -738,17 +734,17 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                     "versions": schema_versions,
                     "severity": "minor"
                 })
-        
+
         return inconsistencies
 
-    def _calculate_consistency_score(self, database_schemas: Dict[str, Dict[str, Any]], 
+    def _calculate_consistency_score(self, database_schemas: Dict[str, Dict[str, Any]],
                                    inconsistencies: List[Dict[str, Any]]) -> float:
         """Calculate overall consistency score"""
         total_schemas = sum(len(schemas) for schemas in database_schemas.values())
-        
+
         if total_schemas == 0:
             return 1.0
-        
+
         # Weight inconsistencies by severity
         inconsistency_weight = 0
         for inconsistency in inconsistencies:
@@ -758,16 +754,16 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
                 inconsistency_weight += 0.5
             elif inconsistency["severity"] == "minor":
                 inconsistency_weight += 0.1
-        
+
         # Calculate score
         consistency_score = max(0.0, 1.0 - (inconsistency_weight / max(total_schemas, 1)))
         return round(consistency_score, 3)
 
-    def _generate_consistency_recommendations(self, inconsistencies: List[Dict[str, Any]], 
+    def _generate_consistency_recommendations(self, inconsistencies: List[Dict[str, Any]],
                                             consistency_score: float) -> List[str]:
         """Generate recommendations for improving consistency"""
         recommendations = []
-        
+
         if consistency_score >= 0.95:
             recommendations.append("Excellent consistency - maintain current practices")
         elif consistency_score >= 0.85:
@@ -776,21 +772,21 @@ class MultiDBSchemaIntegration(BaseOrchestrator):
             recommendations.append("Moderate consistency - implement regular sync processes")
         else:
             recommendations.append("Poor consistency - immediate synchronization required")
-        
+
         # Specific recommendations based on inconsistency types
         missing_schemas = [i for i in inconsistencies if i["type"] == "missing_schema"]
         if missing_schemas:
             recommendations.append(f"Synchronize {len(missing_schemas)} missing schemas across databases")
-        
+
         version_mismatches = [i for i in inconsistencies if i["type"] == "version_mismatch"]
         if version_mismatches:
             recommendations.append(f"Resolve {len(version_mismatches)} version mismatches")
-        
+
         # Database-specific recommendations
         if len(inconsistencies) > 5:
             recommendations.append("Enable automated schema synchronization")
-        
+
         if consistency_score < 0.8:
             recommendations.append("Implement consistency monitoring alerts")
-        
-        return recommendations 
+
+        return recommendations

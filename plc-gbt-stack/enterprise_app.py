@@ -10,23 +10,23 @@ This is the main application file that integrates all enterprise components:
 - Enterprise API Endpoints
 """
 
-import asyncio
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
-# Import enterprise components
-from config.enterprise_settings import EnterpriseSettings
+from api.enterprise_api import enterprise_router
 from auth.jwt_manager import get_jwt_manager
 from auth.rbac import get_rbac_manager
 from cache.redis_cache import get_cache
-from middleware.rate_limiter import get_rate_limiter
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from middleware.auth_middleware import AuthenticationMiddleware
 from middleware.monitoring_middleware import MonitoringMiddleware
+from middleware.rate_limiter import get_rate_limiter
 from monitoring.enterprise_monitoring import get_monitoring
-from api.enterprise_api import enterprise_router
+
+# Import enterprise components
+from config.enterprise_settings import EnterpriseSettings
 
 # Setup logging early for import error handling
 logging.basicConfig(
@@ -37,11 +37,8 @@ logger = logging.getLogger(__name__)
 
 # Import N8N Workflow Engine Integration (Phase 1.3 - OpenAPI Schema MCP Compliant)
 try:
-    from api.workflow_engine.fastapi_router import (
-        router as workflow_router,
-        startup_workflow_engine,
-        shutdown_workflow_engine
-    )
+    from api.workflow_engine.fastapi_router import router as workflow_router
+    from api.workflow_engine.fastapi_router import shutdown_workflow_engine, startup_workflow_engine
     WORKFLOW_ENGINE_AVAILABLE = True
     logger.info("✅ N8N Workflow Engine integration available")
 except ImportError as e:
@@ -54,19 +51,19 @@ except ImportError as e:
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     logger.info("Starting PLC-GPT Enterprise Application")
-    
+
     # Initialize enterprise components
-    settings = EnterpriseSettings()
-    
+    EnterpriseSettings()
+
     try:
         # Initialize JWT Manager
-        jwt_manager = get_jwt_manager()
+        get_jwt_manager()
         logger.info("✅ JWT Manager initialized")
-        
+
         # Initialize RBAC Manager
-        rbac_manager = get_rbac_manager()
+        get_rbac_manager()
         logger.info("✅ RBAC Manager initialized")
-        
+
         # Initialize Redis Cache
         cache = get_cache()
         cache_health = cache.health_check()
@@ -74,22 +71,22 @@ async def lifespan(app: FastAPI):
             logger.info("✅ Redis Cache connected and healthy")
         else:
             logger.warning(f"⚠️ Redis Cache health check failed: {cache_health}")
-        
+
         # Initialize Rate Limiter
-        rate_limiter = get_rate_limiter()
+        get_rate_limiter()
         logger.info("✅ Rate Limiter initialized")
-        
+
         # Initialize Monitoring
         monitoring = get_monitoring()
         monitoring.start_monitoring()
         logger.info("✅ Enterprise Monitoring started")
-        
+
         # Register alert handlers
         def log_alert_handler(alert):
             logger.warning(f"ALERT: {alert.name} - {alert.message}")
-        
+
         monitoring.register_alert_handler("log_handler", log_alert_handler)
-        
+
         # Initialize N8N Workflow Engine (Phase 1.3 - OpenAPI Schema MCP Integration)
         if WORKFLOW_ENGINE_AVAILABLE:
             try:
@@ -100,26 +97,26 @@ async def lifespan(app: FastAPI):
                 # Continue without workflow engine if initialization fails
         else:
             logger.warning(f"⚠️ N8N Workflow Engine not available: {workflow_import_error}")
-        
+
         logger.info("🚀 All enterprise components initialized successfully")
-        
+
         yield
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to initialize enterprise components: {e}")
         raise
-    
+
     finally:
         # Cleanup
         logger.info("Shutting down PLC-GPT Enterprise Application")
-        
+
         try:
             monitoring = get_monitoring()
             monitoring.stop_monitoring()
             logger.info("✅ Monitoring stopped")
         except Exception as e:
             logger.error(f"Error stopping monitoring: {e}")
-        
+
         # Shutdown N8N Workflow Engine
         if WORKFLOW_ENGINE_AVAILABLE:
             try:
@@ -178,7 +175,7 @@ async def health_check():
     try:
         from monitoring.enterprise_monitoring import comprehensive_health_check
         health_data = comprehensive_health_check()
-        
+
         # Add N8N Workflow Engine health status
         if WORKFLOW_ENGINE_AVAILABLE:
             try:
@@ -204,7 +201,7 @@ async def health_check():
                 'status': 'unavailable',
                 'reason': 'N8N Workflow Engine not imported'
             }
-        
+
         # Determine overall status
         overall_status = "healthy"
         if health_data['redis']['status'] != 'healthy':
@@ -213,11 +210,11 @@ async def health_check():
             overall_status = "unhealthy"
         if WORKFLOW_ENGINE_AVAILABLE and health_data['workflow_engine']['status'] not in ['healthy', 'degraded']:
             overall_status = "degraded"
-        
+
         health_data['overall_status'] = overall_status
-        
+
         return health_data
-        
+
     except Exception as e:
         return JSONResponse(
             status_code=503,
@@ -236,13 +233,13 @@ async def get_metrics():
     try:
         monitoring = get_monitoring()
         metrics = monitoring.get_metrics()
-        
+
         from fastapi.responses import Response
         return Response(
             content=metrics,
             media_type="text/plain; version=0.0.4; charset=utf-8"
         )
-        
+
     except Exception as e:
         return JSONResponse(
             status_code=500,
@@ -258,7 +255,7 @@ async def root():
         settings = EnterpriseSettings()
         monitoring = get_monitoring()
         performance_metrics = monitoring.get_performance_metrics()
-        
+
         # Build features list dynamically based on available components
         features = [
             "JWT Authentication",
@@ -268,7 +265,7 @@ async def root():
             "Comprehensive Monitoring",
             "Enterprise APIs"
         ]
-        
+
         # Add N8N Workflow Engine features if available
         if WORKFLOW_ENGINE_AVAILABLE:
             features.extend([
@@ -278,7 +275,7 @@ async def root():
                 "OpenAPI Schema MCP Compliance",
                 "Workflow Performance Monitoring"
             ])
-        
+
         return {
             "application": "PLC-GPT Enterprise",
             "version": "3.0.0",
@@ -295,7 +292,7 @@ async def root():
             "metrics": "/metrics",
             "workflow_engine_status": "/api/v1/workflows/engine/health" if WORKFLOW_ENGINE_AVAILABLE else None
         }
-        
+
     except Exception as e:
         return JSONResponse(
             status_code=500,
@@ -313,7 +310,7 @@ async def not_found_handler(request: Request, exc):
     """Handle 404 errors."""
     monitoring = get_monitoring()
     monitoring.record_error("not_found", "api")
-    
+
     return JSONResponse(
         status_code=404,
         content={
@@ -329,7 +326,7 @@ async def internal_error_handler(request: Request, exc):
     """Handle 500 errors."""
     monitoring = get_monitoring()
     monitoring.record_error("internal_server_error", "api")
-    
+
     return JSONResponse(
         status_code=500,
         content={
@@ -347,7 +344,7 @@ async def startup_message():
     # Build dynamic startup message based on available components
     workflow_status = "✅ OPERATIONAL" if WORKFLOW_ENGINE_AVAILABLE else "⚠️  NOT AVAILABLE"
     workflow_docs = "║  🔧 Workflow API:  http://localhost:8000/api/v1/workflows/engine/health     ║" if WORKFLOW_ENGINE_AVAILABLE else "║  🔧 Workflow API:  Not Available (Import Error)                           ║"
-    
+
     logger.info(f"""
     ╔══════════════════════════════════════════════════════════════════════════════╗
     ║                           PLC-GPT Enterprise v3.0.0                         ║
@@ -373,10 +370,10 @@ async def startup_message():
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     # Configuration
     settings = EnterpriseSettings()
-    
+
     # Run the application
     uvicorn.run(
         "enterprise_app:app",
@@ -385,4 +382,4 @@ if __name__ == "__main__":
         reload=settings.ENVIRONMENT == "development",
         log_level="info",
         access_log=True
-    ) 
+    )

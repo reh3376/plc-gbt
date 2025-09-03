@@ -17,17 +17,16 @@ Following AI Task Orchestrator methodology for systematic security enhancement.
 """
 
 import asyncio
+import json
 import logging
 import ssl
-import socket
-import json
 import time
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
 from enum import Enum
-import uuid
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 # Optional imports for enhanced functionality
 try:
     import aiohttp
@@ -43,12 +42,13 @@ except ImportError:
 
 # Certificate management
 try:
+    import ipaddress
+
     from cryptography import x509
-    from cryptography.x509.oid import NameOID
     from cryptography.hazmat.primitives import hashes, serialization
     from cryptography.hazmat.primitives.asymmetric import rsa
-    from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
-    import ipaddress
+    from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
+    from cryptography.x509.oid import NameOID
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
@@ -123,49 +123,49 @@ class ConnectionMetrics:
 class CertificateManager:
     """
     Certificate management for mTLS authentication.
-    
+
     Handles certificate generation, rotation, and validation.
     """
-    
+
     def __init__(self, cert_dir: str = "security/certificates"):
         """
         Initialize certificate manager.
-        
+
         Args:
             cert_dir: Directory to store certificates
         """
         self.cert_dir = Path(cert_dir)
         self.cert_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Certificate validity period
         self.cert_validity_days = 365
         self.ca_validity_days = 3650  # 10 years for CA
-        
+
         # Key size for RSA certificates
         self.key_size = 2048
-        
+
         logger.info(f"CertificateManager initialized - cert_dir: {self.cert_dir}")
-    
+
     def generate_ca_certificate(self, common_name: str = "PLC-GPT Root CA") -> Tuple[str, str]:
         """
         Generate a Certificate Authority (CA) certificate.
-        
+
         Args:
             common_name: Common name for the CA certificate
-            
+
         Returns:
             Tuple of (cert_path, key_path)
         """
         if not CRYPTO_AVAILABLE:
             raise RuntimeError("cryptography library not available for certificate generation")
-        
+
         try:
             # Generate private key
             private_key = rsa.generate_private_key(
                 public_exponent=65537,
                 key_size=self.key_size,
             )
-            
+
             # Create certificate subject
             subject = issuer = x509.Name([
                 x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
@@ -174,7 +174,7 @@ class CertificateManager:
                 x509.NameAttribute(NameOID.ORGANIZATION_NAME, "PLC-GPT Enterprise"),
                 x509.NameAttribute(NameOID.COMMON_NAME, common_name),
             ])
-            
+
             # Create certificate
             cert = x509.CertificateBuilder().subject_name(
                 subject
@@ -212,28 +212,28 @@ class CertificateManager:
                 ),
                 critical=True,
             ).sign(private_key, hashes.SHA256())
-            
+
             # Save certificate and key
             cert_path = self.cert_dir / "ca.crt"
             key_path = self.cert_dir / "ca.key"
-            
+
             with open(cert_path, "wb") as f:
                 f.write(cert.public_bytes(Encoding.PEM))
-            
+
             with open(key_path, "wb") as f:
                 f.write(private_key.private_bytes(
                     Encoding.PEM,
                     PrivateFormat.PKCS8,
                     NoEncryption()
                 ))
-            
+
             logger.info(f"✅ CA certificate generated: {cert_path}")
             return str(cert_path), str(key_path)
-            
+
         except Exception as e:
             logger.error(f"Failed to generate CA certificate: {e}")
             raise
-    
+
     def generate_server_certificate(
         self,
         common_name: str,
@@ -244,40 +244,40 @@ class CertificateManager:
     ) -> Tuple[str, str]:
         """
         Generate a server certificate signed by the CA.
-        
+
         Args:
             common_name: Common name for the server certificate
             san_dns: Subject Alternative Names (DNS)
             san_ips: Subject Alternative Names (IP addresses)
             ca_cert_path: Path to CA certificate
             ca_key_path: Path to CA private key
-            
+
         Returns:
             Tuple of (cert_path, key_path)
         """
         if not CRYPTO_AVAILABLE:
             raise RuntimeError("cryptography library not available for certificate generation")
-        
+
         try:
             # Use default CA paths if not provided
             if not ca_cert_path:
                 ca_cert_path = self.cert_dir / "ca.crt"
             if not ca_key_path:
                 ca_key_path = self.cert_dir / "ca.key"
-            
+
             # Load CA certificate and key
             with open(ca_cert_path, "rb") as f:
                 ca_cert = x509.load_pem_x509_certificate(f.read())
-            
+
             with open(ca_key_path, "rb") as f:
                 ca_key = serialization.load_pem_private_key(f.read(), password=None)
-            
+
             # Generate server private key
             private_key = rsa.generate_private_key(
                 public_exponent=65537,
                 key_size=self.key_size,
             )
-            
+
             # Create certificate subject
             subject = x509.Name([
                 x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
@@ -286,21 +286,21 @@ class CertificateManager:
                 x509.NameAttribute(NameOID.ORGANIZATION_NAME, "PLC-GPT Enterprise"),
                 x509.NameAttribute(NameOID.COMMON_NAME, common_name),
             ])
-            
+
             # Prepare Subject Alternative Names
             san_list = []
             if san_dns:
                 san_list.extend([x509.DNSName(name) for name in san_dns])
             if san_ips:
                 san_list.extend([x509.IPAddress(ipaddress.ip_address(ip)) for ip in san_ips])
-            
+
             # Add default SANs
             san_list.extend([
                 x509.DNSName("localhost"),
                 x509.DNSName(common_name),
                 x509.IPAddress(ipaddress.ip_address("127.0.0.1")),
             ])
-            
+
             # Create certificate
             cert = x509.CertificateBuilder().subject_name(
                 subject
@@ -339,28 +339,28 @@ class CertificateManager:
                 ]),
                 critical=True,
             ).sign(ca_key, hashes.SHA256())
-            
+
             # Save certificate and key
             cert_path = self.cert_dir / f"{common_name}.crt"
             key_path = self.cert_dir / f"{common_name}.key"
-            
+
             with open(cert_path, "wb") as f:
                 f.write(cert.public_bytes(Encoding.PEM))
-            
+
             with open(key_path, "wb") as f:
                 f.write(private_key.private_bytes(
                     Encoding.PEM,
                     PrivateFormat.PKCS8,
                     NoEncryption()
                 ))
-            
+
             logger.info(f"✅ Server certificate generated: {cert_path}")
             return str(cert_path), str(key_path)
-            
+
         except Exception as e:
             logger.error(f"Failed to generate server certificate: {e}")
             raise
-    
+
     def generate_client_certificate(
         self,
         common_name: str,
@@ -369,38 +369,38 @@ class CertificateManager:
     ) -> Tuple[str, str]:
         """
         Generate a client certificate for mTLS authentication.
-        
+
         Args:
             common_name: Common name for the client certificate
             ca_cert_path: Path to CA certificate
             ca_key_path: Path to CA private key
-            
+
         Returns:
             Tuple of (cert_path, key_path)
         """
         if not CRYPTO_AVAILABLE:
             raise RuntimeError("cryptography library not available for certificate generation")
-        
+
         try:
             # Use default CA paths if not provided
             if not ca_cert_path:
                 ca_cert_path = self.cert_dir / "ca.crt"
             if not ca_key_path:
                 ca_key_path = self.cert_dir / "ca.key"
-            
+
             # Load CA certificate and key
             with open(ca_cert_path, "rb") as f:
                 ca_cert = x509.load_pem_x509_certificate(f.read())
-            
+
             with open(ca_key_path, "rb") as f:
                 ca_key = serialization.load_pem_private_key(f.read(), password=None)
-            
+
             # Generate client private key
             private_key = rsa.generate_private_key(
                 public_exponent=65537,
                 key_size=self.key_size,
             )
-            
+
             # Create certificate subject
             subject = x509.Name([
                 x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
@@ -409,7 +409,7 @@ class CertificateManager:
                 x509.NameAttribute(NameOID.ORGANIZATION_NAME, "PLC-GPT Enterprise"),
                 x509.NameAttribute(NameOID.COMMON_NAME, common_name),
             ])
-            
+
             # Create certificate
             cert = x509.CertificateBuilder().subject_name(
                 subject
@@ -445,53 +445,53 @@ class CertificateManager:
                 ]),
                 critical=True,
             ).sign(ca_key, hashes.SHA256())
-            
+
             # Save certificate and key
             cert_path = self.cert_dir / f"{common_name}-client.crt"
             key_path = self.cert_dir / f"{common_name}-client.key"
-            
+
             with open(cert_path, "wb") as f:
                 f.write(cert.public_bytes(Encoding.PEM))
-            
+
             with open(key_path, "wb") as f:
                 f.write(private_key.private_bytes(
                     Encoding.PEM,
                     PrivateFormat.PKCS8,
                     NoEncryption()
                 ))
-            
+
             logger.info(f"✅ Client certificate generated: {cert_path}")
             return str(cert_path), str(key_path)
-            
+
         except Exception as e:
             logger.error(f"Failed to generate client certificate: {e}")
             raise
-    
+
     def get_certificate_info(self, cert_path: str) -> CertificateInfo:
         """
         Get information about a certificate.
-        
+
         Args:
             cert_path: Path to certificate file
-            
+
         Returns:
             CertificateInfo object
         """
         if not CRYPTO_AVAILABLE:
             raise RuntimeError("cryptography library not available for certificate inspection")
-        
+
         try:
             with open(cert_path, "rb") as f:
                 cert = x509.load_pem_x509_certificate(f.read())
-            
+
             # Extract certificate information
             subject = cert.subject.rfc4514_string()
             issuer = cert.issuer.rfc4514_string()
             serial_number = str(cert.serial_number)
-            
+
             # Calculate fingerprint
             fingerprint = cert.fingerprint(hashes.SHA256()).hex()
-            
+
             return CertificateInfo(
                 cert_path=cert_path,
                 key_path=cert_path.replace(".crt", ".key"),
@@ -503,7 +503,7 @@ class CertificateManager:
                 issuer=issuer,
                 fingerprint=fingerprint
             )
-            
+
         except Exception as e:
             logger.error(f"Failed to get certificate info: {e}")
             raise
@@ -512,33 +512,33 @@ class CertificateManager:
 class MTLSReverseProxy:
     """
     mTLS Reverse Proxy for secure database connections.
-    
+
     Provides mutual TLS authentication and connection proxying
     for database services with certificate-based security.
     """
-    
+
     def __init__(self, cert_manager: CertificateManager = None):
         """
         Initialize mTLS reverse proxy.
-        
+
         Args:
             cert_manager: Certificate manager instance
         """
         self.cert_manager = cert_manager or CertificateManager()
-        
+
         # Proxy configuration
         self.endpoints: Dict[str, ProxyEndpoint] = {}
         self.connection_metrics: List[ConnectionMetrics] = []
-        
+
         # SSL contexts
         self.ssl_contexts: Dict[str, ssl.SSLContext] = {}
-        
+
         # Monitoring
         self.metrics_log_path = Path("logs/mtls_proxy_metrics.log")
         self.metrics_log_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         logger.info("MTLSReverseProxy initialized")
-    
+
     def add_endpoint(
         self,
         name: str,
@@ -552,7 +552,7 @@ class MTLSReverseProxy:
     ) -> bool:
         """
         Add a proxy endpoint.
-        
+
         Args:
             name: Endpoint name
             database_type: Type of database
@@ -562,7 +562,7 @@ class MTLSReverseProxy:
             target_port: Target database port
             tls_enabled: Enable TLS
             client_cert_required: Require client certificate
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -575,26 +575,26 @@ class MTLSReverseProxy:
                 if not ca_cert_path.exists():
                     logger.info("Generating CA certificate...")
                     self.cert_manager.generate_ca_certificate()
-                
+
                 # Generate server certificate
                 server_cert_path, server_key_path = self.cert_manager.generate_server_certificate(
                     common_name=f"{name}-proxy",
                     san_dns=[listen_host, "localhost"],
                     san_ips=[listen_host if listen_host != "localhost" else "127.0.0.1"]
                 )
-                
+
                 certificate_info = self.cert_manager.get_certificate_info(server_cert_path)
-                
+
                 # Create SSL context
                 ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
                 ssl_context.load_cert_chain(server_cert_path, server_key_path)
-                
+
                 if client_cert_required:
                     ssl_context.verify_mode = ssl.CERT_REQUIRED
                     ssl_context.load_verify_locations(ca_cert_path)
-                
+
                 self.ssl_contexts[name] = ssl_context
-            
+
             # Create endpoint
             endpoint = ProxyEndpoint(
                 name=name,
@@ -607,22 +607,22 @@ class MTLSReverseProxy:
                 client_cert_required=client_cert_required,
                 certificate_info=certificate_info
             )
-            
+
             self.endpoints[name] = endpoint
             logger.info(f"✅ Proxy endpoint added: {name} ({listen_host}:{listen_port} -> {target_host}:{target_port})")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to add proxy endpoint {name}: {e}")
             return False
-    
+
     async def start_proxy(self, endpoint_name: str) -> bool:
         """
         Start a proxy endpoint.
-        
+
         Args:
             endpoint_name: Name of endpoint to start
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -630,9 +630,9 @@ class MTLSReverseProxy:
             if endpoint_name not in self.endpoints:
                 logger.error(f"Endpoint {endpoint_name} not found")
                 return False
-            
+
             endpoint = self.endpoints[endpoint_name]
-            
+
             # Create server
             server = await asyncio.start_server(
                 lambda r, w: self._handle_connection(endpoint, r, w),
@@ -640,23 +640,23 @@ class MTLSReverseProxy:
                 endpoint.listen_port,
                 ssl=self.ssl_contexts.get(endpoint_name) if endpoint.tls_enabled else None
             )
-            
+
             logger.info(f"✅ Proxy started: {endpoint_name} listening on {endpoint.listen_host}:{endpoint.listen_port}")
-            
+
             # Start serving
             async with server:
                 await server.serve_forever()
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to start proxy {endpoint_name}: {e}")
             return False
-    
+
     async def _handle_connection(self, endpoint: ProxyEndpoint, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         """
         Handle a client connection.
-        
+
         Args:
             endpoint: Proxy endpoint configuration
             reader: Client reader stream
@@ -666,9 +666,9 @@ class MTLSReverseProxy:
         connection_start = time.time()
         bytes_sent = 0
         bytes_received = 0
-        
+
         logger.info(f"🔗 New connection to {endpoint.name} from {client_addr}")
-        
+
         try:
             # Extract client certificate info if available
             client_cert_subject = None
@@ -679,15 +679,15 @@ class MTLSReverseProxy:
                     if client_cert:
                         client_cert_subject = client_cert.get('subject', '')
                         logger.info(f"🔐 Client certificate: {client_cert_subject}")
-            
+
             # Connect to target database
             target_reader, target_writer = await asyncio.open_connection(
                 endpoint.target_host,
                 endpoint.target_port
             )
-            
+
             logger.info(f"🔗 Connected to target: {endpoint.target_host}:{endpoint.target_port}")
-            
+
             # Start bidirectional data forwarding
             async def forward_data(source_reader, dest_writer, direction):
                 nonlocal bytes_sent, bytes_received
@@ -696,21 +696,21 @@ class MTLSReverseProxy:
                         data = await source_reader.read(8192)
                         if not data:
                             break
-                        
+
                         dest_writer.write(data)
                         await dest_writer.drain()
-                        
+
                         if direction == "client_to_server":
                             bytes_sent += len(data)
                         else:
                             bytes_received += len(data)
-                            
+
                 except Exception as e:
                     logger.debug(f"Data forwarding error ({direction}): {e}")
                 finally:
                     dest_writer.close()
                     await dest_writer.wait_closed()
-            
+
             # Start forwarding tasks
             client_to_server = asyncio.create_task(
                 forward_data(reader, target_writer, "client_to_server")
@@ -718,13 +718,13 @@ class MTLSReverseProxy:
             server_to_client = asyncio.create_task(
                 forward_data(target_reader, writer, "server_to_client")
             )
-            
+
             # Wait for either direction to complete
             await asyncio.gather(client_to_server, server_to_client, return_exceptions=True)
-            
+
         except Exception as e:
             logger.error(f"Connection handling error: {e}")
-        
+
         finally:
             # Close connections
             try:
@@ -732,11 +732,11 @@ class MTLSReverseProxy:
                 await writer.wait_closed()
             except:
                 pass
-            
+
             # Record metrics
             connection_duration = time.time() - connection_start
             ssl_info = writer.get_extra_info('ssl_object')
-            
+
             metrics = ConnectionMetrics(
                 endpoint_name=endpoint.name,
                 client_ip=client_addr[0] if client_addr else "unknown",
@@ -748,35 +748,35 @@ class MTLSReverseProxy:
                 cipher_suite=ssl_info.cipher()[0] if ssl_info and ssl_info.cipher() else "none",
                 client_cert_subject=client_cert_subject
             )
-            
+
             self.connection_metrics.append(metrics)
             self._log_metrics(metrics)
-            
+
             logger.info(f"🔚 Connection closed: {endpoint.name} from {client_addr} (duration: {connection_duration:.2f}s)")
-    
+
     def _log_metrics(self, metrics: ConnectionMetrics):
         """Log connection metrics."""
         try:
             metrics_data = asdict(metrics)
             metrics_data['connected_at'] = metrics.connected_at.isoformat()
-            
+
             with open(self.metrics_log_path, 'a') as f:
                 f.write(json.dumps(metrics_data) + '\n')
         except Exception as e:
             logger.error(f"Failed to log metrics: {e}")
-    
+
     def generate_client_certificates(self, clients: List[str]) -> Dict[str, Tuple[str, str]]:
         """
         Generate client certificates for mTLS authentication.
-        
+
         Args:
             clients: List of client names
-            
+
         Returns:
             Dictionary mapping client names to (cert_path, key_path) tuples
         """
         certificates = {}
-        
+
         for client_name in clients:
             try:
                 cert_path, key_path = self.cert_manager.generate_client_certificate(client_name)
@@ -784,13 +784,13 @@ class MTLSReverseProxy:
                 logger.info(f"✅ Client certificate generated for: {client_name}")
             except Exception as e:
                 logger.error(f"Failed to generate client certificate for {client_name}: {e}")
-        
+
         return certificates
-    
+
     def get_endpoint_status(self) -> Dict[str, Any]:
         """
         Get status of all proxy endpoints.
-        
+
         Returns:
             Status dictionary
         """
@@ -800,10 +800,10 @@ class MTLSReverseProxy:
             "total_connections": len(self.connection_metrics),
             "active_endpoints": len(self.endpoints)
         }
-        
+
         for name, endpoint in self.endpoints.items():
             endpoint_metrics = [m for m in self.connection_metrics if m.endpoint_name == name]
-            
+
             status["endpoints"][name] = {
                 "database_type": endpoint.database_type.value,
                 "listen_address": f"{endpoint.listen_host}:{endpoint.listen_port}",
@@ -813,14 +813,14 @@ class MTLSReverseProxy:
                 "total_connections": len(endpoint_metrics),
                 "certificate_info": asdict(endpoint.certificate_info) if endpoint.certificate_info else None
             }
-        
+
         return status
 
 
 async def setup_default_proxy_endpoints():
     """Set up default proxy endpoints for PLC-GPT databases."""
     proxy = MTLSReverseProxy()
-    
+
     # Default database endpoints
     endpoints = [
         {
@@ -864,7 +864,7 @@ async def setup_default_proxy_endpoints():
             "client_cert_required": True
         }
     ]
-    
+
     # Add all endpoints
     for endpoint_config in endpoints:
         success = proxy.add_endpoint(**endpoint_config)
@@ -872,7 +872,7 @@ async def setup_default_proxy_endpoints():
             logger.info(f"✅ Configured proxy endpoint: {endpoint_config['name']}")
         else:
             logger.error(f"❌ Failed to configure proxy endpoint: {endpoint_config['name']}")
-    
+
     # Generate client certificates for services
     client_names = [
         "plc-gbt-gateway",
@@ -880,10 +880,10 @@ async def setup_default_proxy_endpoints():
         "plc-gbt-api",
         "plc-gbt-monitoring"
     ]
-    
+
     certificates = proxy.generate_client_certificates(client_names)
     logger.info(f"✅ Generated {len(certificates)} client certificates")
-    
+
     return proxy
 
 
@@ -891,16 +891,16 @@ if __name__ == "__main__":
     # Test the mTLS reverse proxy
     async def test_mtls_proxy():
         print("🔐 Testing mTLS Reverse Proxy...")
-        
+
         # Set up proxy
         proxy = await setup_default_proxy_endpoints()
-        
+
         # Get status
         status = proxy.get_endpoint_status()
         print(f"📊 Proxy Status: {json.dumps(status, indent=2)}")
-        
+
         print("🎉 mTLS Reverse Proxy test completed!")
         print("To start proxy endpoints, run individual start_proxy() calls in production")
-    
+
     # Run test
-    asyncio.run(test_mtls_proxy()) 
+    asyncio.run(test_mtls_proxy())

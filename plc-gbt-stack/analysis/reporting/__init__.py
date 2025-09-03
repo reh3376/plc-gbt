@@ -24,7 +24,7 @@ REPORTING_CONFIG = {
     "version": __version__,
     "supported_formats": [
         "pdf",
-        "html", 
+        "html",
         "excel",
         "csv",
         "json",
@@ -87,13 +87,14 @@ REPORTING_CONFIG = {
 }
 
 # Reporting types and enums
-from enum import Enum
-from typing import Dict, List, Any, Optional, Union, Callable
+import json
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-import logging
-import json
+from enum import Enum
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
+
 
 class ReportFormat(Enum):
     """Supported report formats"""
@@ -140,23 +141,23 @@ class ReportConfiguration:
     report_type: ReportType
     output_format: ReportFormat
     template_name: Optional[str] = None
-    
+
     # Content settings
     sections: List[ReportSection] = field(default_factory=list)
     include_charts: bool = True
     include_raw_data: bool = False
     include_appendices: bool = True
-    
+
     # Formatting settings
     page_limit: Optional[int] = None
     font_size: int = 11
     font_family: str = "Arial"
-    
+
     # Metadata
     author: str = "PLC-GPT Analysis System"
     company: str = "Industrial Control Systems"
     confidentiality: str = "Internal Use"
-    
+
     # Generation settings
     priority: ReportPriority = ReportPriority.NORMAL
     auto_refresh: bool = False
@@ -169,12 +170,12 @@ class ReportData:
     performance_metrics: Dict[str, float] = field(default_factory=dict)
     time_series_data: Dict[str, List] = field(default_factory=dict)
     comparison_data: Dict[str, Any] = field(default_factory=dict)
-    
+
     # Analysis metadata
     analysis_period: Optional[tuple] = None
     data_sources: List[str] = field(default_factory=list)
     quality_indicators: Dict[str, float] = field(default_factory=dict)
-    
+
     # Derived insights
     key_findings: List[str] = field(default_factory=list)
     recommendations: List[str] = field(default_factory=list)
@@ -189,12 +190,12 @@ class ExecutiveSummary:
     major_findings: List[str]
     recommendations: List[str]
     conclusions: str
-    
+
     # Performance indicators
     overall_score: float
     trend_direction: str  # "improving", "stable", "declining"
     priority_actions: List[str]
-    
+
     # Financial impact (if applicable)
     cost_savings: Optional[float] = None
     roi_estimate: Optional[float] = None
@@ -207,17 +208,17 @@ class ReportTemplate:
     name: str
     description: str
     sections: List[ReportSection]
-    
+
     # Template settings
     default_format: ReportFormat = ReportFormat.PDF
     page_limit: Optional[int] = None
     target_audience: str = "general"
-    
+
     # Content rules
     required_data: List[str] = field(default_factory=list)
     optional_data: List[str] = field(default_factory=list)
     auto_sections: List[str] = field(default_factory=list)
-    
+
     # Formatting
     style_settings: Dict[str, Any] = field(default_factory=dict)
     chart_specifications: Dict[str, Any] = field(default_factory=dict)
@@ -229,18 +230,18 @@ class ReportMetadata:
     title: str
     generated_at: datetime
     generated_by: str
-    
+
     # Content metadata
     total_pages: int
     section_count: int
     chart_count: int
     table_count: int
-    
+
     # Data metadata
     data_sources: List[str]
     analysis_period: Optional[tuple]
     data_quality_score: float
-    
+
     # Generation metadata
     generation_time: float
     template_used: str
@@ -254,17 +255,17 @@ class ReportGenerationResult:
     report_id: str
     output_path: str
     metadata: ReportMetadata
-    
+
     # Generation details
     generation_time: float
     warnings: List[str] = field(default_factory=list)
     errors: List[str] = field(default_factory=list)
-    
+
     # Quality metrics
     content_completeness: float
     data_quality: float
     formatting_quality: float
-    
+
     # Output information
     file_size: int
     page_count: int
@@ -272,10 +273,10 @@ class ReportGenerationResult:
 
 # Import reporting modules
 try:
-    from .report_generator import ReportGenerator
-    from .template_manager import TemplateManager
     from .export_manager import ExportManager
+    from .report_generator import ReportGenerator
     from .summary_generator import ExecutiveSummaryGenerator
+    from .template_manager import TemplateManager
     REPORTING_MODULES_AVAILABLE = True
 except ImportError:
     REPORTING_MODULES_AVAILABLE = False
@@ -344,9 +345,9 @@ def get_template_info(template_name: str):
 
 def create_standard_templates():
     """Create standard report templates"""
-    
+
     templates = {}
-    
+
     # Executive Summary Template
     templates["executive_summary"] = ReportTemplate(
         template_id="exec_summary_v1",
@@ -369,7 +370,7 @@ def create_standard_templates():
             "emphasize_roi": True
         }
     )
-    
+
     # Technical Analysis Template
     templates["technical_analysis"] = ReportTemplate(
         template_id="tech_analysis_v1",
@@ -393,7 +394,7 @@ def create_standard_templates():
             "include_data_tables": True
         }
     )
-    
+
     # Performance Review Template
     templates["performance_review"] = ReportTemplate(
         template_id="perf_review_v1",
@@ -416,12 +417,12 @@ def create_standard_templates():
             "show_kpi_dashboard": True
         }
     )
-    
+
     return templates
 
 def generate_executive_summary(data: ReportData, config: ReportConfiguration) -> ExecutiveSummary:
     """Generate executive summary from analysis data"""
-    
+
     # Extract key metrics
     key_metrics = {
         "overall_performance": data.performance_metrics.get("overall_score", 0.0),
@@ -429,7 +430,7 @@ def generate_executive_summary(data: ReportData, config: ReportConfiguration) ->
         "cost_savings": data.performance_metrics.get("cost_reduction", 0.0),
         "uptime_improvement": data.performance_metrics.get("uptime_gain", 0.0)
     }
-    
+
     # Determine trend direction
     trend_score = data.performance_metrics.get("trend_score", 0.0)
     if trend_score > 0.1:
@@ -438,34 +439,34 @@ def generate_executive_summary(data: ReportData, config: ReportConfiguration) ->
         trend_direction = "declining"
     else:
         trend_direction = "stable"
-    
+
     # Generate overview
     overview = f"""
-    Analysis of control loop performance from {data.analysis_period[0] if data.analysis_period else 'baseline'} 
-    to {data.analysis_period[1] if data.analysis_period else 'current'} shows {trend_direction} performance 
+    Analysis of control loop performance from {data.analysis_period[0] if data.analysis_period else 'baseline'}
+    to {data.analysis_period[1] if data.analysis_period else 'current'} shows {trend_direction} performance
     with an overall score of {key_metrics['overall_performance']:.1f}%.
     """
-    
+
     # Major findings (top 3)
     major_findings = data.key_findings[:3] if data.key_findings else [
         "Performance analysis completed successfully",
         "System operating within acceptable parameters",
         "Opportunities for optimization identified"
     ]
-    
+
     # Priority actions (top 3 recommendations)
     priority_actions = data.recommendations[:3] if data.recommendations else [
         "Continue routine monitoring",
         "Review performance monthly",
         "Implement recommended optimizations"
     ]
-    
+
     # Conclusions
     conclusions = f"""
-    The control system is performing {trend_direction} with key opportunities for improvement identified. 
+    The control system is performing {trend_direction} with key opportunities for improvement identified.
     Implementation of recommended actions could yield additional performance gains.
     """
-    
+
     return ExecutiveSummary(
         title=config.title,
         overview=overview.strip(),
@@ -482,18 +483,18 @@ def generate_executive_summary(data: ReportData, config: ReportConfiguration) ->
 
 def validate_report_data(data: ReportData, template: ReportTemplate) -> Dict[str, Any]:
     """Validate report data against template requirements"""
-    
+
     validation = {
         "valid": True,
         "errors": [],
         "warnings": [],
         "completeness": 0.0
     }
-    
+
     # Check required data
     required_fields = template.required_data
     available_fields = []
-    
+
     if data.analysis_results:
         available_fields.append("analysis_results")
     if data.performance_metrics:
@@ -502,30 +503,30 @@ def validate_report_data(data: ReportData, template: ReportTemplate) -> Dict[str
         available_fields.append("time_series_data")
     if data.comparison_data:
         available_fields.append("comparison_data")
-    
+
     missing_required = set(required_fields) - set(available_fields)
     if missing_required:
         validation["errors"].extend([f"Missing required data: {field}" for field in missing_required])
         validation["valid"] = False
-    
+
     # Check data quality
     if data.quality_indicators:
         avg_quality = sum(data.quality_indicators.values()) / len(data.quality_indicators)
         if avg_quality < 0.7:
             validation["warnings"].append(f"Low data quality detected: {avg_quality:.2f}")
-    
+
     # Calculate completeness
     total_possible = len(required_fields) + len(template.optional_data)
     available_count = len(available_fields)
     validation["completeness"] = available_count / total_possible if total_possible > 0 else 1.0
-    
+
     return validation
 
 def estimate_generation_time(config: ReportConfiguration, data: ReportData) -> float:
     """Estimate report generation time in seconds"""
-    
+
     base_time = 2.0  # Base time for simple report
-    
+
     # Adjust for format complexity
     format_multipliers = {
         ReportFormat.CSV: 0.5,
@@ -535,25 +536,25 @@ def estimate_generation_time(config: ReportConfiguration, data: ReportData) -> f
         ReportFormat.PDF: 1.5,
         ReportFormat.EXCEL: 2.0
     }
-    
+
     base_time *= format_multipliers.get(config.output_format, 1.0)
-    
+
     # Adjust for data size
     data_size_factor = 1.0
     if data.time_series_data:
         total_points = sum(len(series) for series in data.time_series_data.values())
         data_size_factor = 1.0 + (total_points / 10000)  # +1s per 10k points
-    
+
     # Adjust for sections
     section_factor = len(config.sections) * 0.5
-    
+
     # Adjust for charts
     chart_factor = 1.0
     if config.include_charts:
         chart_factor = 1.5
-    
+
     estimated_time = base_time * data_size_factor * chart_factor + section_factor
-    
+
     return max(estimated_time, 1.0)  # Minimum 1 second
 
 # Export configuration for external use
@@ -561,21 +562,21 @@ __all__ = [
     # Configuration
     "REPORTING_CONFIG",
     "AVAILABILITY_STATUS",
-    
+
     # Data classes
     "ReportConfiguration",
-    "ReportData", 
+    "ReportData",
     "ExecutiveSummary",
     "ReportTemplate",
     "ReportMetadata",
     "ReportGenerationResult",
-    
+
     # Enums
     "ReportFormat",
     "ReportType",
     "ReportSection",
     "ReportPriority",
-    
+
     # Utility functions
     "get_available_formats",
     "get_format_info",
@@ -585,7 +586,7 @@ __all__ = [
     "generate_executive_summary",
     "validate_report_data",
     "estimate_generation_time",
-    
+
     # Classes (if available)
 ]
 
@@ -611,4 +612,4 @@ def get_package_info():
         "total_modules": len(AVAILABILITY_STATUS),
         "completion_percentage": len([v for v in AVAILABILITY_STATUS.values() if v]) / len(AVAILABILITY_STATUS) * 100,
         "implementation_status": AVAILABILITY_STATUS
-    } 
+    }

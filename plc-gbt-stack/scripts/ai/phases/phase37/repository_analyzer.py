@@ -11,16 +11,16 @@ This script analyzes all PLC repositories (plc-100 through plc-600) to:
 5. Generate detailed reports for GitHub repository creation
 """
 
-import os
-import sys
-import json
 import hashlib
-import subprocess
-from pathlib import Path
-from datetime import datetime
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Any, Optional
+import json
 import logging
+import os
+import subprocess
+import sys
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Setup logging
 logging.basicConfig(
@@ -94,7 +94,7 @@ def get_git_info(repo_path: str) -> Dict[str, Any]:
         "remote_url": None,
         "status": None
     }
-    
+
     try:
         # Check if it's a git repository
         result = subprocess.run(
@@ -104,10 +104,10 @@ def get_git_info(repo_path: str) -> Dict[str, Any]:
             text=True,
             timeout=10
         )
-        
+
         if result.returncode == 0:
             git_info["is_git_repo"] = True
-            
+
             # Get current branch
             result = subprocess.run(
                 ["git", "branch", "--show-current"],
@@ -118,7 +118,7 @@ def get_git_info(repo_path: str) -> Dict[str, Any]:
             )
             if result.returncode == 0:
                 git_info["current_branch"] = result.stdout.strip()
-            
+
             # Get last commit
             result = subprocess.run(
                 ["git", "log", "-1", "--format=%H|%s|%an|%ad"],
@@ -136,7 +136,7 @@ def get_git_info(repo_path: str) -> Dict[str, Any]:
                         "author": commit_parts[2],
                         "date": commit_parts[3]
                     }
-            
+
             # Get remote URL
             result = subprocess.run(
                 ["git", "remote", "get-url", "origin"],
@@ -147,7 +147,7 @@ def get_git_info(repo_path: str) -> Dict[str, Any]:
             )
             if result.returncode == 0:
                 git_info["remote_url"] = result.stdout.strip()
-            
+
             # Get status
             result = subprocess.run(
                 ["git", "status", "--porcelain"],
@@ -163,10 +163,10 @@ def get_git_info(repo_path: str) -> Dict[str, Any]:
                     "modified_files": len(status_lines),
                     "changes": status_lines[:10]  # Limit to first 10 changes
                 }
-    
+
     except Exception as e:
         logger.warning(f"Could not get git info for {repo_path}: {e}")
-    
+
     return git_info
 
 def analyze_repository_structure(repo_path: str) -> Dict[str, Any]:
@@ -177,28 +177,28 @@ def analyze_repository_structure(repo_path: str) -> Dict[str, Any]:
         "depth_analysis": {},
         "large_files": []  # Files > 10MB
     }
-    
+
     try:
         for root, dirs, files in os.walk(repo_path):
             # Skip .git directory
             if '.git' in dirs:
                 dirs.remove('.git')
-            
+
             rel_root = os.path.relpath(root, repo_path)
             if rel_root != '.':
                 structure["directories"].append(rel_root)
-            
+
             # Analyze depth
             depth = len(rel_root.split(os.sep)) if rel_root != '.' else 0
             structure["depth_analysis"][depth] = structure["depth_analysis"].get(depth, 0) + len(files)
-            
+
             for file in files:
                 filepath = os.path.join(root, file)
                 try:
                     # File extension analysis
                     ext = os.path.splitext(file)[1].lower()
                     structure["file_types"][ext] = structure["file_types"].get(ext, 0) + 1
-                    
+
                     # Large file analysis
                     size = os.path.getsize(filepath)
                     if size > 10 * 1024 * 1024:  # > 10MB
@@ -208,10 +208,10 @@ def analyze_repository_structure(repo_path: str) -> Dict[str, Any]:
                         })
                 except Exception as e:
                     logger.warning(f"Could not analyze file {filepath}: {e}")
-    
+
     except Exception as e:
         logger.error(f"Could not analyze repository structure for {repo_path}: {e}")
-    
+
     return structure
 
 def analyze_acd_file(filepath: str, repo_name: str, repo_path: str) -> ACDFileInfo:
@@ -220,12 +220,12 @@ def analyze_acd_file(filepath: str, repo_name: str, repo_path: str) -> ACDFileIn
         stat = os.stat(filepath)
         size_bytes = stat.st_size
         size_mb = round(size_bytes / (1024 * 1024), 3)
-        
+
         created, modified = get_file_dates(filepath)
         file_hash = calculate_file_hash(filepath)
-        
+
         relative_path = os.path.relpath(filepath, repo_path)
-        
+
         # Test if file is readable
         is_readable = True
         error_message = None
@@ -235,7 +235,7 @@ def analyze_acd_file(filepath: str, repo_name: str, repo_path: str) -> ACDFileIn
         except Exception as e:
             is_readable = False
             error_message = str(e)
-        
+
         return ACDFileInfo(
             filename=os.path.basename(filepath),
             filepath=filepath,
@@ -249,7 +249,7 @@ def analyze_acd_file(filepath: str, repo_name: str, repo_path: str) -> ACDFileIn
             is_readable=is_readable,
             error_message=error_message
         )
-    
+
     except Exception as e:
         logger.error(f"Could not analyze ACD file {filepath}: {e}")
         return ACDFileInfo(
@@ -270,24 +270,24 @@ def analyze_repository(repo_path: str) -> RepositoryInfo:
     """Analyze a single PLC repository."""
     repo_name = os.path.basename(repo_path)
     logger.info(f"🔍 Analyzing repository: {repo_name}")
-    
+
     acd_files = []
     other_files = []
     total_size = 0
-    
+
     # Find all files
     try:
         for root, dirs, files in os.walk(repo_path):
             # Skip .git directory
             if '.git' in dirs:
                 dirs.remove('.git')
-            
+
             for file in files:
                 filepath = os.path.join(root, file)
                 try:
                     file_size = os.path.getsize(filepath)
                     total_size += file_size
-                    
+
                     if file.lower().endswith('.acd'):
                         acd_info = analyze_acd_file(filepath, repo_name, repo_path)
                         acd_files.append(acd_info)
@@ -295,24 +295,24 @@ def analyze_repository(repo_path: str) -> RepositoryInfo:
                     else:
                         relative_path = os.path.relpath(filepath, repo_path)
                         other_files.append(relative_path)
-                
+
                 except Exception as e:
                     logger.warning(f"Could not process file {filepath}: {e}")
-    
+
     except Exception as e:
         logger.error(f"Could not walk repository {repo_path}: {e}")
-    
+
     # Get git information
     git_info = get_git_info(repo_path)
-    
+
     # Analyze repository structure
     structure = analyze_repository_structure(repo_path)
-    
+
     total_files = len(acd_files) + len(other_files)
     total_mb = round(total_size / (1024 * 1024), 2)
-    
+
     logger.info(f"  ✅ Analysis complete: {len(acd_files)} ACD files, {len(other_files)} other files, {total_mb} MB total")
-    
+
     return RepositoryInfo(
         name=repo_name,
         path=repo_path,
@@ -345,9 +345,9 @@ def generate_migration_manifest(repositories: List[RepositoryInfo]) -> Dict[str,
         },
         "migration_recommendations": []
     }
-    
+
     all_acd_files = []
-    
+
     for repo in repositories:
         # Repository summary
         manifest["repositories"][repo.name] = {
@@ -359,7 +359,7 @@ def generate_migration_manifest(repositories: List[RepositoryInfo]) -> Dict[str,
             "structure": repo.structure,
             "files": [asdict(acd) for acd in repo.acd_files]
         }
-        
+
         # ACD file summary by repository
         manifest["acd_file_summary"]["by_repository"][repo.name] = {
             "count": len(repo.acd_files),
@@ -367,12 +367,12 @@ def generate_migration_manifest(repositories: List[RepositoryInfo]) -> Dict[str,
             "largest_file": max(repo.acd_files, key=lambda x: x.size_mb).filename if repo.acd_files else None,
             "issues": [acd.filename for acd in repo.acd_files if not acd.is_readable]
         }
-        
+
         all_acd_files.extend(repo.acd_files)
-    
+
     # Sort files by size
     all_acd_files.sort(key=lambda x: x.size_mb, reverse=True)
-    
+
     # Largest files across all repositories
     manifest["acd_file_summary"]["largest_files"] = [
         {
@@ -383,7 +383,7 @@ def generate_migration_manifest(repositories: List[RepositoryInfo]) -> Dict[str,
         }
         for acd in all_acd_files[:10]  # Top 10 largest
     ]
-    
+
     # Size distribution
     size_ranges = [
         (0, 1, "< 1 MB"),
@@ -392,7 +392,7 @@ def generate_migration_manifest(repositories: List[RepositoryInfo]) -> Dict[str,
         (50, 100, "50-100 MB"),
         (100, float('inf'), "> 100 MB")
     ]
-    
+
     for min_size, max_size, label in size_ranges:
         count = len([acd for acd in all_acd_files if min_size <= acd.size_mb < max_size])
         manifest["acd_file_summary"]["by_size"].append({
@@ -400,7 +400,7 @@ def generate_migration_manifest(repositories: List[RepositoryInfo]) -> Dict[str,
             "count": count,
             "percentage": round(count / len(all_acd_files) * 100, 1) if all_acd_files else 0
         })
-    
+
     # Potential issues
     issues = []
     for acd in all_acd_files:
@@ -410,103 +410,103 @@ def generate_migration_manifest(repositories: List[RepositoryInfo]) -> Dict[str,
             issues.append(f"Large file (>100MB): {acd.repository}/{acd.filename} ({acd.size_mb} MB)")
         if acd.file_hash == "HASH_ERROR":
             issues.append(f"Hash calculation failed: {acd.repository}/{acd.filename}")
-    
+
     manifest["acd_file_summary"]["potential_issues"] = issues
-    
+
     # Migration recommendations
     recommendations = []
-    
+
     if len(all_acd_files) > 50:
         recommendations.append("Consider batch processing for large number of files")
-    
+
     large_files = [acd for acd in all_acd_files if acd.size_mb > 50]
     if large_files:
         recommendations.append(f"Special handling needed for {len(large_files)} large files (>50MB)")
-    
+
     if issues:
         recommendations.append(f"Resolve {len(issues)} potential issues before migration")
-    
+
     recommendations.extend([
         "Implement parallel processing for conversion efficiency",
         "Set up comprehensive validation checkpoints",
         "Create rollback procedures for failed conversions",
         "Monitor conversion progress with detailed logging"
     ])
-    
+
     manifest["migration_recommendations"] = recommendations
-    
+
     return manifest
 
 def main():
     """Main analysis function."""
     logger.info("🚀 Starting Phase 3.7.1 Repository Analysis")
-    
+
     # Base directory for PLC repositories - they are in the parent of PLC_GPT
     current_dir = Path(__file__).resolve().parent
     plc_gpt_dir = current_dir.parent.parent.parent  # Go up from scripts/phase37/ to PLC_GPT
     base_dir = plc_gpt_dir.parent  # Go up one more to find plc-100, plc-200, etc.
-    
+
     logger.info(f"🔍 Looking for repositories in: {base_dir}")
-    
+
     # Repository names to analyze
     repo_names = ['plc-100', 'plc-200', 'plc-300', 'plc-400', 'plc-500', 'plc-600']
-    
+
     repositories = []
-    
+
     for repo_name in repo_names:
         repo_path = base_dir / repo_name
-        
+
         logger.info(f"  Checking: {repo_path}")
-        
+
         if not repo_path.exists():
             logger.error(f"❌ Repository not found: {repo_path}")
             continue
-        
+
         if not repo_path.is_dir():
             logger.error(f"❌ Not a directory: {repo_path}")
             continue
-        
+
         try:
             repo_info = analyze_repository(str(repo_path))
             repositories.append(repo_info)
         except Exception as e:
             logger.error(f"❌ Failed to analyze {repo_name}: {e}")
-    
+
     if not repositories:
         logger.error("❌ No repositories found or analyzed successfully")
         return 1
-    
+
     # Generate migration manifest
     logger.info("📋 Generating migration manifest...")
     manifest = generate_migration_manifest(repositories)
-    
+
     # Save results
     output_dir = Path(__file__).parent
     output_dir.mkdir(exist_ok=True)
-    
+
     # Save detailed analysis
     analysis_file = output_dir / "repository_analysis_detailed.json"
     with open(analysis_file, 'w') as f:
         json.dump({
             "repositories": [asdict(repo) for repo in repositories]
         }, f, indent=2)
-    
+
     # Save migration manifest
     manifest_file = output_dir / "migration_manifest.json"
     with open(manifest_file, 'w') as f:
         json.dump(manifest, f, indent=2)
-    
+
     # Generate summary report
     summary_file = output_dir / "analysis_summary.md"
     with open(summary_file, 'w') as f:
         f.write("# Phase 3.7.1 Repository Analysis Summary\n\n")
         f.write(f"**Analysis Date**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-        
+
         f.write("## Overview\n")
         f.write(f"- **Total Repositories**: {len(repositories)}\n")
         f.write(f"- **Total ACD Files**: {manifest['migration_info']['total_acd_files']}\n")
         f.write(f"- **Total Size**: {manifest['migration_info']['total_size_mb']:.2f} MB\n\n")
-        
+
         f.write("## Repository Summary\n")
         for repo in repositories:
             f.write(f"### {repo.name}\n")
@@ -514,29 +514,29 @@ def main():
             f.write(f"- **Total Files**: {repo.total_files}\n")
             f.write(f"- **Size**: {repo.total_size_mb:.2f} MB\n")
             f.write(f"- **Git Branch**: {repo.git_info.get('current_branch', 'N/A')}\n\n")
-        
+
         f.write("## Largest ACD Files\n")
         for file_info in manifest["acd_file_summary"]["largest_files"][:5]:
             f.write(f"- **{file_info['filename']}** ({file_info['repository']}): {file_info['size_mb']:.2f} MB\n")
-        
+
         f.write("\n## Size Distribution\n")
         for size_info in manifest["acd_file_summary"]["by_size"]:
             f.write(f"- **{size_info['range']}**: {size_info['count']} files ({size_info['percentage']}%)\n")
-        
+
         if manifest["acd_file_summary"]["potential_issues"]:
             f.write("\n## Potential Issues\n")
             for issue in manifest["acd_file_summary"]["potential_issues"][:10]:
                 f.write(f"- {issue}\n")
-        
+
         f.write("\n## Migration Recommendations\n")
         for rec in manifest["migration_recommendations"]:
             f.write(f"- {rec}\n")
-    
-    logger.info(f"✅ Analysis complete! Results saved to:")
+
+    logger.info("✅ Analysis complete! Results saved to:")
     logger.info(f"  📄 Detailed analysis: {analysis_file}")
     logger.info(f"  📋 Migration manifest: {manifest_file}")
     logger.info(f"  📝 Summary report: {summary_file}")
-    
+
     # Print summary
     print("\n" + "="*60)
     print("🎯 PHASE 3.7.1 REPOSITORY ANALYSIS COMPLETE")
@@ -544,16 +544,16 @@ def main():
     print(f"📊 Analyzed {len(repositories)} repositories")
     print(f"📁 Found {manifest['migration_info']['total_acd_files']} ACD files")
     print(f"💾 Total size: {manifest['migration_info']['total_size_mb']:.2f} MB")
-    
+
     if manifest["acd_file_summary"]["potential_issues"]:
         print(f"⚠️  {len(manifest['acd_file_summary']['potential_issues'])} potential issues identified")
     else:
         print("✅ No issues detected")
-    
-    print(f"\n📋 Next: Create GitHub repositories and begin conversion infrastructure")
+
+    print("\n📋 Next: Create GitHub repositories and begin conversion infrastructure")
     print("="*60)
-    
+
     return 0
 
 if __name__ == "__main__":
-    sys.exit(main()) 
+    sys.exit(main())

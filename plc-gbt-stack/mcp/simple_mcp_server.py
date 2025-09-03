@@ -9,12 +9,11 @@ Provides the same functionality as the full MCP server but with simpler dependen
 import asyncio
 import json
 import logging
-import sys
-import os
-import aiohttp
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -232,33 +231,33 @@ def get_plc_gbt_resources() -> List[MCPResource]:
 
 class SimpleMCPServer:
     """Simplified MCP server for PLC-GBT system"""
-    
+
     def __init__(self, api_base_url: str = "http://localhost:8000/api/v1"):
         self.api_base_url = api_base_url
         self.tools = {tool.name: tool for tool in get_plc_gbt_tools()}
         self.prompts = {prompt.name: prompt for prompt in get_plc_gbt_prompts()}
         self.resources = {resource.name: resource for resource in get_plc_gbt_resources()}
         self.session: Optional[aiohttp.ClientSession] = None
-        
+
     async def start(self):
         """Start the MCP server"""
         self.session = aiohttp.ClientSession()
-        logger.info(f"🚀 PLC-GBT Simplified MCP Server started")
+        logger.info("🚀 PLC-GBT Simplified MCP Server started")
         logger.info(f"📋 Tools: {len(self.tools)}")
         logger.info(f"💬 Prompts: {len(self.prompts)}")
         logger.info(f"📄 Resources: {len(self.resources)}")
-        
+
     async def stop(self):
         """Stop the MCP server"""
         if self.session:
             await self.session.close()
         logger.info("🛑 PLC-GBT Simplified MCP Server stopped")
-    
+
     async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Handle MCP protocol requests"""
         method = request.get("method")
         params = request.get("params", {})
-        
+
         if method == "initialize":
             return await self._handle_initialize(params)
         elif method == "tools/list":
@@ -275,7 +274,7 @@ class SimpleMCPServer:
             return await self._handle_read_resource(params)
         else:
             return {"error": f"Unknown method: {method}"}
-    
+
     async def _handle_initialize(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle initialization request"""
         return {
@@ -291,7 +290,7 @@ class SimpleMCPServer:
                 "description": "PLC-GBT Industrial Automation MCP Server"
             }
         }
-    
+
     async def _handle_list_tools(self) -> Dict[str, Any]:
         """Handle list tools request"""
         tools_list = []
@@ -302,15 +301,15 @@ class SimpleMCPServer:
                 "inputSchema": tool.input_schema
             })
         return {"tools": tools_list}
-    
+
     async def _handle_call_tool(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle tool call request"""
         tool_name = params.get("name")
         arguments = params.get("arguments", {})
-        
+
         if tool_name not in self.tools:
             return {"error": f"Unknown tool: {tool_name}"}
-        
+
         try:
             # Make API call to PLC-GBT system
             result = await self._execute_tool(tool_name, arguments)
@@ -324,12 +323,12 @@ class SimpleMCPServer:
             }
         except Exception as e:
             return {"error": f"Tool execution failed: {str(e)}"}
-    
+
     async def _execute_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a tool by calling the PLC-GBT API"""
         if not self.session:
             raise Exception("MCP server not started")
-        
+
         # Map tool calls to API endpoints
         tool_mappings = {
             "create_control_loop": "/control-loops/instances",
@@ -341,14 +340,14 @@ class SimpleMCPServer:
             "create_workflow": "/workflows",
             "validate_safety_system": "/safety/validate"
         }
-        
+
         endpoint = tool_mappings.get(tool_name)
         if not endpoint:
             return {"error": f"No API mapping for tool: {tool_name}"}
-        
+
         try:
             url = f"{self.api_base_url}{endpoint}"
-            
+
             if tool_name in ["system_status", "list_control_schemas"]:
                 # GET requests
                 async with self.session.get(url, params=arguments) as response:
@@ -363,13 +362,13 @@ class SimpleMCPServer:
                         return await response.json()
                     else:
                         return {"error": f"API call failed: {response.status}"}
-                        
-        except aiohttp.ClientError as e:
+
+        except aiohttp.ClientError:
             # If API is not available, return mock response
             return self._get_mock_response(tool_name, arguments)
         except Exception as e:
             return {"error": f"Tool execution error: {str(e)}"}
-    
+
     def _get_mock_response(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Get mock response when API is not available"""
         mock_responses = {
@@ -404,9 +403,9 @@ class SimpleMCPServer:
                 "total_results": 3
             }
         }
-        
+
         return mock_responses.get(tool_name, {"status": "success", "message": f"Mock response for {tool_name}"})
-    
+
     async def _handle_list_prompts(self) -> Dict[str, Any]:
         """Handle list prompts request"""
         prompts_list = []
@@ -417,13 +416,13 @@ class SimpleMCPServer:
                 "arguments": prompt.arguments
             })
         return {"prompts": prompts_list}
-    
+
     async def _handle_get_prompt(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle get prompt request"""
         prompt_name = params.get("name")
         if prompt_name not in self.prompts:
             return {"error": f"Unknown prompt: {prompt_name}"}
-        
+
         prompt = self.prompts[prompt_name]
         return {
             "description": prompt.description,
@@ -437,7 +436,7 @@ class SimpleMCPServer:
                 }
             ]
         }
-    
+
     async def _handle_list_resources(self) -> Dict[str, Any]:
         """Handle list resources request"""
         resources_list = []
@@ -449,13 +448,13 @@ class SimpleMCPServer:
                 "mimeType": resource.mime_type
             })
         return {"resources": resources_list}
-    
+
     async def _handle_read_resource(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle read resource request"""
         resource_name = params.get("name")
         if resource_name not in self.resources:
             return {"error": f"Unknown resource: {resource_name}"}
-        
+
         resource = self.resources[resource_name]
         return {
             "contents": [
@@ -473,49 +472,49 @@ class SimpleMCPServer:
 async def main():
     """Main entry point for the simplified MCP server"""
     server = SimpleMCPServer()
-    
+
     try:
         await server.start()
-        
+
         # Test server capabilities
         print("\n🧪 Testing PLC-GBT Simplified MCP Server")
         print("=" * 50)
-        
+
         # Test initialization
         init_response = await server.handle_request({
             "method": "initialize",
             "params": {"clientInfo": {"name": "cursor", "version": "1.0"}}
         })
         print(f"✅ Initialization: {init_response['serverInfo']['name']}")
-        
+
         # Test tools listing
         tools_response = await server.handle_request({"method": "tools/list"})
         print(f"📋 Available Tools: {len(tools_response['tools'])}")
-        
+
         # Test a tool call
-        tool_response = await server.handle_request({
+        await server.handle_request({
             "method": "tools/call",
             "params": {
                 "name": "system_status",
                 "arguments": {"include_details": True}
             }
         })
-        print(f"🔧 Tool Test: system_status executed successfully")
-        
+        print("🔧 Tool Test: system_status executed successfully")
+
         # Test prompts
         prompts_response = await server.handle_request({"method": "prompts/list"})
         print(f"💬 Available Prompts: {len(prompts_response['prompts'])}")
-        
+
         # Test resources
         resources_response = await server.handle_request({"method": "resources/list"})
         print(f"📄 Available Resources: {len(resources_response['resources'])}")
-        
-        print(f"\n✅ All tests passed! MCP server is ready for Cursor IDE integration.")
-        
+
+        print("\n✅ All tests passed! MCP server is ready for Cursor IDE integration.")
+
     except Exception as e:
         print(f"❌ Error testing MCP server: {e}")
     finally:
         await server.stop()
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

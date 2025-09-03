@@ -9,26 +9,26 @@ into the Neo4j knowledge graph, including repository metadata, code structure,
 capabilities, and relationships to the main PLC-GPT project.
 """
 
+import json
 import os
 import sys
-import json
 import uuid
-import requests
-from typing import Dict, List, Any, Optional
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import requests
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
+import structlog
+from embedding_generator import EmbeddingGenerator
 from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct
-import structlog
 
 # Import existing processors
-from repo_article_processor import RepoArticleProcessor
-from embedding_generator import EmbeddingGenerator
 
 # Configure structured logging
 structlog.configure(
@@ -52,7 +52,7 @@ logger = structlog.get_logger()
 
 class ACDToolLibIngestion:
     """Specialized ingestion for acd-l5x-tool-lib repository."""
-    
+
     def __init__(
         self,
         neo4j_uri: str = "bolt://localhost:7687",
@@ -68,35 +68,35 @@ class ACDToolLibIngestion:
             neo4j_uri,
             auth=(neo4j_user, neo4j_password)
         )
-        
+
         self.qdrant_client = QdrantClient(
             host=qdrant_host,
             port=qdrant_port
         )
-        
+
         self.embedding_generator = EmbeddingGenerator(api_key=openai_api_key)
-        
+
         # Session for HTTP requests
         self.session = requests.Session()
         if github_token:
             self.session.headers.update({'Authorization': f'token {github_token}'})
-            
+
         # Repository context data
         self.repo_context = self._build_comprehensive_context()
-        
+
     def close(self):
         """Close connections."""
         if self.neo4j_driver:
             self.neo4j_driver.close()
-            
+
     def __enter__(self):
         """Context manager entry."""
         return self
-        
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
         self.close()
-        
+
     def _build_comprehensive_context(self) -> Dict[str, Any]:
         """Build comprehensive context for the acd-l5x-tool-lib repository."""
         return {
@@ -259,11 +259,11 @@ class ACDToolLibIngestion:
                 }
             }
         }
-        
+
     def ingest_repository(self) -> Dict[str, Any]:
         """Ingest the acd-l5x-tool-lib repository into the knowledge graph."""
         logger.info("Starting acd-l5x-tool-lib repository ingestion")
-        
+
         results = {
             'status': 'started',
             'repository_id': None,
@@ -273,59 +273,59 @@ class ACDToolLibIngestion:
             'components_processed': 0,
             'errors': []
         }
-        
+
         try:
             # Step 1: Create main repository node
             repo_id = self._create_repository_node()
             results['repository_id'] = repo_id
             results['nodes_created'] += 1
-            
+
             # Step 2: Create capability nodes
             capability_results = self._create_capability_nodes(repo_id)
             results['nodes_created'] += capability_results['nodes_created']
             results['relationships_created'] += capability_results['relationships_created']
-            
+
             # Step 3: Create code structure nodes
             structure_results = self._create_code_structure_nodes(repo_id)
             results['nodes_created'] += structure_results['nodes_created']
             results['relationships_created'] += structure_results['relationships_created']
-            
+
             # Step 4: Create controller support nodes
             controller_results = self._create_controller_support_nodes(repo_id)
             results['nodes_created'] += controller_results['nodes_created']
             results['relationships_created'] += controller_results['relationships_created']
-            
+
             # Step 5: Create integration relationship with PLC-GPT
             integration_results = self._create_plc_gpt_integration(repo_id)
             results['relationships_created'] += integration_results['relationships_created']
-            
+
             # Step 6: Generate embeddings
             embedding_results = self._generate_comprehensive_embeddings(repo_id)
             results['embeddings_created'] = embedding_results['embeddings_created']
-            
+
             # Step 7: Create ecosystem relationships
             ecosystem_results = self._create_ecosystem_relationships(repo_id)
             results['relationships_created'] += ecosystem_results['relationships_created']
-            
+
             results['status'] = 'completed'
             results['components_processed'] = (
                 len(self.repo_context['capabilities']['file_formats']) +
                 len(self.repo_context['capabilities']['supported_controllers']) +
                 len(self.repo_context['code_structure'])
             )
-            
+
         except Exception as e:
             logger.error(f"Error during ingestion: {str(e)}")
             results['status'] = 'failed'
             results['errors'].append(str(e))
-            
+
         return results
-        
+
     def _create_repository_node(self) -> str:
         """Create the main GitHubRepo node."""
         repo_id = str(uuid.uuid4())
         repo_data = self.repo_context['repository']
-        
+
         with self.neo4j_driver.session() as session:
             session.run("""
                 MERGE (r:GitHubRepo {id: $id})
@@ -351,19 +351,19 @@ class ACDToolLibIngestion:
                 'processed_date': datetime.now().isoformat(),
                 'ingestion_source': 'specialized_acd_l5x_ingestion'
             })
-            
+
         logger.info(f"Created GitHubRepo node: {repo_id}")
         return repo_id
-        
+
     def _create_capability_nodes(self, repo_id: str) -> Dict[str, int]:
         """Create nodes for repository capabilities."""
         stats = {'nodes_created': 0, 'relationships_created': 0}
-        
+
         with self.neo4j_driver.session() as session:
             # Create file format capability nodes
             for format_name, format_data in self.repo_context['capabilities']['file_formats'].items():
                 capability_id = str(uuid.uuid4())
-                
+
                 session.run("""
                     CREATE (c:Capability {
                         id: $id,
@@ -387,14 +387,14 @@ class ACDToolLibIngestion:
                 created_date=datetime.now().isoformat(),
                 repo_id=repo_id
                 )
-                
+
                 stats['nodes_created'] += 1
                 stats['relationships_created'] += 1
-                
+
             # Create validation capability nodes
             for validation_feature in self.repo_context['capabilities']['validation_features']:
                 capability_id = str(uuid.uuid4())
-                
+
                 session.run("""
                     CREATE (c:Capability {
                         id: $id,
@@ -414,23 +414,23 @@ class ACDToolLibIngestion:
                 created_date=datetime.now().isoformat(),
                 repo_id=repo_id
                 )
-                
+
                 stats['nodes_created'] += 1
                 stats['relationships_created'] += 1
-                
+
         return stats
-        
+
     def _create_code_structure_nodes(self, repo_id: str) -> Dict[str, int]:
         """Create nodes for code structure components."""
         stats = {'nodes_created': 0, 'relationships_created': 0}
-        
+
         def create_module_nodes(path_dict: Dict, parent_path: str = "", parent_id: str = None):
             for name, content in path_dict.items():
                 if isinstance(content, dict):
                     # Directory
                     module_id = str(uuid.uuid4())
                     current_path = f"{parent_path}/{name}" if parent_path else name
-                    
+
                     with self.neo4j_driver.session() as session:
                         session.run("""
                             CREATE (m:CodeModule {
@@ -451,10 +451,10 @@ class ACDToolLibIngestion:
                         created_date=datetime.now().isoformat(),
                         repo_id=repo_id
                         )
-                        
+
                     stats['nodes_created'] += 1
                     stats['relationships_created'] += 1
-                    
+
                     # Create parent-child relationship if exists
                     if parent_id:
                         with self.neo4j_driver.session() as session:
@@ -467,17 +467,17 @@ class ACDToolLibIngestion:
                             parent_id=parent_id,
                             child_id=module_id
                             )
-                            
+
                         stats['relationships_created'] += 1
-                    
+
                     # Recursively process subdirectories
                     create_module_nodes(content, current_path, module_id)
-                    
+
                 else:
                     # File
                     module_id = str(uuid.uuid4())
                     current_path = f"{parent_path}/{name}" if parent_path else name
-                    
+
                     with self.neo4j_driver.session() as session:
                         session.run("""
                             CREATE (m:CodeModule {
@@ -500,10 +500,10 @@ class ACDToolLibIngestion:
                         created_date=datetime.now().isoformat(),
                         repo_id=repo_id
                         )
-                        
+
                     stats['nodes_created'] += 1
                     stats['relationships_created'] += 1
-                    
+
                     # Create parent-child relationship if exists
                     if parent_id:
                         with self.neo4j_driver.session() as session:
@@ -516,20 +516,20 @@ class ACDToolLibIngestion:
                             parent_id=parent_id,
                             child_id=module_id
                             )
-                            
+
                         stats['relationships_created'] += 1
-        
+
         create_module_nodes(self.repo_context['code_structure'])
         return stats
-        
+
     def _create_controller_support_nodes(self, repo_id: str) -> Dict[str, int]:
         """Create nodes for supported PLC controllers."""
         stats = {'nodes_created': 0, 'relationships_created': 0}
-        
+
         with self.neo4j_driver.session() as session:
             for controller in self.repo_context['capabilities']['supported_controllers']:
                 controller_id = str(uuid.uuid4())
-                
+
                 session.run("""
                     CREATE (c:PLCController {
                         id: $id,
@@ -556,16 +556,16 @@ class ACDToolLibIngestion:
                 created_date=datetime.now().isoformat(),
                 repo_id=repo_id
                 )
-                
+
                 stats['nodes_created'] += 1
                 stats['relationships_created'] += 1
-                
+
         return stats
-        
+
     def _create_plc_gpt_integration(self, repo_id: str) -> Dict[str, int]:
         """Create relationship with PLC-GPT project."""
         stats = {'relationships_created': 0}
-        
+
         with self.neo4j_driver.session() as session:
             # Try to find existing PLC-GPT project node
             result = session.run("""
@@ -574,9 +574,9 @@ class ACDToolLibIngestion:
                 RETURN p
                 LIMIT 1
             """)
-            
+
             plc_gpt_node = result.single()
-            
+
             if plc_gpt_node:
                 # Create integration relationship
                 session.run("""
@@ -594,12 +594,12 @@ class ACDToolLibIngestion:
                 plc_gpt_id=plc_gpt_node['p']['id'],
                 created_date=datetime.now().isoformat()
                 )
-                
+
                 stats['relationships_created'] += 1
             else:
                 # Create a placeholder PLC-GPT project node
                 plc_gpt_id = str(uuid.uuid4())
-                
+
                 session.run("""
                     CREATE (p:PLCProgram {
                         id: $id,
@@ -623,15 +623,15 @@ class ACDToolLibIngestion:
                 created_date=datetime.now().isoformat(),
                 repo_id=repo_id
                 )
-                
+
                 stats['relationships_created'] += 1
-                
+
         return stats
-        
+
     def _generate_comprehensive_embeddings(self, repo_id: str) -> Dict[str, int]:
         """Generate embeddings for repository content."""
         stats = {'embeddings_created': 0}
-        
+
         try:
             # Repository overview embedding
             overview_text = f"""
@@ -641,9 +641,9 @@ class ACDToolLibIngestion:
             Language: {self.repo_context['repository']['language']}
             Topics: {', '.join(self.repo_context['repository']['topics'])}
             """
-            
+
             overview_embedding = self.embedding_generator.embed_text(overview_text)
-            
+
             point = PointStruct(
                 id=str(uuid.uuid4()),
                 vector=overview_embedding,
@@ -655,28 +655,28 @@ class ACDToolLibIngestion:
                     'embedding_type': 'comprehensive_overview'
                 }
             )
-            
+
             self.qdrant_client.upsert(
                 collection_name='document_chunks',
                 points=[point]
             )
-            
+
             stats['embeddings_created'] += 1
-            
+
             # Capabilities embedding
             capabilities_text = f"""
             File Format Capabilities:
             {json.dumps(self.repo_context['capabilities']['file_formats'], indent=2)}
-            
+
             Validation Features:
             {', '.join(self.repo_context['capabilities']['validation_features'])}
-            
+
             Integration Features:
             {', '.join(self.repo_context['capabilities']['integration_features'])}
             """
-            
+
             capabilities_embedding = self.embedding_generator.embed_text(capabilities_text)
-            
+
             point = PointStruct(
                 id=str(uuid.uuid4()),
                 vector=capabilities_embedding,
@@ -688,25 +688,25 @@ class ACDToolLibIngestion:
                     'embedding_type': 'technical_capabilities'
                 }
             )
-            
+
             self.qdrant_client.upsert(
                 collection_name='document_chunks',
                 points=[point]
             )
-            
+
             stats['embeddings_created'] += 1
-            
+
             # Usage patterns embedding
             usage_text = f"""
             Usage Patterns and Examples:
             {json.dumps(self.repo_context['usage_patterns'], indent=2)}
-            
+
             Technical Specifications:
             {json.dumps(self.repo_context['technical_specifications'], indent=2)}
             """
-            
+
             usage_embedding = self.embedding_generator.embed_text(usage_text)
-            
+
             point = PointStruct(
                 id=str(uuid.uuid4()),
                 vector=usage_embedding,
@@ -718,30 +718,30 @@ class ACDToolLibIngestion:
                     'embedding_type': 'usage_examples'
                 }
             )
-            
+
             self.qdrant_client.upsert(
                 collection_name='document_chunks',
                 points=[point]
             )
-            
+
             stats['embeddings_created'] += 1
-            
+
         except Exception as e:
             logger.error(f"Failed to create embeddings: {e}")
-            
+
         return stats
-        
+
     def _create_ecosystem_relationships(self, repo_id: str) -> Dict[str, int]:
         """Create relationships with ecosystem libraries."""
         stats = {'relationships_created': 0}
-        
+
         ecosystem_libs = self.repo_context['relationships']['ecosystem_position']['related_libraries']
-        
+
         with self.neo4j_driver.session() as session:
             for lib_description in ecosystem_libs:
                 # Parse library name from description
                 lib_name = lib_description.split(' - ')[0].split('/')[-1]
-                
+
                 # Try to find existing repository node
                 result = session.run("""
                     MATCH (r:GitHubRepo)
@@ -749,9 +749,9 @@ class ACDToolLibIngestion:
                     RETURN r
                     LIMIT 1
                 """, lib_name=lib_name)
-                
+
                 existing_repo = result.single()
-                
+
                 if existing_repo:
                     # Create ecosystem relationship
                     session.run("""
@@ -769,30 +769,29 @@ class ACDToolLibIngestion:
                     description=lib_description,
                     created_date=datetime.now().isoformat()
                     )
-                    
+
                     stats['relationships_created'] += 1
-                    
+
         return stats
 
 
 def main():
     """Main execution function."""
-    import os
     try:
         from dotenv import load_dotenv
         load_dotenv()
     except ImportError:
         logger.warning("python-dotenv not installed, using environment variables directly")
-    
+
     # Configuration
     neo4j_uri = os.getenv('NEO4J_URI', 'bolt://localhost:7687')
     neo4j_user = os.getenv('NEO4J_USER', 'neo4j')
     neo4j_password = os.getenv('NEO4J_PASSWORD', 'plc-gpt-2024')
     openai_api_key = os.getenv('OPENAI_API_KEY')
     github_token = os.getenv('GITHUB_TOKEN')
-    
+
     logger.info("Starting acd-l5x-tool-lib repository ingestion")
-    
+
     try:
         with ACDToolLibIngestion(
             neo4j_uri=neo4j_uri,
@@ -801,9 +800,9 @@ def main():
             openai_api_key=openai_api_key,
             github_token=github_token
         ) as ingestion:
-            
+
             results = ingestion.ingest_repository()
-            
+
             # Print results
             print("\n" + "="*60)
             print("ACD-L5X TOOL LIB INGESTION RESULTS")
@@ -814,7 +813,7 @@ def main():
             print(f"Relationships Created: {results['relationships_created']}")
             print(f"Embeddings Created: {results['embeddings_created']}")
             print(f"Components Processed: {results['components_processed']}")
-            
+
             if results['status'] == 'completed':
                 print("\n✅ SUCCESS: acd-l5x-tool-lib repository has been successfully ingested!")
                 print("The knowledge graph now contains comprehensive context about:")
@@ -829,14 +828,14 @@ def main():
                 print(f"\n❌ FAILED: {len(results['errors'])} errors occurred")
                 for error in results['errors']:
                     print(f"  - {error}")
-                    
+
     except Exception as e:
         logger.error(f"Fatal error during ingestion: {str(e)}")
         print(f"\n❌ FATAL ERROR: {str(e)}")
         return 1
-        
+
     return 0
 
 
 if __name__ == "__main__":
-    exit(main()) 
+    exit(main())

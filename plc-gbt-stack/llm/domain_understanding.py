@@ -6,13 +6,11 @@ Provides specialized understanding of control theory concepts, PID tuning interp
 performance goal understanding, and industry terminology handling for industrial control systems.
 """
 
-import re
-import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Union
-from enum import Enum
+import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -130,11 +128,11 @@ class DomainContext:
 
 class ConceptRecognizer:
     """Recognizes control theory concepts in natural language"""
-    
+
     def __init__(self):
         self.concept_definitions = self._initialize_concept_definitions()
         self.concept_patterns = self._build_concept_patterns()
-    
+
     def _initialize_concept_definitions(self) -> Dict[ControlConcept, ConceptDefinition]:
         """Initialize comprehensive concept definitions"""
         return {
@@ -154,7 +152,7 @@ class ConceptRecognizer:
             ),
             ControlConcept.PROCESS_VARIABLE: ConceptDefinition(
                 concept=ControlConcept.PROCESS_VARIABLE,
-                name="Process Variable", 
+                name="Process Variable",
                 definition="Measured value of the controlled process parameter",
                 synonyms=["pv", "measured value", "actual value", "feedback"],
                 units=["°C", "°F", "bar", "psi", "gpm", "lpm", "%"]
@@ -207,35 +205,35 @@ class ConceptRecognizer:
                 typical_ranges={"fast": "<30 seconds", "medium": "30-300 seconds", "slow": ">300 seconds"}
             )
         }
-    
+
     def _build_concept_patterns(self) -> Dict[ControlConcept, List[str]]:
         """Build regex patterns for concept recognition"""
         patterns = {}
-        
+
         for concept, definition in self.concept_definitions.items():
             concept_patterns = []
-            
+
             # Add main name pattern
             name_words = definition.name.lower().split()
             concept_patterns.append(r'\b' + r'\s*'.join(name_words) + r'\b')
-            
+
             # Add synonym patterns
             for synonym in definition.synonyms:
                 if len(synonym) > 2:  # Avoid very short patterns
                     concept_patterns.append(r'\b' + re.escape(synonym.lower()) + r'\b')
-            
+
             patterns[concept] = concept_patterns
-        
+
         return patterns
-    
+
     def recognize_concepts(self, text: str) -> Dict[ControlConcept, float]:
         """Recognize control theory concepts in text"""
         text_lower = text.lower()
         recognized_concepts = {}
-        
+
         for concept, patterns in self.concept_patterns.items():
             max_confidence = 0.0
-            
+
             for pattern in patterns:
                 matches = re.findall(pattern, text_lower)
                 if matches:
@@ -244,19 +242,19 @@ class ConceptRecognizer:
                     if len(pattern) > 10:  # Longer patterns get bonus
                         confidence += 0.1
                     max_confidence = max(max_confidence, confidence)
-            
+
             if max_confidence > 0.2:
                 recognized_concepts[concept] = max_confidence
-        
+
         return recognized_concepts
 
 class TuningMethodInterpreter:
     """Interprets PID tuning methods and recommendations"""
-    
+
     def __init__(self):
         self.tuning_methods = self._initialize_tuning_methods()
         self.method_patterns = self._build_method_patterns()
-    
+
     def _initialize_tuning_methods(self) -> Dict[TuningMethod, TuningMethodInfo]:
         """Initialize tuning method information"""
         return {
@@ -301,14 +299,14 @@ class TuningMethodInterpreter:
                 typical_applications=[IndustryDomain.HVAC, IndustryDomain.MANUFACTURING]
             )
         }
-    
+
     def _build_method_patterns(self) -> Dict[TuningMethod, List[str]]:
         """Build patterns for tuning method recognition"""
         patterns = {}
-        
+
         for method, info in self.tuning_methods.items():
             method_patterns = []
-            
+
             # Add method name patterns
             name_variations = [
                 info.name.lower(),
@@ -317,22 +315,22 @@ class TuningMethodInterpreter:
                 method.value.replace('_', ' '),
                 method.value.replace('_', '-')
             ]
-            
+
             for variation in name_variations:
                 method_patterns.append(r'\b' + re.escape(variation) + r'\b')
-            
+
             patterns[method] = method_patterns
-        
+
         return patterns
-    
+
     def identify_tuning_method(self, text: str) -> Dict[TuningMethod, float]:
         """Identify mentioned tuning methods"""
         text_lower = text.lower()
         identified_methods = {}
-        
+
         for method, patterns in self.method_patterns.items():
             max_confidence = 0.0
-            
+
             for pattern in patterns:
                 if re.search(pattern, text_lower):
                     confidence = 0.8
@@ -340,33 +338,33 @@ class TuningMethodInterpreter:
                     if any(word in text_lower for word in ['tuning', 'method', 'algorithm', 'approach']):
                         confidence += 0.1
                     max_confidence = max(max_confidence, confidence)
-            
+
             if max_confidence > 0.3:
                 identified_methods[method] = max_confidence
-        
+
         return identified_methods
-    
-    def recommend_tuning_method(self, process_characteristics: Dict[str, Any], 
+
+    def recommend_tuning_method(self, process_characteristics: Dict[str, Any],
                                domain: IndustryDomain) -> List[Tuple[TuningMethod, float, str]]:
         """Recommend tuning methods based on process characteristics"""
         recommendations = []
-        
+
         # Analyze process characteristics
         has_dead_time = process_characteristics.get('dead_time', 0) > 0
         is_fast_process = process_characteristics.get('time_constant', 60) < 30
         requires_precision = process_characteristics.get('precision_required', False)
         is_stable_process = process_characteristics.get('stability', 'unknown') == 'stable'
-        
+
         # Generate recommendations
         for method, info in self.tuning_methods.items():
             score = 0.5  # Base score
             reasons = []
-            
+
             # Domain-specific scoring
             if domain in info.typical_applications:
                 score += 0.2
                 reasons.append(f"Well-suited for {domain.value} applications")
-            
+
             # Process characteristic scoring
             if has_dead_time and method == TuningMethod.COHEN_COON:
                 score += 0.3
@@ -374,33 +372,33 @@ class TuningMethodInterpreter:
             elif not has_dead_time and method == TuningMethod.ZIEGLER_NICHOLS:
                 score += 0.2
                 reasons.append("Good for general processes without significant dead time")
-            
+
             if requires_precision and method == TuningMethod.LAMBDA_TUNING:
                 score += 0.2
                 reasons.append("Provides precise, predictable control")
-            
+
             if not is_stable_process and method == TuningMethod.AUTO_TUNING:
                 score += 0.1
                 reasons.append("Safe option for unknown process behavior")
-            
+
             if is_fast_process and method == TuningMethod.ZIEGLER_NICHOLS:
                 score += 0.1
                 reasons.append("Works well for fast-responding processes")
-            
+
             recommendation_reason = "; ".join(reasons) if reasons else "General applicability"
             recommendations.append((method, min(1.0, score), recommendation_reason))
-        
+
         # Sort by score and return top recommendations
         recommendations.sort(key=lambda x: x[1], reverse=True)
         return recommendations[:3]
 
 class PerformanceGoalInterpreter:
     """Interprets performance optimization goals"""
-    
+
     def __init__(self):
         self.performance_goals = self._initialize_performance_goals()
         self.goal_patterns = self._build_goal_patterns()
-    
+
     def _initialize_performance_goals(self) -> Dict[PerformanceGoal, PerformanceGoalInfo]:
         """Initialize performance goal information"""
         return {
@@ -437,7 +435,7 @@ class PerformanceGoalInterpreter:
                 tuning_emphasis={"ki": "increase", "kp": "moderate", "kd": "increase"}
             )
         }
-    
+
     def _build_goal_patterns(self) -> Dict[PerformanceGoal, List[str]]:
         """Build patterns for goal recognition"""
         patterns = {
@@ -463,15 +461,15 @@ class PerformanceGoalInterpreter:
             ]
         }
         return patterns
-    
+
     def identify_performance_goals(self, text: str) -> Dict[PerformanceGoal, float]:
         """Identify performance goals from text"""
         text_lower = text.lower()
         identified_goals = {}
-        
+
         for goal, patterns in self.goal_patterns.items():
             max_confidence = 0.0
-            
+
             for pattern in patterns:
                 if re.search(pattern, text_lower):
                     confidence = 0.8
@@ -479,18 +477,18 @@ class PerformanceGoalInterpreter:
                     if any(word in text_lower for word in ['optimize', 'improve', 'enhance', 'better']):
                         confidence += 0.1
                     max_confidence = max(max_confidence, confidence)
-            
+
             if max_confidence > 0.3:
                 identified_goals[goal] = max_confidence
-        
+
         return identified_goals
 
 class IndustryTerminologyManager:
     """Manages industry-specific terminology and context"""
-    
+
     def __init__(self):
         self.industry_terminology = self._initialize_industry_terminology()
-    
+
     def _initialize_industry_terminology(self) -> Dict[IndustryDomain, IndustryTerminology]:
         """Initialize industry-specific terminology"""
         return {
@@ -553,41 +551,41 @@ class IndustryTerminologyManager:
                 regulatory_standards=["EPA", "AWWA", "NSF"]
             )
         }
-    
+
     def identify_industry_domain(self, text: str) -> Dict[IndustryDomain, float]:
         """Identify likely industry domain from text"""
         text_lower = text.lower()
         domain_scores = {}
-        
+
         for domain, terminology in self.industry_terminology.items():
             score = 0.0
-            
+
             # Check for domain-specific terms
             for term in terminology.terms.keys():
                 if term in text_lower:
                     score += 0.3
-            
+
             # Check for typical processes
             for process in terminology.typical_processes:
                 if process.lower() in text_lower:
                     score += 0.2
-            
+
             # Check for common variables
             for variable in terminology.common_variables:
                 if variable.lower() in text_lower:
                     score += 0.1
-            
+
             if score > 0.1:
                 domain_scores[domain] = min(1.0, score)
-        
+
         return domain_scores
-    
+
     def get_domain_context(self, domain: IndustryDomain, specific_terms: List[str] = None) -> DomainContext:
         """Get comprehensive domain context"""
         terminology = self.industry_terminology.get(domain)
         if not terminology:
             return DomainContext(primary_domain=domain, process_type="unknown")
-        
+
         # Determine process type based on specific terms
         process_type = "general"
         if specific_terms:
@@ -595,7 +593,7 @@ class IndustryTerminologyManager:
                 if term.lower() in terminology.typical_processes[0].lower():
                     process_type = terminology.typical_processes[0]
                     break
-        
+
         return DomainContext(
             primary_domain=domain,
             process_type=process_type,
@@ -610,33 +608,33 @@ class IndustryTerminologyManager:
 
 class DomainUnderstandingEngine:
     """Main orchestrator for domain-specific understanding"""
-    
+
     def __init__(self):
         self.concept_recognizer = ConceptRecognizer()
         self.tuning_interpreter = TuningMethodInterpreter()
         self.goal_interpreter = PerformanceGoalInterpreter()
         self.terminology_manager = IndustryTerminologyManager()
-    
+
     def analyze_domain_content(self, text: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Comprehensive domain analysis of text content"""
         # Recognize control concepts
         concepts = self.concept_recognizer.recognize_concepts(text)
-        
+
         # Identify tuning methods
         tuning_methods = self.tuning_interpreter.identify_tuning_method(text)
-        
+
         # Identify performance goals
         performance_goals = self.goal_interpreter.identify_performance_goals(text)
-        
+
         # Identify industry domain
         industry_domains = self.terminology_manager.identify_industry_domain(text)
-        
+
         # Get domain context if domain is identified
         domain_context = None
         if industry_domains:
             primary_domain = max(industry_domains.items(), key=lambda x: x[1])[0]
             domain_context = self.terminology_manager.get_domain_context(primary_domain)
-        
+
         return {
             "control_concepts": {concept.value: confidence for concept, confidence in concepts.items()},
             "tuning_methods": {method.value: confidence for method, confidence in tuning_methods.items()},
@@ -645,25 +643,25 @@ class DomainUnderstandingEngine:
             "domain_context": domain_context,
             "analysis_confidence": self._calculate_overall_confidence(concepts, tuning_methods, performance_goals, industry_domains)
         }
-    
-    def _calculate_overall_confidence(self, concepts: Dict, tuning_methods: Dict, 
+
+    def _calculate_overall_confidence(self, concepts: Dict, tuning_methods: Dict,
                                     performance_goals: Dict, industry_domains: Dict) -> float:
         """Calculate overall confidence in domain understanding"""
         total_items = len(concepts) + len(tuning_methods) + len(performance_goals) + len(industry_domains)
-        
+
         if total_items == 0:
             return 0.0
-        
+
         total_confidence = (
             sum(concepts.values()) +
             sum(tuning_methods.values()) +
             sum(performance_goals.values()) +
             sum(industry_domains.values())
         )
-        
+
         return min(1.0, total_confidence / total_items)
-    
-    def provide_domain_guidance(self, concepts: List[ControlConcept], 
+
+    def provide_domain_guidance(self, concepts: List[ControlConcept],
                                domain: Optional[IndustryDomain] = None) -> Dict[str, Any]:
         """Provide educational guidance on domain concepts"""
         guidance = {
@@ -672,7 +670,7 @@ class DomainUnderstandingEngine:
             "industry_applications": {},
             "best_practices": []
         }
-        
+
         for concept in concepts:
             if concept in self.concept_recognizer.concept_definitions:
                 definition = self.concept_recognizer.concept_definitions[concept]
@@ -681,12 +679,12 @@ class DomainUnderstandingEngine:
                     "synonyms": definition.synonyms,
                     "typical_ranges": definition.typical_ranges
                 }
-                
+
                 # Add related concepts
                 for related in definition.related_concepts:
                     if related not in concepts:
                         guidance["related_concepts"].append(related.value)
-        
+
         if domain:
             terminology = self.terminology_manager.industry_terminology.get(domain)
             if terminology:
@@ -694,7 +692,7 @@ class DomainUnderstandingEngine:
                 guidance["best_practices"] = [
                     f"Follow {std} standards" for std in terminology.regulatory_standards
                 ]
-        
+
         return guidance
 
 # Singleton engine instance
@@ -730,4 +728,4 @@ __all__ = [
     "DomainUnderstandingEngine",
     "get_domain_engine",
     "analyze_domain_content"
-] 
+]

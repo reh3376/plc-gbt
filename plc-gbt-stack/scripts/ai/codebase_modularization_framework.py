@@ -3,7 +3,7 @@
 Codebase Modularization Framework
 =================================
 
-Comprehensive framework for transforming the entire PLC-GPT codebase to a modular 
+Comprehensive framework for transforming the entire PLC-GPT codebase to a modular
 architecture following AI Task Orchestrator Guide methodology.
 
 Based on analysis results showing:
@@ -12,17 +12,13 @@ Based on analysis results showing:
 - 4-week implementation with 4 phases
 """
 
+import ast
 import json
 import logging
-import os
-import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union, Set
-import subprocess
-import ast
-import importlib.util
+from typing import Any, Dict, List
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -76,35 +72,35 @@ class ModularizationPlan:
 class CodebaseModularizationFramework:
     """
     Comprehensive framework for codebase modularization
-    
+
     Implements systematic approach from AI Task Orchestrator analysis
     """
-    
+
     def __init__(self, workspace_path: str = "/Users/reh3376/repos/plc-gbt"):
         self.workspace_path = Path(workspace_path)
         self.framework_id = f"modularization_framework_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.scripts_path = self.workspace_path / "plc-gpt-stack" / "scripts"
         logger.info(f"🏗️ Modularization Framework initialized: {self.framework_id}")
-        
+
     def analyze_dependencies(self) -> List[DependencyMapping]:
         """Analyze current file dependencies and imports"""
         logger.info("🔍 Analyzing current dependencies...")
-        
+
         dependency_map = []
-        
+
         if not self.scripts_path.exists():
             logger.warning("Scripts path not found")
             return dependency_map
-        
+
         for py_file in self.scripts_path.rglob("*.py"):
             try:
-                with open(py_file, 'r', encoding='utf-8') as f:
+                with open(py_file, encoding='utf-8') as f:
                     content = f.read()
-                
+
                 # Parse AST to extract imports
                 tree = ast.parse(content)
                 imports = []
-                
+
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Import):
                         for alias in node.names:
@@ -112,17 +108,17 @@ class CodebaseModularizationFramework:
                     elif isinstance(node, ast.ImportFrom):
                         if node.module:
                             imports.append(node.module)
-                
+
                 # Categorize dependencies
                 internal_deps = [imp for imp in imports if any(
                     keyword in imp for keyword in ['scripts', 'plc_gpt', 'modules']
                 )]
                 external_deps = [imp for imp in imports if imp not in internal_deps]
-                
+
                 # Calculate complexity score based on imports and lines
                 lines = len(content.splitlines())
                 complexity_score = len(imports) + (lines // 100)
-                
+
                 dependency_map.append(DependencyMapping(
                     file_path=str(py_file.relative_to(self.workspace_path)),
                     imports=imports,
@@ -131,30 +127,30 @@ class CodebaseModularizationFramework:
                     external_dependencies=external_deps,
                     complexity_score=complexity_score
                 ))
-                
+
             except Exception as e:
                 logger.warning(f"Failed to analyze {py_file}: {e}")
-        
+
         logger.info(f"📊 Analyzed {len(dependency_map)} Python files")
         return dependency_map
-    
+
     def _extract_exports(self, tree: ast.AST) -> List[str]:
         """Extract exported functions and classes from AST"""
         exports = []
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 if not node.name.startswith('_'):  # Public functions
                     exports.append(f"function:{node.name}")
             elif isinstance(node, ast.ClassDef):
                 exports.append(f"class:{node.name}")
-        
+
         return exports
-    
+
     def define_target_modules(self) -> List[ModuleDefinition]:
         """Define target modular architecture"""
         logger.info("🎯 Defining target modular architecture...")
-        
+
         modules = [
             ModuleDefinition(
                 name="core",
@@ -169,7 +165,7 @@ class CodebaseModularizationFramework:
                 dependencies=[],
                 exports=[
                     "BaseOrchestrator",
-                    "ConfigurationManager", 
+                    "ConfigurationManager",
                     "LoggingManager",
                     "DatabaseManager"
                 ],
@@ -188,7 +184,7 @@ class CodebaseModularizationFramework:
                 dependencies=["core"],
                 exports=[
                     "DataLoader",
-                    "DataValidator", 
+                    "DataValidator",
                     "DataPreprocessor",
                     "FormatConverter"
                 ],
@@ -220,7 +216,7 @@ class CodebaseModularizationFramework:
                 responsibilities=[
                     "Statistical analysis utilities",
                     "Report generation",
-                    "Visualization helpers", 
+                    "Visualization helpers",
                     "Results aggregation"
                 ],
                 dependencies=["core", "data", "metrics"],
@@ -246,7 +242,7 @@ class CodebaseModularizationFramework:
                 exports=[
                     "TaskOrchestrator",
                     "ModelTrainer",
-                    "InferenceEngine", 
+                    "InferenceEngine",
                     "AIWorkflowManager"
                 ],
                 complexity="high",
@@ -276,7 +272,7 @@ class CodebaseModularizationFramework:
                 description="Testing infrastructure and utilities",
                 responsibilities=[
                     "Test fixtures and utilities",
-                    "Mock objects and helpers", 
+                    "Mock objects and helpers",
                     "Validation frameworks",
                     "Performance testing tools"
                 ],
@@ -291,18 +287,18 @@ class CodebaseModularizationFramework:
                 priority=5
             )
         ]
-        
+
         logger.info(f"🎯 Defined {len(modules)} target modules")
         return modules
-    
-    def create_refactoring_tasks(self, modules: List[ModuleDefinition], 
+
+    def create_refactoring_tasks(self, modules: List[ModuleDefinition],
                                dependency_map: List[DependencyMapping]) -> List[RefactoringTask]:
         """Create detailed refactoring tasks based on modules and dependencies"""
         logger.info("📋 Creating refactoring tasks...")
-        
+
         tasks = []
         task_counter = 1
-        
+
         # Phase 1: Analysis & Planning Tasks
         tasks.extend([
             RefactoringTask(
@@ -316,7 +312,7 @@ class CodebaseModularizationFramework:
                 dependencies=[],
                 success_criteria=[
                     "All Python files analyzed",
-                    "Dependency map generated", 
+                    "Dependency map generated",
                     "Circular dependencies identified",
                     "Refactoring priorities established"
                 ],
@@ -330,7 +326,7 @@ class CodebaseModularizationFramework:
                 task_id=f"T{task_counter+1:03d}",
                 title="Design Module Architecture",
                 description="Create detailed design for each target module",
-                phase=1, 
+                phase=1,
                 priority=1,
                 estimated_hours=12,
                 target_files=["module_architecture_design.md"],
@@ -349,7 +345,7 @@ class CodebaseModularizationFramework:
             )
         ])
         task_counter += 2
-        
+
         # Phase 2: Core Infrastructure Module Tasks
         for module in modules:
             if module.name == "core":
@@ -375,7 +371,7 @@ class CodebaseModularizationFramework:
                     ]
                 ))
                 task_counter += 1
-        
+
         # Phase 3: Domain-Specific Module Tasks
         for module in modules:
             if module.name != "core" and module.name != "testing":
@@ -391,7 +387,7 @@ class CodebaseModularizationFramework:
                     success_criteria=[
                         f"{module.name} module created",
                         "Dependencies properly imported",
-                        "Unit tests passing", 
+                        "Unit tests passing",
                         "Integration tests passing"
                     ],
                     validation_steps=[
@@ -401,10 +397,10 @@ class CodebaseModularizationFramework:
                     ]
                 ))
                 task_counter += 1
-        
+
         # Phase 4: Integration & Migration Tasks
         high_complexity_files = [dm.file_path for dm in dependency_map if dm.complexity_score > 20]
-        
+
         tasks.extend([
             RefactoringTask(
                 task_id=f"T{task_counter:03d}",
@@ -450,14 +446,14 @@ class CodebaseModularizationFramework:
                 ]
             )
         ])
-        
+
         logger.info(f"📋 Created {len(tasks)} refactoring tasks")
         return tasks
-    
+
     def create_validation_framework(self) -> Dict[str, Any]:
         """Create comprehensive validation framework"""
         logger.info("✅ Creating validation framework...")
-        
+
         framework = {
             "automated_tests": {
                 "unit_tests": {
@@ -486,7 +482,7 @@ class CodebaseModularizationFramework:
                     "frequency": "Pre-commit"
                 },
                 "complexity": {
-                    "tool": "radon", 
+                    "tool": "radon",
                     "max_complexity": 10,
                     "frequency": "Weekly"
                 },
@@ -504,7 +500,7 @@ class CodebaseModularizationFramework:
                 },
                 "code_review": {
                     "description": "Review implementation quality",
-                    "frequency": "Every pull request", 
+                    "frequency": "Every pull request",
                     "reviewers": ["Team lead", "Peer developer"]
                 }
             },
@@ -516,19 +512,19 @@ class CodebaseModularizationFramework:
                 "documentation": "Complete module documentation"
             }
         }
-        
+
         return framework
-    
+
     def generate_comprehensive_plan(self) -> ModularizationPlan:
         """Generate complete modularization plan"""
         logger.info("🚀 Generating comprehensive modularization plan...")
-        
+
         # Generate all components
         dependency_map = self.analyze_dependencies()
         modules = self.define_target_modules()
         tasks = self.create_refactoring_tasks(modules, dependency_map)
         validation_framework = self.create_validation_framework()
-        
+
         # Create timeline
         timeline = {
             "total_duration": "4 weeks",
@@ -547,7 +543,7 @@ class CodebaseModularizationFramework:
                 {
                     "phase": 2,
                     "name": "Core Infrastructure",
-                    "duration": "1 week", 
+                    "duration": "1 week",
                     "tasks": [t.task_id for t in tasks if t.phase == 2],
                     "deliverables": [
                         "Core module implementation",
@@ -579,7 +575,7 @@ class CodebaseModularizationFramework:
                 }
             ]
         }
-        
+
         # Risk mitigation strategies
         risk_mitigation = [
             "Incremental migration with feature flags",
@@ -590,7 +586,7 @@ class CodebaseModularizationFramework:
             "Code review gates at module boundaries",
             "Documentation updates concurrent with changes"
         ]
-        
+
         plan = ModularizationPlan(
             modules=modules,
             dependency_map=dependency_map,
@@ -599,30 +595,30 @@ class CodebaseModularizationFramework:
             risk_mitigation=risk_mitigation,
             validation_framework=validation_framework
         )
-        
+
         logger.info("✅ Comprehensive modularization plan generated")
         return plan
-    
+
     def save_plan(self, plan: ModularizationPlan) -> str:
         """Save modularization plan to file"""
         results_path = self.workspace_path / "plc-gpt-stack" / "scripts" / "ai"
         results_path.mkdir(parents=True, exist_ok=True)
-        
+
         output_file = results_path / f"{self.framework_id}_plan.json"
-        
+
         with open(output_file, 'w') as f:
             json.dump(asdict(plan), f, indent=2, default=str)
-        
+
         logger.info(f"📁 Modularization plan saved: {output_file}")
         return str(output_file)
-    
+
     def generate_roadmap_phase(self, plan: ModularizationPlan) -> Dict[str, Any]:
         """Generate roadmap phase content for inclusion in roadmap.md"""
         logger.info("🗺️ Generating roadmap phase content...")
-        
+
         total_tasks = len(plan.refactoring_tasks)
         total_hours = sum(task.estimated_hours for task in plan.refactoring_tasks)
-        
+
         roadmap_phase = {
             "phase_number": "14",
             "title": "Codebase Modularization & Architecture Transformation",
@@ -660,7 +656,7 @@ class CodebaseModularizationFramework:
                     "deliverables": plan.timeline["phases"][0]["deliverables"]
                 },
                 {
-                    "phase": "14.2", 
+                    "phase": "14.2",
                     "name": "Core Infrastructure Modules",
                     "duration": "1 week",
                     "description": "Create foundational modular components and base patterns",
@@ -670,7 +666,7 @@ class CodebaseModularizationFramework:
                 {
                     "phase": "14.3",
                     "name": "Domain-Specific Modules",
-                    "duration": "1 week", 
+                    "duration": "1 week",
                     "description": "Extract domain functionality into specialized modules",
                     "tasks": [t.title for t in plan.refactoring_tasks if t.phase == 3],
                     "deliverables": plan.timeline["phases"][2]["deliverables"]
@@ -698,7 +694,7 @@ class CodebaseModularizationFramework:
             },
             "validation_framework": {
                 "automated_testing": "Unit, integration, and performance tests",
-                "code_quality": "Linting, complexity analysis, duplication detection", 
+                "code_quality": "Linting, complexity analysis, duplication detection",
                 "manual_review": "Architecture and code review processes",
                 "acceptance_criteria": plan.validation_framework["acceptance_criteria"]
             },
@@ -710,57 +706,57 @@ class CodebaseModularizationFramework:
                 "duplication_elimination": "90%+ code duplication removal"
             }
         }
-        
+
         return roadmap_phase
 
 def main():
     """Execute comprehensive codebase modularization framework"""
     print("🏗️ Codebase Modularization Framework")
     print("=" * 80)
-    
+
     framework = CodebaseModularizationFramework()
-    
+
     try:
         # Generate comprehensive plan
         plan = framework.generate_comprehensive_plan()
-        
+
         # Save plan
         plan_file = framework.save_plan(plan)
-        
+
         # Generate roadmap content
         roadmap_phase = framework.generate_roadmap_phase(plan)
-        
+
         # Display summary
-        print(f"\n📊 Modularization Plan Summary:")
+        print("\n📊 Modularization Plan Summary:")
         print(f"   Target Modules: {len(plan.modules)}")
         print(f"   Refactoring Tasks: {len(plan.refactoring_tasks)}")
         print(f"   Total Effort: {sum(task.estimated_hours for task in plan.refactoring_tasks)} hours")
         print(f"   Dependencies Analyzed: {len(plan.dependency_map)} files")
-        
-        print(f"\n🎯 Target Modules:")
+
+        print("\n🎯 Target Modules:")
         for module in plan.modules:
             print(f"   {module.name}: {module.description} (Priority {module.priority})")
-        
-        print(f"\n📋 Implementation Phases:")
+
+        print("\n📋 Implementation Phases:")
         for phase in roadmap_phase["phases"]:
             task_count = len([t for t in plan.refactoring_tasks if t.phase == int(phase["phase"].split('.')[1])])
             print(f"   {phase['phase']}: {phase['name']} ({phase['duration']}, {task_count} tasks)")
-        
+
         print(f"\n✅ Complete plan saved to: {plan_file}")
-        print(f"\n🗺️ Roadmap phase content generated and ready for integration!")
-        print(f"\n🚀 Framework ready for systematic implementation!")
-        
+        print("\n🗺️ Roadmap phase content generated and ready for integration!")
+        print("\n🚀 Framework ready for systematic implementation!")
+
         # Save roadmap phase content
         roadmap_file = Path(plan_file).parent / f"{framework.framework_id}_roadmap_phase.json"
         with open(roadmap_file, 'w') as f:
             json.dump(roadmap_phase, f, indent=2, default=str)
         print(f"📋 Roadmap phase content saved to: {roadmap_file}")
-        
+
     except Exception as e:
         logger.error(f"❌ Framework generation failed: {e}")
         return 1
-    
+
     return 0
 
 if __name__ == "__main__":
-    exit(main()) 
+    exit(main())
