@@ -23,7 +23,6 @@
     "forceConsistentCasingInFileNames": false,
     "moduleResolution": "node"
   },
-  "files": [],
   "include": [],
   "exclude": ["**/*"]
 }
