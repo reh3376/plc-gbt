@@ -5,7 +5,7 @@
 > **Project Completion**: January 18, 2025  
 > **Status**: 🎉 **PROJECT In Development** - All core phases of backend implemented, additional backend refinement necessary to reach production quality code.  Frontend dev is underway.   
 > **Current Status**: Working towards Production deployment by October 2025.  
-> **Last Updated**: August 19, 2025 - MCP Browser Automation Fix & OpenAPI Schema Integration Complete 
+> **Last Updated**: September 3, 2025 - Tuning Queue dropdown dynamic population implemented & user-verified
 
 ## 🚀 **MAJOR PROGRESS UPDATE** - August 19, 2025
 
@@ -3682,6 +3682,7 @@ const template = `
 - [x] **Schema Management**: Zod-driven form generation and validation
 - [x] **Basic Parameter Editing**: PID parameter input fields with validation
 - [x] **Loop Status Display**: Real-time status indicators and monitoring
+ - [x] **Active Loops Dropdown (Tuning Queue)**: Dynamically populated from `/api/v1/instances`; user verified new loop appears immediately after creation
 
 #### In Progress Tasks
 - [ ] **Enhanced Tuning Interface**: Advanced PID tuning capabilities with 15+ functionality gaps to address
@@ -3954,6 +3955,7 @@ const template = `
 - **State Management**: Zustand stores with persistence for all component state
 - **Styling**: Tailwind CSS with VS Code industrial theme consistency
 - **Type Safety**: Zod schema validation for all data structures and API interactions
+ - **Control Loop Panel Update**: Tuning Queue dropdown now uses same-origin Next.js API route `/api/v1/instances` (avoids CORS/port issues) and refreshes immediately after loop creation events
 
 ### 🌐 **Development Server Configuration**
 

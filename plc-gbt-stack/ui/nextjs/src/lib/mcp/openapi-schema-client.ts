@@ -87,6 +87,7 @@ export class RealOpenAPISchemaMCPClient {
 
   constructor(mcpServerUrl?: string) {
     // Check if MCP server URL is provided via environment variable first
+    // Default to port 3000 (n8n MCP) but will automatically fallback to 3001 if needed
     this.mcpServerUrl =
       mcpServerUrl || process.env.NEXT_PUBLIC_MCP_SERVER_URL || 'http://127.0.0.1:3000';
 
@@ -193,10 +194,28 @@ export class RealOpenAPISchemaMCPClient {
    */
   private async loadSchemasFromMCP(): Promise<void> {
     try {
+      // Check capabilities via health endpoint first to avoid probing unsupported paths
+      const health = await this.makeRequest('/health', 'GET');
+      const supportsOpenAPISchemas = Boolean(
+        health.success &&
+          health.data &&
+          typeof health.data === 'object' &&
+          (health.data as Record<string, unknown>)?.capabilities &&
+          Array.isArray((health.data as Record<string, unknown>).capabilities) &&
+          ((health.data as Record<string, unknown>).capabilities as unknown[]).includes(
+            'openapi-schemas'
+          )
+      );
+
       // Test if this is an n8n MCP server (different from OpenAPI Schema MCP)
       const serverInfo = await this.makeRequest('/', 'GET');
 
-      if (serverInfo.success && (serverInfo.data as Record<string, unknown>)?.description?.toString().includes('n8n Documentation')) {
+      if (
+        serverInfo.success &&
+        (serverInfo.data as Record<string, unknown>)?.description
+          ?.toString()
+          .includes('n8n Documentation')
+      ) {
         console.log('ℹ️ Connected to n8n MCP server - using local schemas for OpenAPI validation');
         // This is an n8n MCP server, not an OpenAPI schema server
         // Use local schemas but maintain MCP connection for n8n tools
@@ -204,30 +223,42 @@ export class RealOpenAPISchemaMCPClient {
         return;
       }
 
-      // Request schemas from OpenAPI Schema MCP server (if available)
-      const schemasResponse = await this.makeRequest('/schemas/openapi', 'GET');
-
-      if (!schemasResponse.success) {
-        console.log('ℹ️ MCP server available but no OpenAPI schemas - using local validation');
-        // Server is running but doesn't provide OpenAPI schemas - use local validation
+      // Request schemas from OpenAPI Schema MCP server only if capability is advertised
+      if (!supportsOpenAPISchemas) {
         this.componentSchemas = {};
         return;
       }
 
-      // Parse component schemas
-      if (schemasResponse.schemas) {
-        this.componentSchemas = schemasResponse.schemas;
-      }
+      // Wrap in try-catch to handle server-side errors
+      try {
+        const schemasResponse = await this.makeRequest('/schemas/openapi', 'GET');
 
-      // Parse endpoint schemas
-      if (schemasResponse.endpoints) {
-        for (const endpoint of schemasResponse.endpoints) {
-          const key = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
-          this.endpointSchemas.set(key, endpoint);
+        if (!schemasResponse.success) {
+          // Server is running but doesn't provide OpenAPI schemas - use local validation
+          // This is expected for n8n MCP server, so don't log anything
+          this.componentSchemas = {};
+          return;
         }
-      }
 
-      console.log('📋 Schemas loaded from Docker MCP server');
+        // Parse component schemas
+        if (schemasResponse.schemas) {
+          this.componentSchemas = schemasResponse.schemas;
+        }
+
+        // Parse endpoint schemas
+        if (schemasResponse.endpoints) {
+          for (const endpoint of schemasResponse.endpoints) {
+            const key = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
+            this.endpointSchemas.set(key, endpoint);
+          }
+        }
+
+        console.log('📋 Schemas loaded from Docker MCP server');
+      } catch (_schemaError) {
+        // Use local validation if schema retrieval fails for any reason
+        this.componentSchemas = {};
+        return;
+      }
     } catch (error) {
       console.error('❌ Failed to load schemas from MCP:', error);
       throw error;
@@ -242,9 +273,14 @@ export class RealOpenAPISchemaMCPClient {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     body?: unknown
   ): Promise<DockerMCPResponse> {
-    try {
-      const url = `${this.mcpServerUrl}${path}`;
+    // Special handling for /schemas/openapi endpoint to suppress console errors
+    const isOpenAPISchemaRequest = path === '/schemas/openapi';
+    // Hoist so it's visible in both try and catch blocks
+    const originalConsoleError: ((...data: unknown[]) => void) | null = isOpenAPISchemaRequest
+      ? console.error
+      : null;
 
+    try {
       const requestOptions: RequestInit = {
         method,
         headers: {
@@ -257,7 +293,80 @@ export class RealOpenAPISchemaMCPClient {
         requestOptions.body = JSON.stringify(body);
       }
 
-      const response = await fetch(url, requestOptions);
+      // Try primary URL first
+      let url = `${this.mcpServerUrl}${path}`;
+      let response: Response;
+
+      // For OpenAPI schema requests, we expect failures and want to suppress console errors
+      if (isOpenAPISchemaRequest) {
+        console.error = () => {}; // Temporarily disable console.error
+      }
+
+      try {
+        response = await fetch(url, requestOptions);
+      } catch (error) {
+        // If fetch fails and it's port 3000, try port 3001 as fallback
+        if (this.mcpServerUrl.includes(':3000')) {
+          // Use relative URL if we're on port 3001 to avoid CORS issues
+          if (typeof window !== 'undefined' && window.location.port === '3001') {
+            if (!isOpenAPISchemaRequest) {
+              console.log(`🔄 Primary port 3000 failed, using relative URL for port 3001...`);
+            }
+            url = path; // Use relative URL
+            response = await fetch(url, requestOptions);
+          } else {
+            const fallbackUrl = this.mcpServerUrl
+              .replace(':3000', ':3001')
+              .replace('127.0.0.1', 'localhost');
+            if (!isOpenAPISchemaRequest) {
+              console.log(`🔄 Primary port 3000 failed, trying fallback port 3001...`);
+            }
+            url = `${fallbackUrl}${path}`;
+            response = await fetch(url, requestOptions);
+          }
+        } else {
+          // Restore console.error before throwing
+          if (originalConsoleError) {
+            console.error = originalConsoleError;
+          }
+          throw error;
+        }
+      }
+
+      // If primary fails and it's port 3000, try port 3001 as fallback
+      if (
+        !response.ok &&
+        this.mcpServerUrl.includes(':3000') &&
+        !url.includes(':3001') &&
+        !url.startsWith('/')
+      ) {
+        // Use relative URL if we're on port 3001 to avoid CORS issues
+        if (typeof window !== 'undefined' && window.location.port === '3001') {
+          if (!isOpenAPISchemaRequest) {
+            console.log(
+              `🔄 Primary port 3000 returned ${response.status}, using relative URL for port 3001...`
+            );
+          }
+          url = path; // Use relative URL
+          response = await fetch(url, requestOptions);
+        } else {
+          const fallbackUrl = this.mcpServerUrl
+            .replace(':3000', ':3001')
+            .replace('127.0.0.1', 'localhost');
+          if (!isOpenAPISchemaRequest) {
+            console.log(
+              `🔄 Primary port 3000 returned ${response.status}, trying fallback port 3001...`
+            );
+          }
+          url = `${fallbackUrl}${path}`;
+          response = await fetch(url, requestOptions);
+        }
+      }
+
+      // Restore console.error if it was temporarily disabled
+      if (originalConsoleError) {
+        console.error = originalConsoleError;
+      }
 
       if (!response.ok) {
         return {
@@ -285,6 +394,11 @@ export class RealOpenAPISchemaMCPClient {
 
       return result;
     } catch (error) {
+      // Restore console.error if it was temporarily disabled
+      if (originalConsoleError) {
+        console.error = originalConsoleError;
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',

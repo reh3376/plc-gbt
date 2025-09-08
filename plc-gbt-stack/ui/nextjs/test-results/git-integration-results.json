@@ -1,0 +1,185 @@
+{
+  "config": {
+    "configFile": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/playwright.config.ts",
+    "rootDir": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/src/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/git-integration-results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/src/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.54.2",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "enhanced-modal-drag-resize.test.ts",
+      "file": "enhanced-modal-drag-resize.test.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Enhanced Modal - Drag Functionality",
+          "file": "enhanced-modal-drag-resize.test.ts",
+          "line": 65,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Modal header enables dragging",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 60915,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 60000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 60000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/src/tests/enhanced-modal-drag-resize.test.ts:66:8",
+                        "location": {
+                          "file": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/src/tests/enhanced-modal-drag-resize.test.ts",
+                          "column": 8,
+                          "line": 66
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 64 |\u001b[39m\n \u001b[90m 65 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Enhanced Modal - Drag Functionality'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 66 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 67 |\u001b[39m     \u001b[90m// Navigate to application and open node properties modal\u001b[39m\n \u001b[90m 68 |\u001b[39m     \u001b[36mconst\u001b[39m base \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m resolveBaseUrl(page)\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(joinUrl(base\u001b[33m,\u001b[39m \u001b[32m'/workflow'\u001b[39m))\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/src/tests/enhanced-modal-drag-resize.test.ts",
+                            "column": 8,
+                            "line": 66
+                          },
+                          "message": "\u001b[31mTest timeout of 60000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 64 |\u001b[39m\n \u001b[90m 65 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Enhanced Modal - Drag Functionality'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 66 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 67 |\u001b[39m     \u001b[90m// Navigate to application and open node properties modal\u001b[39m\n \u001b[90m 68 |\u001b[39m     \u001b[36mconst\u001b[39m base \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m resolveBaseUrl(page)\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(joinUrl(base\u001b[33m,\u001b[39m \u001b[32m'/workflow'\u001b[39m))\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at /Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/src/tests/enhanced-modal-drag-resize.test.ts:66:8\u001b[22m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/src/tests/enhanced-modal-drag-resize.test.ts",
+                            "column": 16,
+                            "line": 74
+                          },
+                          "message": "Error: page.click: Test timeout of 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"plc-input-node\"]')\u001b[22m\n\n\n\u001b[0m \u001b[90m 72 |\u001b[39m     \u001b[90m// Open workflow canvas and select a node to trigger modal\u001b[39m\n \u001b[90m 73 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'[data-testid=\"workflow-canvas\"]'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 74 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'[data-testid=\"plc-input-node\"]'\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// Assuming test node exists\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 75 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'[data-testid=\"open-properties-button\"]'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 76 |\u001b[39m\n \u001b[90m 77 |\u001b[39m     \u001b[90m// Wait for modal to be visible\u001b[39m\u001b[0m\n\u001b[2m    at /Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/src/tests/enhanced-modal-drag-resize.test.ts:74:16\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-04T12:51:49.692Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/test-results/enhanced-modal-drag-resize-350a0-dal-header-enables-dragging-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/test-results/enhanced-modal-drag-resize-350a0-dal-header-enables-dragging-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/test-results/enhanced-modal-drag-resize-350a0-dal-header-enables-dragging-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/test-results/enhanced-modal-drag-resize-350a0-dal-header-enables-dragging-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/reh3376/repos/plc-gbt/plc-gbt-stack/ui/nextjs/src/tests/enhanced-modal-drag-resize.test.ts",
+                        "column": 8,
+                        "line": 66
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "b0eb7c968bf139a041f0-0e9191f417f2cfb24c23",
+              "file": "enhanced-modal-drag-resize.test.ts",
+              "line": 84,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-09-04T12:51:49.055Z",
+    "duration": 61876.297,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

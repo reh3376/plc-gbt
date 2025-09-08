@@ -12,7 +12,41 @@ import { expect, test } from '@playwright/test';
 // Test Configuration
 // ========================================
 
-const MODAL_TEST_URL = 'http://localhost:3000';
+let RESOLVED_BASE_URL: string | null = null;
+
+const candidateUrls = (): string[] => {
+  const fromEnv = process.env.BASE_URL && process.env.BASE_URL.trim();
+  const list = [
+    'http://host.docker.internal:3001',
+    'http://host.docker.internal:3000',
+    'http://localhost:3001',
+    'http://localhost:3000',
+  ];
+  return fromEnv ? [fromEnv, ...list] : list;
+};
+
+async function resolveBaseUrl(page: import('@playwright/test').Page): Promise<string> {
+  if (RESOLVED_BASE_URL) return RESOLVED_BASE_URL;
+  const urls = candidateUrls();
+  for (const url of urls) {
+    try {
+      const resp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 5000 });
+      if (!resp || (resp.status() >= 200 && resp.status() < 600)) {
+        RESOLVED_BASE_URL = url;
+        return url;
+      }
+    } catch {
+      // try next
+    }
+  }
+  throw new Error(`Unable to resolve a reachable BASE_URL from candidates: ${urls.join(', ')}`);
+}
+
+function joinUrl(base: string, path: string): string {
+  const b = base.endsWith('/') ? base.slice(0, -1) : base;
+  const p = path.startsWith('/') ? path : `/${path}`;
+  return `${b}${p}`;
+}
 const MODAL_SELECTOR = '[data-testid="node-properties-modal"]';
 const MODAL_HEADER_SELECTOR = '[data-testid="modal-header"]';
 const RESIZE_HANDLE_SELECTOR = '[data-testid^="resize-handle-"]';
@@ -31,7 +65,8 @@ const ASSERTION_TIMEOUT = 2000;
 test.describe('Enhanced Modal - Drag Functionality', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to application and open node properties modal
-    await page.goto(MODAL_TEST_URL);
+    const base = await resolveBaseUrl(page);
+    await page.goto(joinUrl(base, '/workflow'));
     await page.waitForLoadState('networkidle');
 
     // Open workflow canvas and select a node to trigger modal
@@ -176,7 +211,8 @@ test.describe('Enhanced Modal - Drag Functionality', () => {
 test.describe('Enhanced Modal - Resize Functionality', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate and open modal
-    await page.goto(MODAL_TEST_URL);
+    const base = await resolveBaseUrl(page);
+    await page.goto(joinUrl(base, '/workflow'));
     await page.waitForLoadState('networkidle');
 
     // Open node properties modal
@@ -337,7 +373,8 @@ test.describe('Enhanced Modal - Resize Functionality', () => {
 
 test.describe('Enhanced Modal - State Management', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(MODAL_TEST_URL);
+    const base = await resolveBaseUrl(page);
+    await page.goto(joinUrl(base, '/workflow'));
     await page.waitForLoadState('networkidle');
 
     // Open modal
@@ -419,7 +456,8 @@ test.describe('Enhanced Modal - State Management', () => {
 test.describe('Enhanced Modal - Cross-browser Compatibility', () => {
   ['chromium', 'firefox', 'webkit'].forEach(browserName => {
     test(`Modal drag/resize works in ${browserName}`, async ({ page }) => {
-      await page.goto(MODAL_TEST_URL);
+      const base = await resolveBaseUrl(page);
+      await page.goto(joinUrl(base, '/workflow'));
       await page.waitForLoadState('networkidle');
 
       // Open modal
@@ -459,7 +497,8 @@ test.describe('Enhanced Modal - Cross-browser Compatibility', () => {
 
 test.describe('Enhanced Modal - Performance', () => {
   test('Modal operations complete within performance thresholds', async ({ page }) => {
-    await page.goto(MODAL_TEST_URL);
+    const base = await resolveBaseUrl(page);
+    await page.goto(joinUrl(base, '/workflow'));
     await page.waitForLoadState('networkidle');
 
     // Measure modal open time
@@ -495,7 +534,8 @@ test.describe('Enhanced Modal - Performance', () => {
 test.describe('Test Suite Summary', () => {
   test('All modal enhancement features tested', async ({ page }) => {
     // This test serves as a summary verification
-    await page.goto(MODAL_TEST_URL);
+    const base = await resolveBaseUrl(page);
+    await page.goto(base);
 
     console.log('\n📊 Enhanced Modal Test Suite Summary:');
     console.log('✅ Drag functionality tests');

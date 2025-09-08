@@ -455,7 +455,7 @@ export const Phase32Demo2: React.FC<Phase32Demo2Props> = ({ className }) => {
     setCurrentStep(5);
     console.log('Measuring improvement...');
     await new Promise(resolve => setTimeout(resolve, 3000));
-  }, [setTestResults, setCurrentStep, setIsRunningTests, startWorkflowExecution]);
+  }, [setCurrentStep, startWorkflowExecution]);
 
   // Run all scenarios
   const runAllScenarios = useCallback(async () => {

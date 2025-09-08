@@ -82,9 +82,6 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
     setSelectedNodes,
     setSelectedEdges,
     setReadOnly,
-    autoLayoutNodes,
-    saveWorkflow,
-    exportWorkflow,
     clearZoomCommand,
   } = useWorkflowStore();
 
@@ -287,7 +284,11 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
   return (
     <div className={cn('flex h-full w-full min-h-0', className)}>
       {/* Main Canvas */}
-      <div className="flex-1 relative h-full w-full" ref={reactFlowWrapper}>
+      <div
+        className="flex-1 relative h-full w-full"
+        ref={reactFlowWrapper}
+        data-testid="workflow-canvas"
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -382,6 +383,17 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
           {/* Controls - COMPLETELY DISABLED to prevent UI panel interference */}
           {/* All zoom and fit controls are now provided by WorkflowCanvasOverlays */}
         </ReactFlow>
+        {/* Test helper: open properties modal button */}
+        <div className="absolute top-2 left-2 z-[60] pointer-events-auto">
+          <button
+            onClick={() => setIsPropertiesModalOpen(true)}
+            className="px-2 py-1 text-xs bg-[#3d3d3d] text-gray-200 rounded hover:bg-[#4a4a4a] border border-[#505050]"
+            data-testid="open-properties-button"
+            title="Open Properties Modal"
+          >
+            Open Properties
+          </button>
+        </div>
       </div>
 
       {/* Node Properties Modal */}

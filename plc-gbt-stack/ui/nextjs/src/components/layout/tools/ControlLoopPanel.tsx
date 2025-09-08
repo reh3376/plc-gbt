@@ -13,6 +13,8 @@
 
 'use client';
 
+import { PLCGBTApiClient } from '@/lib/api/client';
+import type { ControlLoopType } from '@/lib/types/control-loop.types';
 import { cn } from '@/lib/utils/cn';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -29,7 +31,7 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 // ===== OPENAPI SCHEMA MCP GOVERNANCE =====
@@ -591,7 +593,9 @@ const TuningQueueContextPopup: React.FC<ContextPopupProps> = ({ entry, onAction,
   return (
     <div
       ref={popupRef}
-      className={`fixed bg-[#2d2d30] border-2 border-[#007acc] rounded shadow-2xl min-w-48 max-w-64 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`fixed bg-[#2d2d30] border-2 border-[#007acc] rounded shadow-2xl min-w-48 max-w-64 ${
+        isDragging ? 'cursor-grabbing' : 'cursor-grab'
+      }`}
       style={{
         top: position.top,
         left: position.left,
@@ -726,6 +730,90 @@ export function ControlLoopPanel() {
     return initialModes;
   });
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false);
+
+  // Dynamically load queue entries from API and refresh on create
+  const apiClient = useMemo(() => new PLCGBTApiClient(), []);
+
+  const refreshTuningQueueFromAPI = useCallback(async () => {
+    try {
+      const instances = await apiClient.getControlLoopInstances();
+
+      setTuningQueueState(prev => {
+        const existing = new Map(prev.entries.map(e => [e.loopId, e] as const));
+
+        let que = 1;
+        const entries = instances.map(inst => {
+          const keep = existing.get(inst.id);
+          return {
+            loopId: inst.id,
+            loopName: inst.name || `Loop ${inst.id}`,
+            queID: que++,
+            isFocus: keep ? keep.isFocus : false,
+            analysisOngoing: keep ? keep.analysisOngoing : false,
+            analysisTime: keep ? keep.analysisTime : 30,
+            autotuneEnable: keep ? keep.autotuneEnable : false,
+            queuedAt: keep?.queuedAt || new Date().toISOString(),
+            lastModified: new Date().toISOString(),
+            originalLoopData: {
+              id: inst.id,
+              name: inst.name,
+              type: 'ladder_logic_standard_pid' as ControlLoopType,
+              status: ((inst as any).status || 'running') as
+                | 'running'
+                | 'stopped'
+                | 'error'
+                | 'tuning'
+                | 'manual'
+                | 'cascade',
+              setpoint: Number((inst as any).parameters?.setpoint ?? 0),
+              process_value: Number((inst as any).parameters?.process_value ?? 0),
+              control_output: Number((inst as any).parameters?.control_output ?? 0),
+              mode: ((inst as any).parameters?.mode as string) || 'Manual',
+              performance_score: Number((inst as any).parameters?.performance_score ?? 0),
+              alarms_active: Number((inst as any).parameters?.alarms_active ?? 0),
+              last_updated: new Date().toISOString(),
+            },
+          } as TuningQueueEntry;
+        });
+
+        if (!entries.some(e => e.isFocus) && entries.length > 0) entries[0].isFocus = true;
+
+        setNavigationState(prevNav =>
+          KeyboardNavigationStateSchema.parse({
+            ...prevNav,
+            totalEntries: entries.length,
+            currentIndex: Math.max(
+              entries.findIndex(e => e.isFocus),
+              0
+            ),
+          })
+        );
+
+        const nextState: TuningQueueState = {
+          ...prev,
+          entries,
+          focusLoopId: entries.find(e => e.isFocus)?.loopId ?? null,
+          nextAvailableQueID: entries.length + 1,
+          lastUpdated: new Date().toISOString(),
+        };
+
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('tuningQueueState', JSON.stringify(nextState));
+        }
+
+        return nextState;
+      });
+    } catch (error) {
+      console.warn('Failed to refresh tuning queue:', error);
+    }
+  }, [apiClient, setTuningQueueState, setNavigationState]);
+
+  useEffect(() => {
+    refreshTuningQueueFromAPI();
+    const onCreated = () => refreshTuningQueueFromAPI();
+    window.addEventListener('control-loop:created', onCreated as EventListener);
+    return () => window.removeEventListener('control-loop:created', onCreated as EventListener);
+  }, [refreshTuningQueueFromAPI]);
 
   // ===== UTILITY FUNCTIONS =====
   const focusEntry = tuningQueueState.entries.find(entry => entry.isFocus);

@@ -1,0 +1,25 @@
+{
+  "instance_id": "bd677746-0bdf-495a-82be-e39605ec3be1",
+  "name": "Still01-LWC-PIDE",
+  "description": "",
+  "instance_type": "InstanceType.BASIC_PID",
+  "schema_id": "default_schema",
+  "schema_version": "1.0.0",
+  "status": "InstanceStatus.CONFIGURED",
+  "created_at": "2025-09-03 09:31:22.411159",
+  "updated_at": "2025-09-03 09:31:22.411159",
+  "created_by": "",
+  "tags": [],
+  "metadata": {},
+  "parameters": {
+    "kp": 1.0,
+    "ki": 0.1,
+    "kd": 0.05,
+    "setpoint": 0.0,
+    "output_min": 0.0,
+    "output_max": 100.0,
+    "sample_time": 1.0
+  },
+  "plc_connection": null,
+  "validation_results": null
+}

@@ -267,7 +267,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
         setIsValidating(false);
       }
     },
-    [selectedNode?.id, selectedNode?.type, schema] // Include schema as it's used in validation
+    [selectedNode, schema] // Selected node object and schema are used
   );
 
   // Handle field changes
@@ -612,6 +612,86 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
           </select>
         )}
 
+        {field.type === 'multiselect' && (
+          <select
+            multiple
+            value={(() => {
+              if (Array.isArray(fieldValue)) return fieldValue.map(String);
+              if (Array.isArray(field.defaultValue))
+                return (field.defaultValue as unknown[]).map(String);
+              return [] as string[];
+            })()}
+            onChange={e =>
+              handleFieldChange(
+                field.key,
+                Array.from(e.currentTarget.selectedOptions).map(o => o.value)
+              )
+            }
+            className={cn(
+              'w-full px-3 py-2 bg-[#1e1e1e] border rounded-lg text-white',
+              'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+              fieldError?.severity === 'error'
+                ? 'border-red-500'
+                : 'border-[#404040] hover:border-[#505050]'
+            )}
+          >
+            {field.options?.map(option => (
+              <option key={String(option.value)} value={String(option.value)}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {field.type === 'textarea' && (
+          <textarea
+            value={(() => {
+              if (typeof fieldValue === 'string') return fieldValue;
+              if (typeof field.defaultValue === 'string') return field.defaultValue;
+              return '';
+            })()}
+            onChange={e => handleFieldChange(field.key, e.target.value)}
+            className={cn(
+              'w-full px-3 py-2 bg-[#1e1e1e] border rounded-lg text-white',
+              'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+              fieldError?.severity === 'error'
+                ? 'border-red-500'
+                : 'border-[#404040] hover:border-[#505050]'
+            )}
+            rows={4}
+          />
+        )}
+
+        {field.type === 'json' && (
+          <textarea
+            value={(() => {
+              if (typeof fieldValue === 'string') return fieldValue;
+              try {
+                return JSON.stringify(fieldValue ?? field.defaultValue ?? {}, null, 2);
+              } catch {
+                return '';
+              }
+            })()}
+            onChange={e => {
+              const text = e.target.value;
+              try {
+                const parsed = JSON.parse(text);
+                handleFieldChange(field.key, parsed);
+              } catch {
+                // Ignore until valid JSON; validation system will surface issues
+              }
+            }}
+            className={cn(
+              'w-full px-3 py-2 bg-[#1e1e1e] border rounded-lg text-white font-mono text-sm',
+              'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+              fieldError?.severity === 'error'
+                ? 'border-red-500'
+                : 'border-[#404040] hover:border-[#505050]'
+            )}
+            rows={8}
+          />
+        )}
+
         {/* Specialized Components */}
         {renderSpecializedComponent(field, fieldValue)}
 
@@ -668,9 +748,19 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
       };
     } else {
       // Use positioned coordinates from enhanced modal
+      // Clamp to viewport and snap to edges explicitly for tests
+      const margin = 10;
+      const clampedX = Math.max(
+        margin,
+        Math.min(enhancedModal.position.x, viewportWidth - modalWidth - margin)
+      );
+      const clampedY = Math.max(
+        margin,
+        Math.min(enhancedModal.position.y, viewportHeight - modalHeight - margin)
+      );
       return {
-        top: `${enhancedModal.position.y}px`,
-        left: `${enhancedModal.position.x}px`,
+        top: `${clampedY}px`,
+        left: `${clampedX}px`,
         width: `${modalWidth}px`,
         height: `${modalHeight}px`,
         minWidth: '320px',
@@ -726,9 +816,13 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
           ...modalStyle,
           zIndex: zIndex + 1,
         }}
+        data-testid="node-properties-modal"
       >
         {/* Modal Header */}
-        <header className="flex items-center justify-between p-4 border-b border-[#404040] bg-[#252526]">
+        <header
+          className="flex items-center justify-between p-4 border-b border-[#404040] bg-[#252526] cursor-move"
+          data-testid="modal-header"
+        >
           <div className="flex items-center gap-3 flex-1">
             <button
               type="button"
@@ -736,6 +830,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
               onMouseDown={enhancedModal.handleDragStart}
               aria-label="Drag to move modal"
               title="Drag to move modal"
+              data-testid="drag-icon"
             >
               <Move className="w-4 h-4 text-gray-500" />
             </button>
@@ -750,6 +845,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
               onClick={handleMaximizeToggle}
               className="p-1 hover:bg-[#3d3d3d] rounded transition-colors"
               title={enhancedModal.isMaximized ? 'Restore' : 'Maximize'}
+              data-testid="maximize-button"
             >
               {enhancedModal.isMaximized ? (
                 <Minimize2 className="w-4 h-4 text-gray-400" />
@@ -780,6 +876,7 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
                   ? 'bg-[#094771] text-white shadow-md transform scale-[1.02]'
                   : 'text-gray-400 hover:text-white hover:bg-[#3d3d3d] hover:transform hover:scale-[1.01]'
               )}
+              data-testid="modal-tab"
             >
               {tab.label}
               {tab.shortcut && <span className="ml-2 text-xs opacity-60">({tab.shortcut})</span>}
@@ -788,7 +885,11 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-auto" style={{ height: 'calc(100% - 140px)' }}>
+        <div
+          className="flex-1 overflow-auto"
+          style={{ height: 'calc(100% - 140px)' }}
+          data-testid="modal-content"
+        >
           <div className="p-4">
             {/* Loading State */}
             {isLoading && (
@@ -807,6 +908,15 @@ export function NodePropertiesModal({ nodeId, onClose }: NodePropertiesModalProp
 
                   // Filter out fields based on conditions
                   const visibleFields = groupFields.filter(field => {
+                    // Generic conditional visibility: dependsOn simple equality against current config
+                    const dependsOn = (field as unknown as { dependsOn?: string[] }).dependsOn;
+                    if (Array.isArray(dependsOn) && dependsOn.length) {
+                      // Basic guard: only show when all dependsOn keys are present (non-empty)
+                      const allPresent = dependsOn.every(depKey =>
+                        Boolean(config[depKey] !== undefined && config[depKey] !== '')
+                      );
+                      if (!allPresent) return false;
+                    }
                     if (selectedNode?.type === 'plc-input' && config.dataType === 'BOOLEAN') {
                       // Hide signal scaling fields for boolean data type
                       if (

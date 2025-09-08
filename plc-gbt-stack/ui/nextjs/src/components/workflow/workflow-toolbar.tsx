@@ -1562,6 +1562,7 @@ export function WorkflowToolbar() {
                       )}
                       title={`${node.description} - Drag to canvas or press Enter/Space to add`}
                       aria-label={`Add ${node.label} node to workflow`}
+                      data-testid={node.type === 'plc-input' ? 'plc-input-node' : undefined}
                     >
                       {/* Node icon with size adjusted for view mode */}
                       <node.icon

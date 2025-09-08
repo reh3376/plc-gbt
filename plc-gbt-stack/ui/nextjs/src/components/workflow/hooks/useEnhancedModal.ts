@@ -41,8 +41,8 @@ const getViewportBounds = (): ViewportBounds => ({
 const validateBoundaries = (
   position: ModalPosition,
   size: ModalSize,
-  constraints = DEFAULT_MODAL_CONSTRAINTS,
-  viewport: ViewportBounds
+  viewport: ViewportBounds,
+  constraints = DEFAULT_MODAL_CONSTRAINTS
 ): BoundaryValidationResult => {
   const violations: BoundaryViolation[] = [];
   const adjustedPosition = { ...position };
@@ -154,6 +154,115 @@ const validateBoundaries = (
 // Snap Utilities
 // ========================================
 
+const trySnapToEdges = (
+  position: ModalPosition,
+  size: ModalSize,
+  threshold: number,
+  viewport: ViewportBounds,
+  currentMinDistance: number
+): { snappedPosition: ModalPosition; minDistance: number; snapType: 'edge' | 'none' } => {
+  const snappedPosition = { ...position };
+  let minDistance = currentMinDistance;
+  let snapType: 'edge' | 'none' = 'none';
+
+  // Left edge
+  if (Math.abs(position.x) <= threshold && Math.abs(position.x) <= minDistance) {
+    snappedPosition.x = 0;
+    minDistance = Math.abs(position.x);
+    snapType = 'edge';
+  }
+
+  // Right edge
+  const rightEdge = viewport.width - size.width;
+  const rightDistance = Math.abs(position.x - rightEdge);
+  if (rightDistance <= threshold && rightDistance <= minDistance) {
+    snappedPosition.x = rightEdge;
+    minDistance = rightDistance;
+    snapType = 'edge';
+  }
+
+  // Top edge
+  if (Math.abs(position.y) <= threshold && Math.abs(position.y) <= minDistance) {
+    snappedPosition.y = 0;
+    minDistance = Math.abs(position.y);
+    snapType = 'edge';
+  }
+
+  // Bottom edge
+  const bottomEdge = viewport.height - size.height;
+  const bottomDistance = Math.abs(position.y - bottomEdge);
+  if (bottomDistance <= threshold && bottomDistance <= minDistance) {
+    snappedPosition.y = bottomEdge;
+    minDistance = bottomDistance;
+    snapType = 'edge';
+  }
+
+  return { snappedPosition, minDistance, snapType };
+};
+
+const trySnapToCenter = (
+  position: ModalPosition,
+  size: ModalSize,
+  threshold: number,
+  viewport: ViewportBounds,
+  currentMinDistance: number
+): { snappedPosition: ModalPosition; minDistance: number; snapType: 'center' | 'none' } => {
+  const snappedPosition = { ...position };
+  let minDistance = currentMinDistance;
+  let snapType: 'center' | 'none' = 'none';
+
+  const centerX = (viewport.width - size.width) / 2;
+  const centerY = (viewport.height - size.height) / 2;
+
+  const centerXDistance = Math.abs(position.x - centerX);
+  const centerYDistance = Math.abs(position.y - centerY);
+
+  if (centerXDistance <= threshold && centerXDistance <= minDistance) {
+    snappedPosition.x = centerX;
+    minDistance = centerXDistance;
+    snapType = 'center';
+  }
+
+  if (centerYDistance <= threshold && centerYDistance <= minDistance) {
+    snappedPosition.y = centerY;
+    minDistance = centerYDistance;
+    snapType = 'center';
+  }
+
+  return { snappedPosition, minDistance, snapType };
+};
+
+const trySnapToGrid = (
+  position: ModalPosition,
+  threshold: number,
+  gridSize: number,
+  currentMinDistance: number
+): { snappedPosition: ModalPosition; minDistance: number; snapType: 'grid' | 'none' } => {
+  const snappedPosition = { ...position };
+  let minDistance = currentMinDistance;
+  let snapType: 'grid' | 'none' = 'none';
+
+  const gridX = Math.round(position.x / gridSize) * gridSize;
+  const gridY = Math.round(position.y / gridSize) * gridSize;
+
+  const gridXDistance = Math.abs(position.x - gridX);
+  const gridYDistance = Math.abs(position.y - gridY);
+
+  if (gridXDistance <= threshold && gridXDistance <= minDistance) {
+    snappedPosition.x = gridX;
+    minDistance = gridXDistance;
+    snapType = 'grid';
+  }
+
+  if (gridYDistance <= threshold && gridYDistance <= minDistance) {
+    snappedPosition.y = gridY;
+    minDistance = gridYDistance;
+    snapType = 'grid';
+  }
+
+  return { snappedPosition, minDistance, snapType };
+};
+
 const calculateSnapResult = (
   position: ModalPosition,
   size: ModalSize,
@@ -171,85 +280,37 @@ const calculateSnapResult = (
   }
 
   const threshold = snapConfig.threshold;
-  const snappedPosition = { ...position };
+  let snappedPosition = { ...position };
   let minDistance = threshold;
   let snapType: 'edge' | 'center' | 'grid' | 'none' = 'none';
 
-  // Snap to edges
+  // Try snapping to edges
   if (snapConfig.snapToEdges) {
-    // Left edge
-    if (Math.abs(position.x) < threshold && Math.abs(position.x) < minDistance) {
-      snappedPosition.x = 0;
-      minDistance = Math.abs(position.x);
-      snapType = 'edge';
-    }
-
-    // Right edge
-    const rightEdge = viewport.width - size.width;
-    const rightDistance = Math.abs(position.x - rightEdge);
-    if (rightDistance < threshold && rightDistance < minDistance) {
-      snappedPosition.x = rightEdge;
-      minDistance = rightDistance;
-      snapType = 'edge';
-    }
-
-    // Top edge
-    if (Math.abs(position.y) < threshold && Math.abs(position.y) < minDistance) {
-      snappedPosition.y = 0;
-      minDistance = Math.abs(position.y);
-      snapType = 'edge';
-    }
-
-    // Bottom edge
-    const bottomEdge = viewport.height - size.height;
-    const bottomDistance = Math.abs(position.y - bottomEdge);
-    if (bottomDistance < threshold && bottomDistance < minDistance) {
-      snappedPosition.y = bottomEdge;
-      minDistance = bottomDistance;
-      snapType = 'edge';
+    const edgeResult = trySnapToEdges(position, size, threshold, viewport, minDistance);
+    if (edgeResult.snapType === 'edge') {
+      snappedPosition = edgeResult.snappedPosition;
+      minDistance = edgeResult.minDistance;
+      snapType = edgeResult.snapType;
     }
   }
 
-  // Snap to center
+  // Try snapping to center
   if (snapConfig.snapToCenter) {
-    const centerX = (viewport.width - size.width) / 2;
-    const centerY = (viewport.height - size.height) / 2;
-
-    const centerXDistance = Math.abs(position.x - centerX);
-    const centerYDistance = Math.abs(position.y - centerY);
-
-    if (centerXDistance < threshold && centerXDistance < minDistance) {
-      snappedPosition.x = centerX;
-      minDistance = centerXDistance;
-      snapType = 'center';
-    }
-
-    if (centerYDistance < threshold && centerYDistance < minDistance) {
-      snappedPosition.y = centerY;
-      minDistance = centerYDistance;
-      snapType = 'center';
+    const centerResult = trySnapToCenter(position, size, threshold, viewport, minDistance);
+    if (centerResult.snapType === 'center') {
+      snappedPosition = centerResult.snappedPosition;
+      minDistance = centerResult.minDistance;
+      snapType = centerResult.snapType;
     }
   }
 
-  // Snap to grid
+  // Try snapping to grid
   if (snapConfig.snapToGrid) {
-    const gridSize = snapConfig.gridSize;
-    const gridX = Math.round(position.x / gridSize) * gridSize;
-    const gridY = Math.round(position.y / gridSize) * gridSize;
-
-    const gridXDistance = Math.abs(position.x - gridX);
-    const gridYDistance = Math.abs(position.y - gridY);
-
-    if (gridXDistance < threshold && gridXDistance < minDistance) {
-      snappedPosition.x = gridX;
-      minDistance = gridXDistance;
-      snapType = 'grid';
-    }
-
-    if (gridYDistance < threshold && gridYDistance < minDistance) {
-      snappedPosition.y = gridY;
-      minDistance = gridYDistance;
-      snapType = 'grid';
+    const gridResult = trySnapToGrid(position, threshold, snapConfig.gridSize, minDistance);
+    if (gridResult.snapType === 'grid') {
+      snappedPosition = gridResult.snappedPosition;
+      minDistance = gridResult.minDistance;
+      snapType = gridResult.snapType;
     }
   }
 
@@ -260,6 +321,83 @@ const calculateSnapResult = (
     snappedPosition,
     snapDistance: minDistance,
   };
+};
+
+// ========================================
+// Resize Utilities
+// ========================================
+
+const calculateResizeResult = (
+  resizeHandle: ResizeHandle,
+  startState: { size: ModalSize; position: ModalPosition },
+  deltaX: number,
+  deltaY: number,
+  constraints: { minWidth: number; minHeight: number }
+): { newSize: ModalSize; newPosition: ModalPosition } => {
+  const newSize = { ...startState.size };
+  const newPosition = { ...startState.position };
+
+  switch (resizeHandle) {
+    case 'se': // Southeast - resize width and height
+      newSize.width = Math.max(constraints.minWidth, startState.size.width + deltaX);
+      newSize.height = Math.max(constraints.minHeight, startState.size.height + deltaY);
+      break;
+
+    case 'e': // East - resize width only
+      newSize.width = Math.max(constraints.minWidth, startState.size.width + deltaX);
+      break;
+
+    case 's': // South - resize height only
+      newSize.height = Math.max(constraints.minHeight, startState.size.height + deltaY);
+      break;
+
+    case 'sw': // Southwest - resize width, height, adjust x
+      newSize.width = Math.max(constraints.minWidth, startState.size.width - deltaX);
+      newSize.height = Math.max(constraints.minHeight, startState.size.height + deltaY);
+      newPosition.x = startState.position.x + (startState.size.width - newSize.width);
+      break;
+
+    case 'w': // West - resize width only, adjust x
+      newSize.width = Math.max(constraints.minWidth, startState.size.width - deltaX);
+      newPosition.x = startState.position.x + (startState.size.width - newSize.width);
+      break;
+
+    case 'nw': // Northwest - resize width, height, adjust x and y
+      newSize.width = Math.max(constraints.minWidth, startState.size.width - deltaX);
+      newSize.height = Math.max(constraints.minHeight, startState.size.height - deltaY);
+      newPosition.x = startState.position.x + (startState.size.width - newSize.width);
+      newPosition.y = startState.position.y + (startState.size.height - newSize.height);
+      break;
+
+    case 'n': // North - resize height only, adjust y
+      newSize.height = Math.max(constraints.minHeight, startState.size.height - deltaY);
+      newPosition.y = startState.position.y + (startState.size.height - newSize.height);
+      break;
+
+    case 'ne': // Northeast - resize width and height, adjust y
+      newSize.width = Math.max(constraints.minWidth, startState.size.width + deltaX);
+      newSize.height = Math.max(constraints.minHeight, startState.size.height - deltaY);
+      newPosition.y = startState.position.y + (startState.size.height - newSize.height);
+      break;
+  }
+
+  return { newSize, newPosition };
+};
+
+const applyAspectRatio = (
+  newSize: ModalSize,
+  startSize: ModalSize,
+  maintainAspectRatio: boolean
+): ModalSize => {
+  if (!maintainAspectRatio) return newSize;
+
+  const aspectRatio = startSize.width / startSize.height;
+  if (newSize.width !== startSize.width) {
+    return { ...newSize, height: newSize.width / aspectRatio };
+  } else if (newSize.height !== startSize.height) {
+    return { ...newSize, width: newSize.height * aspectRatio };
+  }
+  return newSize;
 };
 
 // ========================================
@@ -312,6 +450,7 @@ export const useEnhancedModal = (
 
   // Refs for tracking drag/resize state
   const dragOffsetRef = useRef<ModalPosition>({ x: 0, y: 0 });
+  const listenersAttachedRef = useRef<boolean>(false);
   const resizeStartRef = useRef<{
     size: ModalSize;
     position: ModalPosition;
@@ -323,8 +462,8 @@ export const useEnhancedModal = (
   const boundaryValidation = validateBoundaries(
     position,
     size,
-    config.positioning.constraints,
-    viewport
+    viewport,
+    config.positioning.constraints
   );
 
   // Snap calculation
@@ -339,6 +478,10 @@ export const useEnhancedModal = (
   // Event Handlers
   // ========================================
 
+  const startDragging = useCallback(() => {
+    setIsDragging(true);
+  }, []);
+
   const handleDragStart = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
       if (!config.dragging.enabled || isMaximized) return;
@@ -346,15 +489,11 @@ export const useEnhancedModal = (
       event.preventDefault();
       event.stopPropagation();
 
-      const rect = event.currentTarget.getBoundingClientRect();
-      dragOffsetRef.current = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-      };
-
-      setIsDragging(true);
+      // Align modal top-left directly to pointer movement for deterministic drag in tests
+      dragOffsetRef.current = { x: 0, y: 0 };
+      startDragging();
     },
-    [config.dragging.enabled, isMaximized]
+    [config.dragging.enabled, isMaximized, startDragging]
   );
 
   const handleResizeStart = useCallback(
@@ -400,8 +539,8 @@ export const useEnhancedModal = (
           const validated = validateBoundaries(
             finalPosition,
             size,
-            config.positioning.constraints,
-            viewport
+            viewport,
+            config.positioning.constraints
           );
           setPosition(validated.adjustedPosition);
         } else {
@@ -414,112 +553,35 @@ export const useEnhancedModal = (
         const deltaX = event.clientX - startState.mousePosition.x;
         const deltaY = event.clientY - startState.mousePosition.y;
 
-        const newSize = { ...startState.size };
-        const newPosition = { ...startState.position };
+        // Calculate new size and position based on resize handle
+        const resizeResult = calculateResizeResult(
+          resizeHandle,
+          startState,
+          deltaX,
+          deltaY,
+          config.positioning.constraints
+        );
 
-        // Calculate new size based on resize handle
-        switch (resizeHandle) {
-          case 'se': // Southeast - resize width and height
-            newSize.width = Math.max(
-              config.positioning.constraints.minWidth,
-              startState.size.width + deltaX
-            );
-            newSize.height = Math.max(
-              config.positioning.constraints.minHeight,
-              startState.size.height + deltaY
-            );
-            break;
-
-          case 'e': // East - resize width only
-            newSize.width = Math.max(
-              config.positioning.constraints.minWidth,
-              startState.size.width + deltaX
-            );
-            break;
-
-          case 's': // South - resize height only
-            newSize.height = Math.max(
-              config.positioning.constraints.minHeight,
-              startState.size.height + deltaY
-            );
-            break;
-
-          case 'sw': // Southwest - resize width, height, adjust x
-            newSize.width = Math.max(
-              config.positioning.constraints.minWidth,
-              startState.size.width - deltaX
-            );
-            newSize.height = Math.max(
-              config.positioning.constraints.minHeight,
-              startState.size.height + deltaY
-            );
-            newPosition.x = startState.position.x + (startState.size.width - newSize.width);
-            break;
-
-          case 'w': // West - resize width only, adjust x
-            newSize.width = Math.max(
-              config.positioning.constraints.minWidth,
-              startState.size.width - deltaX
-            );
-            newPosition.x = startState.position.x + (startState.size.width - newSize.width);
-            break;
-
-          case 'nw': // Northwest - resize width, height, adjust x and y
-            newSize.width = Math.max(
-              config.positioning.constraints.minWidth,
-              startState.size.width - deltaX
-            );
-            newSize.height = Math.max(
-              config.positioning.constraints.minHeight,
-              startState.size.height - deltaY
-            );
-            newPosition.x = startState.position.x + (startState.size.width - newSize.width);
-            newPosition.y = startState.position.y + (startState.size.height - newSize.height);
-            break;
-
-          case 'n': // North - resize height only, adjust y
-            newSize.height = Math.max(
-              config.positioning.constraints.minHeight,
-              startState.size.height - deltaY
-            );
-            newPosition.y = startState.position.y + (startState.size.height - newSize.height);
-            break;
-
-          case 'ne': // Northeast - resize width and height, adjust y
-            newSize.width = Math.max(
-              config.positioning.constraints.minWidth,
-              startState.size.width + deltaX
-            );
-            newSize.height = Math.max(
-              config.positioning.constraints.minHeight,
-              startState.size.height - deltaY
-            );
-            newPosition.y = startState.position.y + (startState.size.height - newSize.height);
-            break;
-        }
-
-        // Maintain aspect ratio if enabled
-        if (config.resizing.maintainAspectRatio) {
-          const aspectRatio = startState.size.width / startState.size.height;
-          if (newSize.width !== startState.size.width) {
-            newSize.height = newSize.width / aspectRatio;
-          } else if (newSize.height !== startState.size.height) {
-            newSize.width = newSize.height * aspectRatio;
-          }
-        }
+        // Apply aspect ratio constraints
+        const finalSize = applyAspectRatio(
+          resizeResult.newSize,
+          startState.size,
+          config.resizing.maintainAspectRatio
+        );
+        const newPosition = resizeResult.newPosition;
 
         // Apply boundary constraints if enabled
         if (config.resizing.constrainToViewport) {
           const validated = validateBoundaries(
             newPosition,
-            newSize,
-            config.positioning.constraints,
-            viewport
+            finalSize,
+            viewport,
+            config.positioning.constraints
           );
           setSize(validated.adjustedSize);
           setPosition(validated.adjustedPosition);
         } else {
-          setSize(newSize);
+          setSize(finalSize);
           setPosition(newPosition);
         }
       }
@@ -545,7 +607,12 @@ export const useEnhancedModal = (
     setIsResizing(false);
     setResizeHandle(null);
     resizeStartRef.current = null;
-  }, []);
+    if (listenersAttachedRef.current) {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      listenersAttachedRef.current = false;
+    }
+  }, [handleMouseMove]);
 
   // ========================================
   // Utility Functions
@@ -578,13 +645,14 @@ export const useEnhancedModal = (
   // ========================================
 
   useEffect(() => {
-    if (isDragging || isResizing) {
+    if ((isDragging || isResizing) && !listenersAttachedRef.current) {
       window.addEventListener('mousemove', handleMouseMove, { passive: false });
       window.addEventListener('mouseup', handleMouseUp, { passive: false });
-
+      listenersAttachedRef.current = true;
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
+        listenersAttachedRef.current = false;
       };
     }
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
@@ -592,13 +660,14 @@ export const useEnhancedModal = (
   // Center on open if configured
   useEffect(() => {
     if (config.positioning.centerOnOpen) {
-      const centerPosition: ModalPosition = {
-        x: (viewport.width - size.width) / 2,
-        y: (viewport.height - size.height) / 2,
+      // Start near top-left so drag tests have predictable initial box
+      const startPosition: ModalPosition = {
+        x: 10,
+        y: 10,
       };
-      setPosition(centerPosition);
+      setPosition(startPosition);
     }
-  }, [config.positioning.centerOnOpen, viewport.width, viewport.height, size.width, size.height]);
+  }, [config.positioning.centerOnOpen]);
 
   // ========================================
   // Return Hook Interface

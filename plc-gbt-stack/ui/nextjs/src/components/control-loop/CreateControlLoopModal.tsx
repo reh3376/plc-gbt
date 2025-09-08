@@ -202,6 +202,13 @@ export function CreateControlLoopModal({ onClose, onCreated }: CreateControlLoop
       };
 
       onCreated(newLoop);
+
+      // Notify listeners (e.g., ControlLoopPanel) to refresh tuning queue
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('control-loop:created', { detail: { id: newInstance.id } })
+        );
+      }
     } catch (error) {
       console.error('Failed to create control loop:', error);
 
