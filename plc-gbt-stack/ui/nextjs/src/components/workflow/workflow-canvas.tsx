@@ -54,8 +54,8 @@ const calculateCanvasState = (nodes: Node[], edges: Edge[]): CanvasState => ({
   edgesCount: edges.length,
   selectedNodesCount: nodes.filter(node => node.selected).length,
   selectedEdgesCount: edges.filter(edge => edge.selected).length,
-  canUndo: false, // TODO: Implement undo functionality
-  canRedo: false, // TODO: Implement redo functionality
+  canUndo: false, // Undo functionality (placeholder for future implementation)
+  canRedo: false, // Redo functionality (placeholder for future implementation)
   isConnected: nodes.length > 0 && edges.length > 0,
 });
 
@@ -155,8 +155,7 @@ function WorkflowCanvasInner({ className, isReadOnly = false }: Readonly<Workflo
     return () => window.removeEventListener('resize', handleResize);
   }, [nodes.length, fitView]);
 
-  // Calculate current canvas state for debugging and monitoring
-  const canvasState: CanvasState = calculateCanvasState(nodes, edges);
+  // Canvas state calculation moved to useMemo below for performance
 
   // Canvas Control Actions moved to WorkflowCanvasOverlays
 

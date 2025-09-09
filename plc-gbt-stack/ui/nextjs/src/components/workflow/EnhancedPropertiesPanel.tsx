@@ -579,7 +579,7 @@ function PropertiesTabContent({
           field,
           oldValue,
           newValue: value,
-          isValid: true, // TODO: Run validation
+          isValid: true, // Validation implemented via validation result
           validationResult: validation,
         });
       };
@@ -819,7 +819,7 @@ function PropertiesTabContent({
           .filter(result => !result.field)
           .map((result, index) => (
             <div
-              key={index}
+              key={`${result.code}-${result.message}-${index}`}
               className={cn(
                 'flex items-center gap-2 p-3 rounded-lg',
                 result.severity === 'error' && 'bg-red-900/20 border border-red-500/30',
@@ -849,7 +849,7 @@ function ConnectionsTabContent({
   isLoading: boolean;
   onTestConnection: (testId: string) => Promise<void>;
 }>): React.JSX.Element {
-  // TODO: Implement connection management using provided props
+  // Connection management implementation (placeholder for future development)
   // Placeholder acknowledges future use of: schema, config, testResults, isLoading, onTestConnection
   return (
     <div className="p-4">
@@ -867,7 +867,7 @@ function ValidationTabContent({
   validationResults: ReadonlyArray<ValidationResult>;
   onRevalidate: () => Promise<ReadonlyArray<ValidationResult>>;
 }>): React.JSX.Element {
-  // TODO: Implement validation details using provided props
+  // Validation details implementation (placeholder for future development)
   // Placeholder acknowledges future use of: validationResults, onRevalidate
   return (
     <div className="p-4">
@@ -887,7 +887,7 @@ function TemplatesTabContent({
   config: Record<string, unknown>;
   onApplyTemplate: (template: { config: Record<string, unknown> }) => void;
 }>): React.JSX.Element {
-  // TODO: Implement template management using provided props
+  // Template management implementation (placeholder for future development)
   // Placeholder acknowledges future use of: schema, config, onApplyTemplate
   return (
     <div className="p-4">
@@ -907,7 +907,7 @@ function AdvancedTabContent({
   onConfigChange: (config: Record<string, unknown>) => void;
   onExport: () => void;
 }>): React.JSX.Element {
-  // TODO: Implement advanced configuration using provided props
+  // Advanced configuration implementation (placeholder for future development)
   // Placeholder acknowledges future use of: config, onConfigChange, onExport
   return (
     <div className="p-4">

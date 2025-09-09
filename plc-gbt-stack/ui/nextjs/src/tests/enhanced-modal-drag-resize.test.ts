@@ -15,7 +15,7 @@ import { expect, test } from '@playwright/test';
 let RESOLVED_BASE_URL: string | null = null;
 
 const candidateUrls = (): string[] => {
-  const fromEnv = process.env.BASE_URL && process.env.BASE_URL.trim();
+  const fromEnv = process.env.BASE_URL?.trim();
   const list = [
     'http://host.docker.internal:3001',
     'http://host.docker.internal:3000',
@@ -162,7 +162,7 @@ test.describe('Enhanced Modal - Drag Functionality', () => {
   test('Modal snaps to edges when close enough', async ({ page }) => {
     const modal = page.locator(MODAL_SELECTOR);
     const header = page.locator(MODAL_HEADER_SELECTOR);
-    const viewport = page.viewportSize()!;
+    // Viewport size available via page.viewportSize() if needed
 
     // Drag modal close to left edge (within snap threshold)
     await header.dragTo(page.locator('body'), {
@@ -347,7 +347,6 @@ test.describe('Enhanced Modal - Resize Functionality', () => {
   });
 
   test('Resize indicator shows current dimensions', async ({ page }) => {
-    const modal = page.locator(MODAL_SELECTOR);
     const seHandle = page.locator('[data-testid="resize-handle-se"]');
     const indicator = page.locator('[data-testid="resize-indicator"]');
 
@@ -513,7 +512,6 @@ test.describe('Enhanced Modal - Performance', () => {
     expect(openTime).toBeLessThan(1000); // Modal should open within 1 second
 
     // Measure resize performance
-    const modal = page.locator(MODAL_SELECTOR);
     const seHandle = page.locator('[data-testid="resize-handle-se"]');
 
     const resizeStart = Date.now();

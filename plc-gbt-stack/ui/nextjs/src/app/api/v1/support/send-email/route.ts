@@ -39,7 +39,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       const response = {
         success: true,
-        messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        messageId: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         timestamp: new Date().toISOString(),
         recipient: body.to,
         subject: body.subject,

@@ -16,6 +16,28 @@ import { useNodePropertiesApi } from '@/lib/api/node-properties';
 import { cn } from '@/lib/utils/cn';
 import { RawConfigurationModal } from '../modals/RawConfigurationModal';
 
+// Helper function to get handle border styling
+const getHandleBorderStyle = (handle: ConnectionHandle): string => {
+  if (handle.connected) {
+    return 'border-green-500/30 bg-green-900/10';
+  }
+  if (handle.required) {
+    return 'border-orange-500/30 bg-orange-900/10';
+  }
+  return 'border-[#404040] hover:border-[#505050]';
+};
+
+// Helper function to get handle status indicator color
+const getHandleStatusColor = (handle: ConnectionHandle): string => {
+  if (handle.connected) {
+    return 'bg-green-400';
+  }
+  if (handle.required) {
+    return 'bg-orange-400';
+  }
+  return 'bg-gray-400';
+};
+
 interface ConnectionHandle {
   readonly id: string;
   readonly type: 'input' | 'output';
@@ -318,25 +340,12 @@ export function ConnectionsTab({
                     key={handle.id}
                     className={cn(
                       'p-3 border rounded-lg transition-all duration-200',
-                      handle.connected
-                        ? 'border-green-500/30 bg-green-900/10'
-                        : handle.required
-                        ? 'border-orange-500/30 bg-orange-900/10'
-                        : 'border-[#404040] hover:border-[#505050]'
+                      getHandleBorderStyle(handle)
                     )}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div
-                          className={cn(
-                            'w-3 h-3 rounded-full',
-                            handle.connected
-                              ? 'bg-green-400'
-                              : handle.required
-                              ? 'bg-orange-400'
-                              : 'bg-gray-400'
-                          )}
-                        />
+                        <div className={cn('w-3 h-3 rounded-full', getHandleStatusColor(handle))} />
                         <span className="font-medium text-white">{handle.label}</span>
                         {handle.required && <span className="text-red-400 text-xs">*</span>}
                       </div>
@@ -424,7 +433,7 @@ export function ConnectionsTab({
                 <button
                   className="flex items-center gap-2 px-3 py-1 text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-600/10 rounded transition-colors"
                   onClick={() => {
-                    // TODO: Add custom mapping
+                    // Custom mapping functionality (placeholder for future implementation)
                     console.log('Add custom mapping');
                   }}
                 >

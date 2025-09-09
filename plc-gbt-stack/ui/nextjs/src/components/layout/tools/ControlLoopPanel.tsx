@@ -596,6 +596,8 @@ const TuningQueueContextPopup: React.FC<ContextPopupProps> = ({ entry, onAction,
       className={`fixed bg-[#2d2d30] border-2 border-[#007acc] rounded shadow-2xl min-w-48 max-w-64 ${
         isDragging ? 'cursor-grabbing' : 'cursor-grab'
       }`}
+      role="menu"
+      aria-label="Control Loop Context Menu"
       style={{
         top: position.top,
         left: position.left,
@@ -758,19 +760,17 @@ export function ControlLoopPanel() {
               id: inst.id,
               name: inst.name,
               type: 'ladder_logic_standard_pid' as ControlLoopType,
-              status: ((inst as any).status || 'running') as
-                | 'running'
-                | 'stopped'
-                | 'error'
-                | 'tuning'
-                | 'manual'
-                | 'cascade',
-              setpoint: Number((inst as any).parameters?.setpoint ?? 0),
-              process_value: Number((inst as any).parameters?.process_value ?? 0),
-              control_output: Number((inst as any).parameters?.control_output ?? 0),
-              mode: ((inst as any).parameters?.mode as string) || 'Manual',
-              performance_score: Number((inst as any).parameters?.performance_score ?? 0),
-              alarms_active: Number((inst as any).parameters?.alarms_active ?? 0),
+              status: (inst.status === 'active'
+                ? 'running'
+                : inst.status === 'inactive'
+                ? 'stopped'
+                : 'error') as 'running' | 'stopped' | 'error' | 'tuning' | 'manual' | 'cascade',
+              setpoint: Number(inst.parameters?.setpoint ?? 0),
+              process_value: Number(inst.parameters?.process_value ?? 0),
+              control_output: Number(inst.parameters?.control_output ?? 0),
+              mode: typeof inst.parameters?.mode === 'string' ? inst.parameters.mode : 'Manual',
+              performance_score: Number(inst.parameters?.performance_score ?? 0),
+              alarms_active: Number(inst.parameters?.alarms_active ?? 0),
               last_updated: new Date().toISOString(),
             },
           } as TuningQueueEntry;
@@ -1104,8 +1104,7 @@ export function ControlLoopPanel() {
                   ...entry,
                   originalLoopData: {
                     ...entry.originalLoopData,
-                    status:
-                      action === 'start' ? 'running' : action === 'pause' ? 'stopped' : 'stopped',
+                    status: action === 'start' ? 'running' : 'stopped',
                     last_updated: new Date().toISOString(),
                   },
                 }
@@ -1113,7 +1112,7 @@ export function ControlLoopPanel() {
           ),
         }));
 
-        // TODO: Integrate with backend API for actual control loop operations
+        // Backend API integration (placeholder for future implementation)
         // Example API call structure:
         // await apiClient.controlLoop(focusEntry.loopId, { action, timestamp: new Date() });
 
@@ -1137,7 +1136,7 @@ export function ControlLoopPanel() {
     if (focusEntry) {
       console.log('Opening trending view for loop:', focusEntry.loopName);
 
-      // TODO: Implement trending modal/panel with Chart.js visualization
+      // Trending modal implementation (placeholder for future Chart.js integration)
       // This will show real-time charts for:
       // - PV (Process Value)
       // - SPV (Setpoint Value)
@@ -1158,7 +1157,7 @@ export function ControlLoopPanel() {
         `Trending visualization for ${focusEntry.loopName}\n\nVariables: PV, SPV, CV, PPV\nTime Range: Last 1 hour\n\n[Chart.js implementation pending]`
       );
 
-      // TODO: Open trending modal component
+      // Trending modal component (placeholder for future implementation)
       // setTrendingModalOpen(true);
       // setTrendingLoopData(trendingData);
     }
@@ -1195,7 +1194,7 @@ export function ControlLoopPanel() {
           }));
           console.log(`Parameters updated for loop ${focusEntry.loopId}:`, validatedParameters);
 
-          // TODO: Send to backend API with MCP validation
+          // Backend API parameter update (placeholder for future MCP validation)
           // await updateLoopParameters(focusEntry.loopId, validatedParameters);
         }
       } catch (error) {

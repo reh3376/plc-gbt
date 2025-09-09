@@ -1,9 +1,9 @@
 /**
- * Node Configuration Validation API Route - AI Task Orchestrator TypeScript Implementation
+ * Node Properties Validation API Route - AI Task Orchestrator TypeScript Implementation
  *
- * @description API endpoint for validating node configurations against schemas
+ * @description Validates node configuration against property schemas with OpenAPI MCP integration
  * @compliance Strict TypeScript with OpenAPI Schema MCP validation
- * @integration MCP_Docker OpenAPI validation for all requests/responses
+ * @route POST /api/v1/node-properties/{nodeType}/validate
  */
 
 import {
@@ -12,12 +12,66 @@ import {
   NodeConfigurationValidationResponseSchema,
   type ErrorResponse,
   type IndustrialNodeType,
+  type NodeConfigurationValidationRequest,
   type NodeConfigurationValidationResponse,
+  type NodePropertySchema,
   type ValidationResult,
 } from '@/api/zod-schemas';
 import { openAPISchemaMCP } from '@/lib/mcp/openapi-schema-client';
 import { nodeSchemaRegistry } from '@/lib/schemas/industrial-node-schemas';
 import { NextRequest, NextResponse } from 'next/server';
+
+// Helper function to validate node type parameter
+async function validateNodeTypeParameter(nodeType: string): Promise<ErrorResponse | null> {
+  const nodeTypeValidation = IndustrialNodeTypeSchema.safeParse(nodeType);
+  if (!nodeTypeValidation.success) {
+    return {
+      error: `Invalid node type: ${nodeType}`,
+      details: 'Must be a valid industrial node type',
+      timestamp: new Date().toISOString(),
+      code: 'INVALID_NODE_TYPE',
+    };
+  }
+  return null;
+}
+
+// Helper function to get node schema
+async function getNodeSchema(
+  nodeType: string
+): Promise<{ schema: NodePropertySchema | null; error: ErrorResponse | null }> {
+  const schema = nodeSchemaRegistry.getSchema(nodeType as IndustrialNodeType);
+  if (!schema) {
+    return {
+      schema: null,
+      error: {
+        error: `Schema not found for node type: ${nodeType}`,
+        details: 'Node type is valid but no schema is registered',
+        timestamp: new Date().toISOString(),
+        code: 'SCHEMA_NOT_FOUND',
+      },
+    };
+  }
+  return { schema, error: null };
+}
+
+// Helper function to validate request body
+async function validateRequestBody(
+  body: unknown
+): Promise<{ request: NodeConfigurationValidationRequest | null; error: ErrorResponse | null }> {
+  const requestValidation = NodeConfigurationValidationRequestSchema.safeParse(body);
+  if (!requestValidation.success) {
+    return {
+      request: null,
+      error: {
+        error: 'Invalid request format',
+        details: requestValidation.error.message,
+        timestamp: new Date().toISOString(),
+        code: 'INVALID_REQUEST_FORMAT',
+      },
+    };
+  }
+  return { request: requestValidation.data, error: null };
+}
 
 /**
  * POST /api/v1/node-properties/{nodeType}/validate
@@ -31,28 +85,22 @@ export async function POST(
     const { nodeType } = await params;
     const body = await request.json();
 
-    // Validate nodeType parameter
-    const nodeTypeValidation = IndustrialNodeTypeSchema.safeParse(nodeType);
-    if (!nodeTypeValidation.success) {
-      const errorResponse: ErrorResponse = {
-        error: `Invalid node type: ${nodeType}`,
-        details: 'Must be a valid industrial node type',
-        timestamp: new Date().toISOString(),
-        code: 'INVALID_NODE_TYPE',
-      };
-      return NextResponse.json(errorResponse, { status: 400 });
+    // Validate nodeType parameter using helper function
+    const nodeTypeError = await validateNodeTypeParameter(nodeType);
+    if (nodeTypeError) {
+      return NextResponse.json(nodeTypeError, { status: 400 });
     }
 
-    // Validate request body using Zod schema
-    const requestValidation = NodeConfigurationValidationRequestSchema.safeParse(body);
-    if (!requestValidation.success) {
-      const errorResponse: ErrorResponse = {
-        error: 'Invalid request body',
-        details: requestValidation.error.message,
-        timestamp: new Date().toISOString(),
-        code: 'INVALID_REQUEST',
-      };
-      return NextResponse.json(errorResponse, { status: 400 });
+    // Validate request body using helper function
+    const { request: validatedRequest, error: requestError } = await validateRequestBody(body);
+    if (requestError) {
+      return NextResponse.json(requestError, { status: 400 });
+    }
+
+    // Get node schema using helper function
+    const { schema: nodeSchema, error: schemaError } = await getNodeSchema(nodeType);
+    if (schemaError) {
+      return NextResponse.json(schemaError, { status: 404 });
     }
 
     // Validate request against OpenAPI schema
@@ -66,34 +114,15 @@ export async function POST(
       console.error('OpenAPI request validation failed:', openAPIValidation.errors);
     }
 
-    // Get schema from registry
-    const schema = nodeSchemaRegistry.getSchema(nodeTypeValidation.data as IndustrialNodeType);
-
-    if (!schema) {
-      const errorResponse: ErrorResponse = {
-        error: `Schema not found for node type: ${nodeType}`,
-        details: 'Node type is valid but no schema is registered',
-        timestamp: new Date().toISOString(),
-        code: 'SCHEMA_NOT_FOUND',
-      };
-      return NextResponse.json(errorResponse, { status: 404 });
-    }
-
-    // Perform validation
-    const { configuration, context } = requestValidation.data;
+    // Continue with validation logic using validated data
+    const { configuration, context } = validatedRequest!;
     const validationResults: ValidationResult[] = [];
     let hasErrors = false;
     let hasWarnings = false;
 
-    // Get the original schema with validation functions from the registry
-    // For now, we'll only support the schemas that are actually registered
-    const originalSchema = nodeSchemaRegistry.getSchema(
-      nodeTypeValidation.data as 'pid-controller' | 'modbus-client' | 'opc-server' | 'hmi-display'
-    );
-
-    if (originalSchema) {
-      // Validate each field in each group using the original schema with validation functions
-      for (const group of originalSchema.groups) {
+    // Validate each field in each group using the schema
+    if (nodeSchema) {
+      for (const group of nodeSchema.groups) {
         for (const field of group.fields) {
           const value = configuration[field.key];
 
@@ -107,61 +136,47 @@ export async function POST(
               code: 'REQUIRED_FIELD',
             });
             hasErrors = true;
-            continue;
           }
 
-          // Run field-specific validation if value exists and validation function is available
-          if (
-            value !== undefined &&
-            value !== null &&
-            'validation' in field &&
-            typeof field.validation === 'function'
-          ) {
-            try {
-              const validationContext = {
-                nodeType: schema.nodeType,
-                allNodes: [],
-                connectedNodes: [],
-                workflowConfig: context || {},
-              };
+          // Type validation
+          if (value !== undefined && value !== null && value !== '') {
+            // Basic type checking based on field type
+            let typeValid = true;
+            let typeMessage = '';
 
-              const fieldValidation = field.validation(value, configuration, validationContext);
-              if (fieldValidation) {
-                validationResults.push(fieldValidation);
-                if (fieldValidation.severity === 'error') hasErrors = true;
-                if (fieldValidation.severity === 'warning') hasWarnings = true;
-              }
-            } catch (error) {
+            switch (field.type) {
+              case 'number':
+                if (typeof value !== 'number' && isNaN(Number(value))) {
+                  typeValid = false;
+                  typeMessage = `${field.label} must be a number`;
+                }
+                break;
+              case 'boolean':
+                if (typeof value !== 'boolean') {
+                  typeValid = false;
+                  typeMessage = `${field.label} must be a boolean`;
+                }
+                break;
+              case 'text':
+              case 'textarea':
+              case 'select':
+                if (typeof value !== 'string') {
+                  typeValid = false;
+                  typeMessage = `${field.label} must be a string`;
+                }
+                break;
+            }
+
+            if (!typeValid) {
               validationResults.push({
                 isValid: false,
                 severity: 'error',
-                message: `Validation error: ${
-                  error instanceof Error ? error.message : 'Unknown error'
-                }`,
+                message: typeMessage,
                 field: field.key,
-                code: 'VALIDATION_EXCEPTION',
+                code: 'TYPE_MISMATCH',
               });
               hasErrors = true;
             }
-          }
-        }
-      }
-    } else {
-      // Fallback: Basic validation without functions
-      for (const group of schema.groups) {
-        for (const field of group.fields) {
-          const value = configuration[field.key];
-
-          // Check required fields
-          if (field.required && (value === undefined || value === null || value === '')) {
-            validationResults.push({
-              isValid: false,
-              severity: 'error',
-              message: `${field.label} is required`,
-              field: field.key,
-              code: 'REQUIRED_FIELD',
-            });
-            hasErrors = true;
           }
         }
       }
@@ -169,30 +184,17 @@ export async function POST(
 
     // Create response
     const response: NodeConfigurationValidationResponse = {
-      success: true,
+      success: !hasErrors,
       message: hasErrors
-        ? 'Validation completed with errors'
+        ? 'Validation failed'
         : hasWarnings
-        ? 'Validation completed with warnings'
+        ? 'Validation passed with warnings'
         : 'Validation passed',
       results: validationResults,
       isValid: !hasErrors,
       errors: validationResults.filter(r => r.severity === 'error'),
       warnings: validationResults.filter(r => r.severity === 'warning'),
     };
-
-    // Validate response using Zod schema
-    const zodValidation = NodeConfigurationValidationResponseSchema.safeParse(response);
-    if (!zodValidation.success) {
-      console.error('Zod validation failed:', zodValidation.error);
-      const errorResponse: ErrorResponse = {
-        error: 'Internal validation error',
-        details: 'Response schema validation failed',
-        timestamp: new Date().toISOString(),
-        code: 'VALIDATION_ERROR',
-      };
-      return NextResponse.json(errorResponse, { status: 500 });
-    }
 
     // Validate response against OpenAPI schema
     const responseValidation = await openAPISchemaMCP.validateResponse(

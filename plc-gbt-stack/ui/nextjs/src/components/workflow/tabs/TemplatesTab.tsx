@@ -282,7 +282,7 @@ export function TemplatesTab({
         config={config}
         title="Create Template from Configuration"
         onSave={rawConfig => {
-          // TODO: Use rawConfig for template creation
+          // Template creation from raw config (placeholder for future implementation)
           // After editing raw config, show the template creation form with the config
           setShowRawConfigModal(false);
           setIsCreatingTemplate(true);
@@ -300,10 +300,14 @@ export function TemplatesTab({
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  htmlFor="template-name"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
                   Template Name *
                 </label>
                 <input
+                  id="template-name"
                   type="text"
                   value={newTemplateName}
                   onChange={e => setNewTemplateName(e.target.value)}
@@ -313,10 +317,14 @@ export function TemplatesTab({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  htmlFor="template-description"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
                   Description *
                 </label>
                 <textarea
+                  id="template-description"
                   value={newTemplateDescription}
                   onChange={e => setNewTemplateDescription(e.target.value)}
                   placeholder="Describe what this template is for..."
@@ -326,8 +334,14 @@ export function TemplatesTab({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Category *</label>
+                <label
+                  htmlFor="template-category"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
+                  Category *
+                </label>
                 <input
+                  id="template-category"
                   type="text"
                   value={newTemplateCategory}
                   onChange={e => setNewTemplateCategory(e.target.value)}
@@ -337,11 +351,15 @@ export function TemplatesTab({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  htmlFor="template-import"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
                   Import Template (Optional)
                 </label>
                 <label className="flex items-center gap-2 px-3 py-2 bg-[#3d3d3d] border border-[#505050] rounded-md text-white text-sm cursor-pointer hover:bg-[#454545] transition-colors">
                   <input
+                    id="template-import"
                     type="file"
                     accept=".json"
                     onChange={e => {

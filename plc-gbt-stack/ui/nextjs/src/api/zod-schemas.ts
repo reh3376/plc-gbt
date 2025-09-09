@@ -238,7 +238,7 @@ export const ConnectionTestResultSchema = z
     message: z.string(),
     details: z.record(z.string(), z.unknown()).optional(),
     latencyMs: z.number().optional(),
-    timestamp: z.string().datetime(),
+    timestamp: z.coerce.date().transform(date => date.toISOString()),
   })
   .strict();
 
@@ -286,7 +286,10 @@ export const ErrorResponseSchema = z
   .object({
     error: z.string(),
     details: z.string().optional(),
-    timestamp: z.string().datetime().optional(),
+    timestamp: z.coerce
+      .date()
+      .transform(date => date.toISOString())
+      .optional(),
     code: z.string().optional(),
   })
   .strict();
