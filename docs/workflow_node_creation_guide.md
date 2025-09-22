@@ -63,7 +63,7 @@ This guide defines the end-to-end process for designing, implementing, and valid
 - ✅ CLI/API contract verification against mocked or live services.
 - ✅ Workflow integration test that exercises success and failure paths.
 - ✅ Documentation entry updated with screenshots or sequence diagrams.
-- ✅ Changelog entry in `docs/summaries/workflow_nodes.md` (to be created as catalog).
+- ✅ Changelog entry in the workflow node catalog (to be created alongside this guide).
 
 ## 7. Release Management
 1. Increment node version metadata following semantic versioning.
