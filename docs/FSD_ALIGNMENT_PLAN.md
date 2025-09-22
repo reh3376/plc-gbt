@@ -10,7 +10,7 @@ This functional specification establishes the action plan required to align the 
 
 ### 2.2 Back-end
 - **Status:** FastAPI/CLI layers partially implemented. PLC format converter, workflow automation modules, and repo integration adapters remain stubs.
-- **Key blockers:** Naming/inport mismatches (e.g., `plc-conversion` package), unfinished PLC memory orchestration layers, absent bindings to external PLC repositories, and brittle documentation/test assets.
+- **Key blockers:** Naming/import mismatches (e.g., `plc-conversion` package), unfinished PLC memory orchestration layers, absent bindings to external PLC repositories, and brittle documentation/test assets.
 
 ### 2.3 Documentation & Knowledge
 - **Status:** Extensive reports exist but are redundant or outdated. Task-critical guides for PLC memory operations and workflow node creation are fragmented across summaries.

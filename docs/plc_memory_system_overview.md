@@ -44,7 +44,7 @@ This document serves as the canonical reference for the PLC Memory subsystem tha
 1. Run `plc-memory backup --database <target>` to capture metadata; specify `--compress` for archival.
 2. Validate backup integrity with generated `backup_session_summary.json`.
 3. Restore via `plc-memory restore --database <target> <path>`; use `--verify` to trigger post-restore checks.
-4. Update the backup logbook in `docs/summaries` with timestamp and validation outcome.
+4. Update the team backup logbook with the timestamp and verification outcome so recovery checkpoints remain auditable.
 
 ### 4.4 Health & Maintenance
 - Schedule `plc-memory health` as a nightly job; aggregate results for observability dashboards.
@@ -87,4 +87,4 @@ This document serves as the canonical reference for the PLC Memory subsystem tha
 - Source code: `plc-gbt-stack/scripts/ai/plc_memory_cli.py`
 - Node definitions: `plc-gbt-stack/n8n/nodes/plc_memory`
 - Testing frameworks: `scripts/testing/*plc_memory*`
-- Related reports: `docs/summaries/PLC_MEMORY_CLI_PRODUCTION_DEPLOYMENT_GUIDE.md`
+- Historical reference: `docs/quarantine/summaries/PLC_MEMORY_CLI_PRODUCTION_DEPLOYMENT_GUIDE.md`
