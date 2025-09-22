@@ -111,3 +111,6 @@ n8n-framework/**/*
 # Previously duplicated entries - cleaning up
 acd-l5x-tool-lib/
 n8n-framework-temp/
+
+# Ignore nested git repo from former submodule
+plc-gbt-stack/n8n-mcp/.git
