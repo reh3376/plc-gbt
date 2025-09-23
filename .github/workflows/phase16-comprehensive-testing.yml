@@ -15,7 +15,7 @@ on:
 
 env:
   COVERAGE_THRESHOLD: ${{ github.event.inputs.coverage_threshold || '95' }}
-  PYTHON_VERSION: '3.9'
+  PYTHON_VERSION: '3.14'
 
 jobs:
   phase16-comprehensive-testing:
@@ -69,35 +69,25 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Cache pip dependencies
+      - name: Cache uv dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/workers/requirements.txt') }}
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-uv-
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
 
-      - name: Install Python dependencies
+      - name: Install Python dependencies with uv
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov coverage pytest-xdist pytest-timeout
-          pip install pytest-html pytest-json-report pytest-benchmark
-          pip install bandit safety semgrep
-          pip install locust  # For load testing
-
-          # Install project dependencies
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-
-          if [ -f workers/requirements.txt ]; then
-            pip install -r workers/requirements.txt
-          fi
+          pip install uv
+          uv pip install -e .[dev]
+          uv pip install pytest pytest-cov coverage pytest-xdist pytest-timeout pytest-html pytest-json-report pytest-benchmark bandit safety semgrep locust
 
       - name: Wait for services to be ready
         run: |

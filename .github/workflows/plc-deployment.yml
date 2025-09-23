@@ -17,11 +17,13 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.14'
 
-      - name: Install deployment tools
+      - name: Install deployment tools with uv
         run: |
-          pip install plc-format-converter
+          python -m pip install --upgrade pip
+          pip install uv
+          uv pip install plc-format-converter
 
       - name: Validate all PLC files
         run: |

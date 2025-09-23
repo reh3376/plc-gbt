@@ -2,8 +2,8 @@
 # Phase 1.5: Automated Testing Suite with Linting Isolation
 
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "plc-gbt-n8n-integration"
@@ -89,7 +89,7 @@ max-line-length = 100
 
 [tool.black]
 line-length = 100
-target-version = ['py311']
+target-version = ['py314']
 exclude = '''
 /(
     \.git
@@ -112,7 +112,7 @@ skip = ["n8n-framework"]
 skip_glob = ["n8n-framework/**/*"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.14"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

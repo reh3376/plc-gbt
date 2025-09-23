@@ -24,12 +24,22 @@ references.
 | `quarantine/`, `docs/quarantine/` | Archived reports and guides that no longer reflect the live code |
 
 ## Getting Started
-1. Create a virtual environment and install the project dependencies:
+1. Use the existing development virtual environment (or create it with uv) and ensure core dev tools are installed (uv, ruff):
    ```bash
-   python -m venv .venv
+   # If uv is not installed
+   python -m pip install --upgrade pip
+   pip install uv
+
+   # Create/activate venv with uv (if not already present)
+   uv venv
    source .venv/bin/activate
-   pip install -r requirements.txt
+
+   # Install project (and dev tools) from pyproject.toml
+   uv pip install -e .[dev]
    ```
+   Notes:
+   - Dependencies are managed via `pyproject.toml` (no requirements.txt when using uv).
+   - `ruff` ships as part of the `[project.optional-dependencies].dev` group.
 2. Explore the FastAPI stack and CLI integration points in `plc-gbt-stack/` to identify gaps referenced in the development guide.
 3. Follow the tasks outlined in `docs/DEVELOPMENT_GUIDE.md` before expanding functionality.
 
@@ -47,4 +57,4 @@ The following documents are authoritative for ongoing development:
 - [Coding Standards](docs/coding-standards.md)
 - [Naming Conventions](docs/naming-conventions.md)
 
-Legacy documentation that overstated feature completeness has been relocated to the quarantine directories for archival purposes.
+Legacy documentation that overstated feature completeness has been relocated to the quarantine directories for archival purposes. If you find a missing link to documentation it may reside in one of the quarantine directories, you can search for it there, but before it can be removed from the quarantine directory it will require review and explicit user permission. 
