@@ -8,6 +8,9 @@ name: PLC Repository Deployment
 jobs:
   deploy-to-production:
     runs-on: ubuntu-latest
+    env:
+      DEPLOYMENT_KEY: ${{ secrets.DEPLOYMENT_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
       - uses: actions/checkout@v4
@@ -30,34 +33,29 @@ jobs:
           python scripts/deployment/validate_all_repos.py
 
       - name: Deploy to production
-        if: ${{ env.DEPLOYMENT_KEY_EXISTS == 'true' }}
+        if: ${{ env.DEPLOYMENT_KEY != '' }}
         run: |
           python scripts/deployment/deploy_repositories.py
         env:
-          DEPLOYMENT_KEY: ${{ secrets.DEPLOYMENT_KEY }}
-          DEPLOYMENT_KEY_EXISTS: ${{ secrets.DEPLOYMENT_KEY != '' }}
+          DEPLOYMENT_KEY: ${{ env.DEPLOYMENT_KEY }}
 
       - name: Deployment Skipped Notice
-        if: ${{ env.DEPLOYMENT_KEY_EXISTS != 'true' }}
+        if: ${{ env.DEPLOYMENT_KEY == '' }}
         run: |
           echo "⚠️ Deployment skipped - DEPLOYMENT_KEY secret not configured"
           echo "To enable deployment, configure DEPLOYMENT_KEY secret in repository settings"
-        env:
-          DEPLOYMENT_KEY_EXISTS: ${{ secrets.DEPLOYMENT_KEY != '' }}
 
       - name: Notify deployment status
         uses: 8398a7/action-slack@v3
-        if: ${{ always() && env.SLACK_WEBHOOK_EXISTS == 'true' }}
+        if: ${{ always() && env.SLACK_WEBHOOK_URL != '' }}
         with:
           status: ${{ job.status }}
+          fields: repo,commit,author,workflow,job,took
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_EXISTS: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
 
       - name: Notification Skipped Notice
-        if: ${{ always() && env.SLACK_WEBHOOK_EXISTS != 'true' }}
+        if: ${{ always() && env.SLACK_WEBHOOK_URL == '' }}
         run: |
           echo "⚠️ Slack notification skipped - SLACK_WEBHOOK_URL secret not configured"
           echo "To enable notifications, configure SLACK_WEBHOOK_URL secret in repository settings"
-        env:
-          SLACK_WEBHOOK_EXISTS: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
