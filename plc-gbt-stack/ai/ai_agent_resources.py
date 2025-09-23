@@ -9,12 +9,13 @@ for AI agents operating within the PLC-GPT codebase.
 
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Add scripts to path
 sys.path.append(str(Path(__file__).parent / "scripts"))
 
-def get_available_ai_resources() -> Dict[str, Any]:
+
+def get_available_ai_resources() -> dict[str, Any]:
     """
     Discover all AI resources available in the PLC-GPT project.
 
@@ -32,26 +33,26 @@ def get_available_ai_resources() -> Dict[str, Any]:
             "guide": "../docs/AI_KNOWLEDGE_GRAPH_GUIDE.md",
             "connection": "bolt://localhost:7687",
             "description": "Neo4j knowledge graph with PLC domain expertise",
-            "types": []
+            "types": [],
         },
         "documentation": {
             "main_docs": "docs/",
             "roadmap": "docs/roadmap.md",
             "deployment_guide": "docs/plc_gpt_full_guide.md",
             "file_conversion_guide": "docs/plc-file-conversion-howto.md",
-            "summaries": "summaries/"
+            "summaries": "summaries/",
         },
         "tools": {
             "studio5000_integration": "plc-gpt-stack/scripts/etl/studio5000_integration.py",
             "format_compatibility_checker": "plc-gpt-stack/scripts/etl/format_compatibility_checker.py",
             "repo_article_processor": "plc-gpt-stack/scripts/etl/repo_article_processor.py",
-            "embedding_generator": "plc-gpt-stack/scripts/etl/embedding_generator.py"
+            "embedding_generator": "plc-gpt-stack/scripts/etl/embedding_generator.py",
         },
         "services": {
             "neo4j": {"port": 7687, "http_port": 7474, "status": "unknown"},
             "qdrant": {"port": 6333, "status": "unknown"},
             "postgres": {"port": 5432, "status": "unknown"},
-            "gateway": {"port": 8000, "status": "unknown"}
+            "gateway": {"port": 8000, "status": "unknown"},
         },
         "formats_supported": ["L5X", "ACD", "L5K", "RSS", "APA"],
         "programming_languages": ["Python", "TypeScript", "Cypher"],
@@ -62,25 +63,30 @@ def get_available_ai_resources() -> Dict[str, Any]:
             "Domain expertise queries",
             "File format conversion",
             "Compatibility validation",
-            "Ecosystem analysis"
-        ]
+            "Ecosystem analysis",
+        ],
     }
 
     # Check knowledge graph availability
     try:
         from scripts.query.knowledge_graph_interface import get_knowledge_graph_summary
+
         kg_summary = get_knowledge_graph_summary()
 
-        if kg_summary.get('knowledge_graph_available'):
+        if kg_summary.get("knowledge_graph_available"):
             resources["knowledge_graph"]["available"] = True
-            resources["knowledge_graph"]["types"] = list(kg_summary.get('knowledge_types', {}).keys())
-            resources["knowledge_graph"]["last_updated"] = kg_summary.get('last_updated')
-            resources["knowledge_graph"]["capabilities"] = kg_summary.get('capabilities', {})
-            resources["knowledge_graph"]["sample_data"] = kg_summary.get('sample_data', {})
+            resources["knowledge_graph"]["types"] = list(
+                kg_summary.get("knowledge_types", {}).keys()
+            )
+            resources["knowledge_graph"]["last_updated"] = kg_summary.get("last_updated")
+            resources["knowledge_graph"]["capabilities"] = kg_summary.get("capabilities", {})
+            resources["knowledge_graph"]["sample_data"] = kg_summary.get("sample_data", {})
 
     except Exception as e:
         resources["knowledge_graph"]["error"] = str(e)
-        resources["knowledge_graph"]["instructions"] = "Run: cd plc-gpt-stack && docker-compose up -d"
+        resources["knowledge_graph"]["instructions"] = (
+            "Run: cd plc-gpt-stack && docker-compose up -d"
+        )
 
     return resources
 
@@ -94,13 +100,14 @@ def check_plc_knowledge_available() -> bool:
     """
     try:
         from scripts.query.knowledge_graph_interface import get_knowledge_graph_summary
+
         summary = get_knowledge_graph_summary()
-        return summary.get('knowledge_graph_available', False)
+        return summary.get("knowledge_graph_available", False)
     except Exception:
         return False
 
 
-def get_plc_repositories(language: str = None, min_stars: int = 0) -> List[Dict[str, Any]]:
+def get_plc_repositories(language: str = None, min_stars: int = 0) -> list[dict[str, Any]]:
     """
     Get PLC repositories from knowledge graph.
 
@@ -120,7 +127,7 @@ def get_plc_repositories(language: str = None, min_stars: int = 0) -> List[Dict[
         return [{"error": f"Knowledge graph unavailable: {e}"}]
 
 
-def search_plc_knowledge(query: str) -> Dict[str, List[Dict]]:
+def search_plc_knowledge(query: str) -> dict[str, list[dict]]:
     """
     Search across all PLC knowledge.
 
@@ -139,7 +146,7 @@ def search_plc_knowledge(query: str) -> Dict[str, List[Dict]]:
         return {"error": [{"message": f"Knowledge graph unavailable: {e}"}]}
 
 
-def get_tool_recommendations(task_description: str) -> Dict[str, Any]:
+def get_tool_recommendations(task_description: str) -> dict[str, Any]:
     """
     Get tool recommendations for a specific PLC task.
 
@@ -149,12 +156,7 @@ def get_tool_recommendations(task_description: str) -> Dict[str, Any]:
     Returns:
         Recommended tools and resources
     """
-    recommendations = {
-        "repositories": [],
-        "tools": [],
-        "documentation": [],
-        "research": []
-    }
+    recommendations = {"repositories": [], "tools": [], "documentation": [], "research": []}
 
     task_lower = task_description.lower()
 
@@ -162,43 +164,55 @@ def get_tool_recommendations(task_description: str) -> Dict[str, Any]:
     try:
         repos = get_plc_repositories()
         for repo in repos:
-            if any(keyword in repo.get('description', '').lower() for keyword in task_lower.split()):
-                recommendations["repositories"].append({
-                    "name": repo.get('name'),
-                    "description": repo.get('description'),
-                    "stars": repo.get('stars', 0),
-                    "url": repo.get('url')
-                })
+            if any(
+                keyword in repo.get("description", "").lower() for keyword in task_lower.split()
+            ):
+                recommendations["repositories"].append(
+                    {
+                        "name": repo.get("name"),
+                        "description": repo.get("description"),
+                        "stars": repo.get("stars", 0),
+                        "url": repo.get("url"),
+                    }
+                )
     except Exception:
         pass
 
     # Tool recommendations
     if "conversion" in task_lower or "format" in task_lower:
-        recommendations["tools"].append({
-            "name": "Studio 5000 Integration",
-            "path": "plc-gpt-stack/scripts/etl/studio5000_integration.py",
-            "description": "Convert between ACD and L5X formats"
-        })
-        recommendations["tools"].append({
-            "name": "Format Compatibility Checker",
-            "path": "plc-gpt-stack/scripts/etl/format_compatibility_checker.py",
-            "description": "Validate format conversions and compatibility"
-        })
+        recommendations["tools"].append(
+            {
+                "name": "Studio 5000 Integration",
+                "path": "plc-gpt-stack/scripts/etl/studio5000_integration.py",
+                "description": "Convert between ACD and L5X formats",
+            }
+        )
+        recommendations["tools"].append(
+            {
+                "name": "Format Compatibility Checker",
+                "path": "plc-gpt-stack/scripts/etl/format_compatibility_checker.py",
+                "description": "Validate format conversions and compatibility",
+            }
+        )
 
     # Documentation recommendations
     if "setup" in task_lower or "install" in task_lower:
-        recommendations["documentation"].append({
-            "name": "Deployment Guide",
-            "path": "docs/plc_gpt_full_guide.md",
-            "description": "Complete setup and deployment instructions"
-        })
+        recommendations["documentation"].append(
+            {
+                "name": "Deployment Guide",
+                "path": "docs/plc_gpt_full_guide.md",
+                "description": "Complete setup and deployment instructions",
+            }
+        )
 
     if "conversion" in task_lower:
-        recommendations["documentation"].append({
-            "name": "File Conversion Guide",
-            "path": "docs/plc-file-conversion-howto.md",
-            "description": "How to use file conversion tools"
-        })
+        recommendations["documentation"].append(
+            {
+                "name": "File Conversion Guide",
+                "path": "docs/plc-file-conversion-howto.md",
+                "description": "How to use file conversion tools",
+            }
+        )
 
     return recommendations
 
@@ -208,15 +222,18 @@ PLC_KNOWLEDGE_GRAPH_INTERFACE = "scripts/query/knowledge_graph_interface.py"
 AI_AGENT_GUIDE = "../docs/AI_KNOWLEDGE_GRAPH_GUIDE.md"
 NEO4J_CONNECTION = "bolt://localhost:7687"
 
+
 # Quick access functions
 def kg_available() -> bool:
     """Alias for check_plc_knowledge_available()"""
     return check_plc_knowledge_available()
 
+
 def get_kg_summary():
     """Get knowledge graph summary if available"""
     try:
         from scripts.query.knowledge_graph_interface import get_knowledge_graph_summary
+
         return get_knowledge_graph_summary()
     except Exception:
         return {"knowledge_graph_available": False, "error": "Interface not accessible"}
@@ -230,16 +247,16 @@ if __name__ == "__main__":
     resources = get_available_ai_resources()
 
     print(f"\n📊 Knowledge Graph Available: {resources['knowledge_graph']['available']}")
-    if resources['knowledge_graph']['available']:
+    if resources["knowledge_graph"]["available"]:
         print(f"   Types: {len(resources['knowledge_graph']['types'])} knowledge types")
         print(f"   Interface: {resources['knowledge_graph']['interface']}")
 
     print(f"\n🛠 Tools Available: {len(resources['tools'])} specialized tools")
-    for tool_name in resources['tools']:
+    for tool_name in resources["tools"]:
         print(f"   • {tool_name}")
 
     print("\n🎯 AI Capabilities:")
-    for capability in resources['ai_capabilities']:
+    for capability in resources["ai_capabilities"]:
         print(f"   • {capability}")
 
     print("\n💡 Quick Start for AI Agents:")

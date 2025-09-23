@@ -34,6 +34,7 @@ import { exec } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { promisify } from 'util';
+import { z } from 'zod';
 
 // Import modular UI testing components
 import { PlaywrightMCPClient } from './playwright-mcp-client';
@@ -45,6 +46,247 @@ import {
 } from './user-validation-manager';
 
 const execAsync = promisify(exec);
+
+// ==================== CONFIGURATION MANAGEMENT ====================
+
+// Configuration schema with Zod validation
+const OrchestratorConfigSchema = z.object({
+  // Environment
+  environment: z.enum(['development', 'staging', 'production']).default('development'),
+  debug: z.boolean().default(false),
+
+  // Paths
+  projectRoot: z.string().optional(),
+  tempDirPrefix: z.string().default('ai_task_'),
+
+  // Memory System
+  enableMemory: z.boolean().default(true),
+  mcpDockerUrl: z.string().url().default('http://localhost:8080'),
+  redisUrl: z.string().default('redis://localhost:6379'),
+  neo4jUri: z.string().default('bolt://localhost:7687'),
+  postgresUrl: z.string().default('postgresql://user:pass@localhost/db'),
+  qdrantUrl: z.string().url().default('http://localhost:6333'),
+
+  // Features
+  enableAllFeatures: z.boolean().default(false),
+  enableMathValidation: z.boolean().default(true),
+  enableProductionChecks: z.boolean().default(false),
+  enableUITesting: z.boolean().default(true),
+
+  // Performance
+  maxRetries: z.number().min(1).max(10).default(3),
+  timeoutMs: z.number().min(1000).default(300000),
+  cacheTTL: z.number().min(0).default(3600),
+  maxWorkers: z.number().min(1).max(32).default(4),
+  maxBuildIterations: z.number().min(1).max(10).default(3),
+
+  // Validation
+  minValidationScore: z.number().min(0).max(100).default(95),
+  requireDocumentation: z.boolean().default(true),
+  requireUserValidation: z.boolean().default(true),
+});
+
+export type OrchestratorConfig = z.infer<typeof OrchestratorConfigSchema>;
+
+// Create config from environment or defaults
+export function createConfig(overrides?: Partial<OrchestratorConfig>): OrchestratorConfig {
+  const envConfig = {
+    environment: process.env.ORCHESTRATOR_ENV,
+    debug: process.env.ORCHESTRATOR_DEBUG === 'true',
+    projectRoot: process.env.ORCHESTRATOR_PROJECT_ROOT,
+    enableMemory: process.env.ENABLE_MEMORY !== 'false',
+    mcpDockerUrl: process.env.MCP_DOCKER_URL,
+    redisUrl: process.env.REDIS_URL,
+    neo4jUri: process.env.NEO4J_URI,
+    postgresUrl: process.env.POSTGRES_URL,
+    qdrantUrl: process.env.QDRANT_URL,
+    enableAllFeatures: process.env.ENABLE_ALL_FEATURES === 'true',
+    enableMathValidation: process.env.ENABLE_MATH_VALIDATION !== 'false',
+    enableProductionChecks: process.env.ENABLE_PRODUCTION_CHECKS === 'true',
+    enableUITesting: process.env.ENABLE_UI_TESTING !== 'false',
+    maxRetries: process.env.MAX_RETRIES ? parseInt(process.env.MAX_RETRIES) : undefined,
+    timeoutMs: process.env.TIMEOUT_MS ? parseInt(process.env.TIMEOUT_MS) : undefined,
+    cacheTTL: process.env.CACHE_TTL ? parseInt(process.env.CACHE_TTL) : undefined,
+    maxWorkers: process.env.MAX_WORKERS ? parseInt(process.env.MAX_WORKERS) : undefined,
+    maxBuildIterations: process.env.MAX_BUILD_ITERATIONS
+      ? parseInt(process.env.MAX_BUILD_ITERATIONS)
+      : undefined,
+    minValidationScore: process.env.MIN_VALIDATION_SCORE
+      ? parseFloat(process.env.MIN_VALIDATION_SCORE)
+      : undefined,
+    requireDocumentation: process.env.REQUIRE_DOCUMENTATION !== 'false',
+    requireUserValidation: process.env.REQUIRE_USER_VALIDATION !== 'false',
+  };
+
+  // Filter undefined values
+  const filteredEnvConfig = Object.fromEntries(
+    Object.entries(envConfig).filter(([_, v]) => v !== undefined)
+  );
+
+  return OrchestratorConfigSchema.parse({
+    ...filteredEnvConfig,
+    ...overrides,
+  });
+}
+
+// ==================== ERROR HANDLING & RETRY PATTERNS ====================
+
+export class OrchestratorError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public statusCode: number = 500,
+    public details?: any
+  ) {
+    super(message);
+    this.name = 'OrchestratorError';
+  }
+}
+
+export class ValidationError extends OrchestratorError {
+  constructor(message: string, details?: any) {
+    super(message, 'VALIDATION_ERROR', 400, details);
+  }
+}
+
+export class ConfigurationError extends OrchestratorError {
+  constructor(message: string, details?: any) {
+    super(message, 'CONFIGURATION_ERROR', 500, details);
+  }
+}
+
+// Retry decorator for TypeScript
+export function retry(
+  maxAttempts: number = 3,
+  backoffMs: number = 1000,
+  maxDelayMs: number = 60000
+) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (...args: any[]) {
+      let lastError: Error = new Error('No attempts made');
+      let delay = backoffMs;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          return await originalMethod.apply(this, args);
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+
+          if (attempt === maxAttempts) {
+            throw lastError;
+          }
+
+          console.warn(
+            `Retry ${attempt}/${maxAttempts} for ${propertyKey} after error:`,
+            lastError.message
+          );
+
+          await new Promise(resolve => setTimeout(resolve, Math.min(delay, maxDelayMs)));
+          delay *= 2; // Exponential backoff
+        }
+      }
+
+      throw lastError;
+    };
+
+    return descriptor;
+  };
+}
+
+// Circuit breaker implementation
+export class CircuitBreaker {
+  private failureCount = 0;
+  private lastFailureTime: number | null = null;
+  private state: 'closed' | 'open' | 'half-open' = 'closed';
+
+  constructor(
+    private readonly failureThreshold: number = 5,
+    private readonly recoveryTimeoutMs: number = 30000
+  ) {}
+
+  async execute<T>(fn: () => Promise<T>): Promise<T> {
+    if (this.state === 'open') {
+      if (Date.now() - this.lastFailureTime! > this.recoveryTimeoutMs) {
+        this.state = 'half-open';
+      } else {
+        throw new Error('Circuit breaker is open');
+      }
+    }
+
+    try {
+      const result = await fn();
+      if (this.state === 'half-open') {
+        this.reset();
+      }
+      return result;
+    } catch (error) {
+      this.recordFailure();
+      throw error;
+    }
+  }
+
+  private recordFailure(): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+
+    if (this.failureCount >= this.failureThreshold) {
+      this.state = 'open';
+      console.error(`Circuit breaker opened after ${this.failureCount} failures`);
+    }
+  }
+
+  private reset(): void {
+    this.failureCount = 0;
+    this.state = 'closed';
+    this.lastFailureTime = null;
+  }
+}
+
+// Simple TTL cache for TypeScript
+export class TTLCache<T> {
+  private readonly cache = new Map<string, { value: T; expires: number }>();
+
+  constructor(
+    private readonly ttlMs: number = 3600000, // 1 hour default
+    private readonly maxSize: number = 1000
+  ) {}
+
+  get(key: string): T | undefined {
+    const entry = this.cache.get(key);
+
+    if (!entry) {
+      return undefined;
+    }
+
+    if (Date.now() > entry.expires) {
+      this.cache.delete(key);
+      return undefined;
+    }
+
+    return entry.value;
+  }
+
+  set(key: string, value: T): void {
+    // Evict oldest if at capacity
+    if (this.cache.size >= this.maxSize) {
+      const oldestKey = Array.from(this.cache.entries()).sort(
+        ([, a], [, b]) => a.expires - b.expires
+      )[0][0];
+      this.cache.delete(oldestKey);
+    }
+
+    this.cache.set(key, {
+      value,
+      expires: Date.now() + this.ttlMs,
+    });
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
 
 // ==================== ENUMS & CONSTANTS ====================
 
@@ -784,12 +1026,11 @@ class QueryStrategy {
 // ==================== MAIN ORCHESTRATOR CLASS ====================
 
 export class AITaskOrchestratorTS {
+  private readonly config: OrchestratorConfig;
   private readonly sessionId: string;
   private readonly projectRoot: string;
   private buildIterations: number = 0;
   private readonly maxBuildIterations: number = 3;
-  private readonly enableMemoryIntegration: boolean;
-  private readonly enableAllFeatures: boolean;
   private readonly productionMode: boolean;
   private errors: BuildError[] = [];
   private readonly metrics: BuildMetrics[] = [];
@@ -809,33 +1050,62 @@ export class AITaskOrchestratorTS {
   private userValidationManager: UserValidationManager | null = null;
 
   constructor(
-    options: {
-      projectRoot?: string;
-      enableMemoryIntegration?: boolean;
-      enableAllFeatures?: boolean;
-      productionMode?: boolean;
-      maxBuildIterations?: number;
-    } = {}
+    configOrOptions?:
+      | OrchestratorConfig
+      | {
+          projectRoot?: string;
+          enableMemoryIntegration?: boolean;
+          enableAllFeatures?: boolean;
+          productionMode?: boolean;
+          maxBuildIterations?: number;
+        }
   ) {
+    // Handle both new config and legacy options
+    if (configOrOptions && 'environment' in configOrOptions) {
+      // New config object
+      this.config = configOrOptions as OrchestratorConfig;
+    } else {
+      // Legacy options - convert to config
+      const legacyOptions = configOrOptions || {};
+      this.config = createConfig({
+        projectRoot: legacyOptions.projectRoot,
+        enableMemory: legacyOptions.enableMemoryIntegration,
+        enableAllFeatures: legacyOptions.enableAllFeatures,
+        enableProductionChecks: legacyOptions.productionMode,
+        maxBuildIterations: legacyOptions.maxBuildIterations,
+      });
+    }
+
     this.sessionId = `frontend_session_${Date.now()}`;
-    this.projectRoot = options.projectRoot || process.cwd();
-    this.enableMemoryIntegration = options.enableMemoryIntegration || false;
-    this.enableAllFeatures = options.enableAllFeatures || false;
-    this.productionMode = options.productionMode || false;
-    this.maxBuildIterations = options.maxBuildIterations || 3;
-    this.tempDir = `/tmp/ai_task_${Date.now()}`;
+    this.projectRoot = this.config.projectRoot || process.cwd();
+    this.productionMode =
+      this.config.enableProductionChecks || this.config.environment === 'production';
+    this.maxBuildIterations = this.config.maxBuildIterations;
+    this.tempDir = `/tmp/${this.config.tempDirPrefix}${Date.now()}`;
+
+    // Log configuration in debug mode
+    if (this.config.debug) {
+      console.log('🔧 AITaskOrchestratorTS Configuration:', {
+        environment: this.config.environment,
+        productionMode: this.productionMode,
+        enableMemory: this.config.enableMemory,
+        enableUITesting: this.config.enableUITesting,
+      });
+    }
 
     // Initialize enhanced features
-    if (this.enableMemoryIntegration || this.enableAllFeatures) {
+    if (this.config.enableMemory || this.config.enableAllFeatures) {
       this._initializeMemorySystem();
     }
 
-    if (this.enableAllFeatures) {
+    if (this.config.enableAllFeatures) {
       this._initializeAllFeatures();
     }
 
     // Initialize UI Testing features for frontend tasks
-    this._initializeUITestingComponents();
+    if (this.config.enableUITesting) {
+      this._initializeUITestingComponents();
+    }
   }
 
   private _initializeMemorySystem(): void {

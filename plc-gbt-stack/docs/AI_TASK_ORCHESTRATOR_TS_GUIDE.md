@@ -1,5 +1,29 @@
 # 🚀 AI Task Orchestrator TypeScript/Next.js Guide
 
+## 🚀 Quick Start (60 seconds)
+
+```typescript
+import { createOrchestrator } from '@plc-gbt/orchestrator';
+
+// 1. Analyze task
+const orchestrator = createOrchestrator();
+const analysis = await orchestrator.analyzeTask("Create React data table component");
+
+// 2. Generate OpenAPI schemas (MANDATORY)
+const schemas = await orchestrator.generateOpenAPISchemas(analysis);
+
+// 3. Validate implementation
+const validation = await orchestrator.validateImplementation(code);
+
+// 4. Test & Document
+if (validation.score >= 95) {
+    await orchestrator.runPlaywrightTests();
+    // Then request user validation
+}
+```
+
+**[Full TypeScript Quick Start Guide →](../ai/QUICK_START_GUIDE_TS.md)**
+
 ## 📋 Overview
 
 The AI Task Orchestrator TypeScript Guide provides a **structured framework** for AI agents and LLMs to complete frontend coding tasks systematically using Next.js, TypeScript, and React. It ensures thorough analysis, proper planning, build validation, **two-phase testing (automated Playwright MCP + user validation)** with >95% success rate, and mandatory documentation updates.
@@ -1022,6 +1046,1019 @@ try {
     
 finally {
     orchestrator.cleanup()
+}
+```
+
+## 📊 Which Pattern Should I Use?
+
+### Routing Decision Tree
+
+```mermaid
+graph TD
+    A[New Route?] --> B{Static or Dynamic?}
+    B -->|Static| C[App Router: app/page.tsx]
+    B -->|Dynamic| D{Data Source?}
+    D -->|Database| E[Server Component + fetch]
+    D -->|API| F[Client Component + SWR/RQ]
+    D -->|Mixed| G[Server Component + Client Island]
+    E --> H[Add loading.tsx]
+    F --> I[Add error boundary]
+    G --> J[Optimize bundle size]
+```
+
+### Component Decision Tree
+
+```mermaid
+graph TD
+    A[New Component?] --> B{Needs Interactivity?}
+    B -->|No| C[Server Component]
+    B -->|Yes| D{State Management?}
+    D -->|Local Only| E[useState/useReducer]
+    D -->|Shared| F{Scope?}
+    F -->|Component Tree| G[Context API]
+    F -->|Global| H[Zustand/Redux]
+    C --> I[Streaming SSR?]
+    E --> J[Optimize re-renders]
+    G --> K[Provider placement]
+    H --> L[DevTools setup]
+```
+
+### Data Fetching Decision Tree
+
+```mermaid
+graph TD
+    A[Need Data?] --> B{When to Fetch?}
+    B -->|Build Time| C[getStaticProps/generateStaticParams]
+    B -->|Request Time| D{Client or Server?}
+    D -->|Server| E[Server Component fetch]
+    D -->|Client| F{Caching Strategy?}
+    F -->|SWR| G[useSWR Hook]
+    F -->|React Query| H[useQuery Hook]
+    F -->|None| I[useEffect + fetch]
+    E --> J[Parallel fetch]
+    G --> K[Optimistic updates]
+    H --> L[Prefetching]
+```
+
+## 🎯 Next.js Specific Patterns
+
+### App Router API Routes
+
+```typescript
+// app/api/plc/[id]/route.ts - Next.js 14+ App Router
+import { NextRequest, NextResponse } from 'next/server';
+import { validateRequest, validateResponse } from '@/lib/mcp-validator';
+import { z } from 'zod';
+
+// Define schema using Zod (generated from OpenAPI)
+const ParamsSchema = z.object({
+  id: z.string().uuid()
+});
+
+const ResponseSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  status: z.enum(['online', 'offline', 'error']),
+  lastUpdate: z.string().datetime()
+});
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Validate request params
+    const validated = ParamsSchema.parse(params);
+    
+    // Fetch data with proper typing
+    const plc = await db.plc.findUnique({ 
+      where: { id: validated.id } 
+    });
+    
+    if (!plc) {
+      return NextResponse.json(
+        { error: 'PLC not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Validate response
+    const response = ResponseSchema.parse(plc);
+    
+    return NextResponse.json(response);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Validation error', details: error.errors },
+        { status: 400 }
+      );
+    }
+    
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT endpoint with request body validation
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const body = await request.json();
+  
+  // Validate with OpenAPI schema from MCP
+  const validated = await validateRequest('updatePLC', {
+    params,
+    body
+  });
+  
+  // Update with transaction
+  const updated = await db.$transaction(async (tx) => {
+    const plc = await tx.plc.update({
+      where: { id: validated.params.id },
+      data: validated.body
+    });
+    
+    // Log audit trail
+    await tx.auditLog.create({
+      data: {
+        action: 'UPDATE_PLC',
+        entityId: plc.id,
+        userId: request.headers.get('x-user-id'),
+        timestamp: new Date()
+      }
+    });
+    
+    return plc;
+  });
+  
+  return NextResponse.json(updated);
+}
+```
+
+### Middleware for Authentication
+
+```typescript
+// middleware.ts - Edge runtime authentication
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verifyJWT } from '@/lib/auth';
+
+export async function middleware(request: NextRequest) {
+  // Check protected routes
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    
+    try {
+      const payload = await verifyJWT(token);
+      
+      // Add user info to headers for downstream use
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-user-id', payload.userId);
+      requestHeaders.set('x-user-role', payload.role);
+      
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        }
+      });
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Invalid token' },
+        { status: 401 }
+      );
+    }
+  }
+  
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/api/:path*', '/dashboard/:path*']
+};
+```
+
+### Server Components with Streaming
+
+```typescript
+// app/plc/[id]/page.tsx - Server Component with suspense
+import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
+
+// Server Component for data fetching
+async function PLCDetails({ id }: { id: string }) {
+  const plc = await fetch(`${process.env.API_URL}/api/plc/${id}`, {
+    next: { revalidate: 60 } // Cache for 60 seconds
+  }).then(res => {
+    if (!res.ok) return null;
+    return res.json();
+  });
+  
+  if (!plc) notFound();
+  
+  return (
+    <div className="plc-details">
+      <h2>{plc.name}</h2>
+      <PLCMetrics data={plc.metrics} />
+      <PLCControls plcId={plc.id} />
+    </div>
+  );
+}
+
+// Loading skeleton
+function PLCDetailsSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="h-8 bg-gray-200 rounded w-1/4 mb-4" />
+      <div className="space-y-3">
+        <div className="h-4 bg-gray-200 rounded" />
+        <div className="h-4 bg-gray-200 rounded w-5/6" />
+      </div>
+    </div>
+  );
+}
+
+// Page Component
+export default function PLCPage({ params }: { params: { id: string } }) {
+  return (
+    <div className="container mx-auto p-4">
+      <Suspense fallback={<PLCDetailsSkeleton />}>
+        <PLCDetails id={params.id} />
+      </Suspense>
+    </div>
+  );
+}
+
+// Generate static params for known PLCs
+export async function generateStaticParams() {
+  const plcs = await fetch(`${process.env.API_URL}/api/plc`).then(res => res.json());
+  
+  return plcs.map((plc: { id: string }) => ({
+    id: plc.id,
+  }));
+}
+```
+
+## 📦 State Management Patterns
+
+### Zustand for Global State
+
+```typescript
+// stores/plc-store.ts - Zustand with TypeScript
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+
+interface PLCData {
+  id: string;
+  name: string;
+  status: 'online' | 'offline' | 'error';
+  lastUpdate: Date;
+  metrics: {
+    temperature: number;
+    pressure: number;
+    flow: number;
+  };
+}
+
+interface PLCStore {
+  // State
+  selectedPLC: string | null;
+  plcData: Record<string, PLCData>;
+  isLoading: boolean;
+  error: string | null;
+  
+  // Actions
+  setSelectedPLC: (id: string | null) => void;
+  updatePLCData: (id: string, data: Partial<PLCData>) => void;
+  fetchPLCData: (id: string) => Promise<void>;
+  subscribeToUpdates: (id: string) => () => void;
+}
+
+export const usePLCStore = create<PLCStore>()(
+  persist(
+    immer((set, get) => ({
+      // Initial state
+      selectedPLC: null,
+      plcData: {},
+      isLoading: false,
+      error: null,
+      
+      // Actions
+      setSelectedPLC: (id) => set((state) => {
+        state.selectedPLC = id;
+      }),
+      
+      updatePLCData: (id, data) => set((state) => {
+        if (!state.plcData[id]) {
+          state.plcData[id] = { id } as PLCData;
+        }
+        Object.assign(state.plcData[id], data);
+      }),
+      
+      fetchPLCData: async (id) => {
+        set((state) => {
+          state.isLoading = true;
+          state.error = null;
+        });
+        
+        try {
+          const response = await fetch(`/api/plc/${id}`);
+          if (!response.ok) throw new Error('Failed to fetch');
+          
+          const data = await response.json();
+          
+          set((state) => {
+            state.plcData[id] = data;
+            state.isLoading = false;
+          });
+        } catch (error) {
+          set((state) => {
+            state.error = error.message;
+            state.isLoading = false;
+          });
+        }
+      },
+      
+      subscribeToUpdates: (id) => {
+        // WebSocket subscription
+        const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}/plc/${id}`);
+        
+        ws.onmessage = (event) => {
+          const update = JSON.parse(event.data);
+          get().updatePLCData(id, update);
+        };
+        
+        // Return cleanup function
+        return () => ws.close();
+      }
+    })),
+    {
+      name: 'plc-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        selectedPLC: state.selectedPLC,
+        // Don't persist real-time data
+      })
+    }
+  )
+);
+```
+
+### React Query for Server State
+
+```typescript
+// hooks/usePLCData.ts - React Query with optimistic updates
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
+
+// Type-safe API client
+const api = {
+  getPLC: async (id: string) => {
+    const res = await fetch(`/api/plc/${id}`);
+    if (!res.ok) throw new Error('Failed to fetch');
+    return PLCSchema.parse(await res.json());
+  },
+  
+  updatePLC: async ({ id, data }: { id: string; data: PLCUpdate }) => {
+    const res = await fetch(`/api/plc/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Failed to update');
+    return PLCSchema.parse(await res.json());
+  }
+};
+
+// Custom hooks
+export function usePLCData(id: string) {
+  return useQuery({
+    queryKey: ['plc', id],
+    queryFn: () => api.getPLC(id),
+    staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchInterval: 30 * 1000, // Refetch every 30 seconds
+    refetchIntervalInBackground: true,
+  });
+}
+
+export function useUpdatePLC() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: api.updatePLC,
+    
+    // Optimistic update
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['plc', id] });
+      
+      const previousData = queryClient.getQueryData(['plc', id]);
+      
+      queryClient.setQueryData(['plc', id], (old: PLCData) => ({
+        ...old,
+        ...data,
+        lastUpdate: new Date()
+      }));
+      
+      return { previousData };
+    },
+    
+    // Rollback on error
+    onError: (err, { id }, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(['plc', id], context.previousData);
+      }
+    },
+    
+    // Refetch after success
+    onSettled: (data, error, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['plc', id] });
+    }
+  });
+}
+
+// Prefetching
+export function usePrefetchPLC() {
+  const queryClient = useQueryClient();
+  
+  return (id: string) => {
+    queryClient.prefetchQuery({
+      queryKey: ['plc', id],
+      queryFn: () => api.getPLC(id),
+      staleTime: 5 * 60 * 1000,
+    });
+  };
+}
+```
+
+## ⚡ Performance Optimization Examples
+
+### Bundle Size Optimization
+
+```javascript
+// next.config.js - Advanced optimization config
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+
+module.exports = {
+  webpack: (config, { dev, isServer }) => {
+    // Bundle analyzer in development
+    if (!dev && !isServer) {
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          reportFilename: './analyze.html',
+          openAnalyzer: false,
+        })
+      );
+    }
+    
+    // Tree shaking optimization
+    config.optimization = {
+      ...config.optimization,
+      usedExports: true,
+      sideEffects: false,
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          vendor: {
+            name: 'vendor',
+            chunks: 'all',
+            test: /node_modules/,
+            priority: 20
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'async',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true
+          }
+        }
+      }
+    };
+    
+    return config;
+  },
+  
+  // Image optimization
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year
+  },
+  
+  // Compiler optimizations
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+    reactRemoveProperties: process.env.NODE_ENV === 'production',
+  },
+  
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lodash', 'date-fns', '@mui/material'],
+  },
+};
+```
+
+### Component Performance Optimization
+
+```typescript
+// components/OptimizedPLCDashboard.tsx - Performance patterns
+import { memo, useMemo, useCallback, useTransition, useDeferredValue } from 'react';
+import dynamic from 'next/dynamic';
+
+// Lazy load heavy components
+const HeavyChart = dynamic(() => import('./HeavyChart'), {
+  loading: () => <ChartSkeleton />,
+  ssr: false // Disable SSR for client-only components
+});
+
+// Memoized component with proper comparison
+const PLCCard = memo<{ plc: PLCData; onClick: (id: string) => void }>(
+  ({ plc, onClick }) => {
+    const handleClick = useCallback(() => {
+      onClick(plc.id);
+    }, [onClick, plc.id]);
+    
+    return (
+      <div onClick={handleClick} className="plc-card">
+        <h3>{plc.name}</h3>
+        <StatusIndicator status={plc.status} />
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison for better performance
+    return (
+      prevProps.plc.id === nextProps.plc.id &&
+      prevProps.plc.status === nextProps.plc.status &&
+      prevProps.plc.name === nextProps.plc.name
+    );
+  }
+);
+
+PLCCard.displayName = 'PLCCard';
+
+// Main dashboard with performance optimizations
+export function OptimizedPLCDashboard() {
+  const [isPending, startTransition] = useTransition();
+  const [search, setSearch] = useState('');
+  const deferredSearch = useDeferredValue(search);
+  
+  const { data: plcs, isLoading } = usePLCData();
+  
+  // Expensive filtering with memoization
+  const filteredPLCs = useMemo(() => {
+    if (!plcs || !deferredSearch) return plcs || [];
+    
+    return plcs.filter(plc => 
+      plc.name.toLowerCase().includes(deferredSearch.toLowerCase())
+    );
+  }, [plcs, deferredSearch]);
+  
+  // Virtualized list for large datasets
+  const rowVirtualizer = useVirtualizer({
+    count: filteredPLCs.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 100,
+    overscan: 5,
+  });
+  
+  const handleSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    startTransition(() => {
+      setSearch(e.target.value);
+    });
+  }, []);
+  
+  const handlePLCClick = useCallback((id: string) => {
+    router.push(`/plc/${id}`);
+  }, [router]);
+  
+  return (
+    <div className="dashboard">
+      <SearchInput 
+        value={search} 
+        onChange={handleSearch}
+        isPending={isPending}
+      />
+      
+      <div ref={parentRef} className="plc-list">
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            position: 'relative',
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+            const plc = filteredPLCs[virtualItem.index];
+            return (
+              <div
+                key={plc.id}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${virtualItem.size}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                }}
+              >
+                <PLCCard plc={plc} onClick={handlePLCClick} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      
+      <Suspense fallback={<ChartSkeleton />}>
+        <HeavyChart data={filteredPLCs} />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+### Memory Leak Prevention
+
+```typescript
+// hooks/useMemoryLeakPrevention.ts
+import { useEffect, useRef, useCallback } from 'react';
+
+export function useInterval(callback: () => void, delay: number | null) {
+  const savedCallback = useRef(callback);
+  
+  // Remember the latest callback
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+  
+  // Set up the interval
+  useEffect(() => {
+    if (delay === null) return;
+    
+    const tick = () => savedCallback.current();
+    const id = setInterval(tick, delay);
+    
+    return () => clearInterval(id);
+  }, [delay]);
+}
+
+export function useEventListener<K extends keyof WindowEventMap>(
+  eventName: K,
+  handler: (event: WindowEventMap[K]) => void,
+  element = window
+) {
+  const savedHandler = useRef(handler);
+  
+  useEffect(() => {
+    savedHandler.current = handler;
+  }, [handler]);
+  
+  useEffect(() => {
+    const isSupported = element && element.addEventListener;
+    if (!isSupported) return;
+    
+    const eventListener = (event: WindowEventMap[K]) => savedHandler.current(event);
+    
+    element.addEventListener(eventName, eventListener);
+    
+    return () => {
+      element.removeEventListener(eventName, eventListener);
+    };
+  }, [eventName, element]);
+}
+
+export function useAbortController() {
+  const abortControllerRef = useRef<AbortController>();
+  
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+  
+  const getSignal = useCallback(() => {
+    if (!abortControllerRef.current) {
+      abortControllerRef.current = new AbortController();
+    }
+    return abortControllerRef.current.signal;
+  }, []);
+  
+  return getSignal;
+}
+```
+
+## 💾 Backup Configuration & Retention Policies
+
+### PLC Memory Backup Configuration for TypeScript
+
+```typescript
+import { z } from 'zod';
+
+// Backup configuration schema with validation
+export const BackupConfigSchema = z.object({
+  // Backup directories
+  backupRoot: z.string().default('/var/plc-gbt/backups'),
+  
+  // Redis backup settings
+  redis: z.object({
+    backupInterval: z.number().min(10).max(1440).default(30), // minutes
+    retentionDays: z.number().default(7),
+    snapshotOnMemoryThreshold: z.number().min(0).max(100).default(80), // percent
+  }),
+  
+  // Neo4j backup settings
+  neo4j: z.object({
+    backupHour: z.number().min(0).max(23).default(2), // 2 AM
+    retentionDays: z.number().default(90),
+    incrementalEnabled: z.boolean().default(true),
+  }),
+  
+  // PostgreSQL backup settings
+  postgresql: z.object({
+    backupHour: z.number().min(0).max(23).default(1), // 1 AM
+    walRetentionDays: z.number().default(7),
+    fullRetentionDays: z.number().default(90),
+    continuousArchiving: z.boolean().default(true),
+  }),
+  
+  // Qdrant backup settings
+  qdrant: z.object({
+    backupDays: z.array(z.number().min(0).max(6)).default([1, 4]), // Monday, Thursday
+    retentionDays: z.number().default(60),
+    collectionSizeThreshold: z.number().min(0).max(100).default(20), // percent
+  }),
+  
+  // Global settings
+  compressionEnabled: z.boolean().default(true),
+  encryptionEnabled: z.boolean().default(true),
+  validationRequired: z.boolean().default(true),
+  alertOnFailure: z.boolean().default(true),
+});
+
+export type BackupConfig = z.infer<typeof BackupConfigSchema>;
+
+// Load backup configuration from environment
+export function createBackupConfig(overrides?: Partial<BackupConfig>): BackupConfig {
+  const envConfig = {
+    backupRoot: process.env.BACKUP_ROOT,
+    redis: {
+      backupInterval: parseInt(process.env.REDIS_BACKUP_INTERVAL || '30'),
+      retentionDays: parseInt(process.env.REDIS_RETENTION_DAYS || '7'),
+      snapshotOnMemoryThreshold: parseInt(process.env.REDIS_MEMORY_THRESHOLD || '80'),
+    },
+    neo4j: {
+      backupHour: parseInt(process.env.NEO4J_BACKUP_HOUR || '2'),
+      retentionDays: parseInt(process.env.NEO4J_RETENTION_DAYS || '90'),
+      incrementalEnabled: process.env.NEO4J_INCREMENTAL !== 'false',
+    },
+    postgresql: {
+      backupHour: parseInt(process.env.POSTGRES_BACKUP_HOUR || '1'),
+      walRetentionDays: parseInt(process.env.POSTGRES_WAL_RETENTION || '7'),
+      fullRetentionDays: parseInt(process.env.POSTGRES_FULL_RETENTION || '90'),
+      continuousArchiving: process.env.POSTGRES_WAL_ARCHIVING !== 'false',
+    },
+    qdrant: {
+      backupDays: process.env.QDRANT_BACKUP_DAYS?.split(',').map(Number) || [1, 4],
+      retentionDays: parseInt(process.env.QDRANT_RETENTION_DAYS || '60'),
+      collectionSizeThreshold: parseInt(process.env.QDRANT_SIZE_THRESHOLD || '20'),
+    },
+    compressionEnabled: process.env.BACKUP_COMPRESSION !== 'false',
+    encryptionEnabled: process.env.BACKUP_ENCRYPTION !== 'false',
+    validationRequired: process.env.BACKUP_VALIDATION !== 'false',
+    alertOnFailure: process.env.BACKUP_ALERT_ON_FAILURE !== 'false',
+  };
+  
+  return BackupConfigSchema.parse({ ...envConfig, ...overrides });
+}
+```
+
+### Backup Manager Implementation
+
+```typescript
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import * as path from 'path';
+import * as fs from 'fs/promises';
+import { BackupConfig } from './backup-config';
+
+const execAsync = promisify(exec);
+
+export class BackupManager {
+  constructor(
+    private config: BackupConfig,
+    private orchestrator: AITaskOrchestratorTS
+  ) {}
+  
+  async executeBackup(database: 'redis' | 'neo4j' | 'postgresql' | 'qdrant' | 'all'): Promise<void> {
+    const commands = {
+      redis: 'python3 plc_memory_cli.py backup -d redis',
+      neo4j: 'python3 plc_memory_cli.py backup -d neo4j',
+      postgresql: 'python3 plc_memory_cli.py backup -d postgresql',
+      qdrant: 'python3 plc_memory_cli.py backup -d qdrant',
+      all: 'python3 plc_memory_cli.py backup',
+    };
+    
+    const options = [];
+    if (this.config.compressionEnabled) options.push('--compress');
+    if (this.config.validationRequired) options.push('--validate');
+    options.push('-o', this.config.backupRoot);
+    
+    const command = `${commands[database]} ${options.join(' ')}`;
+    
+    try {
+      // Execute backup command
+      const { stdout, stderr } = await execAsync(command, {
+        cwd: path.join(process.cwd(), 'plc-gbt-stack/scripts/ai'),
+      });
+      
+      // Log success
+      await this.orchestrator.logAction({
+        action: 'backup_completed',
+        target: database,
+        output: stdout,
+        success: true,
+      });
+      
+      // Validate if required
+      if (this.config.validationRequired) {
+        await this.validateBackup(database, stdout);
+      }
+    } catch (error) {
+      // Handle failure
+      if (this.config.alertOnFailure) {
+        await this.sendAlert(database, error);
+      }
+      throw error;
+    }
+  }
+  
+  async scheduleBackups(): Promise<void> {
+    const { CronJob } = await import('cron');
+    
+    // Redis - every N minutes
+    new CronJob(`*/${this.config.redis.backupInterval} * * * *`, async () => {
+      await this.executeBackup('redis');
+    }).start();
+    
+    // Neo4j - daily at specified hour
+    new CronJob(`0 ${this.config.neo4j.backupHour} * * *`, async () => {
+      await this.executeBackup('neo4j');
+    }).start();
+    
+    // PostgreSQL - daily at specified hour
+    new CronJob(`0 ${this.config.postgresql.backupHour} * * *`, async () => {
+      await this.executeBackup('postgresql');
+    }).start();
+    
+    // Qdrant - on specified days at 4 AM
+    const days = this.config.qdrant.backupDays.join(',');
+    new CronJob(`0 4 * * ${days}`, async () => {
+      await this.executeBackup('qdrant');
+    }).start();
+  }
+}
+```
+
+### Retention Policy Manager
+
+```typescript
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
+export class RetentionPolicyManager {
+  constructor(private config: BackupConfig) {}
+  
+  async applyRetentionPolicies(): Promise<void> {
+    await Promise.all([
+      this.cleanupRedisBackups(),
+      this.cleanupNeo4jBackups(),
+      this.cleanupPostgreSQLBackups(),
+      this.cleanupQdrantBackups(),
+    ]);
+  }
+  
+  private async cleanupRedisBackups(): Promise<void> {
+    const backupDir = path.join(this.config.backupRoot, 'redis');
+    const retentionDate = new Date();
+    retentionDate.setDate(retentionDate.getDate() - this.config.redis.retentionDays);
+    
+    for (const subDir of ['hourly', 'daily', 'snapshots']) {
+      const dirPath = path.join(backupDir, subDir);
+      try {
+        const files = await fs.readdir(dirPath);
+        
+        for (const file of files) {
+          const filePath = path.join(dirPath, file);
+          const stats = await fs.stat(filePath);
+          
+          if (stats.mtime < retentionDate) {
+            await fs.unlink(filePath);
+            console.log(`Deleted old Redis backup: ${file}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error cleaning ${subDir} backups:`, error);
+      }
+    }
+  }
+  
+  private async cleanupNeo4jBackups(): Promise<void> {
+    const backupDir = path.join(this.config.backupRoot, 'neo4j');
+    const retentionDate = new Date();
+    retentionDate.setDate(retentionDate.getDate() - this.config.neo4j.retentionDays);
+    
+    const files = await fs.readdir(backupDir);
+    for (const file of files) {
+      const filePath = path.join(backupDir, file);
+      const stats = await fs.stat(filePath);
+      
+      if (stats.mtime < retentionDate && file.includes('full')) {
+        // Check for dependent incremental backups before deletion
+        const hasIncrementals = await this.hasDependentIncrementals(filePath);
+        if (!hasIncrementals) {
+          await fs.rm(filePath, { recursive: true });
+          console.log(`Deleted old Neo4j backup: ${file}`);
+        }
+      }
+    }
+  }
+  
+  private async hasDependentIncrementals(baseBackup: string): Promise<boolean> {
+    // Implementation to check for incremental backups
+    const dir = path.dirname(baseBackup);
+    const baseName = path.basename(baseBackup);
+    const files = await fs.readdir(dir);
+    
+    return files.some(file => 
+      file.includes('incremental') && 
+      file.includes(baseName.replace('full', ''))
+    );
+  }
+}
+```
+
+### Integration with Next.js API Routes
+
+```typescript
+// app/api/backup/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { BackupManager } from '@/lib/backup/backup-manager';
+import { createBackupConfig } from '@/lib/backup/backup-config';
+import { AITaskOrchestratorTS } from '@/lib/ai/orchestrator';
+
+export async function POST(request: NextRequest) {
+  try {
+    const { database } = await request.json();
+    
+    const config = createBackupConfig();
+    const orchestrator = new AITaskOrchestratorTS();
+    const backupManager = new BackupManager(config, orchestrator);
+    
+    await backupManager.executeBackup(database);
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: `Backup completed for ${database}` 
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  const config = createBackupConfig();
+  
+  return NextResponse.json({
+    configuration: {
+      redis: config.redis,
+      neo4j: config.neo4j,
+      postgresql: config.postgresql,
+      qdrant: config.qdrant,
+      global: {
+        backupRoot: config.backupRoot,
+        compressionEnabled: config.compressionEnabled,
+        encryptionEnabled: config.encryptionEnabled,
+      }
+    }
+  });
 }
 ```
 

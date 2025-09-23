@@ -21,7 +21,7 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -34,6 +34,7 @@ try:
     import control
     import numpy as np
     from scipy import signal
+
     CONTROL_LIBRARIES_AVAILABLE = True
 except ImportError:
     CONTROL_LIBRARIES_AVAILABLE = False
@@ -46,6 +47,7 @@ logger = logging.getLogger(__name__)
 
 class PIDProcessType(Enum):
     """PID process types for tuning strategy selection"""
+
     LEVEL = "level"
     FLOW = "flow"
     PRESSURE = "pressure"
@@ -58,18 +60,21 @@ class PIDProcessType(Enum):
 
 class PIDAlgorithmForm(Enum):
     """PID algorithm forms (Rockwell-specific)"""
+
     DEPENDENT = "dependent"
     INDEPENDENT = "independent"
 
 
 class PIDInstructionType(Enum):
     """PID instruction types"""
+
     PID = "PID"
     PIDE = "PIDE"
 
 
 class PIDControlMode(Enum):
     """PID control modes"""
+
     P = "P"
     PI = "PI"
     PID = "PID"
@@ -78,6 +83,7 @@ class PIDControlMode(Enum):
 @dataclass
 class PIDLoop:
     """PID Loop configuration and state"""
+
     loop_id: str
     name: str
     description: str
@@ -87,8 +93,8 @@ class PIDLoop:
     control_mode: PIDControlMode
 
     # Process Variables
-    pv_tags: List[str] = field(default_factory=list)
-    pv_weights: List[float] = field(default_factory=list)
+    pv_tags: list[str] = field(default_factory=list)
+    pv_weights: list[float] = field(default_factory=list)
     cv_tag: str = ""
     sp_tag: str = ""
 
@@ -98,42 +104,43 @@ class PIDLoop:
     td: float = 0.0  # Derivative time (minutes)
 
     # Scaling and Limits
-    pv_range: Tuple[float, float] = (0.0, 100.0)
-    cv_range: Tuple[float, float] = (0.0, 100.0)
-    sp_range: Tuple[float, float] = (0.0, 100.0)
+    pv_range: tuple[float, float] = (0.0, 100.0)
+    cv_range: tuple[float, float] = (0.0, 100.0)
+    sp_range: tuple[float, float] = (0.0, 100.0)
 
     # Performance Metrics
-    last_tuned: Optional[datetime] = None
+    last_tuned: datetime | None = None
     performance_score: float = 0.0
     oscillation_index: float = 0.0
     cv_saturation_percent: float = 0.0
 
     # Relationships
-    cascade_master: Optional[str] = None
-    cascade_slaves: List[str] = field(default_factory=list)
-    disturbance_variables: List[str] = field(default_factory=list)
+    cascade_master: str | None = None
+    cascade_slaves: list[str] = field(default_factory=list)
+    disturbance_variables: list[str] = field(default_factory=list)
 
 
 @dataclass
 class PIDTuningSession:
     """PID tuning session data"""
+
     session_id: str
     loop_id: str
     started: datetime
-    completed: Optional[datetime] = None
+    completed: datetime | None = None
 
     # Tuning method and parameters
     tuning_method: str = "ziegler_nichols"
-    initial_parameters: Dict[str, float] = field(default_factory=dict)
-    final_parameters: Dict[str, float] = field(default_factory=dict)
+    initial_parameters: dict[str, float] = field(default_factory=dict)
+    final_parameters: dict[str, float] = field(default_factory=dict)
 
     # Performance results
-    initial_performance: Dict[str, float] = field(default_factory=dict)
-    final_performance: Dict[str, float] = field(default_factory=dict)
+    initial_performance: dict[str, float] = field(default_factory=dict)
+    final_performance: dict[str, float] = field(default_factory=dict)
 
     # Step test data
-    step_test_data: List[Dict[str, Any]] = field(default_factory=list)
-    model_identification: Dict[str, float] = field(default_factory=dict)
+    step_test_data: list[dict[str, Any]] = field(default_factory=list)
+    model_identification: dict[str, float] = field(default_factory=dict)
 
     # Status and notes
     status: str = "in_progress"
@@ -154,10 +161,12 @@ class PIDIntegrationOrchestrator:
     5. Vector Database - Historical performance similarity
     """
 
-    def __init__(self,
-                 neo4j_uri: str = "bolt://localhost:7687",
-                 neo4j_user: str = "neo4j",
-                 neo4j_password: str = "password"):
+    def __init__(
+        self,
+        neo4j_uri: str = "bolt://localhost:7687",
+        neo4j_user: str = "neo4j",
+        neo4j_password: str = "password",
+    ):
         """Initialize PID Integration Orchestrator"""
 
         # Initialize existing PLC-GPT infrastructure
@@ -165,30 +174,30 @@ class PIDIntegrationOrchestrator:
         self.knowledge_graph = PLCKnowledgeGraph(neo4j_uri, neo4j_user, neo4j_password)
 
         # PID-specific state
-        self.pid_loops: Dict[str, PIDLoop] = {}
-        self.active_tuning_sessions: Dict[str, PIDTuningSession] = {}
-        self.tuning_history: List[PIDTuningSession] = []
+        self.pid_loops: dict[str, PIDLoop] = {}
+        self.active_tuning_sessions: dict[str, PIDTuningSession] = {}
+        self.tuning_history: list[PIDTuningSession] = []
 
         # Performance tracking
         self.performance_thresholds = {
-            'oscillation_index': 0.3,
-            'cv_saturation_percent': 10.0,
-            'response_time_seconds': 300.0,
-            'steady_state_error_percent': 2.0
+            "oscillation_index": 0.3,
+            "cv_saturation_percent": 10.0,
+            "response_time_seconds": 300.0,
+            "steady_state_error_percent": 2.0,
         }
 
         # Tuning algorithm registry
         self.tuning_algorithms = {
-            'ziegler_nichols': self._ziegler_nichols_tuning,
-            'cohen_coon': self._cohen_coon_tuning,
-            'imc': self._imc_tuning,
-            'lambda_tuning': self._lambda_tuning
+            "ziegler_nichols": self._ziegler_nichols_tuning,
+            "cohen_coon": self._cohen_coon_tuning,
+            "imc": self._imc_tuning,
+            "lambda_tuning": self._lambda_tuning,
         }
 
         logger.info("PID Integration Orchestrator initialized")
         logger.info(f"Control libraries available: {CONTROL_LIBRARIES_AVAILABLE}")
 
-    def discover_pid_loops(self) -> List[PIDLoop]:
+    def discover_pid_loops(self) -> list[PIDLoop]:
         """
         Discover PID loops using existing knowledge graph infrastructure.
 
@@ -200,9 +209,7 @@ class PIDIntegrationOrchestrator:
 
         try:
             # Use AI Task Orchestrator for intelligent loop discovery
-            get_task_guidance(
-                "Discover and analyze PID control loops in PLC project files"
-            )
+            get_task_guidance("Discover and analyze PID control loops in PLC project files")
 
             # Search for PID-related components in knowledge graph
             with self.knowledge_graph.driver.session() as session:
@@ -229,12 +236,12 @@ class PIDIntegrationOrchestrator:
 
                     pid_loop = PIDLoop(
                         loop_id=loop_id,
-                        name=comp['name'],
-                        description=comp['description'] or "",
+                        name=comp["name"],
+                        description=comp["description"] or "",
                         process_type=process_type,
                         algorithm_form=PIDAlgorithmForm.INDEPENDENT,
                         instruction_type=PIDInstructionType.PIDE,
-                        control_mode=PIDControlMode.PID
+                        control_mode=PIDControlMode.PID,
                     )
 
                     discovered_loops.append(pid_loop)
@@ -247,29 +254,30 @@ class PIDIntegrationOrchestrator:
             logger.error(f"Error discovering PID loops: {e}")
             return []
 
-    def _classify_process_type(self, component: Dict[str, Any]) -> PIDProcessType:
+    def _classify_process_type(self, component: dict[str, Any]) -> PIDProcessType:
         """
         Classify process type using AI analysis.
 
         Integrates with AI Task Orchestrator for intelligent classification.
         """
-        name = component.get('name', '').lower()
-        description = component.get('description', '').lower()
+        name = component.get("name", "").lower()
+        description = component.get("description", "").lower()
 
         # Simple heuristic classification (can be enhanced with AI)
-        if 'level' in name or 'level' in description:
+        if "level" in name or "level" in description:
             return PIDProcessType.LEVEL
-        elif 'flow' in name or 'flow' in description:
+        elif "flow" in name or "flow" in description:
             return PIDProcessType.FLOW
-        elif 'pressure' in name or 'pressure' in description:
+        elif "pressure" in name or "pressure" in description:
             return PIDProcessType.PRESSURE
-        elif 'temp' in name or 'temp' in description:
+        elif "temp" in name or "temp" in description:
             return PIDProcessType.TEMPERATURE
         else:
             return PIDProcessType.LEVEL  # Default
 
-    def configure_multi_pv_strategy(self, loop_id: str, pv_tags: List[str],
-                                   weights: Optional[List[float]] = None) -> bool:
+    def configure_multi_pv_strategy(
+        self, loop_id: str, pv_tags: list[str], weights: list[float] | None = None
+    ) -> bool:
         """
         Configure multi-PV control strategy as per Autonomous PID Roadmap Milestone 2.
 
@@ -313,7 +321,7 @@ class PIDIntegrationOrchestrator:
 
         return True
 
-    def _analyze_cascade_opportunities(self, loop_id: str) -> List[str]:
+    def _analyze_cascade_opportunities(self, loop_id: str) -> list[str]:
         """
         Analyze cascade control opportunities using knowledge graph.
 
@@ -331,7 +339,7 @@ class PIDIntegrationOrchestrator:
                 """
 
                 result = session.run(query, loop_id=loop_id)
-                candidates = [record['secondary_id'] for record in result]
+                candidates = [record["secondary_id"] for record in result]
 
                 return candidates
 
@@ -339,8 +347,9 @@ class PIDIntegrationOrchestrator:
             logger.error(f"Error analyzing cascade opportunities: {e}")
             return []
 
-    def execute_automated_tuning(self, loop_id: str,
-                                method: str = "ziegler_nichols") -> PIDTuningSession:
+    def execute_automated_tuning(
+        self, loop_id: str, method: str = "ziegler_nichols"
+    ) -> PIDTuningSession:
         """
         Execute automated PID tuning procedure as per Autonomous PID Roadmap Milestone 5.
 
@@ -361,7 +370,7 @@ class PIDIntegrationOrchestrator:
             loop_id=loop_id,
             started=datetime.now(),
             tuning_method=method,
-            operator="system"
+            operator="system",
         )
 
         self.active_tuning_sessions[session_id] = session
@@ -387,9 +396,9 @@ class PIDIntegrationOrchestrator:
 
             # Update loop parameters
             loop = self.pid_loops[loop_id]
-            loop.kc = final_params.get('kc', loop.kc)
-            loop.ti = final_params.get('ti', loop.ti)
-            loop.td = final_params.get('td', loop.td)
+            loop.kc = final_params.get("kc", loop.kc)
+            loop.ti = final_params.get("ti", loop.ti)
+            loop.td = final_params.get("td", loop.td)
             loop.last_tuned = datetime.now()
 
             logger.info(f"Tuning session {session_id} completed successfully")
@@ -406,7 +415,7 @@ class PIDIntegrationOrchestrator:
 
         return session
 
-    def _ziegler_nichols_tuning(self, loop_id: str) -> Tuple[Dict[str, float], Dict[str, float]]:
+    def _ziegler_nichols_tuning(self, loop_id: str) -> tuple[dict[str, float], dict[str, float]]:
         """
         Ziegler-Nichols tuning algorithm implementation.
 
@@ -415,16 +424,12 @@ class PIDIntegrationOrchestrator:
         loop = self.pid_loops[loop_id]
 
         # Get initial parameters
-        initial_params = {
-            'kc': loop.kc,
-            'ti': loop.ti,
-            'td': loop.td
-        }
+        initial_params = {"kc": loop.kc, "ti": loop.ti, "td": loop.td}
 
         # Simulate tuning process (in real implementation, this would involve step tests)
         if CONTROL_LIBRARIES_AVAILABLE:
             # Example process model (First Order Plus Dead Time)
-            K = 1.0    # Process gain
+            K = 1.0  # Process gain
             tau = 10.0  # Time constant
             theta = 2.0  # Dead time
 
@@ -433,47 +438,43 @@ class PIDIntegrationOrchestrator:
             ti = 2.0 * theta
             td = 0.5 * theta
 
-            final_params = {
-                'kc': kc,
-                'ti': ti,
-                'td': td
-            }
+            final_params = {"kc": kc, "ti": ti, "td": td}
         else:
             # Fallback tuning without control libraries
             final_params = {
-                'kc': initial_params['kc'] * 1.2,
-                'ti': initial_params['ti'] * 0.8,
-                'td': initial_params['td'] * 1.5
+                "kc": initial_params["kc"] * 1.2,
+                "ti": initial_params["ti"] * 0.8,
+                "td": initial_params["td"] * 1.5,
             }
 
         logger.info(f"Ziegler-Nichols tuning completed for loop {loop_id}")
         return initial_params, final_params
 
-    def _cohen_coon_tuning(self, loop_id: str) -> Tuple[Dict[str, float], Dict[str, float]]:
+    def _cohen_coon_tuning(self, loop_id: str) -> tuple[dict[str, float], dict[str, float]]:
         """Cohen-Coon tuning algorithm implementation."""
         # Placeholder implementation
         loop = self.pid_loops[loop_id]
-        initial_params = {'kc': loop.kc, 'ti': loop.ti, 'td': loop.td}
-        final_params = {'kc': loop.kc * 1.1, 'ti': loop.ti * 0.9, 'td': loop.td * 1.2}
+        initial_params = {"kc": loop.kc, "ti": loop.ti, "td": loop.td}
+        final_params = {"kc": loop.kc * 1.1, "ti": loop.ti * 0.9, "td": loop.td * 1.2}
         return initial_params, final_params
 
-    def _imc_tuning(self, loop_id: str) -> Tuple[Dict[str, float], Dict[str, float]]:
+    def _imc_tuning(self, loop_id: str) -> tuple[dict[str, float], dict[str, float]]:
         """Internal Model Control tuning algorithm implementation."""
         # Placeholder implementation
         loop = self.pid_loops[loop_id]
-        initial_params = {'kc': loop.kc, 'ti': loop.ti, 'td': loop.td}
-        final_params = {'kc': loop.kc * 0.9, 'ti': loop.ti * 1.1, 'td': loop.td * 0.8}
+        initial_params = {"kc": loop.kc, "ti": loop.ti, "td": loop.td}
+        final_params = {"kc": loop.kc * 0.9, "ti": loop.ti * 1.1, "td": loop.td * 0.8}
         return initial_params, final_params
 
-    def _lambda_tuning(self, loop_id: str) -> Tuple[Dict[str, float], Dict[str, float]]:
+    def _lambda_tuning(self, loop_id: str) -> tuple[dict[str, float], dict[str, float]]:
         """Lambda tuning algorithm implementation."""
         # Placeholder implementation
         loop = self.pid_loops[loop_id]
-        initial_params = {'kc': loop.kc, 'ti': loop.ti, 'td': loop.td}
-        final_params = {'kc': loop.kc * 1.0, 'ti': loop.ti * 1.0, 'td': loop.td * 0.9}
+        initial_params = {"kc": loop.kc, "ti": loop.ti, "td": loop.td}
+        final_params = {"kc": loop.kc * 1.0, "ti": loop.ti * 1.0, "td": loop.td * 0.9}
         return initial_params, final_params
 
-    def monitor_performance(self, loop_id: str) -> Dict[str, Any]:
+    def monitor_performance(self, loop_id: str) -> dict[str, Any]:
         """
         Monitor PID loop performance using enterprise monitoring infrastructure.
 
@@ -488,31 +489,33 @@ class PIDIntegrationOrchestrator:
 
         # Simulate performance metrics (in real implementation, this would get real data)
         performance_metrics = {
-            'timestamp': datetime.now().isoformat(),
-            'loop_id': loop_id,
-            'pv_value': 50.0 + np.random.normal(0, 2.0) if CONTROL_LIBRARIES_AVAILABLE else 50.0,
-            'sp_value': 50.0,
-            'cv_value': 45.0 + np.random.normal(0, 5.0) if CONTROL_LIBRARIES_AVAILABLE else 45.0,
-            'oscillation_index': loop.oscillation_index,
-            'cv_saturation_percent': loop.cv_saturation_percent,
-            'performance_score': loop.performance_score,
-            'tuning_method': self.tuning_history[-1].tuning_method if self.tuning_history else "manual"
+            "timestamp": datetime.now().isoformat(),
+            "loop_id": loop_id,
+            "pv_value": 50.0 + np.random.normal(0, 2.0) if CONTROL_LIBRARIES_AVAILABLE else 50.0,
+            "sp_value": 50.0,
+            "cv_value": 45.0 + np.random.normal(0, 5.0) if CONTROL_LIBRARIES_AVAILABLE else 45.0,
+            "oscillation_index": loop.oscillation_index,
+            "cv_saturation_percent": loop.cv_saturation_percent,
+            "performance_score": loop.performance_score,
+            "tuning_method": self.tuning_history[-1].tuning_method
+            if self.tuning_history
+            else "manual",
         }
 
         # Check performance thresholds
         alerts = []
-        if loop.oscillation_index > self.performance_thresholds['oscillation_index']:
+        if loop.oscillation_index > self.performance_thresholds["oscillation_index"]:
             alerts.append(f"High oscillation detected: {loop.oscillation_index:.3f}")
 
-        if loop.cv_saturation_percent > self.performance_thresholds['cv_saturation_percent']:
+        if loop.cv_saturation_percent > self.performance_thresholds["cv_saturation_percent"]:
             alerts.append(f"CV saturation detected: {loop.cv_saturation_percent:.1f}%")
 
-        performance_metrics['alerts'] = alerts
+        performance_metrics["alerts"] = alerts
 
         logger.info(f"Performance monitoring for loop {loop_id}: {len(alerts)} alerts")
         return performance_metrics
 
-    def get_tuning_recommendations(self, loop_id: str) -> Dict[str, Any]:
+    def get_tuning_recommendations(self, loop_id: str) -> dict[str, Any]:
         """
         Get AI-powered tuning recommendations.
 
@@ -526,47 +529,57 @@ class PIDIntegrationOrchestrator:
         loop = self.pid_loops[loop_id]
 
         # Use AI Task Orchestrator for intelligent recommendations
-        task_description = f"Provide tuning recommendations for {loop.process_type.value} control loop"
+        task_description = (
+            f"Provide tuning recommendations for {loop.process_type.value} control loop"
+        )
         guidance = get_task_guidance(task_description)
 
         # Analyze current performance
         performance = self.monitor_performance(loop_id)
 
         recommendations = {
-            'loop_id': loop_id,
-            'current_performance': performance,
-            'ai_guidance': guidance,
-            'recommendations': []
+            "loop_id": loop_id,
+            "current_performance": performance,
+            "ai_guidance": guidance,
+            "recommendations": [],
         }
 
         # Performance-based recommendations
         if loop.oscillation_index > 0.3:
-            recommendations['recommendations'].append({
-                'type': 'parameter_adjustment',
-                'description': 'Reduce proportional gain to decrease oscillation',
-                'suggested_kc': loop.kc * 0.8,
-                'priority': 'high'
-            })
+            recommendations["recommendations"].append(
+                {
+                    "type": "parameter_adjustment",
+                    "description": "Reduce proportional gain to decrease oscillation",
+                    "suggested_kc": loop.kc * 0.8,
+                    "priority": "high",
+                }
+            )
 
         if loop.cv_saturation_percent > 10:
-            recommendations['recommendations'].append({
-                'type': 'tuning_method',
-                'description': 'Consider switching to lambda tuning for better constraint handling',
-                'suggested_method': 'lambda_tuning',
-                'priority': 'medium'
-            })
+            recommendations["recommendations"].append(
+                {
+                    "type": "tuning_method",
+                    "description": "Consider switching to lambda tuning for better constraint handling",
+                    "suggested_method": "lambda_tuning",
+                    "priority": "medium",
+                }
+            )
 
         if loop.performance_score < 0.7:
-            recommendations['recommendations'].append({
-                'type': 'advanced_control',
-                'description': 'Consider implementing feed-forward control',
-                'priority': 'low'
-            })
+            recommendations["recommendations"].append(
+                {
+                    "type": "advanced_control",
+                    "description": "Consider implementing feed-forward control",
+                    "priority": "low",
+                }
+            )
 
-        logger.info(f"Generated {len(recommendations['recommendations'])} recommendations for loop {loop_id}")
+        logger.info(
+            f"Generated {len(recommendations['recommendations'])} recommendations for loop {loop_id}"
+        )
         return recommendations
 
-    def generate_deployment_report(self, loop_id: str) -> Dict[str, Any]:
+    def generate_deployment_report(self, loop_id: str) -> dict[str, Any]:
         """
         Generate deployment report for Studio 5000 integration.
 
@@ -585,35 +598,35 @@ class PIDIntegrationOrchestrator:
                 break
 
         report = {
-            'loop_configuration': {
-                'loop_id': loop.loop_id,
-                'name': loop.name,
-                'process_type': loop.process_type.value,
-                'instruction_type': loop.instruction_type.value,
-                'algorithm_form': loop.algorithm_form.value
+            "loop_configuration": {
+                "loop_id": loop.loop_id,
+                "name": loop.name,
+                "process_type": loop.process_type.value,
+                "instruction_type": loop.instruction_type.value,
+                "algorithm_form": loop.algorithm_form.value,
             },
-            'tuning_parameters': {
-                'kc': loop.kc,
-                'ti': loop.ti,
-                'td': loop.td,
-                'pv_range': loop.pv_range,
-                'cv_range': loop.cv_range,
-                'sp_range': loop.sp_range
+            "tuning_parameters": {
+                "kc": loop.kc,
+                "ti": loop.ti,
+                "td": loop.td,
+                "pv_range": loop.pv_range,
+                "cv_range": loop.cv_range,
+                "sp_range": loop.sp_range,
             },
-            'performance_metrics': self.monitor_performance(loop_id),
-            'tuning_history': latest_session.__dict__ if latest_session else None,
-            'l5x_deployment': {
-                'instruction_type': loop.instruction_type.value,
-                'parameters': {
-                    'PGain': loop.kc,
-                    'Ti': loop.ti,
-                    'Td': loop.td,
-                    'PVEUMax': loop.pv_range[1],
-                    'PVEUMin': loop.pv_range[0],
-                    'CVEUMax': loop.cv_range[1],
-                    'CVEUMin': loop.cv_range[0]
-                }
-            }
+            "performance_metrics": self.monitor_performance(loop_id),
+            "tuning_history": latest_session.__dict__ if latest_session else None,
+            "l5x_deployment": {
+                "instruction_type": loop.instruction_type.value,
+                "parameters": {
+                    "PGain": loop.kc,
+                    "Ti": loop.ti,
+                    "Td": loop.td,
+                    "PVEUMax": loop.pv_range[1],
+                    "PVEUMin": loop.pv_range[0],
+                    "CVEUMax": loop.cv_range[1],
+                    "CVEUMin": loop.cv_range[0],
+                },
+            },
         }
 
         logger.info(f"Generated deployment report for loop {loop_id}")
@@ -649,9 +662,7 @@ def main():
             loop_id = loops[0].loop_id
             print(f"\n2. Configuring multi-PV strategy for {loop_id}...")
             success = orchestrator.configure_multi_pv_strategy(
-                loop_id,
-                ['PV_01', 'PV_02'],
-                [0.7, 0.3]
+                loop_id, ["PV_01", "PV_02"], [0.7, 0.3]
             )
             print(f"   Configuration successful: {success}")
 
