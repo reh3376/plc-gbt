@@ -27,3 +27,13 @@ This diagram provides a detailed view of the async task analysis process:
 2. **Plugin hooks**: Async plugin hooks are executed before and after analysis
 3. **Memory insights**: Memory system insights are attached to the analysis asynchronously
 4. **Thread pool usage**: CPU-intensive operations are offloaded to a thread pool
+
+## Sequence Point Index
+
+1. **Async analysis request** - User/Service calls `analyze_task_async()` with task description
+2. **Pre-analysis async hook** - AITaskOrchestrator calls PluginManager's `execute_hook_async()` for PRE_ANALYZE
+3. **Thread pool delegation** - AITaskOrchestrator uses `asyncio.to_thread()` to run CPU-bound analysis in ThreadPool
+4. **Analysis completion** - ThreadPool returns completed TaskAnalysis to AITaskOrchestrator
+5. **Memory insights attachment** - AITaskOrchestrator awaits `_get_memory_insights()` to attach memory data if available
+6. **Post-analysis async hook** - AITaskOrchestrator calls PluginManager's `execute_hook_async()` for POST_ANALYZE with TaskAnalysis
+7. **Final result return** - Complete TaskAnalysis returned to User/Service

@@ -26,3 +26,12 @@ This diagram shows the implementation guide creation process:
 4. **File writing**: Guide is written as UTF-8 encoded Markdown
 5. **Post-generation hook**: Plugins can react to the created guide
 6. **Path return**: The path to the created guide is returned to the caller
+
+## Sequence Point Index
+
+1. **Guide creation initiation** - Caller invokes `create_implementation_guide()` with TaskAnalysis and optional output_dir
+2. **Pre-generation plugin hook** - AITaskOrchestrator executes PRE_GENERATE_GUIDE hook via PluginManager
+3. **Directory structure setup** - AITaskOrchestrator calls `_ensure_directory()` to create parent directories
+4. **Guide content writing** - AITaskOrchestrator writes implementation guide to filesystem as UTF-8 encoded file
+5. **Post-generation plugin hook** - AITaskOrchestrator executes POST_GENERATE_GUIDE hook with guide_path
+6. **Path return to caller** - AITaskOrchestrator returns the Path object pointing to created guide

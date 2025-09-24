@@ -29,3 +29,17 @@ This diagram shows the basic flow of task analysis and implementation guide crea
 
 1. **Async-first analysis**: The orchestrator analyzes tasks asynchronously with plugin hooks
 2. **Guide creation**: After analysis, implementation guides are generated with filesystem operations
+
+## Sequence Point Index
+
+1. **User initiates async task analysis** - User/Service calls `analyze_task_async()` with task description
+2. **Pre-analysis plugin hook** - PluginManager executes PRE_ANALYZE hooks (async/sync awaited)
+3. **Internal analysis execution** - AITaskOrchestrator performs core analysis using LLM/memory/etc.
+4. **Post-analysis plugin hook** - PluginManager executes POST_ANALYZE hooks with analysis results
+5. **Analysis result returned** - TaskAnalysis object returned to User/Service
+6. **Guide creation request** - User/Service calls `create_implementation_guide()` with TaskAnalysis
+7. **Pre-guide generation hook** - PluginManager executes PRE_GENERATE_GUIDE hooks
+8. **Directory structure creation** - Filesystem operations ensure output directory exists
+9. **Guide file writing** - Implementation guide written as UTF-8 Markdown to filesystem
+10. **Post-guide generation hook** - PluginManager executes POST_GENERATE_GUIDE with file path
+11. **Guide path returned** - Path to created guide returned to User/Service
