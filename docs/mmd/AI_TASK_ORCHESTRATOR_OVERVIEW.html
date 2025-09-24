@@ -6,30 +6,63 @@
     <title>AI Task Orchestrator - System Overview</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script>
-      mermaid.initialize({ startOnLoad: true, theme: 'default' });
+      // Defer theme-aware initialization until DOMContentLoaded
+      if (window.mermaid) {
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+      }
     </script>
     <style>
-      body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 24px; line-height: 1.5; color: #222; background: #fafafa; }
+      :root {
+        --bg: #fafafa;
+        --text: #222222;
+        --card-bg: #ffffff;
+        --muted: #666666;
+        --shadow: rgba(0, 0, 0, 0.06);
+        --pill-bg: #eef6ff;
+        --pill-border: #cfe3ff;
+        --pill-text: #1b6fd8;
+        --link: #1b6fd8;
+        --border: #e5e7eb;
+      }
+      [data-theme="dark"] {
+        --bg: #0f172a; /* slate-900 */
+        --text: #e5e7eb; /* gray-200 */
+        --card-bg: #111827; /* gray-900 */
+        --muted: #9ca3af; /* gray-400 */
+        --shadow: rgba(0, 0, 0, 0.4);
+        --pill-bg: #1f2937; /* gray-800 */
+        --pill-border: #374151; /* gray-700 */
+        --pill-text: #93c5fd; /* blue-300 */
+        --link: #93c5fd;
+        --border: #374151;
+      }
+
+      body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 24px; line-height: 1.5; color: var(--text); background: var(--bg); }
       h1 { text-align: center; margin-bottom: 8px; }
-      .subtle { text-align: center; color: #666; margin-top: 0; }
-      section { background: #fff; border-radius: 10px; padding: 20px; margin: 20px 0 28px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); }
+      .subtle { text-align: center; color: var(--muted); margin-top: 0; }
+      section { background: var(--card-bg); border-radius: 10px; padding: 20px; margin: 20px 0 28px; box-shadow: 0 2px 6px var(--shadow); }
       h2 { margin: 0 0 10px; }
       h3 { margin: 14px 0 6px; }
       .mermaid { margin: 22px 0; }
       .index-title { font-weight: 700; margin: 18px 0 8px; }
       ul.point-index { margin: 0 0 0 18px; }
-      .lead { font-size: 1.05rem; color: #333; }
-      .pill { display: inline-block; background: #eef6ff; color: #1b6fd8; border: 1px solid #cfe3ff; border-radius: 999px; padding: 2px 10px; font-size: 12px; margin-right: 6px; }
+      .lead { font-size: 1.05rem; color: var(--text); }
+      .pill { display: inline-block; background: var(--pill-bg); color: var(--pill-text); border: 1px solid var(--pill-border); border-radius: 999px; padding: 2px 10px; font-size: 12px; margin-right: 6px; }
       .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-      .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 6px; }
+      .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #11182710; border: 1px solid var(--border); padding: 1px 6px; border-radius: 6px; }
       .checklist li { margin: 4px 0; }
-      footer { text-align: center; color: #555; margin-top: 24px; }
-      footer a { color: #1b6fd8; text-decoration: none; }
+      footer { text-align: center; color: var(--muted); margin-top: 24px; }
+      footer a { color: var(--link); text-decoration: none; }
       footer a:hover { text-decoration: underline; }
       @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+      /* Theme toggle */
+      .theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 1000; background: var(--card-bg); color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; cursor: pointer; box-shadow: 0 1px 4px var(--shadow); }
+      .theme-toggle:focus { outline: 2px solid var(--pill-text); outline-offset: 2px; }
     </style>
   </head>
   <body>
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">Dark</button>
     <h1>AI Task Orchestrator - System Overview</h1>
     <p class="subtle">Architecture, lifecycle, and interaction flows with annotated sequence indexes</p>
 
@@ -456,5 +489,44 @@ const validation = await orchestrator.validateImplementation(code)
     <footer>
       Repository: <a href="https://github.com/reh3376/plc-gbt" target="_blank" rel="noopener noreferrer">github.com/reh3376/plc-gbt</a>
     </footer>
+
+    <script>
+      (function() {
+        const getStoredTheme = () => localStorage.getItem('theme');
+        const prefersDark = () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const getPreferredTheme = () => {
+          const stored = getStoredTheme();
+          if (stored === 'dark' || stored === 'light') return stored;
+          return prefersDark() ? 'dark' : 'light';
+        };
+        const applyTheme = (theme) => {
+          document.documentElement.setAttribute('data-theme', theme);
+          const btn = document.getElementById('themeToggle');
+          if (btn) btn.textContent = theme === 'dark' ? 'Light' : 'Dark';
+          try {
+            if (window.mermaid) {
+              mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'default' });
+              mermaid.run({ querySelector: '.mermaid' });
+            }
+          } catch (e) {
+            // no-op; rendering attempted
+          }
+        };
+        const init = () => {
+          const theme = getPreferredTheme();
+          applyTheme(theme);
+          const btn = document.getElementById('themeToggle');
+          if (btn) {
+            btn.addEventListener('click', () => {
+              const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+              const next = current === 'dark' ? 'light' : 'dark';
+              localStorage.setItem('theme', next);
+              applyTheme(next);
+            });
+          }
+        };
+        document.addEventListener('DOMContentLoaded', init);
+      })();
+    </script>
   </body>
 </html>
