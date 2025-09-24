@@ -1,0 +1,49 @@
+# AI Task Orchestrator - Complete Lifecycle Flow
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant App as Orchestrator User
+  participant Orc as AITaskOrchestrator
+  participant Obs as Observability (Metrics/Tracer)
+  participant PM as PluginManager
+  participant Mem as Memory/Store
+
+  App->>Orc: instantiate()
+  rect rgb(240,245,255)
+    note right of Orc: Lazy init (if available)
+    Orc-->>Obs: get_metrics_collector? / get_tracer?
+    Orc-->>PM: get_plugin_manager?
+  end
+
+  App->>+Orc: __enter__/__aenter__()
+  alt plugins available
+    Orc->>PM: startup()
+  else plugins unavailable
+    note over Orc: skip plugin hooks
+  end
+  Orc->>Mem: load context/memory
+
+  App->>+Orc: execute_task_step(...)
+  Orc->>Obs: record metrics/trace (guarded)
+  Orc->>Mem: read/write insights (robust shape handling)
+  Orc-->>App: result or raise ExecutionError (chained)
+
+  App->>+Orc: __exit__/__aexit__(exc?)
+  alt plugins available
+    Orc->>PM: shutdown()
+  else
+    note over Orc: no-op
+  end
+  Orc-->>App: closed (bool in async)
+```
+
+## Description
+
+This comprehensive diagram shows the complete lifecycle of the AI Task Orchestrator:
+
+1. **Instantiation**: Lazy initialization of observability and plugin components
+2. **Context entry**: Startup hooks and memory loading when entering context
+3. **Task execution**: Metrics recording, memory operations, and error handling
+4. **Context exit**: Graceful shutdown with plugin cleanup
+5. **Error handling**: Robust error chaining and exception management throughout

@@ -1,3 +1,6 @@
+# AI Task Orchestrator - Analysis and Guide Creation Flow
+
+```mermaid
 sequenceDiagram
   autonumber
   participant U as User/Service
@@ -18,5 +21,11 @@ sequenceDiagram
   OR->>FS: Ensure directory, write UTF-8 Markdown
   OR->>PM: POST_GENERATE_GUIDE(Path)
   OR-->>U: Path
+```
 
+## Description
 
+This diagram shows the basic flow of task analysis and implementation guide creation in the AI Task Orchestrator. It demonstrates:
+
+1. **Async-first analysis**: The orchestrator analyzes tasks asynchronously with plugin hooks
+2. **Guide creation**: After analysis, implementation guides are generated with filesystem operations

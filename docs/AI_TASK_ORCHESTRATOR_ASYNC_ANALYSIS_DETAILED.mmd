@@ -1,0 +1,29 @@
+# AI Task Orchestrator - Detailed Async Analysis Flow
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as User/Service
+  participant OR as AITaskOrchestrator
+  participant PM as PluginManager
+  participant FS as Filesystem
+  participant TH as ThreadPool
+
+  Note over OR: Async-first analysis (non-blocking)
+  U->>OR: analyze_task_async(task_description)
+  OR->>PM: execute_hook_async(PRE_ANALYZE, ...)
+  OR->>TH: asyncio.to_thread(self.analyzer.analyze, task_description)
+  TH-->>OR: TaskAnalysis (returned)
+  OR->>OR: await _get_memory_insights(...) (attach if present)
+  OR->>PM: execute_hook_async(POST_ANALYZE, TaskAnalysis)
+  OR-->>U: TaskAnalysis
+```
+
+## Description
+
+This diagram provides a detailed view of the async task analysis process:
+
+1. **Non-blocking analysis**: Uses asyncio.to_thread for CPU-bound analysis operations
+2. **Plugin hooks**: Async plugin hooks are executed before and after analysis
+3. **Memory insights**: Memory system insights are attached to the analysis asynchronously
+4. **Thread pool usage**: CPU-intensive operations are offloaded to a thread pool

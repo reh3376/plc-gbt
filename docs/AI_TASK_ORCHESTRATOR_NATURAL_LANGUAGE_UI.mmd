@@ -1,0 +1,47 @@
+# AI Task Orchestrator - Natural Language UI Flow
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant User as User
+  participant UI as NaturalLanguageUIApp
+  participant CM as ConversationManager
+  participant LLM as OpenAILLMManager
+  participant OA as OpenAI Chat API
+  participant MCP as MCP Server (tools)
+
+  User->>UI: send_message(session_id, message)
+  UI->>CM: process_user_message(...)
+  alt LLM manager not set
+    CM-->>UI: raise ValueError
+    UI-->>User: error response
+  else ready
+    CM->>LLM: generate_response(messages, tools | NOT_GIVEN)
+    LLM->>OA: chat.completions.create(messages, tools/tool_choice)
+    OA-->>LLM: response (content, tool_calls, usage)
+    alt tool_calls present
+      CM->>MCP: execute tools (per call)
+      MCP-->>CM: tool_results (per call)
+      CM-->>UI: UIResponse(content, suggestions, tool_results, usage, UTC timestamps)
+    else no tools
+      CM-->>UI: UIResponse(content, suggestions, usage, UTC timestamps)
+    end
+  end
+  UI-->>User: render response
+```
+
+## Description
+
+This diagram illustrates the Natural Language UI interaction flow:
+
+1. **User interaction**: User sends a message through the UI
+2. **Conversation management**: The ConversationManager processes the message
+3. **LLM integration**: OpenAI LLM generates responses with optional tool calls
+4. **Tool execution**: MCP server executes any requested tools
+5. **Response rendering**: UI presents the complete response to the user
+
+Key features:
+- Error handling for missing LLM manager
+- Support for tool calls via MCP server
+- UTC timestamp tracking throughout
+- Suggestions and tool results in responses
