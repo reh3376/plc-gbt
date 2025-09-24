@@ -48,3 +48,24 @@ Legacy documents that referenced unimplemented or deprecated functionality have 
 - `docs/quarantine/` for archived documentation and research artifacts.
 
 Review these directories only when historical context is needed; do not treat their contents as authoritative for ongoing work.
+
+## IDE (Theia) Setup
+
+- Start IDE:
+  - `cd docker/theia && docker compose up -d`
+  - Open `http://localhost:3100`
+- The project root is mounted at `/home/project` inside the container with Git support enabled.
+
+## External PLC Repositories Sync
+
+- Configure repositories in `scripts/automation/repo_sync.yaml`.
+- Sync repositories:
+  - `python scripts/automation/repo_sync.py --config scripts/automation/repo_sync.yaml`
+- Repositories are cloned/updated under `external/` at the repository root.
+
+## PLC Conversion and Validation
+
+- API Endpoints:
+  - POST `/api/v1/conversion/convert` – supports L5X→JSON and JSON→L5X
+  - POST `/api/v1/conversion/validate` – validates L5X structure
+  - GET  `/api/v1/conversion/inspect` – returns controller/programs/tasks/tags metadata
