@@ -9,15 +9,7 @@
       mermaid.initialize({ startOnLoad: true, theme: 'default' });
     </script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 24px;
-        line-height: 1.5;
-        color: #222;
-        background: #fafafa;
-      }
+      body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 24px; line-height: 1.5; color: #222; background: #fafafa; }
       h1 { text-align: center; margin-bottom: 8px; }
       .subtle { text-align: center; color: #666; margin-top: 0; }
       section { background: #fff; border-radius: 10px; padding: 20px; margin: 20px 0 28px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); }
@@ -31,6 +23,9 @@
       .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
       .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 6px; }
       .checklist li { margin: 4px 0; }
+      footer { text-align: center; color: #555; margin-top: 24px; }
+      footer a { color: #1b6fd8; text-decoration: none; }
+      footer a:hover { text-decoration: underline; }
       @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
     </style>
   </head>
@@ -115,7 +110,7 @@
 
     <section>
       <h2>1) Analysis and Guide Creation Flow</h2>
-      <div class="mermaid">
+      <pre class="mermaid">
 sequenceDiagram
   autonumber
   participant U as User/Service
@@ -136,7 +131,7 @@ sequenceDiagram
   OR->>FS: Ensure directory, write UTF-8 Markdown
   OR->>PM: POST_GENERATE_GUIDE(Path)
   OR-->>U: Path
-      </div>
+      </pre>
       <div class="index-title">Sequence Point Index</div>
       <ul class="point-index">
         <li>1. User initiates async task analysis</li>
@@ -155,7 +150,7 @@ sequenceDiagram
 
     <section>
       <h2>2) Detailed Async Analysis Flow</h2>
-      <div class="mermaid">
+      <pre class="mermaid">
 sequenceDiagram
   autonumber
   participant U as User/Service
@@ -170,7 +165,7 @@ sequenceDiagram
   note right of OR: await _get_memory_insights(...) (attach if present)
   OR->>PM: execute_hook_async(POST_ANALYZE, TaskAnalysis)
   OR-->>U: TaskAnalysis
-      </div>
+      </pre>
       <div class="index-title">Sequence Point Index</div>
       <ul class="point-index">
         <li>1. Async analysis request</li>
@@ -185,7 +180,7 @@ sequenceDiagram
 
     <section>
       <h2>3) Implementation Guide Creation Flow</h2>
-      <div class="mermaid">
+      <pre class="mermaid">
 sequenceDiagram
   autonumber
   participant U as Caller
@@ -199,7 +194,7 @@ sequenceDiagram
   OR->>FS: write guide (utf-8)
   OR->>PM: execute_hook(POST_GENERATE_GUIDE, guide_path)
   OR-->>U: Path
-      </div>
+      </pre>
       <div class="index-title">Sequence Point Index</div>
       <ul class="point-index">
         <li>1. Guide creation initiation</li>
@@ -213,7 +208,7 @@ sequenceDiagram
 
     <section>
       <h2>4) Complete Orchestrator Lifecycle</h2>
-      <div class="mermaid">
+      <pre class="mermaid">
 sequenceDiagram
   autonumber
   participant App
@@ -257,7 +252,7 @@ sequenceDiagram
     note over Orc: no-op
   end
   Orc-->>App: closed (bool in async)
-      </div>
+      </pre>
       <div class="index-title">Sequence Point Index</div>
       <ul class="point-index">
         <li>1. Orchestrator instantiation</li>
@@ -279,7 +274,7 @@ sequenceDiagram
 
     <section>
       <h2>5) Plugin Manager Shutdown Flow</h2>
-      <div class="mermaid">
+      <pre class="mermaid">
 sequenceDiagram
   autonumber
   participant U as Operator
@@ -289,7 +284,7 @@ sequenceDiagram
   PM->>PM: execute SHUTDOWN hooks (try/except)
   PM->>PM: call each plugin.cleanup() (try/except)
   PM-->>U: shutdown complete
-      </div>
+      </pre>
       <div class="index-title">Sequence Point Index</div>
       <ul class="point-index">
         <li>1. Shutdown method invocation</li>
@@ -301,7 +296,7 @@ sequenceDiagram
 
     <section>
       <h2>6) Natural Language UI Flow</h2>
-      <div class="mermaid">
+      <pre class="mermaid">
 sequenceDiagram
   autonumber
   participant User
@@ -332,7 +327,7 @@ sequenceDiagram
     end
   end
   UI-->>User: render response
-      </div>
+      </pre>
       <div class="index-title">Sequence Point Index</div>
       <ul class="point-index">
         <li>1. User message submission</li>
@@ -353,7 +348,7 @@ sequenceDiagram
 
     <section>
       <h2>7) Context Management and Cleanup</h2>
-      <div class="mermaid">
+      <pre class="mermaid">
 sequenceDiagram
   autonumber
   participant U as Caller
@@ -375,7 +370,7 @@ sequenceDiagram
   OR->>PM: SHUTDOWN hooks
   OR-->>PM: Plugin cleanup
   OR-->>U: Closed
-      </div>
+      </pre>
       <div class="index-title">Sequence Point Index</div>
       <ul class="point-index">
         <li>1. Enter context (__aenter__/__enter__)</li>
@@ -457,5 +452,9 @@ const validation = await orchestrator.validateImplementation(code)
         </div>
       </div>
     </section>
+
+    <footer>
+      Repository: <a href="https://github.com/reh3376/plc-gbt" target="_blank" rel="noopener noreferrer">github.com/reh3376/plc-gbt</a>
+    </footer>
   </body>
 </html>
