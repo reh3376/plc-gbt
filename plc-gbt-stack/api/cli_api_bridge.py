@@ -241,12 +241,12 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Include PLC Conversion Router - Phase 35
+# Include PLC Conversion Router - MVP
 try:
     from plc_conversion import router as plc_conversion_router
     app.include_router(plc_conversion_router)
-except ImportError:
-    logger.warning("PLC Conversion module not found, skipping router inclusion")
+except Exception as e:
+    logger.warning(f"PLC Conversion router not included: {e}")
 
 # Configure CORS
 app.add_middleware(
