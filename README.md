@@ -14,6 +14,46 @@ The project is still in early development; many documented capabilities are not 
 Refer to the [PLC-GBT Development Guide](docs/DEVELOPMENT_GUIDE.md) for the active roadmap, priorities, and links to supporting
 references.
 
+## Installation
+
+For detailed installation instructions, see [INSTALLATION.md](INSTALLATION.md).
+
+### Quick Install
+```bash
+git clone https://github.com/reh3376/plc-gbt.git
+cd plc-gbt
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+## Usage
+
+### Starting the API Server
+```bash
+cd plc-gbt-stack/api
+uvicorn main:app --reload
+```
+
+### Running Tests
+```bash
+pytest
+```
+
+### Using the CLI
+```bash
+plc-memory --help
+```
+
+## Features
+
+- **PLC Format Conversion**: Convert between various PLC file formats
+- **Memory Management**: Multi-database memory system for knowledge storage
+- **Workflow Engine**: Create and manage automation workflows
+- **AI Integration**: OpenAI fine-tuned models for industrial automation
+- **Real-time Monitoring**: System health and performance monitoring
+- **Security**: Enterprise-grade security with authentication and authorization
+
 ## Repository Layout
 | Path | Purpose |
 |------|---------|
@@ -22,6 +62,13 @@ references.
 | `ui/` | Planned Theia IDE workspace (not yet implemented) |
 | `docs/` | Maintained documentation for current workstreams |
 | `quarantine/`, `docs/quarantine/` | Archived reports and guides that no longer reflect the live code |
+
+## Requirements
+
+- Python 3.12 or higher
+- Node.js 20.x or higher (for frontend development)
+- Docker and Docker Compose (for services)
+- Git
 
 ## Getting Started
 1. Use the existing development virtual environment (or create it with uv) and ensure core dev tools are installed (uv, ruff):
