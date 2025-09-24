@@ -38,4 +38,3 @@ This reference captures the async lifecycle improvements introduced for the AI T
   Records the `asyncio.to_thread` behavior, renames the guide helper to `create_implementation_guide`, and explains the automatic directory creation and plugin hook lifecycle for documentation output.
 - **Navigation update — `plc-gbt-stack/ai/docs/index.md` [lines 65-69]**  
   Adds the lifecycle guide to the advanced topics list so knowledge of the new teardown workflow is part of the primary documentation navigation.
-

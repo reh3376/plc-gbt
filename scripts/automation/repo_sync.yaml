@@ -1,0 +1,21 @@
+repos:
+  - name: plc-100
+    url: git@github.com:reh3376/plc-100.git
+    branch: main
+    dest: external
+  - name: plc-200
+    url: git@github.com:reh3376/plc-200.git
+    branch: main
+    dest: external
+  - name: plc-300
+    url: git@github.com:reh3376/plc-300.git
+    branch: main
+    dest: external
+  - name: plc-400
+    url: git@github.com:reh3376/plc-400.git
+    branch: main
+    dest: external
+  - name: plc-500
+    url: git@github.com:reh3376/plc-500.git
+    branch: main
+    dest: external

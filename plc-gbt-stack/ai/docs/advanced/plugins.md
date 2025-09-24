@@ -48,6 +48,16 @@ graph TD
 
 ## Creating a Plugin
 
+### Prerequisites used in examples
+
+```python
+import re
+import time
+import logging
+
+logger = logging.getLogger("plc_orchestrator.plugins.examples")
+```
+
 ### Basic Plugin Structure
 
 ```python

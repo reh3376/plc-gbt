@@ -146,7 +146,6 @@ class AITaskOrchestrator:
         """Create the directory for the provided path if it is missing."""
 
         path.mkdir(parents=True, exist_ok=True)
-
     def _initialize_features(self) -> None:
         """Initialize optional features based on configuration."""
         # Memory system
@@ -314,7 +313,6 @@ class AITaskOrchestrator:
         Raises:
             OrchestratorError: If analysis fails
         """
-
         self._ensure_sync_context("analyze_task()", "await analyze_task_async(...)")
         return asyncio.run(self.analyze_task_async(task_description))
 
@@ -333,6 +331,7 @@ class AITaskOrchestrator:
                     },
                 )
                 span_context.__enter__()
+            timer_context = None
 
             timer_context = None
 
@@ -765,14 +764,12 @@ class AITaskOrchestrator:
 
     def cleanup(self) -> None:
         """Clean up resources and close connections."""
-
         if self._summary_created and self._closed:
             return
 
         if not self._cleanup_started:
             self._cleanup_started = True
             self.logger.info(f"Cleaning up task {self.task_id}")
-
         try:
             self.close()
         except RuntimeError as exc:

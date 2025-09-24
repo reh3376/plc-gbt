@@ -1,5 +1,7 @@
 # AI Task Orchestrator - Consolidated Improvement Plan
 
+> Version: 2025-09-24 • Commit: (see repo history) • Author: PLC-GBT Team
+
 **Status: ✅ COMPLETED** | **Completion Date: 2025-01-18**
 
 This document consolidates all improvement suggestions from the previous analyses into a single, actionable improvement plan for the AI Task Orchestrator files.
