@@ -108,18 +108,20 @@ jobs:
 
       - name: Set up environment variables
         run: |
-          echo "NEO4J_URI=bolt://localhost:7687" >> $GITHUB_ENV
-          echo "NEO4J_USER=neo4j" >> $GITHUB_ENV
-          echo "NEO4J_PASSWORD=password" >> $GITHUB_ENV
-          echo "QDRANT_HOST=localhost" >> $GITHUB_ENV
-          echo "QDRANT_PORT=6333" >> $GITHUB_ENV
-          echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
-          echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
-          echo "POSTGRES_USER=postgres" >> $GITHUB_ENV
-          echo "POSTGRES_PASSWORD=password" >> $GITHUB_ENV
-          echo "POSTGRES_DB=plc_gbt" >> $GITHUB_ENV
-          echo "REDIS_HOST=localhost" >> $GITHUB_ENV
-          echo "REDIS_PORT=6379" >> $GITHUB_ENV
+          {
+            echo "NEO4J_URI=bolt://localhost:7687"
+            echo "NEO4J_USER=neo4j"
+            echo "NEO4J_PASSWORD=password"
+            echo "QDRANT_HOST=localhost"
+            echo "QDRANT_PORT=6333"
+            echo "POSTGRES_HOST=localhost"
+            echo "POSTGRES_PORT=5432"
+            echo "POSTGRES_USER=postgres"
+            echo "POSTGRES_PASSWORD=password"
+            echo "POSTGRES_DB=plc_gbt"
+            echo "REDIS_HOST=localhost"
+            echo "REDIS_PORT=6379"
+          } >> "$GITHUB_ENV"
 
       - name: Run Phase 16 Comprehensive Testing
         run: |
