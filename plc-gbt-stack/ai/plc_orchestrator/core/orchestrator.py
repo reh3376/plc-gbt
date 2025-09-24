@@ -100,6 +100,13 @@ class AITaskOrchestrator:
         # Plugin system
         self.plugin_manager: PluginManager | None = None
 
+         # Lifecycle management
+        self._close_lock: asyncio.Lock | None = None
+        self._closed = False
+        self._cleanup_started = False
+        self._summary_created = False
+        self._cleanup_task: asyncio.Task | None = None
+
         # Initialize optional features
         self._initialize_features()
 
@@ -114,6 +121,25 @@ class AITaskOrchestrator:
                 "plugins_enabled": self.plugin_manager is not None,
             },
         )
+
+    @staticmethod
+    def _event_loop_running() -> bool:
+        """Return ``True`` if an asyncio event loop is currently running."""
+
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return False
+        return True
+
+    def _ensure_sync_context(self, operation: str, suggestion: str) -> None:
+        """Ensure a synchronous API is not invoked from an async context."""
+
+        if self._event_loop_running():
+            raise RuntimeError(
+                f"{operation} cannot be used while an asyncio event loop is running. "
+                f"Use the asynchronous counterpart (e.g. '{suggestion}')."
+            )
 
     def _initialize_features(self) -> None:
         """Initialize optional features based on configuration."""
@@ -178,6 +204,97 @@ class AITaskOrchestrator:
             except Exception as e:
                 self.logger.warning(f"Failed to initialize plugin system: {e}")
 
+    def __enter__(self) -> "AITaskOrchestrator":
+        """Support usage as a synchronous context manager."""
+
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> bool:
+        """Ensure resources are cleaned up when leaving context managers."""
+
+        self.cleanup()
+        return False
+
+    async def __aenter__(self) -> "AITaskOrchestrator":
+        """Support usage as an asynchronous context manager."""
+
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb) -> bool:
+        """Ensure asynchronous cleanup when leaving async context managers."""
+
+        await self.cleanup_async()
+        return False
+
+    def close(self) -> None:
+        """Synchronously close orchestrator resources."""
+
+        if self._closed:
+            return
+
+        self._ensure_sync_context("close()", "await aclose()")
+        asyncio.run(self.aclose())
+
+    async def aclose(self) -> None:
+        """Asynchronously close orchestrator resources."""
+
+        if self._closed:
+            return
+
+        if self._close_lock is None:
+            self._close_lock = asyncio.Lock()
+
+        async with self._close_lock:
+            if self._closed:
+                return
+
+            await self._close_memory()
+            self._shutdown_plugins()
+
+            if self.tracer:
+                try:
+                    self.tracer.export()
+                except Exception as exc:  # pragma: no cover - defensive logging
+                    self.logger.warning(f"Failed to flush tracing spans: {exc}")
+                finally:
+                    self.tracer = None
+
+            self._closed = True
+            self.logger.info(
+                "AI Task Orchestrator resources closed",
+                extra={"task_id": self.task_id},
+            )
+
+    async def _close_memory(self) -> None:
+        """Close memory coordinator connections safely."""
+
+        if not self.memory_coordinator:
+            return
+
+        try:
+            await self.memory_coordinator.close()
+        except Exception as exc:  # pragma: no cover - defensive logging
+            self.logger.error(f"Error closing memory coordinator: {exc}")
+        finally:
+            self.memory_coordinator = None
+
+    def _shutdown_plugins(self) -> None:
+        """Shut down the plugin system if it was initialized."""
+
+        if not self.plugin_manager:
+            return
+
+        try:
+            shutdown = getattr(self.plugin_manager, "shutdown", None)
+            if callable(shutdown):
+                shutdown()
+            elif self.plugin_manager.has_hooks(HookType.SHUTDOWN):
+                self.plugin_manager.execute_hook(HookType.SHUTDOWN, orchestrator=self)
+        except Exception as exc:  # pragma: no cover - defensive logging
+            self.logger.warning(f"Failed to shut down plugin system: {exc}")
+        finally:
+            self.plugin_manager = None
+
     def analyze_task(self, task_description: str) -> TaskAnalysis:
         """
         Analyze a task to determine complexity, requirements, and execution plan.
@@ -191,6 +308,12 @@ class AITaskOrchestrator:
         Raises:
             OrchestratorError: If analysis fails
         """
+        self._ensure_sync_context("analyze_task()", "await analyze_task_async(...)")
+        return asyncio.run(self.analyze_task_async(task_description))
+
+    async def analyze_task_async(self, task_description: str) -> TaskAnalysis:
+        """Asynchronous variant of :meth:`analyze_task`."""
+
         with LogContext(self.logger, task_id=self.task_id, operation="analyze_task"):
             # Create span for tracing
             span_context = None
@@ -203,11 +326,14 @@ class AITaskOrchestrator:
                     },
                 )
                 span_context.__enter__()
+            timer_context = None
 
             try:
                 # Execute pre-analyze plugins
                 if self.plugin_manager and PLUGINS_AVAILABLE:
-                    self.plugin_manager.execute_hook(HookType.PRE_ANALYZE, task_description)
+                    await self.plugin_manager.execute_hook_async(
+                        HookType.PRE_ANALYZE, task_description
+                    )
 
                 # Track metrics
                 if self.metrics_collector and OBSERVABILITY_AVAILABLE:
@@ -224,14 +350,14 @@ class AITaskOrchestrator:
                 # Enhance with memory insights if available
                 if self.memory_coordinator:
                     try:
-                        memory_insights = asyncio.run(self._get_memory_insights(task_description))
+                        memory_insights = await self._get_memory_insights(task_description)
                         analysis.memory_insights = memory_insights
                     except Exception as e:
                         self.logger.warning(f"Failed to get memory insights: {e}")
 
                 # Execute post-analyze plugins
                 if self.plugin_manager and PLUGINS_AVAILABLE:
-                    self.plugin_manager.execute_hook(
+                    await self.plugin_manager.execute_hook_async(
                         HookType.POST_ANALYZE, task_description, analysis
                     )
 
@@ -242,11 +368,7 @@ class AITaskOrchestrator:
 
             finally:
                 # End timer
-                if (
-                    self.metrics_collector
-                    and OBSERVABILITY_AVAILABLE
-                    and "timer_context" in locals()
-                ):
+                if self.metrics_collector and OBSERVABILITY_AVAILABLE and timer_context is not None:
                     timer_context.__exit__(None, None, None)
 
                 # End span
@@ -527,7 +649,7 @@ class AITaskOrchestrator:
             self.config.settings.summaries_dir, f"summary_{self.task_id}.md"
         )
 
-        with open(summary_path, "w") as f:
+        with open(summary_path, "w", encoding="utf-8") as f:
             f.write(f"# Task Summary: {self.task_id}\n\n")
             f.write(f"Generated: {datetime.now().isoformat()}\n\n")
 
@@ -564,22 +686,87 @@ class AITaskOrchestrator:
         self.logger.info(f"Summary document created: {summary_path}")
         return summary_path
 
-    def cleanup(self) -> None:
-        """Clean up resources and close connections."""
-        self.logger.info(f"Cleaning up task {self.task_id}")
+    def _create_summary_with_error_handling(self) -> None:
+        """Create the summary document once, handling errors gracefully."""
 
-        # Close memory connections
-        if self.memory_coordinator:
-            try:
-                asyncio.run(self.memory_coordinator.close())
-            except Exception as e:
-                self.logger.error(f"Error closing memory coordinator: {e}")
+        if self._summary_created:
+            return
 
-        # Save final summary
         try:
             self.create_summary_document()
-        except Exception as e:
-            self.logger.error(f"Error creating final summary: {e}")
+        except Exception as exc:  # pragma: no cover - defensive logging
+            self.logger.error(f"Error creating final summary: {exc}")
+        else:
+            self._summary_created = True
+
+    def _log_async_cleanup_result(self, task: asyncio.Task) -> None:
+        """Log the outcome of an asynchronous cleanup task."""
+
+        if task.cancelled():
+            self.logger.warning("Asynchronous cleanup task was cancelled")
+            if self._cleanup_task is task:
+                self._cleanup_task = None
+            return
+
+        try:
+            task.result()
+        except Exception as exc:  # pragma: no cover - defensive logging
+            self.logger.error(f"Asynchronous cleanup failed: {exc}")
+        finally:
+            if self._cleanup_task is task:
+                self._cleanup_task = None
+
+    async def cleanup_async(self) -> None:
+        """Asynchronously release orchestrator resources and write the summary."""
+
+        if not self._cleanup_started:
+            self._cleanup_started = True
+            self.logger.info(f"Cleaning up task {self.task_id}")
+
+        try:
+            await self.aclose()
+        except Exception as exc:
+            self.logger.error(f"Error during asynchronous cleanup: {exc}")
+            raise
+        finally:
+            self._create_summary_with_error_handling()
+            try:
+                current = asyncio.current_task()
+            except RuntimeError:  # pragma: no cover - defensive
+                current = None
+            if self._cleanup_task is not None and current is self._cleanup_task:
+                self._cleanup_task = None
+
+    def cleanup(self) -> None:
+        """Clean up resources and close connections."""
+        if self._summary_created and self._closed:
+            return
+
+        if not self._cleanup_started:
+            self._cleanup_started = True
+            self.logger.info(f"Cleaning up task {self.task_id}")
+        try:
+            self.close()
+        except RuntimeError as exc:
+            message = str(exc)
+            if "close() cannot be used while an asyncio event loop is running" in message:
+                if self._cleanup_task and not self._cleanup_task.done():
+                    self.logger.debug("Asynchronous cleanup already in progress", extra={"task_id": self.task_id})
+                    return
+
+                loop = asyncio.get_running_loop()
+                task = loop.create_task(self.cleanup_async())
+                task.add_done_callback(self._log_async_cleanup_result)
+                self._cleanup_task = task
+                self.logger.warning(
+                    "cleanup() called from a running event loop; scheduled asynchronous cleanup. "
+                    "Await cleanup_async() to ensure completion.",
+                    extra={"task_id": self.task_id},
+                )
+                return
+            raise
+
+        self._create_summary_with_error_handling()
 
     # Helper methods for guide generation
     def _write_guide_header(self, f: TextIO, analysis: TaskAnalysis) -> None:
