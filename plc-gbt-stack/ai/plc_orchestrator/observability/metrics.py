@@ -1,11 +1,10 @@
 """Metrics collection singleton and factory for the PLC Task Orchestrator."""
 
-from typing import Optional
 
 from plc_orchestrator.observability import MetricsCollector
 
 # Global metrics collector instance
-_metrics_collector: Optional[MetricsCollector] = None
+_metrics_collector: MetricsCollector | None = None
 
 
 def get_metrics_collector() -> MetricsCollector:
@@ -16,10 +15,10 @@ def get_metrics_collector() -> MetricsCollector:
         The singleton MetricsCollector instance
     """
     global _metrics_collector
-    
+
     if _metrics_collector is None:
         _metrics_collector = MetricsCollector()
-    
+
     return _metrics_collector
 
 
@@ -31,7 +30,7 @@ def reset_metrics_collector() -> None:
     completely reinitialize the metrics system.
     """
     global _metrics_collector
-    
+
     if _metrics_collector is not None:
         # Attempt to export any pending metrics
         if hasattr(_metrics_collector, 'export'):
@@ -39,7 +38,7 @@ def reset_metrics_collector() -> None:
                 _metrics_collector.export()
             except Exception:
                 pass  # Best effort
-    
+
     _metrics_collector = None
 
 

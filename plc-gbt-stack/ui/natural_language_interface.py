@@ -16,10 +16,10 @@ import json
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, cast
 
 # OpenAI integration
 import uvicorn
@@ -33,6 +33,8 @@ from fastapi.templating import Jinja2Templates
 # Local imports
 from mcp.plc_gbt_mcp_server import MCPServerManager, PLCGBTMCPServer
 from openai import AsyncOpenAI
+from openai._types import NOT_GIVEN
+from openai.types.chat import ChatCompletionMessageParam, ChatCompletionToolParam
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -81,28 +83,28 @@ class ConversationMessage:
     role: ConversationRole
     content: str
     timestamp: datetime
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    tool_calls: Optional[List[Dict[str, Any]]] = None
-    tool_results: Optional[List[Dict[str, Any]]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    tool_calls: list[dict[str, Any]] | None = None
+    tool_results: list[dict[str, Any]] | None = None
 
 @dataclass
 class ConversationSession:
     """Complete conversation session"""
     session_id: str
     user_id: str
-    messages: List[ConversationMessage]
-    context: Dict[str, Any]
+    messages: list[ConversationMessage]
+    context: dict[str, Any]
     created_at: datetime
     last_activity: datetime
-    intent_history: List[IntentType] = field(default_factory=list)
-    active_task: Optional[str] = None
+    intent_history: list[IntentType] = field(default_factory=list)
+    active_task: str | None = None
 
 @dataclass
 class LLMResponse:
     """Response from OpenAI LLM"""
     content: str
-    tool_calls: Optional[List[Dict[str, Any]]]
-    usage: Dict[str, Any]
+    tool_calls: list[dict[str, Any]] | None
+    usage: dict[str, Any]
     model: str
     finish_reason: str
 
@@ -110,9 +112,9 @@ class LLMResponse:
 class UIResponse:
     """Response from UI interface"""
     message: str
-    suggestions: List[str]
-    tool_results: Optional[List[Dict[str, Any]]]
-    context_update: Optional[Dict[str, Any]]
+    suggestions: list[str]
+    tool_results: list[dict[str, Any]] | None
+    context_update: dict[str, Any] | None
     session_id: str
     timestamp: datetime
 
@@ -154,34 +156,34 @@ Key principles:
 When users ask for help with industrial automation tasks, analyze their request and use the
 available tools to provide comprehensive assistance. Always explain what you're doing and why."""
 
-    async def generate_response(self, messages: List[ConversationMessage],
-                              available_tools: List[Dict[str, Any]]) -> LLMResponse:
+    async def generate_response(self, messages: list[ConversationMessage],
+                              available_tools: list[ChatCompletionToolParam] | None) -> LLMResponse:
         """Generate response from OpenAI LLM with tool calling capability"""
         try:
             # Convert messages to OpenAI format
-            openai_messages = [{"role": "system", "content": self.system_prompt}]
+            openai_messages: list[ChatCompletionMessageParam] = [{"role": "system", "content": self.system_prompt}]
 
             for msg in messages[-MAX_CONVERSATION_HISTORY:]:  # Limit context window
-                openai_messages.append({
+                openai_messages.append(cast(ChatCompletionMessageParam, {
                     "role": msg.role.value,
                     "content": msg.content
-                })
+                }))
 
                 # Add tool results if present
                 if msg.tool_results:
                     for result in msg.tool_results:
-                        openai_messages.append({
+                        openai_messages.append(cast(ChatCompletionMessageParam, {
                             "role": "tool",
                             "content": json.dumps(result),
                             "tool_call_id": result.get("tool_call_id", "unknown")
-                        })
+                        }))
 
             # Make API call with tools
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=openai_messages,
-                tools=available_tools if available_tools else None,
-                tool_choice="auto" if available_tools else None,
+                tools=available_tools if available_tools else NOT_GIVEN,
+                tool_choice="auto" if available_tools else NOT_GIVEN,
                 temperature=0.3,  # Lower temperature for more consistent industrial advice
                 max_tokens=1500
             )
@@ -190,8 +192,8 @@ available tools to provide comprehensive assistance. Always explain what you're 
 
             return LLMResponse(
                 content=message.content or "",
-                tool_calls=message.tool_calls,
-                usage=response.usage.dict() if response.usage else {},
+                tool_calls=[tool_call.model_dump() for tool_call in message.tool_calls] if message.tool_calls else None,
+                usage=response.usage.model_dump() if response.usage else {},
                 model=response.model,
                 finish_reason=response.choices[0].finish_reason
             )
@@ -200,12 +202,12 @@ available tools to provide comprehensive assistance. Always explain what you're 
             logger.error(f"Error generating LLM response: {e}")
             raise
 
-    def format_tools_for_openai(self, mcp_tools: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def format_tools_for_openai(self, mcp_tools: dict[str, Any]) -> list[ChatCompletionToolParam]:
         """Convert MCP tools to OpenAI function calling format"""
-        openai_tools = []
+        openai_tools: list[ChatCompletionToolParam] = []
 
         for tool_name, tool_def in mcp_tools.items():
-            openai_tool = {
+            openai_tool = cast(ChatCompletionToolParam, {
                 "type": "function",
                 "function": {
                     "name": tool_name,
@@ -216,7 +218,7 @@ available tools to provide comprehensive assistance. Always explain what you're 
                         "required": list(tool_def.parameters.keys())
                     }
                 }
-            }
+            })
             openai_tools.append(openai_tool)
 
         return openai_tools
@@ -229,9 +231,9 @@ class ConversationManager:
     """Manages conversation sessions and context"""
 
     def __init__(self):
-        self.sessions: Dict[str, ConversationSession] = {}
-        self.llm_manager: Optional[OpenAILLMManager] = None
-        self.mcp_server: Optional[PLCGBTMCPServer] = None
+        self.sessions: dict[str, ConversationSession] = {}
+        self.llm_manager: OpenAILLMManager | None = None
+        self.mcp_server: PLCGBTMCPServer | None = None
 
         logger.info("Initialized Conversation Manager")
 
@@ -254,8 +256,8 @@ class ConversationManager:
             user_id=user_id,
             messages=[],
             context={},
-            created_at=datetime.now(timezone.utc),
-            last_activity=datetime.now(timezone.utc)
+            created_at=datetime.now(UTC),
+            last_activity=datetime.now(UTC)
         )
 
         self.sessions[session_id] = session
@@ -263,12 +265,12 @@ class ConversationManager:
 
         return session_id
 
-    def get_session(self, session_id: str) -> Optional[ConversationSession]:
+    def get_session(self, session_id: str) -> ConversationSession | None:
         """Get a conversation session"""
         return self.sessions.get(session_id)
 
     def add_message(self, session_id: str, role: ConversationRole,
-                   content: str, metadata: Dict[str, Any] = None) -> str:
+                   content: str, metadata: dict[str, Any] = None) -> str:
         """Add a message to conversation session"""
         session = self.get_session(session_id)
         if not session:
@@ -279,12 +281,12 @@ class ConversationManager:
             id=message_id,
             role=role,
             content=content,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             metadata=metadata or {}
         )
 
         session.messages.append(message)
-        session.last_activity = datetime.now(timezone.utc)
+        session.last_activity = datetime.now(UTC)
 
         return message_id
 
@@ -300,10 +302,13 @@ class ConversationManager:
 
             # Get available tools from MCP server
             available_tools = []
-            if self.mcp_server:
+            if self.mcp_server and self.llm_manager:
                 available_tools = self.llm_manager.format_tools_for_openai(self.mcp_server.tools)
 
             # Generate LLM response
+            if not self.llm_manager:
+                raise ValueError("LLM manager not initialized")
+
             llm_response = await self.llm_manager.generate_response(
                 session.messages, available_tools
             )
@@ -334,7 +339,7 @@ class ConversationManager:
                 tool_results=tool_results,
                 context_update=None,
                 session_id=session_id,
-                timestamp=datetime.now(timezone.utc)
+                timestamp=datetime.now(UTC)
             )
 
         except Exception as e:
@@ -345,10 +350,10 @@ class ConversationManager:
                 tool_results=None,
                 context_update=None,
                 session_id=session_id,
-                timestamp=datetime.now(timezone.utc)
+                timestamp=datetime.now(UTC)
             )
 
-    async def _execute_tool_calls(self, tool_calls: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _execute_tool_calls(self, tool_calls: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Execute tool calls via MCP server"""
         results = []
 
@@ -379,7 +384,7 @@ class ConversationManager:
         return results
 
     def _generate_suggestions(self, session: ConversationSession,
-                            llm_response: LLMResponse) -> List[str]:
+                            llm_response: LLMResponse) -> list[str]:
         """Generate contextual suggestions for next actions"""
         suggestions = []
 
@@ -449,7 +454,7 @@ class NaturalLanguageUIApp:
         )
 
         # Active WebSocket connections
-        self.active_connections: Dict[str, WebSocket] = {}
+        self.active_connections: dict[str, WebSocket] = {}
 
         # Register routes
         self._register_routes()
@@ -506,7 +511,7 @@ class NaturalLanguageUIApp:
             }
 
         @self.app.post("/api/sessions/{session_id}/messages")
-        async def send_message(session_id: str, message: Dict[str, str]):
+        async def send_message(session_id: str, message: dict[str, str]):
             """Send a message and get response"""
             user_message = message.get("message", "")
             if not user_message:
@@ -595,7 +600,7 @@ class NaturalLanguageUIApp:
                 "mcp_server": mcp_info,
                 "active_sessions": len(self.conversation_manager.sessions),
                 "active_connections": len(self.active_connections),
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
 
         @self.app.get("/api/capabilities")

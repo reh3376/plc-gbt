@@ -1,11 +1,10 @@
 """Tracing singleton and factory for the PLC Task Orchestrator."""
 
-from typing import Optional
 
 from plc_orchestrator.observability import Tracer
 
 # Global tracer instance
-_tracer: Optional[Tracer] = None
+_tracer: Tracer | None = None
 
 
 def get_tracer() -> Tracer:
@@ -16,10 +15,10 @@ def get_tracer() -> Tracer:
         The singleton Tracer instance
     """
     global _tracer
-    
+
     if _tracer is None:
         _tracer = Tracer()
-    
+
     return _tracer
 
 
@@ -31,7 +30,7 @@ def reset_tracer() -> None:
     completely reinitialize the tracing system.
     """
     global _tracer
-    
+
     if _tracer is not None:
         # Attempt to export any pending spans
         if hasattr(_tracer, 'export'):
@@ -39,7 +38,7 @@ def reset_tracer() -> None:
                 _tracer.export()
             except Exception:
                 pass  # Best effort
-    
+
     _tracer = None
 
 

@@ -4,7 +4,6 @@ import importlib
 import inspect
 import pkgutil
 from pathlib import Path
-from typing import List, Optional, Set, Type
 
 from plc_orchestrator.utils.logging import get_logger
 
@@ -12,9 +11,9 @@ logger = get_logger(__name__)
 
 
 def discover_plugins(
-    plugin_paths: Optional[List[str]] = None,
-    base_class: Optional[Type] = None,
-) -> Set[Type]:
+    plugin_paths: list[str] | None = None,
+    base_class: type | None = None,
+) -> set[type]:
     """
     Discover and load plugins from specified paths.
 
@@ -32,7 +31,7 @@ def discover_plugins(
 
     for plugin_path in plugin_paths:
         path = Path(plugin_path)
-        
+
         if not path.exists():
             logger.debug(f"Plugin path does not exist: {plugin_path}")
             continue
@@ -45,7 +44,7 @@ def discover_plugins(
                 if spec and spec.loader:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
-                    
+
                     for name, obj in inspect.getmembers(module):
                         if _is_valid_plugin(obj, base_class):
                             discovered_plugins.add(obj)
@@ -58,10 +57,10 @@ def discover_plugins(
             for finder, name, ispkg in pkgutil.iter_modules([str(path)]):
                 if name.startswith("_"):
                     continue
-                    
+
                 try:
                     module = importlib.import_module(f"{plugin_path}.{name}")
-                    
+
                     for attr_name, obj in inspect.getmembers(module):
                         if _is_valid_plugin(obj, base_class):
                             discovered_plugins.add(obj)
@@ -73,7 +72,7 @@ def discover_plugins(
     return discovered_plugins
 
 
-def _is_valid_plugin(obj: any, base_class: Optional[Type] = None) -> bool:
+def _is_valid_plugin(obj: any, base_class: type | None = None) -> bool:
     """
     Check if an object is a valid plugin class.
 
@@ -86,30 +85,30 @@ def _is_valid_plugin(obj: any, base_class: Optional[Type] = None) -> bool:
     """
     if not inspect.isclass(obj):
         return False
-        
+
     # Skip abstract classes
     if inspect.isabstract(obj):
         return False
-        
+
     # Check if it's a subclass of base_class if provided
     if base_class and not issubclass(obj, base_class):
         return False
-        
+
     # Check for plugin marker
     if not getattr(obj, "_is_plugin", False):
         # Also check for common plugin patterns
         if not (
-            hasattr(obj, "execute") or 
+            hasattr(obj, "execute") or
             hasattr(obj, "process") or
             hasattr(obj, "analyze") or
             hasattr(obj, "validate")
         ):
             return False
-    
+
     return True
 
 
-def register_plugin_paths(paths: List[str]) -> None:
+def register_plugin_paths(paths: list[str]) -> None:
     """
     Register additional paths for plugin discovery.
 
@@ -117,7 +116,7 @@ def register_plugin_paths(paths: List[str]) -> None:
         paths: List of paths to add to plugin search
     """
     import sys
-    
+
     for path in paths:
         abs_path = str(Path(path).resolve())
         if abs_path not in sys.path:

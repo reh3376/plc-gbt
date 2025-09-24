@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, TextIO
+from typing import Any, TextIO
 
 from plc_orchestrator.config.settings import OrchestratorConfig
 from plc_orchestrator.core.analyzer import TaskAnalyzer
@@ -71,7 +71,7 @@ class AITaskOrchestrator:
     """
 
     def __init__(
-        self, config: Optional[OrchestratorConfig] = None, task_id: Optional[str] = None
+        self, config: OrchestratorConfig | None = None, task_id: str | None = None
     ) -> None:
         """
         Initialize the AI Task Orchestrator.
@@ -93,27 +93,27 @@ class AITaskOrchestrator:
         self.progress_monitor = TaskProgressMonitor(self.task_id, self.config.get_logging_config())
 
         # Optional components
-        self.memory_coordinator: Optional[MemoryCoordinator] = None
-        self.control_handler: Optional[ControlSystemsHandler] = None
-        self.math_validator: Optional[MathematicalValidator] = None
+        self.memory_coordinator: MemoryCoordinator | None = None
+        self.control_handler: ControlSystemsHandler | None = None
+        self.math_validator: MathematicalValidator | None = None
 
         # State tracking
-        self.current_analysis: Optional[TaskAnalysis] = None
+        self.current_analysis: TaskAnalysis | None = None
         self.execution_history: list[ExecutionStep] = []
 
         # Observability components
-        self.metrics_collector: Optional[Any] = None  # MetricsCollector when available
-        self.tracer: Optional[Any] = None  # Tracer when available
+        self.metrics_collector: Any | None = None  # MetricsCollector when available
+        self.tracer: Any | None = None  # Tracer when available
 
         # Plugin system
-        self.plugin_manager: Optional[Any] = None  # PluginManager when available
+        self.plugin_manager: Any | None = None  # PluginManager when available
 
         # Lifecycle management
-        self._close_lock: Optional[asyncio.Lock] = None
+        self._close_lock: asyncio.Lock | None = None
         self._closed = False
         self._cleanup_started = False
         self._summary_created = False
-        self._cleanup_task: Optional[asyncio.Task] = None
+        self._cleanup_task: asyncio.Task | None = None
 
         # Initialize optional features
         self._initialize_features()
@@ -423,7 +423,7 @@ class AITaskOrchestrator:
             return {}
 
     def create_implementation_guide(
-        self, task_analysis: TaskAnalysis, output_dir: Optional[Path] = None
+        self, task_analysis: TaskAnalysis, output_dir: Path | None = None
     ) -> Path:
         """
         Create a detailed implementation guide based on task analysis.
@@ -471,7 +471,7 @@ class AITaskOrchestrator:
     def validate_implementation(
         self,
         code_content: str,
-        requirements: Optional[list[str]] = None,
+        requirements: list[str] | None = None,
         validation_tier: ValidationTier = ValidationTier.REQUIREMENTS,
     ) -> ValidationResult:
         """

@@ -15,7 +15,7 @@ on:
 
 env:
   COVERAGE_THRESHOLD: ${{ github.event.inputs.coverage_threshold || '95' }}
-  PYTHON_VERSION: '3.14'
+  PYTHON_VERSION: '3.12'
 
 jobs:
   phase16-comprehensive-testing:

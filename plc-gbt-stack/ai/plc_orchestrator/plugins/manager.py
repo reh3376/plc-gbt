@@ -1,11 +1,10 @@
 """Plugin manager singleton and factory for the PLC Task Orchestrator."""
 
-from typing import Optional
 
 from plc_orchestrator.plugins.base import PluginManager
 
 # Global plugin manager instance
-_plugin_manager: Optional[PluginManager] = None
+_plugin_manager: PluginManager | None = None
 
 
 def get_plugin_manager() -> PluginManager:
@@ -16,10 +15,10 @@ def get_plugin_manager() -> PluginManager:
         The singleton PluginManager instance
     """
     global _plugin_manager
-    
+
     if _plugin_manager is None:
         _plugin_manager = PluginManager()
-    
+
     return _plugin_manager
 
 
@@ -31,12 +30,12 @@ def reset_plugin_manager() -> None:
     completely reinitialize the plugin system.
     """
     global _plugin_manager
-    
+
     if _plugin_manager is not None:
         # Attempt to shutdown gracefully
         if hasattr(_plugin_manager, 'shutdown'):
             _plugin_manager.shutdown()
-    
+
     _plugin_manager = None
 
 
