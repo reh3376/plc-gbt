@@ -28,10 +28,10 @@ import logging
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import uvicorn
 from fastapi import Body, Depends, FastAPI, Query, WebSocket, WebSocketDisconnect
@@ -99,17 +99,17 @@ class APIResponse(BaseModel):
     """Standard API response model"""
     success: bool = Field(..., description="Operation success status")
     message: str = Field(..., description="Human-readable message")
-    data: Optional[Dict[str, Any]] = Field(None, description="Response data")
-    command_executed: Optional[str] = Field(None, description="CLI command that was executed")
-    execution_time: Optional[float] = Field(None, description="Execution time in seconds")
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    data: dict[str, Any] | None = Field(None, description="Response data")
+    command_executed: str | None = Field(None, description="CLI command that was executed")
+    execution_time: float | None = Field(None, description="Execution time in seconds")
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 class CommandRequest(BaseModel):
     """Request model for CLI command execution"""
     command: str = Field(..., description="CLI command to execute")
-    args: List[str] = Field(default=[], description="Command arguments")
-    timeout: Optional[float] = Field(30.0, description="Execution timeout in seconds")
-    working_directory: Optional[str] = Field(None, description="Working directory for command")
+    args: list[str] = Field(default=[], description="Command arguments")
+    timeout: float | None = Field(30.0, description="Execution timeout in seconds")
+    working_directory: str | None = Field(None, description="Working directory for command")
 
 # =============================================================================
 # CLI COMMAND EXECUTOR
@@ -119,6 +119,8 @@ class CLIExecutor:
     """Secure CLI command executor with validation and sandboxing"""
 
     def __init__(self):
+        # Map allowed CLI commands to executables and script paths
+        # Note: plc-memory CLI resides under scripts/ai in this repo layout
         self.allowed_commands = {
             "plc-cl": {
                 "executable": "python3",
@@ -127,21 +129,32 @@ class CLIExecutor:
             },
             "plc-memory": {
                 "executable": "python3",
-                "script_path": str(project_root / "scripts" / "cli" / "plc_memory_cli.py"),
+                "script_path": str(project_root / "scripts" / "ai" / "plc_memory_cli.py"),
                 "description": "Memory system operations"
             }
         }
-        self.command_history: List[CLICommandResult] = []
+        self.command_history: list[CLICommandResult] = []
         self.max_history = 1000
 
-    async def execute_command(self, command: str, args: List[str],
-                            command_timeout: float = 30.0, working_dir: Optional[str] = None) -> CLICommandResult:
+    async def execute_command(self, command: str, args: list[str],
+                            command_timeout: float = 30.0, working_dir: str | None = None) -> CLICommandResult:
         """Execute CLI command with validation and security controls"""
         start_time = time.time()
 
-        # Validate command
+        # Validate command (return structured error instead of raising to avoid 500s)
         if command not in self.allowed_commands:
-            raise ValueError(f"Command '{command}' not allowed. Allowed: {list(self.allowed_commands.keys())}")
+            execution_time = time.time() - start_time
+            result = CLICommandResult(
+                command=f"{command} {' '.join(args)}",
+                status=ExecutionStatus.ERROR,
+                exit_code=-1,
+                stdout="",
+                stderr=f"Command '{command}' not allowed. Allowed: {list(self.allowed_commands.keys())}",
+                execution_time=execution_time,
+                timestamp=datetime.now(UTC)
+            )
+            self._add_to_history(result)
+            return result
 
         cmd_config = self.allowed_commands[command]
 
@@ -180,18 +193,18 @@ class CLIExecutor:
                 stdout=stdout.decode('utf-8', errors='replace'),
                 stderr=stderr.decode('utf-8', errors='replace'),
                 execution_time=execution_time,
-                timestamp=datetime.now(timezone.utc)
+                timestamp=datetime.now(UTC)
             )
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             result = CLICommandResult(
                 command=f"{command} {' '.join(args)}",
                 status=ExecutionStatus.TIMEOUT,
                 exit_code=-1,
                 stdout="",
-                stderr=f"Command timed out after {timeout} seconds",
+                stderr=f"Command timed out after {command_timeout} seconds",
                 execution_time=time.time() - start_time,
-                timestamp=datetime.now(timezone.utc)
+                timestamp=datetime.now(UTC)
             )
 
         except Exception as e:
@@ -202,7 +215,7 @@ class CLIExecutor:
                 stdout="",
                 stderr=str(e),
                 execution_time=time.time() - start_time,
-                timestamp=datetime.now(timezone.utc)
+                timestamp=datetime.now(UTC)
             )
 
         # Store in history
@@ -265,8 +278,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 @app.post("/api/v1/cli/schema/list", response_model=APIResponse, tags=["Control Loops"])
 async def list_schemas(
-    schema_type: Optional[str] = Query(None, description="Filter by schema type"),
-    search: Optional[str] = Query(None, description="Search schema names"),
+    schema_type: str | None = Query(None, description="Filter by schema type"),
+    search: str | None = Query(None, description="Search schema names"),
     user = Depends(get_current_user)
 ):
     """List all control loop schemas via CLI"""
@@ -290,7 +303,7 @@ async def list_schemas(
 async def create_schema(
     schema_name: str = Body(..., description="Schema name"),
     schema_type: str = Body(..., description="Schema type"),
-    description: Optional[str] = Body(None, description="Schema description"),
+    description: str | None = Body(None, description="Schema description"),
     user = Depends(get_current_user)
 ):
     """Create new control loop schema via CLI"""
@@ -310,9 +323,9 @@ async def create_schema(
 
 @app.post("/api/v1/cli/instance/list", response_model=APIResponse, tags=["Control Loops"])
 async def list_instances(
-    schema_id: Optional[str] = Query(None, description="Filter by schema"),
-    status: Optional[str] = Query(None, description="Filter by status"),
-    plc_host: Optional[str] = Query(None, description="Filter by PLC host"),
+    schema_id: str | None = Query(None, description="Filter by schema"),
+    status: str | None = Query(None, description="Filter by status"),
+    plc_host: str | None = Query(None, description="Filter by PLC host"),
     user = Depends(get_current_user)
 ):
     """List all control loop instances via CLI"""
@@ -338,7 +351,7 @@ async def list_instances(
 async def create_instance(
     instance_name: str = Body(..., description="Instance name"),
     schema_name: str = Body(..., description="Schema to use"),
-    plc_host: Optional[str] = Body(None, description="PLC host address"),
+    plc_host: str | None = Body(None, description="PLC host address"),
     user = Depends(get_current_user)
 ):
     """Create new control loop instance via CLI"""
@@ -382,8 +395,8 @@ async def connect_plc(
 
 @app.post("/api/v1/cli/plc/read", response_model=APIResponse, tags=["PLC Operations"])
 async def read_plc_tags(
-    tags: List[str] = Body(..., description="PLC tags to read"),
-    connection_id: Optional[str] = Body(None, description="Connection ID"),
+    tags: list[str] = Body(..., description="PLC tags to read"),
+    connection_id: str | None = Body(None, description="Connection ID"),
     user = Depends(get_current_user)
 ):
     """Read PLC tag values via CLI"""
@@ -408,8 +421,8 @@ async def read_plc_tags(
 @app.post("/api/v1/cli/memory/query", response_model=APIResponse, tags=["Memory System"])
 async def query_memory(
     query: str = Body(..., description="Query to execute"),
-    database: Optional[str] = Body(None, description="Target database (neo4j, postgresql, qdrant, redis)"),
-    limit: Optional[int] = Body(None, description="Result limit"),
+    database: str | None = Body(None, description="Target database (neo4j, postgresql, qdrant, redis)"),
+    limit: int | None = Body(None, description="Result limit"),
     user = Depends(get_current_user)
 ):
     """Query the memory system via CLI"""
@@ -431,7 +444,7 @@ async def query_memory(
 
 @app.post("/api/v1/cli/memory/ingest", response_model=APIResponse, tags=["Memory System"])
 async def ingest_memory(
-    paths: List[str] = Body(..., description="Paths to ingest"),
+    paths: list[str] = Body(..., description="Paths to ingest"),
     force: bool = Body(False, description="Force re-ingestion"),
     user = Depends(get_current_user)
 ):
@@ -457,7 +470,7 @@ async def ingest_memory(
 @app.post("/api/v1/cli/batch/create", response_model=APIResponse, tags=["Batch Operations"])
 async def create_batch(
     operation: str = Body(..., description="Batch operation type"),
-    config_file: Optional[str] = Body(None, description="Configuration file path"),
+    config_file: str | None = Body(None, description="Configuration file path"),
     dry_run: bool = Body(True, description="Perform dry run first"),
     user = Depends(get_current_user)
 ):
@@ -558,7 +571,7 @@ async def health_check():
     return {
         "status": "healthy",
         "version": APP_VERSION,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "allowed_commands": list(cli_executor.allowed_commands.keys())
     }
 
@@ -624,7 +637,7 @@ async def get_instances_adapter():
                 "setpoint": 75.0,
                 "processValue": 74.8,
                 "output": 45.2,
-                "lastUpdated": datetime.now(timezone.utc).isoformat()
+                "lastUpdated": datetime.now(UTC).isoformat()
             },
             {
                 "id": "loop-002",
@@ -634,7 +647,7 @@ async def get_instances_adapter():
                 "setpoint": 15.0,
                 "processValue": 14.9,
                 "output": 52.1,
-                "lastUpdated": datetime.now(timezone.utc).isoformat()
+                "lastUpdated": datetime.now(UTC).isoformat()
             }
         ]
 
@@ -678,7 +691,7 @@ async def get_instances_adapter():
         )
 
 @app.post("/api/v1/instances", response_model=APIResponse, tags=["Frontend Adapter"])
-async def create_instance_adapter(instance_data: Dict[str, Any]):
+async def create_instance_adapter(instance_data: dict[str, Any]):
     """
     Frontend adapter: Create control loop instance
     Maps to CLI command with instance data and stores in memory
@@ -702,8 +715,8 @@ async def create_instance_adapter(instance_data: Dict[str, Any]):
                 "setpoint": 75.0,
                 "processValue": 75.0,
                 "output": 50.0,
-                "lastUpdated": datetime.now(timezone.utc).isoformat(),
-                "created": datetime.now(timezone.utc).isoformat()
+                "lastUpdated": datetime.now(UTC).isoformat(),
+                "created": datetime.now(UTC).isoformat()
             }
             logger.info(f"Stored new instance {instance_id}: {created_instances[instance_id]['name']}")
 
@@ -746,7 +759,7 @@ async def get_instance_adapter(instance_id: str):
                 "setpoint": 75.0,
                 "processValue": 74.8,
                 "output": 45.2,
-                "lastUpdated": datetime.now(timezone.utc).isoformat()
+                "lastUpdated": datetime.now(UTC).isoformat()
             }
 
             return APIResponse(
@@ -772,7 +785,7 @@ async def get_instance_adapter(instance_id: str):
         )
 
 @app.put("/api/v1/instances/{instance_id}", response_model=APIResponse, tags=["Frontend Adapter"])
-async def update_instance_adapter(instance_id: str, updates: Dict[str, Any]):
+async def update_instance_adapter(instance_id: str, updates: dict[str, Any]):
     """
     Frontend adapter: Update control loop instance
     """
@@ -821,7 +834,7 @@ async def delete_instance_adapter(instance_id: str):
 # WebSocket connection manager
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -887,7 +900,7 @@ async def periodic_control_loop_updates():
                 # Generate dynamic values for loop-001
                 loop_001_message = {
                     "type": "control_loop_update",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "data": {
                         "loop_id": "loop-001",
                         "updates": {
@@ -901,7 +914,7 @@ async def periodic_control_loop_updates():
                 # Generate dynamic values for loop-002
                 loop_002_message = {
                     "type": "control_loop_update",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "data": {
                         "loop_id": "loop-002",
                         "updates": {
@@ -939,7 +952,7 @@ async def websocket_endpoint(websocket: WebSocket):
         # Send immediate connection confirmation using ConnectionManager
         initial_message = {
             "type": "connection_established",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "message": "WebSocket connected to industrial backend",
             "connection_id": connection_id
         }
@@ -950,7 +963,7 @@ async def websocket_endpoint(websocket: WebSocket):
         # Send immediate data samples in correct format using ConnectionManager
         loop_001_message = {
             "type": "control_loop_update",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "data": {
                 "loop_id": "loop-001",
                 "updates": {
@@ -963,7 +976,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
         loop_002_message = {
             "type": "control_loop_update",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "data": {
                 "loop_id": "loop-002",
                 "updates": {
@@ -993,7 +1006,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     current_time = time.time()
                     update_message = {
                         "type": "control_loop_update",
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                         "data": {
                             "loop_id": "loop-001",
                             "updates": {
@@ -1041,7 +1054,7 @@ async def list_files():
                     "type": "file",
                     "path": str(item.relative_to(workspace_path)),
                     "size": item.stat().st_size,
-                    "modified": datetime.fromtimestamp(item.stat().st_mtime, timezone.utc).isoformat(),
+                    "modified": datetime.fromtimestamp(item.stat().st_mtime, UTC).isoformat(),
                     "extension": item.suffix
                 })
             elif item.is_dir() and item != workspace_path:
@@ -1067,7 +1080,7 @@ async def list_files():
         )
 
 @app.post("/api/v1/files", response_model=APIResponse, tags=["File Operations"])
-async def create_file(file_data: Dict[str, Any]):
+async def create_file(file_data: dict[str, Any]):
     """
     Create a new file or folder
     Phase 31.3: File Explorer functionality
