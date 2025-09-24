@@ -4,7 +4,8 @@
 
 This document consolidates all improvement suggestions from the previous analyses into a single, actionable improvement plan for the AI Task Orchestrator files.
 
-> **Update:** All phases of the improvement plan have been successfully completed. The Python implementation has been fully modularized, documentation enhanced, and all quality improvements implemented.
+> **Update:** All phases of the improvement plan have been successfully completed. The Python implementation has been fully modularized, documentation enhanced, and all quality improvements implemented. A line-level summary of every lifecycle change is available in [`docs/ai-task-change-log.md`](./ai-task-change-log.md) for quick reference.
+
 
 ## Executive Summary
 
@@ -26,6 +27,13 @@ The AI Task Orchestrator system consists of 4 core files (2 Python, 2 TypeScript
 6. ✅ Added observability features (metrics, tracing, logging)
 7. ✅ Implemented extensible plugin architecture
 8. ✅ Resolved all linting issues
+
+**Latest Lifecycle Enhancements (2025-09-24):**
+
+- ✅ Added `analyze_task_async` so coding agents operating inside running event loops can await the full analysis pipeline without workarounds.
+- ✅ Updated synchronous entry points (`analyze_task`, `close`) to detect active event loops and provide actionable guidance toward their async counterparts.
+- ✅ Migrated analysis plugin execution to the asynchronous dispatcher, enabling coroutine-based hooks to run alongside traditional callbacks.
+- ✅ Published a dedicated lifecycle primer (`plc-gbt-stack/ai/docs/advanced/lifecycle-updates.md`) so every new coding agent immediately sees how to work with the updated shutdown and analysis APIs.
 
 ---
 

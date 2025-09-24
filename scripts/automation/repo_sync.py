@@ -11,7 +11,6 @@ from __future__ import annotations
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
 import yaml
 
@@ -24,7 +23,7 @@ class RepoSpec:
     dest: str = "external"
 
 
-def run(cmd: List[str], cwd: Path | None = None) -> None:
+def run(cmd: list[str], cwd: Path | None = None) -> None:
     subprocess.check_call(cmd, cwd=str(cwd) if cwd else None)
 
 

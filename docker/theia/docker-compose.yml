@@ -5,7 +5,7 @@ services:
     image: theiaide/theia:latest
     container_name: plc-gbt-theia
     ports:
-      - "3100:3000"
+      - '3100:3000'
     environment:
       - THEIA_MINIMAP=false
       - THEIA_HOST=0.0.0.0
@@ -22,4 +22,3 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-

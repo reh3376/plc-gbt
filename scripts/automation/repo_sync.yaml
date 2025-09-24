@@ -19,4 +19,3 @@ repos:
     url: git@github.com:reh3376/plc-500.git
     branch: main
     dest: external
-
