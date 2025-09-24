@@ -18,56 +18,25 @@
         color: #222;
         background: #fafafa;
       }
-      h1 {
-        text-align: center;
-        margin-bottom: 8px;
-      }
-      .subtle {
-        text-align: center;
-        color: #666;
-        margin-top: 0;
-      }
-      section {
-        background: #fff;
-        border-radius: 10px;
-        padding: 20px;
-        margin: 20px 0 28px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-      }
-      h2 {
-        margin: 0 0 10px;
-      }
-      .mermaid {
-        margin: 22px 0;
-      }
-      .index-title {
-        font-weight: 700;
-        margin: 18px 0 8px;
-      }
-      ul.point-index {
-        margin: 0 0 0 18px;
-      }
-      .lead {
-        font-size: 1.05rem;
-        color: #333;
-      }
-      .pill {
-        display: inline-block;
-        background: #eef6ff;
-        color: #1b6fd8;
-        border: 1px solid #cfe3ff;
-        border-radius: 999px;
-        padding: 2px 10px;
-        font-size: 12px;
-        margin-right: 6px;
-      }
+      h1 { text-align: center; margin-bottom: 8px; }
+      .subtle { text-align: center; color: #666; margin-top: 0; }
+      section { background: #fff; border-radius: 10px; padding: 20px; margin: 20px 0 28px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); }
+      h2 { margin: 0 0 10px; }
+      h3 { margin: 14px 0 6px; }
+      .mermaid { margin: 22px 0; }
+      .index-title { font-weight: 700; margin: 18px 0 8px; }
+      ul.point-index { margin: 0 0 0 18px; }
+      .lead { font-size: 1.05rem; color: #333; }
+      .pill { display: inline-block; background: #eef6ff; color: #1b6fd8; border: 1px solid #cfe3ff; border-radius: 999px; padding: 2px 10px; font-size: 12px; margin-right: 6px; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 6px; }
+      .checklist li { margin: 4px 0; }
+      @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
     </style>
   </head>
   <body>
     <h1>AI Task Orchestrator - System Overview</h1>
-    <p class="subtle">
-      Architecture, lifecycle, and interaction flows with annotated sequence indexes
-    </p>
+    <p class="subtle">Architecture, lifecycle, and interaction flows with annotated sequence indexes</p>
 
     <section>
       <h2>Overview</h2>
@@ -86,6 +55,62 @@
         <span class="pill">Contract-First</span>
         <span class="pill">Two-Phase Testing</span>
       </p>
+    </section>
+
+    <section>
+      <h2>Purpose</h2>
+      <p>
+        This system turns high-level requests into reliable, production-grade outcomes. It guides AI
+        agents through analysis → planning → implementation → validation → documentation, while
+        enforcing strict API/schema governance and measurable quality gates across Python and
+        TypeScript stacks.
+      </p>
+      <div class="grid">
+        <div>
+          <h3>Problems It Solves</h3>
+          <ul>
+            <li>Unstructured tasks and inconsistent delivery quality</li>
+            <li>Schema drift between frontend/backend</li>
+            <li>Ad-hoc error handling and missing observability</li>
+            <li>Insufficient validation and premature “done” states</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Outcomes You Get</h3>
+          <ul>
+            <li>Contract-first APIs and type-safe integrations</li>
+            <li>Deterministic lifecycle with plugin extensibility</li>
+            <li>Two-phase testing: automated + user validation</li>
+            <li>Traceable deliverables with documentation by default</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Architecture & Components</h2>
+      <div class="grid">
+        <div>
+          <h3>Core Modules</h3>
+          <ul>
+            <li><strong>Orchestrator</strong>: lifecycle, context, coordination</li>
+            <li><strong>Analyzer</strong>: task understanding, requirements</li>
+            <li><strong>Validator</strong>: multi-tier checks (syntax → production)</li>
+            <li><strong>Plugins</strong>: PRE/POST hooks and SHUTDOWN lifecycle</li>
+            <li><strong>Observability</strong>: metrics, tracing, structured logs</li>
+            <li><strong>Memory</strong>: Redis/Neo4j/PostgreSQL/Qdrant adapters</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Contract-First Governance</h3>
+          <ul>
+            <li>OpenAPI Schema MCP as the single source of truth</li>
+            <li>Generated types only; no hand-written interfaces</li>
+            <li>Runtime validation on every request/response</li>
+            <li>Strict TypeScript rules (no <span class="kbd">any</span>)</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
     <section>
@@ -361,6 +386,76 @@ sequenceDiagram
         <li>6. Plugin cleanup completed</li>
         <li>7. Closed returned to caller</li>
       </ul>
+    </section>
+
+    <section>
+      <h2>Governance & Testing (Non‑Negotiables)</h2>
+      <div class="grid">
+        <div>
+          <h3>Contract‑First (OpenAPI MCP)</h3>
+          <ul>
+            <li>Zero manual API types or UI schemas</li>
+            <li>Generate types from OpenAPI only</li>
+            <li>Runtime validation (request/response/UI)</li>
+            <li>Centralized error handling patterns</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Two‑Phase Testing</h3>
+          <ul>
+            <li>Phase 1: Automated (Playwright MCP + unit/integration/a11y/perf)</li>
+            <li>Phase 2: User interactive testing (mandatory)</li>
+            <li>No feature marked complete until both phases pass</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Quick Starts</h2>
+      <div class="grid">
+        <div>
+          <h3>Python (60s)</h3>
+          <pre><code class="language-python">from plc_gbt_stack.ai import AITaskOrchestrator
+
+with AITaskOrchestrator() as orchestrator:
+    analysis = orchestrator.analyze_task("Create PLC data parser")
+    guide = orchestrator.create_implementation_guide(analysis)
+    print(guide)
+</code></pre>
+        </div>
+        <div>
+          <h3>TypeScript/Next.js</h3>
+          <pre><code class="language-ts">import { createOrchestrator } from '@plc-gbt/orchestrator'
+
+const orchestrator = createOrchestrator()
+const analysis = await orchestrator.analyzeTask('Create React data table component')
+const validation = await orchestrator.validateImplementation(code)
+</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Operations & Checklists</h2>
+      <div class="grid">
+        <div>
+          <h3>Before Starting</h3>
+          <ul class="checklist">
+            <li>Confirm Python 3.12+, Node 18+, and env vars</li>
+            <li>Verify OpenAPI MCP connectivity</li>
+            <li>Check Docker port conflicts (Next.js on 3000)</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Before Marking Complete</h3>
+          <ul class="checklist">
+            <li>Automated tests ≥ required thresholds</li>
+            <li>User interactive testing confirmed</li>
+            <li>Docs updated (roadmap + guide + diagrams)</li>
+          </ul>
+        </div>
+      </div>
     </section>
   </body>
 </html>
