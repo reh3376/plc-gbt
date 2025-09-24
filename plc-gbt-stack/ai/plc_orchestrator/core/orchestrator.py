@@ -1,5 +1,7 @@
 """Main orchestrator module for the PLC Task Orchestrator."""
 
+from __future__ import annotations
+
 import asyncio
 from datetime import datetime
 from pathlib import Path
@@ -31,27 +33,33 @@ try:
         MetricsCollector,
         Tracer,
         create_span,
-        get_metrics_collector,
-        get_tracer,
-        trace,
     )
+    from plc_orchestrator.observability.metrics import get_metrics_collector
+    from plc_orchestrator.observability.trace import get_tracer
 
     OBSERVABILITY_AVAILABLE = True
 except ImportError:
     OBSERVABILITY_AVAILABLE = False
+    MetricsCollector = None
+    Tracer = None
+    get_metrics_collector = None
+    get_tracer = None
 
 # Plugin imports (optional)
 try:
     from plc_orchestrator.plugins import (
         HookType,
         PluginManager,
-        discover_plugins,
-        get_plugin_manager,
     )
+    from plc_orchestrator.plugins.discovery import discover_plugins
+    from plc_orchestrator.plugins.manager import get_plugin_manager
 
     PLUGINS_AVAILABLE = True
 except ImportError:
     PLUGINS_AVAILABLE = False
+    PluginManager = None
+    discover_plugins = None
+    get_plugin_manager = None
 
 
 class AITaskOrchestrator:
@@ -94,11 +102,11 @@ class AITaskOrchestrator:
         self.execution_history: list[ExecutionStep] = []
 
         # Observability components
-        self.metrics_collector: MetricsCollector | None = None
-        self.tracer: Tracer | None = None
+        self.metrics_collector: Any | None = None  # MetricsCollector when available
+        self.tracer: Any | None = None  # Tracer when available
 
         # Plugin system
-        self.plugin_manager: PluginManager | None = None
+        self.plugin_manager: Any | None = None  # PluginManager when available
 
         # Lifecycle management
         self._close_lock: asyncio.Lock | None = None
@@ -183,8 +191,8 @@ class AITaskOrchestrator:
         # Observability
         if OBSERVABILITY_AVAILABLE and getattr(self.config.settings, "enable_observability", True):
             try:
-                self.metrics_collector = get_metrics_collector()
-                self.tracer = get_tracer()
+                self.metrics_collector = get_metrics_collector()  # type: ignore[misc]
+                self.tracer = get_tracer()  # type: ignore[misc]
                 self.logger.info("Observability features initialized")
             except Exception as e:
                 self.logger.warning(f"Failed to initialize observability: {e}")
@@ -192,24 +200,25 @@ class AITaskOrchestrator:
         # Plugin system
         if PLUGINS_AVAILABLE and getattr(self.config.settings, "enable_plugins", True):
             try:
-                self.plugin_manager = get_plugin_manager()
-                self.plugin_manager.set_orchestrator(self)
+                self.plugin_manager = get_plugin_manager()  # type: ignore[misc]
+                if self.plugin_manager and hasattr(self.plugin_manager, 'set_orchestrator'):
+                    self.plugin_manager.set_orchestrator(self)
 
                 # Auto-discover plugins if configured
                 if getattr(self.config.settings, "auto_discover_plugins", True):
                     plugin_paths = getattr(self.config.settings, "plugin_paths", ["plugins"])
-                    discover_plugins(plugin_paths)
+                    discover_plugins(plugin_paths)  # type: ignore[misc]
                     self.logger.info(f"Discovered plugins in: {plugin_paths}")
 
                 # Execute startup hooks
-                if self.plugin_manager.has_hooks(HookType.STARTUP):
+                if self.plugin_manager and hasattr(self.plugin_manager, 'has_hooks') and self.plugin_manager.has_hooks(HookType.STARTUP):
                     self.plugin_manager.execute_hook(HookType.STARTUP, orchestrator=self)
 
                 self.logger.info("Plugin system initialized")
             except Exception as e:
                 self.logger.warning(f"Failed to initialize plugin system: {e}")
 
-    def __enter__(self) -> "AITaskOrchestrator":
+    def __enter__(self) -> AITaskOrchestrator:
         """Support usage as a synchronous context manager."""
 
         return self
@@ -220,7 +229,7 @@ class AITaskOrchestrator:
         self.cleanup()
         return False
 
-    async def __aenter__(self) -> "AITaskOrchestrator":
+    async def __aenter__(self) -> AITaskOrchestrator:
         """Support usage as an asynchronous context manager."""
 
         return self
@@ -293,7 +302,7 @@ class AITaskOrchestrator:
             shutdown = getattr(self.plugin_manager, "shutdown", None)
             if callable(shutdown):
                 shutdown()
-            elif self.plugin_manager.has_hooks(HookType.SHUTDOWN):
+            elif hasattr(self.plugin_manager, 'has_hooks') and self.plugin_manager.has_hooks(HookType.SHUTDOWN):
                 self.plugin_manager.execute_hook(HookType.SHUTDOWN, orchestrator=self)
         except Exception as exc:  # pragma: no cover - defensive logging
             self.logger.warning(f"Failed to shut down plugin system: {exc}")
@@ -399,12 +408,16 @@ class AITaskOrchestrator:
             query = QueryBuilder.build_task_query(task_description)
             response = await self.memory_coordinator.query(query)
 
-            return {
-                "similar_tasks": response.get("similar_tasks", []),
-                "relevant_code": response.get("code_patterns", []),
-                "best_practices": response.get("best_practices", []),
-                "known_issues": response.get("known_issues", []),
-            }
+            # Extract data from response
+            response_data = response.data if hasattr(response, 'data') else response
+            if isinstance(response_data, dict):
+                return {
+                    "similar_tasks": response_data.get("similar_tasks", []),
+                    "relevant_code": response_data.get("code_patterns", []),
+                    "best_practices": response_data.get("best_practices", []),
+                    "known_issues": response_data.get("known_issues", []),
+                }
+            return {}
         except Exception as e:
             self.logger.error(f"Memory query failed: {e}")
             return {}
@@ -589,7 +602,7 @@ class AITaskOrchestrator:
             self.progress_monitor.fail_step(step_number, str(e))
             raise ExecutionError(
                 f"Step {step_number} failed: {e}", step_name=step.name, task_id=self.task_id
-            )
+            ) from e
 
         finally:
             self.execution_history.append(step)
