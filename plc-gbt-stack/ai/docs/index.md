@@ -65,6 +65,7 @@ The AI Task Orchestrator is a comprehensive system for guiding AI coding agents 
 ### 🔌 Advanced Topics
 - [Observability Guide](advanced/observability.md)
 - [Plugin Architecture](advanced/plugins.md)
+- [Lifecycle & Async Usage](advanced/lifecycle-updates.md)
 - [Custom Validators](advanced/custom-validators.md)
 - [Memory Adapters](advanced/memory-adapters.md)
 - [Performance Tuning](advanced/performance.md)

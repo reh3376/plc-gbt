@@ -138,6 +138,13 @@ class MyCustomPlugin(Plugin):
 | `ERROR_OCCURRED` | Error happens | `error`, `context` | Error handling |
 | `ERROR_RECOVERED` | Error recovered | `error`, `recovery_action` | Recovery tracking |
 
+### Async hooks
+
+- `HookType.PRE_ANALYZE` and `HookType.POST_ANALYZE` now support coroutine callbacks. The orchestrator awaits them automatically during the analysis pipeline.
+- When writing async hooks, prefer `async def` signatures and ensure any awaited work respects orchestrator cancellation/timeout policies.
+- Mixed environments (some hooks async, some sync) are supported—the plugin manager handles both transparently.
+- `PRE_GENERATE_GUIDE` runs before the orchestrator writes Markdown, while `POST_GENERATE_GUIDE` fires with the resolved `Path` once the UTF-8 file is saved. Use these hooks to append sections, upload artifacts, or register documentation in external systems without re-implementing guide creation.
+
 ## Specialized Plugin Types
 
 ### Analyzer Plugin
