@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Task Orchestrator - System Overview</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px;
+        line-height: 1.5;
+        color: #222;
+        background: #fafafa;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      .subtle {
+        text-align: center;
+        color: #666;
+        margin-top: 0;
+      }
+      section {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0 28px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      }
+      h2 {
+        margin: 0 0 10px;
+      }
+      .mermaid {
+        margin: 22px 0;
+      }
+      .index-title {
+        font-weight: 700;
+        margin: 18px 0 8px;
+      }
+      ul.point-index {
+        margin: 0 0 0 18px;
+      }
+      .lead {
+        font-size: 1.05rem;
+        color: #333;
+      }
+      .pill {
+        display: inline-block;
+        background: #eef6ff;
+        color: #1b6fd8;
+        border: 1px solid #cfe3ff;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 12px;
+        margin-right: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AI Task Orchestrator - System Overview</h1>
+    <p class="subtle">Architecture, lifecycle, and interaction flows with annotated sequence indexes</p>
+
+    <section>
+      <h2>Overview</h2>
+      <p class="lead">
+        The AI Task Orchestrator provides a contract-first, observable, and extensible framework for
+        analyzing tasks, generating implementation guides, coordinating plugins, integrating memory
+        systems, and validating outcomes. This page visualizes key flows and includes a sequence point
+        index after each diagram to clarify what each numbered step represents.
+      </p>
+      <p>
+        Core principles:
+        <span class="pill">Async-first</span>
+        <span class="pill">Plugin Hooks</span>
+        <span class="pill">Observability</span>
+        <span class="pill">Memory Integration</span>
+        <span class="pill">Contract-First</span>
+        <span class="pill">Two-Phase Testing</span>
+      </p>
+    </section>
+
+    <section>
+      <h2>1) Analysis and Guide Creation Flow</h2>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant U as User/Service
+  participant OR as AITaskOrchestrator
+  participant PM as PluginManager
+  participant FS as Filesystem
+
+  Note over OR: Async-first analysis
+  U->>OR: analyze_task_async(task_description)
+  OR->>PM: PRE_ANALYZE (async/sync awaited)
+  OR-->>OR: Perform analysis (LLM/memory/etc.)
+  OR->>PM: POST_ANALYZE (async/sync awaited)
+  OR-->>U: TaskAnalysis
+
+  Note over OR: Guide creation (sync or async context)
+  U->>OR: create_implementation_guide(TaskAnalysis, output_dir?)
+  OR->>PM: PRE_GENERATE_GUIDE
+  OR->>FS: Ensure directory, write UTF-8 Markdown
+  OR->>PM: POST_GENERATE_GUIDE(Path)
+  OR-->>U: Path
+      </div>
+      <div class="index-title">Sequence Point Index</div>
+      <ul class="point-index">
+        <li>1. User initiates async task analysis</li>
+        <li>2. Pre-analysis plugin hook</li>
+        <li>3. Internal analysis execution</li>
+        <li>4. Post-analysis plugin hook</li>
+        <li>5. Analysis result returned</li>
+        <li>6. Guide creation request</li>
+        <li>7. Pre-guide generation hook</li>
+        <li>8. Directory structure creation</li>
+        <li>9. Guide file writing</li>
+        <li>10. Post-guide generation hook</li>
+        <li>11. Guide path returned</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2) Detailed Async Analysis Flow</h2>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant U as User/Service
+  participant OR as AITaskOrchestrator
+  participant PM as PluginManager
+  participant TH as ThreadPool
+
+  U->>OR: analyze_task_async(task_description)
+  OR->>PM: execute_hook_async(PRE_ANALYZE)
+  OR->>TH: asyncio.to_thread(analyze_task, ...)
+  TH-->>OR: TaskAnalysis
+  OR->>OR: await _get_memory_insights(...) (attach if present)
+  OR->>PM: execute_hook_async(POST_ANALYZE, TaskAnalysis)
+  OR-->>U: TaskAnalysis
+      </div>
+      <div class="index-title">Sequence Point Index</div>
+      <ul class="point-index">
+        <li>1. Async analysis request</li>
+        <li>2. Pre-analysis async hook</li>
+        <li>3. Thread pool delegation</li>
+        <li>4. Analysis completion</li>
+        <li>5. Memory insights attachment</li>
+        <li>6. Post-analysis async hook</li>
+        <li>7. Final result return</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>3) Implementation Guide Creation Flow</h2>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant U as Caller
+  participant OR as AITaskOrchestrator
+  participant PM as PluginManager
+  participant FS as Filesystem
+
+  U->>OR: create_implementation_guide(TaskAnalysis, output_dir?)
+  OR->>PM: execute_hook(PRE_GENERATE_GUIDE)
+  OR->>OR: _ensure_directory(parent)
+  OR->>FS: write guide (utf-8)
+  OR->>PM: execute_hook(POST_GENERATE_GUIDE, guide_path)
+  OR-->>U: Path
+      </div>
+      <div class="index-title">Sequence Point Index</div>
+      <ul class="point-index">
+        <li>1. Guide creation initiation</li>
+        <li>2. Pre-generation plugin hook</li>
+        <li>3. Directory structure setup</li>
+        <li>4. Guide content writing</li>
+        <li>5. Post-generation plugin hook</li>
+        <li>6. Path return to caller</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4) Complete Orchestrator Lifecycle</h2>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant App
+  participant Orc as AITaskOrchestrator
+  participant MC as MetricsCollector
+  participant Tr as Tracer
+  participant PM as PluginManager
+  participant Mem as Memory/Store
+
+  App->>Orc: new AITaskOrchestrator(config)
+  alt observability available
+    Orc->>MC: get_metrics_collector()
+    Orc->>Tr: get_tracer()
+  end
+  alt plugins available
+    Orc->>PM: get_plugin_manager()
+  end
+
+  App->>Orc: __enter__() or __aenter__()
+  alt plugins available
+    Orc->>PM: startup()
+  end
+  Orc->>Mem: load context/memory
+  Orc-->>App: self
+
+  App->>Orc: execute_task_step(...)
+  alt metrics/trace available
+    Orc->>MC: record (with guard checks)
+  end
+  Orc->>Mem: read/write insights (robust shape handling)
+  alt error
+    Orc-->>App: raise ExecutionError(...) from e
+  else success
+    Orc-->>App: result
+  end
+
+  App->>Orc: __exit__() or __aexit__()
+  alt plugins available
+    Orc->>PM: shutdown()
+  else no plugins
+    note over Orc: no-op
+  end
+  Orc-->>App: closed (bool in async)
+      </div>
+      <div class="index-title">Sequence Point Index</div>
+      <ul class="point-index">
+        <li>1. Orchestrator instantiation</li>
+        <li>2. Observability component check</li>
+        <li>3. Tracer component check</li>
+        <li>4. Plugin manager check</li>
+        <li>5. Context manager entry</li>
+        <li>6. Plugin startup</li>
+        <li>7. Memory context loading</li>
+        <li>8. Task step execution</li>
+        <li>9. Metrics recording</li>
+        <li>10. Memory operations</li>
+        <li>11. Result or error return</li>
+        <li>12. Context manager exit</li>
+        <li>13. Plugin shutdown</li>
+        <li>14. Context closure confirmation</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5) Plugin Manager Shutdown Flow</h2>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant U as Operator
+  participant PM as PluginManager
+
+  U->>PM: shutdown()
+  PM->>PM: execute SHUTDOWN hooks (try/except)
+  PM->>PM: call each plugin.cleanup() (try/except)
+  PM-->>U: shutdown complete
+      </div>
+      <div class="index-title">Sequence Point Index</div>
+      <ul class="point-index">
+        <li>1. Shutdown method invocation</li>
+        <li>2. Execute SHUTDOWN hooks</li>
+        <li>3. Plugin cleanup calls</li>
+        <li>4. Shutdown confirmation</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>6) Natural Language UI Flow</h2>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant User
+  participant UI as NaturalLanguageUIApp
+  participant CM as ConversationManager
+  participant LLM as LLMManager
+  participant OAI as OpenAI
+  participant MCP as MCPServer
+
+  User->>UI: send_message(content, session_id)
+  UI->>CM: process_user_message(...)
+  alt LLM not configured
+    CM-->>UI: ValueError("LLM manager not initialized")
+    UI-->>User: error response
+  else LLM configured
+    CM->>LLM: generate_response(messages, tools?)
+    LLM->>OAI: chat.completions.create(...)
+    OAI-->>LLM: response{content, tool_calls?, usage}
+    LLM-->>CM: response
+    alt tool_calls present
+      loop each tool_call
+        CM->>MCP: execute_tool(name, args)
+        MCP-->>CM: tool_result
+      end
+      CM-->>UI: UIResponse{content, suggestions, tool_results, usage, timestamps(UTC)}
+    else no tool_calls
+      CM-->>UI: UIResponse{content, suggestions, usage, timestamps(UTC)}
+    end
+  end
+  UI-->>User: render response
+      </div>
+      <div class="index-title">Sequence Point Index</div>
+      <ul class="point-index">
+        <li>1. User message submission</li>
+        <li>2. Message processing delegation</li>
+        <li>3. LLM manager validation</li>
+        <li>4. Error response path</li>
+        <li>5. LLM response generation</li>
+        <li>6. OpenAI API call</li>
+        <li>7. API response received</li>
+        <li>8. Tool execution check</li>
+        <li>9. MCP tool execution</li>
+        <li>10. Tool results collection</li>
+        <li>11. Complete UI response (with tools)</li>
+        <li>12. Simple UI response (no tools)</li>
+        <li>13. Response rendering</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>7) Context Management and Cleanup</h2>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant U as Caller
+  participant OR as AITaskOrchestrator
+  participant PM as PluginManager
+
+  rect rgb(245,245,255)
+    Note over OR: Context management
+    U->>OR: __aenter__/__enter__
+    OR-->>U: Orchestrator ready
+  end
+
+  opt Event loop active
+    U->>OR: close()
+    OR-->>OR: Schedule cleanup_async (fire-and-log)
+  end
+
+  U->>OR: aclose()/cleanup_async()
+  OR->>PM: SHUTDOWN hooks
+  OR-->>PM: Plugin cleanup
+  OR-->>U: Closed
+      </div>
+      <div class="index-title">Sequence Point Index</div>
+      <ul class="point-index">
+        <li>1. Enter context (__aenter__/__enter__)</li>
+        <li>2. Orchestrator ready returned</li>
+        <li>3. Close() schedules async cleanup (if event loop active)</li>
+        <li>4. aclose()/cleanup_async() invoked</li>
+        <li>5. SHUTDOWN hooks executed</li>
+        <li>6. Plugin cleanup completed</li>
+        <li>7. Closed returned to caller</li>
+      </ul>
+    </section>
+
+  </body>
+</html>
