@@ -63,30 +63,53 @@ def analyze_task(
     """
 ```
 
-##### generate_guide
+> ℹ️ **Async environments:** When an event loop is already running (e.g., FastAPI), call [`analyze_task_async`](#analyze_task_async) instead of this synchronous helper.
+
+##### analyze_task_async
 
 ```python
-def generate_guide(
+async def analyze_task_async(
     self,
-    analysis: TaskAnalysis,
-    format: str = "markdown"
-) -> ImplementationGuide:
+    task_description: str
+) -> TaskAnalysis:
     """
-    Generate a structured implementation guide.
-    
-    Args:
-        analysis: Task analysis result
-        format: Output format ('markdown', 'json', 'html')
-        
-    Returns:
-        ImplementationGuide with step-by-step instructions
-        
+    Awaitable analysis pipeline for callers that already manage an event loop.
+
     Example:
-        >>> guide = orchestrator.generate_guide(analysis)
-        >>> for step in guide.steps:
-        ...     print(f"{step.number}. {step.title}")
+        >>> async with AITaskOrchestrator() as orchestrator:
+        ...     analysis = await orchestrator.analyze_task_async("Optimize PID loop")
+        ...     print(analysis.requirements[0])
     """
 ```
+
+> ✅ Internally this method offloads the synchronous `TaskAnalyzer.analyze()` call to `asyncio.to_thread(...)`, keeping your event loop responsive while the heavy analysis work completes.
+
+##### create_implementation_guide
+
+```python
+def create_implementation_guide(
+    self,
+    task_analysis: TaskAnalysis,
+    output_dir: Path | None = None
+) -> Path:
+    """
+    Generate a Markdown implementation guide and return the saved path.
+
+    Args:
+        task_analysis: Task analysis result
+        output_dir: Optional override for the destination directory
+
+    Returns:
+        Path to the generated Markdown file
+
+    Example:
+        >>> guide_path = orchestrator.create_implementation_guide(analysis)
+        >>> print(guide_path.name)
+        'guide_task_20250118_a1b2c3d4.md'
+    """
+```
+
+> 📂 The orchestrator now creates the destination directory automatically, writes UTF-8 by default, and emits `PRE_GENERATE_GUIDE` / `POST_GENERATE_GUIDE` hooks so plugins can extend the generated documentation.
 
 ##### validate_implementation
 

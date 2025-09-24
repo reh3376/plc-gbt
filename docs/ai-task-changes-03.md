@@ -8,7 +8,6 @@ This document consolidates all improvement suggestions from the previous analyse
 
 > **Update:** All phases of the improvement plan have been successfully completed. The Python implementation has been fully modularized, documentation enhanced, and all quality improvements implemented. A line-level summary of every lifecycle change is available in [`docs/ai-task-change-log.md`](./ai-task-change-log.md) for quick reference.
 
-
 ## Executive Summary
 
 The AI Task Orchestrator system consists of 4 core files (2 Python, 2 TypeScript) that guide AI coding agents. **All major structural and organizational improvements have been successfully completed.**
@@ -30,12 +29,14 @@ The AI Task Orchestrator system consists of 4 core files (2 Python, 2 TypeScript
 7. ✅ Implemented extensible plugin architecture
 8. ✅ Resolved all linting issues
 
-**Latest Lifecycle Enhancements (2025-09-24):**
+## Latest Lifecycle Enhancements (2025-01-19)
 
 - ✅ Added `analyze_task_async` so coding agents operating inside running event loops can await the full analysis pipeline without workarounds.
 - ✅ Updated synchronous entry points (`analyze_task`, `close`) to detect active event loops and provide actionable guidance toward their async counterparts.
 - ✅ Migrated analysis plugin execution to the asynchronous dispatcher, enabling coroutine-based hooks to run alongside traditional callbacks.
 - ✅ Published a dedicated lifecycle primer (`plc-gbt-stack/ai/docs/advanced/lifecycle-updates.md`) so every new coding agent immediately sees how to work with the updated shutdown and analysis APIs.
+- ✅ Offloaded the synchronous analyzer onto a background worker via `asyncio.to_thread()` so async callers do not block the event loop while the analysis model runs.
+- ✅ Hardened guide/summary generation by auto-creating output directories, using UTF-8 writes, and firing `PRE_GENERATE_GUIDE` / `POST_GENERATE_GUIDE` plugin hooks around the documentation pipeline.
 
 ---
 
@@ -441,6 +442,34 @@ class AITaskOrchestrator:
         except Exception as e:
             logger.error("task_analysis_failed", error=str(e))
             raise
+```
+
+#### Lifecycle & Resource Management
+```python
+# Use the orchestrator as a context manager to guarantee cleanup
+with AITaskOrchestrator() as orchestrator:
+    analysis = orchestrator.analyze_task("Create OPC-UA ingestion pipeline")
+    orchestrator.create_implementation_guide(analysis)
+
+# Async workflows can rely on the async context manager as well
+async def orchestrate_async(description: str) -> None:
+    async with AITaskOrchestrator() as orchestrator:
+        orchestrator.analyze_task(description)
+
+# Manual lifecycle control is also supported
+orchestrator = AITaskOrchestrator()
+try:
+    orchestrator.analyze_task("Collect PLC metrics")
+finally:
+    orchestrator.cleanup()
+
+# In fully async code, await the non-blocking cleanup helper
+async def run_task(description: str) -> None:
+    orchestrator = AITaskOrchestrator()
+    try:
+        orchestrator.analyze_task(description)
+    finally:
+        await orchestrator.cleanup_async()
 ```
 
 ---

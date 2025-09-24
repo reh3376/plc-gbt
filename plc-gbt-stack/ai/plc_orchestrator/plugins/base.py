@@ -273,6 +273,28 @@ class PluginManager:
         """Get number of hooks for a type."""
         return len(self._hooks[hook_type])
 
+    def shutdown(self) -> None:
+        """Execute shutdown hooks and cleanup registered plugins."""
+
+        if self.has_hooks(HookType.SHUTDOWN):
+            try:
+                self.execute_hook(HookType.SHUTDOWN, orchestrator=self._orchestrator)
+            except Exception as exc:  # pragma: no cover - defensive logging
+                logger.error("shutdown_hook_failed", error=str(exc))
+
+        for name, plugin in list(self._plugins.items()):
+            try:
+                plugin.cleanup()
+            except Exception as exc:  # pragma: no cover - defensive logging
+                logger.error("plugin_cleanup_failed", name=name, error=str(exc))
+
+        for hook_list in self._hooks.values():
+            hook_list.clear()
+
+        self._plugins.clear()
+        self._orchestrator = None
+        logger.info("plugin_manager_shutdown")
+
 
 # Global plugin manager instance
 _plugin_manager = PluginManager()

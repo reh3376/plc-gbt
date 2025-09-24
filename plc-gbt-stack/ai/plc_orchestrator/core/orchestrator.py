@@ -100,7 +100,7 @@ class AITaskOrchestrator:
         # Plugin system
         self.plugin_manager: PluginManager | None = None
 
-         # Lifecycle management
+        # Lifecycle management
         self._close_lock: asyncio.Lock | None = None
         self._closed = False
         self._cleanup_started = False
@@ -141,6 +141,11 @@ class AITaskOrchestrator:
                 f"Use the asynchronous counterpart (e.g. '{suggestion}')."
             )
 
+    @staticmethod
+    def _ensure_directory(path: Path) -> None:
+        """Create the directory for the provided path if it is missing."""
+
+        path.mkdir(parents=True, exist_ok=True)
     def _initialize_features(self) -> None:
         """Initialize optional features based on configuration."""
         # Memory system
@@ -328,6 +333,8 @@ class AITaskOrchestrator:
                 span_context.__enter__()
             timer_context = None
 
+            timer_context = None
+
             try:
                 # Execute pre-analyze plugins
                 if self.plugin_manager and PLUGINS_AVAILABLE:
@@ -345,7 +352,9 @@ class AITaskOrchestrator:
                     timer_context.__enter__()
 
                 # Basic analysis
-                analysis = self.analyzer.analyze(task_description)
+                analysis = await asyncio.to_thread(
+                    self.analyzer.analyze, task_description
+                )
 
                 # Enhance with memory insights if available
                 if self.memory_coordinator:
@@ -368,7 +377,11 @@ class AITaskOrchestrator:
 
             finally:
                 # End timer
-                if self.metrics_collector and OBSERVABILITY_AVAILABLE and timer_context is not None:
+                if (
+                    self.metrics_collector
+                    and OBSERVABILITY_AVAILABLE
+                    and timer_context is not None
+                ):
                     timer_context.__exit__(None, None, None)
 
                 # End span
@@ -411,8 +424,14 @@ class AITaskOrchestrator:
         """
         output_dir = output_dir or self.config.settings.guides_dir
         guide_path = safe_file_path(output_dir, f"guide_{task_analysis.task_id}.md")
+        self._ensure_directory(guide_path.parent)
 
-        with open(guide_path, "w") as f:
+        if self.plugin_manager and PLUGINS_AVAILABLE:
+            self.plugin_manager.execute_hook(
+                HookType.PRE_GENERATE_GUIDE, task_analysis
+            )
+
+        with open(guide_path, "w", encoding="utf-8") as f:
             self._write_guide_header(f, task_analysis)
             self._write_requirements_section(f, task_analysis)
             self._write_implementation_plan(f, task_analysis)
@@ -427,6 +446,11 @@ class AITaskOrchestrator:
                 self._write_memory_insights(f, task_analysis)
 
             self._write_guide_footer(f, task_analysis)
+
+        if self.plugin_manager and PLUGINS_AVAILABLE:
+            self.plugin_manager.execute_hook(
+                HookType.POST_GENERATE_GUIDE, task_analysis, guide_path
+            )
 
         self.logger.info(f"Implementation guide created: {guide_path}")
         return guide_path
@@ -648,6 +672,7 @@ class AITaskOrchestrator:
         summary_path = safe_file_path(
             self.config.settings.summaries_dir, f"summary_{self.task_id}.md"
         )
+        self._ensure_directory(summary_path.parent)
 
         with open(summary_path, "w", encoding="utf-8") as f:
             f.write(f"# Task Summary: {self.task_id}\n\n")
