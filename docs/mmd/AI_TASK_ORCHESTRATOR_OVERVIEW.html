@@ -32,7 +32,7 @@
         border-radius: 10px;
         padding: 20px;
         margin: 20px 0 28px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
       }
       h2 {
         margin: 0 0 10px;
@@ -65,15 +65,17 @@
   </head>
   <body>
     <h1>AI Task Orchestrator - System Overview</h1>
-    <p class="subtle">Architecture, lifecycle, and interaction flows with annotated sequence indexes</p>
+    <p class="subtle">
+      Architecture, lifecycle, and interaction flows with annotated sequence indexes
+    </p>
 
     <section>
       <h2>Overview</h2>
       <p class="lead">
         The AI Task Orchestrator provides a contract-first, observable, and extensible framework for
         analyzing tasks, generating implementation guides, coordinating plugins, integrating memory
-        systems, and validating outcomes. This page visualizes key flows and includes a sequence point
-        index after each diagram to clarify what each numbered step represents.
+        systems, and validating outcomes. This page visualizes key flows and includes a sequence
+        point index after each diagram to clarify what each numbered step represents.
       </p>
       <p>
         Core principles:
@@ -99,7 +101,7 @@ sequenceDiagram
   Note over OR: Async-first analysis
   U->>OR: analyze_task_async(task_description)
   OR->>PM: PRE_ANALYZE (async/sync awaited)
-  OR-->>OR: Perform analysis (LLM/memory/etc.)
+  note right of OR: Perform analysis (LLM/memory/etc.)
   OR->>PM: POST_ANALYZE (async/sync awaited)
   OR-->>U: TaskAnalysis
 
@@ -140,7 +142,7 @@ sequenceDiagram
   OR->>PM: execute_hook_async(PRE_ANALYZE)
   OR->>TH: asyncio.to_thread(analyze_task, ...)
   TH-->>OR: TaskAnalysis
-  OR->>OR: await _get_memory_insights(...) (attach if present)
+  note right of OR: await _get_memory_insights(...) (attach if present)
   OR->>PM: execute_hook_async(POST_ANALYZE, TaskAnalysis)
   OR-->>U: TaskAnalysis
       </div>
@@ -168,7 +170,7 @@ sequenceDiagram
 
   U->>OR: create_implementation_guide(TaskAnalysis, output_dir?)
   OR->>PM: execute_hook(PRE_GENERATE_GUIDE)
-  OR->>OR: _ensure_directory(parent)
+  note right of OR: _ensure_directory(parent)
   OR->>FS: write guide (utf-8)
   OR->>PM: execute_hook(POST_GENERATE_GUIDE, guide_path)
   OR-->>U: Path
@@ -341,7 +343,7 @@ sequenceDiagram
 
   opt Event loop active
     U->>OR: close()
-    OR-->>OR: Schedule cleanup_async (fire-and-log)
+    note right of OR: Schedule cleanup_async (fire-and-log)
   end
 
   U->>OR: aclose()/cleanup_async()
@@ -360,6 +362,5 @@ sequenceDiagram
         <li>7. Closed returned to caller</li>
       </ul>
     </section>
-
   </body>
 </html>
