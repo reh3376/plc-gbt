@@ -4,7 +4,7 @@
 FROM python:3.12-slim
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
     vim \
@@ -17,9 +17,12 @@ RUN apt-get update && apt-get install -y \
     dnsutils \
     && rm -rf /var/lib/apt/lists/*
 
+# Set shell options for pipefail
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Install Node.js for TypeScript development
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs
+    apt-get install -y --no-install-recommends nodejs
 
 # Set working directory
 WORKDIR /workspace
@@ -78,7 +81,7 @@ RUN pip install --no-cache-dir \
     graphql-core==3.2.3
 
 # Install TypeScript and Node.js dependencies
-RUN npm install -g typescript @types/node ts-node nodemon
+RUN npm install -g typescript@5.3.3 @types/node@20.11.0 ts-node@10.9.2 nodemon@3.0.2
 
 # Create project directories
 RUN mkdir -p /workspace/phase32 /workspace/tests /workspace/docs

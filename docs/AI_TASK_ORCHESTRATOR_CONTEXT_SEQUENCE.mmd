@@ -1,23 +1,35 @@
 sequenceDiagram
   autonumber
-  participant U as Caller
-  participant OR as AITaskOrchestrator
+  participant App as Orchestrator User
+  participant Orc as AITaskOrchestrator
+  participant Obs as Observability (Metrics/Tracer)
   participant PM as PluginManager
+  participant Mem as Memory/Store
 
-  rect rgb(245,245,255)
-  Note over OR: Context management
-  U->>OR: __aenter__/__enter__
-  OR-->>U: Orchestrator ready
+  App->>Orc: instantiate()
+  rect rgb(240,245,255)
+    note right of Orc: Lazy init (if available)
+    Orc-->>Obs: get_metrics_collector? / get_tracer?
+    Orc-->>PM: get_plugin_manager?
   end
 
-  opt Event loop active
-    U->>OR: close()
-    OR-->>OR: Schedule cleanup_async (fire-and-log)
+  App->>+Orc: __enter__/__aenter__()
+  alt plugins available
+    Orc->>PM: startup()
+  else plugins unavailable
+    note over Orc: skip plugin hooks
   end
+  Orc->>Mem: load context/memory
 
-  U->>OR: aclose()/cleanup_async()
-  OR->>PM: SHUTDOWN hooks
-  OR-->>PM: Plugin cleanup
-  OR-->>U: Closed
+  App->>+Orc: execute_task_step(...)
+  Orc->>Obs: record metrics/trace (guarded)
+  Orc->>Mem: read/write insights (robust shape handling)
+  Orc-->>App: result or raise ExecutionError (chained)
 
-
+  App->>+Orc: __exit__/__aexit__(exc?)
+  alt plugins available
+    Orc->>PM: shutdown()
+  else
+    note over Orc: no-op
+  end
+  Orc-->>App: closed (bool in async)

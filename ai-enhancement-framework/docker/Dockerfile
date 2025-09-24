@@ -13,7 +13,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     git \
@@ -30,7 +30,7 @@ COPY requirements.txt /app/
 COPY requirements-dev.txt /app/
 
 # Install Python dependencies
-RUN pip install --upgrade pip && \
+RUN pip install --upgrade pip==24.0 && \
     pip install -r requirements.txt && \
     pip install -r requirements-dev.txt
 
