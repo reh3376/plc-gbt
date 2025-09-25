@@ -1,0 +1,63 @@
+# AI Task Orchestrator - Natural Language UI Flow
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant User as User
+  participant UI as NaturalLanguageUIApp
+  participant CM as ConversationManager
+  participant LLM as OpenAILLMManager
+  participant OA as OpenAI Chat API
+  participant MCP as MCP Server (tools)
+
+  User->>UI: send_message(session_id, message)
+  UI->>CM: process_user_message(...)
+  alt LLM manager not set
+    CM-->>UI: raise ValueError
+    UI-->>User: error response
+  else ready
+    CM->>LLM: generate_response(messages, tools | NOT_GIVEN)
+    LLM->>OA: chat.completions.create(messages, tools/tool_choice)
+    OA-->>LLM: response (content, tool_calls, usage)
+    alt tool_calls present
+      CM->>MCP: execute tools (per call)
+      MCP-->>CM: tool_results (per call)
+      CM-->>UI: UIResponse(content, suggestions, tool_results, usage, UTC timestamps)
+    else no tools
+      CM-->>UI: UIResponse(content, suggestions, usage, UTC timestamps)
+    end
+  end
+  UI-->>User: render response
+```
+
+## Description
+
+This diagram illustrates the Natural Language UI interaction flow:
+
+1. **User interaction**: User sends a message through the UI
+2. **Conversation management**: The ConversationManager processes the message
+3. **LLM integration**: OpenAI LLM generates responses with optional tool calls
+4. **Tool execution**: MCP server executes any requested tools
+5. **Response rendering**: UI presents the complete response to the user
+
+Key features:
+- Error handling for missing LLM manager
+- Support for tool calls via MCP server
+- UTC timestamp tracking throughout
+- Suggestions and tool results in responses
+
+## Sequence Point Index
+
+1. **User message submission** - User sends message to NaturalLanguageUIApp with session_id
+2. **Message processing delegation** - UI forwards to ConversationManager's `process_user_message()`
+3. **LLM manager validation** - ConversationManager checks if LLM manager is configured
+4. **Error response path** - If no LLM manager, ValueError raised and error returned to User
+5. **LLM response generation** - ConversationManager calls LLM's `generate_response()` with messages and optional tools
+6. **OpenAI API call** - LLM manager calls OpenAI Chat API's `completions.create()`
+7. **API response received** - OpenAI returns response with content, tool_calls, and usage data
+8. **Tool execution check** - ConversationManager checks if tool_calls are present
+9. **MCP tool execution** - If tools present, each tool call executed via MCP Server
+10. **Tool results collection** - MCP Server returns results for each tool call
+11. **Complete UI response (with tools)** - ConversationManager returns UIResponse with content, suggestions, tool_results, usage, and UTC timestamps
+12. **Simple UI response (no tools)** - If no tools, ConversationManager returns UIResponse with content, suggestions, usage, and UTC timestamps
+13. **Response rendering** - UI renders the complete response for the User

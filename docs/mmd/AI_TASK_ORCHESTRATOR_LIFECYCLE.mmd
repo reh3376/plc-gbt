@@ -1,0 +1,66 @@
+# AI Task Orchestrator - Complete Lifecycle Flow
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant App as Orchestrator User
+  participant Orc as AITaskOrchestrator
+  participant Obs as Observability (Metrics/Tracer)
+  participant PM as PluginManager
+  participant Mem as Memory/Store
+
+  App->>Orc: instantiate()
+  rect rgb(240,245,255)
+    note right of Orc: Lazy init (if available)
+    Orc-->>Obs: get_metrics_collector? / get_tracer?
+    Orc-->>PM: get_plugin_manager?
+  end
+
+  App->>+Orc: __enter__/__aenter__()
+  alt plugins available
+    Orc->>PM: startup()
+  else plugins unavailable
+    note over Orc: skip plugin hooks
+  end
+  Orc->>Mem: load context/memory
+
+  App->>+Orc: execute_task_step(...)
+  Orc->>Obs: record metrics/trace (guarded)
+  Orc->>Mem: read/write insights (robust shape handling)
+  Orc-->>App: result or raise ExecutionError (chained)
+
+  App->>+Orc: __exit__/__aexit__(exc?)
+  alt plugins available
+    Orc->>PM: shutdown()
+  else
+    note over Orc: no-op
+  end
+  Orc-->>App: closed (bool in async)
+```
+
+## Description
+
+This comprehensive diagram shows the complete lifecycle of the AI Task Orchestrator:
+
+1. **Instantiation**: Lazy initialization of observability and plugin components
+2. **Context entry**: Startup hooks and memory loading when entering context
+3. **Task execution**: Metrics recording, memory operations, and error handling
+4. **Context exit**: Graceful shutdown with plugin cleanup
+5. **Error handling**: Robust error chaining and exception management throughout
+
+## Sequence Point Index
+
+1. **Orchestrator instantiation** - App creates new AITaskOrchestrator instance
+2. **Observability component check** - Orchestrator attempts to get metrics collector (if available)
+3. **Tracer component check** - Orchestrator attempts to get tracer (if available)
+4. **Plugin manager check** - Orchestrator attempts to get plugin manager (if available)
+5. **Context manager entry** - App enters orchestrator context via `__enter__()` or `__aenter__()`
+6. **Plugin startup** - If plugins available, orchestrator calls PluginManager startup()
+7. **Memory context loading** - Orchestrator loads context/memory from Memory/Store
+8. **Task step execution** - App calls `execute_task_step()` with task parameters
+9. **Metrics recording** - Orchestrator records metrics/trace (with guard checks)
+10. **Memory operations** - Orchestrator performs read/write insights with robust shape handling
+11. **Result or error return** - Orchestrator returns result or raises ExecutionError with chaining
+12. **Context manager exit** - App exits context via `__exit__()` or `__aexit__()`
+13. **Plugin shutdown** - If plugins available, orchestrator calls PluginManager shutdown()
+14. **Context closure confirmation** - Orchestrator confirms closed state (returns bool in async)

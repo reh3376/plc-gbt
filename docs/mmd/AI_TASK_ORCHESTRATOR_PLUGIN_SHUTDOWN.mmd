@@ -1,0 +1,29 @@
+# AI Task Orchestrator - Plugin Manager Shutdown Flow
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as Operator
+  participant PM as PluginManager
+
+  U->>PM: shutdown()
+  PM->>PM: execute SHUTDOWN hooks (try/except)
+  PM->>PM: call each plugin.cleanup() (try/except)
+  PM-->>U: shutdown complete
+```
+
+## Description
+
+This diagram illustrates the graceful shutdown process for the Plugin Manager:
+
+1. **Shutdown initiation**: The operator calls the shutdown method
+2. **SHUTDOWN hooks**: All registered SHUTDOWN hooks are executed with error handling
+3. **Plugin cleanup**: Each plugin's cleanup method is called individually
+4. **Completion**: The shutdown process completes and returns to the operator
+
+## Sequence Point Index
+
+1. **Shutdown method invocation** - Operator calls `shutdown()` on PluginManager
+2. **Execute SHUTDOWN hooks** - PluginManager internally executes all registered SHUTDOWN hooks with try/except error handling
+3. **Plugin cleanup calls** - PluginManager calls each plugin's `cleanup()` method with try/except error handling
+4. **Shutdown confirmation** - PluginManager returns completion status to Operator

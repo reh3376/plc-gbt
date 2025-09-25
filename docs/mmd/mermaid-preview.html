@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Task Orchestrator Mermaid Diagrams</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        sequence: {
+          diagramMarginX: 50,
+          diagramMarginY: 50,
+          actorMargin: 50,
+          width: 150,
+          height: 65,
+          boxMargin: 10,
+          boxTextMargin: 5,
+          noteMargin: 10,
+          messageMargin: 35,
+          mirrorActors: true,
+        },
+      });
+    </script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      h2 {
+        color: #555;
+        margin-top: 40px;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 10px;
+      }
+      .diagram-container {
+        background-color: white;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .mermaid {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AI Task Orchestrator Sequence Diagrams</h1>
+
+    <div class="diagram-container">
+      <h2>1. Basic Task Analysis and Guide Creation Flow</h2>
+      <div class="mermaid">
+        sequenceDiagram autonumber participant U as User/Service participant OR as
+        AITaskOrchestrator participant PM as PluginManager participant FS as Filesystem Note over
+        OR: Async-first analysis U->>OR: analyze_task_async(task_description) OR->>PM: PRE_ANALYZE
+        (async/sync awaited) OR-->>OR: Perform analysis (LLM/memory/etc.) OR->>PM: POST_ANALYZE
+        (async/sync awaited) OR-->>U: TaskAnalysis Note over OR: Guide creation (sync or async
+        context) U->>OR: create_implementation_guide(TaskAnalysis, output_dir?) OR->>PM:
+        PRE_GENERATE_GUIDE OR->>FS: Ensure directory, write UTF-8 Markdown OR->>PM:
+        POST_GENERATE_GUIDE(Path) OR-->>U: Path
+      </div>
+    </div>
+
+    <div class="diagram-container">
+      <h2>2. Plugin Manager Shutdown Flow</h2>
+      <div class="mermaid">
+        sequenceDiagram autonumber participant U as Operator participant PM as PluginManager U->>PM:
+        shutdown() PM->>PM: execute SHUTDOWN hooks (try/except) PM->>PM: call each plugin.cleanup()
+        (try/except) PM-->>U: shutdown complete
+      </div>
+    </div>
+
+    <div class="diagram-container">
+      <h2>3. Detailed Async Analysis Flow</h2>
+      <div class="mermaid">
+        sequenceDiagram autonumber participant U as User/Service participant OR as
+        AITaskOrchestrator participant PM as PluginManager participant TP as ThreadPool U->>OR:
+        analyze_task_async(task_description) OR->>PM: execute_hook_async(PRE_ANALYZE) OR->>TP:
+        asyncio.to_thread(analyze_task, ...) TP-->>OR: TaskAnalysis OR->>OR: await
+        _get_memory_insights(...) (attach if present) OR->>PM: execute_hook_async(POST_ANALYZE,
+        TaskAnalysis) OR-->>U: TaskAnalysis
+      </div>
+    </div>
+
+    <div class="diagram-container">
+      <h2>4. Implementation Guide Creation Flow</h2>
+      <div class="mermaid">
+        sequenceDiagram autonumber participant U as Caller participant OR as AITaskOrchestrator
+        participant PM as PluginManager participant FS as Filesystem U->>OR:
+        create_implementation_guide(TaskAnalysis, output_dir?) OR->>PM:
+        execute_hook(PRE_GENERATE_GUIDE) OR->>OR: _ensure_directory(parent) OR->>FS: write guide
+        (utf-8) OR->>PM: execute_hook(POST_GENERATE_GUIDE, guide_path) OR-->>U: Path
+      </div>
+    </div>
+
+    <div class="diagram-container">
+      <h2>5. Complete Orchestrator Lifecycle</h2>
+      <div class="mermaid">
+        sequenceDiagram autonumber participant App participant Orc as AITaskOrchestrator participant
+        MC as MetricsCollector participant Tr as Tracer participant PM as PluginManager participant
+        Mem as Memory/Store App->>Orc: new AITaskOrchestrator(config) alt observability available
+        Orc->>MC: get_metrics_collector() Orc->>Tr: get_tracer() end alt plugins available Orc->>PM:
+        get_plugin_manager() end App->>Orc: __enter__() or __aenter__() alt plugins available
+        Orc->>PM: startup() end Orc->>Mem: load context/memory Orc-->>App: self App->>Orc:
+        execute_task_step(...) alt metrics/trace available Orc->>MC: record (with guard checks) end
+        Orc->>Mem: read/write insights (robust shape handling) alt error Orc-->>App: raise
+        ExecutionError(...) from e else success Orc-->>App: result end App->>Orc: __exit__() or
+        __aexit__() alt plugins available Orc->>PM: shutdown() else no plugins note over Orc: no-op
+        end Orc-->>App: closed (bool in async)
+      </div>
+    </div>
+
+    <div class="diagram-container">
+      <h2>6. Natural Language UI Flow</h2>
+      <div class="mermaid">
+        sequenceDiagram autonumber participant User participant UI as NaturalLanguageUIApp
+        participant CM as ConversationManager participant LLM as LLMManager participant OAI as
+        OpenAI participant MCP as MCPServer User->>UI: send_message(content, session_id) UI->>CM:
+        process_user_message(...) alt LLM not configured CM-->>UI: ValueError("LLM manager not
+        initialized") UI-->>User: error response else LLM configured CM->>LLM:
+        generate_response(messages, tools?) LLM->>OAI: chat.completions.create(...) OAI-->>LLM:
+        response{content, tool_calls?, usage} LLM-->>CM: response alt tool_calls present loop each
+        tool_call CM->>MCP: execute_tool(name, args) MCP-->>CM: tool_result end CM-->>UI:
+        UIResponse{content, suggestions, tool_results, usage, timestamps(UTC)} else no tool_calls
+        CM-->>UI: UIResponse{content, suggestions, usage, timestamps(UTC)} end end UI-->>User:
+        render response
+      </div>
+    </div>
+
+    <div class="diagram-container">
+      <h2>7. Context Management and Cleanup</h2>
+      <div class="mermaid">
+        sequenceDiagram autonumber participant U as Caller participant OR as AITaskOrchestrator
+        participant PM as PluginManager rect rgb(245,245,255) Note over OR: Context management
+        U->>OR: __aenter__/__enter__ OR-->>U: Orchestrator ready end opt Event loop active U->>OR:
+        close() OR-->>OR: Schedule cleanup_async (fire-and-log) end U->>OR: aclose()/cleanup_async()
+        OR->>PM: SHUTDOWN hooks OR-->>PM: Plugin cleanup OR-->>U: Closed
+      </div>
+    </div>
+  </body>
+</html>
