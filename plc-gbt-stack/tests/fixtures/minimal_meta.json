@@ -1,0 +1,7 @@
+{
+  "controller": "TestController",
+  "programs": ["MainProgram"],
+  "tasks": ["MainTask"],
+  "tags": ["Tag1"],
+  "tagCount": 1
+}

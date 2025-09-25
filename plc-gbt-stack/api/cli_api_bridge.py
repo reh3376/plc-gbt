@@ -23,6 +23,7 @@ Phase: Alternative LLM Integration (Post-MCP)
 """
 
 import asyncio
+import importlib.util
 import json
 import logging
 import sys
@@ -151,7 +152,7 @@ class CLIExecutor:
                 stdout="",
                 stderr=f"Command '{command}' not allowed. Allowed: {list(self.allowed_commands.keys())}",
                 execution_time=execution_time,
-                timestamp=datetime.now(UTC)
+    timestamp=datetime.now(UTC)
             )
             self._add_to_history(result)
             return result
@@ -243,10 +244,20 @@ app = FastAPI(
 
 # Include PLC Conversion Router - MVP
 try:
-    from plc_conversion import router as plc_conversion_router
-    app.include_router(plc_conversion_router)
-except Exception as e:
-    logger.warning(f"PLC Conversion router not included: {e}")
+    conversion_module_path = Path(__file__).parent / "plc_conversion.py"
+    spec = importlib.util.spec_from_file_location("plc_conversion", conversion_module_path)
+    if spec and spec.loader:
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        plc_conversion_router = getattr(module, "router", None)
+        if plc_conversion_router:
+            app.include_router(plc_conversion_router)
+        else:
+            logger.warning("PLC Conversion router module missing 'router' attribute")
+    else:
+        logger.warning("Unable to load PLC Conversion router module at %s", conversion_module_path)
+except Exception as exc:  # pragma: no cover - import failure should not crash app
+    logger.warning("PLC Conversion router not included: %s", exc)
 
 # Configure CORS
 app.add_middleware(

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RSLogix5000Content SchemaRevision="1.0">
+  <Controller Name="TestController">
+    <Programs>
+      <Program Name="MainProgram" />
+    </Programs>
+    <Tags>
+      <Tag Name="Tag1" />
+    </Tags>
+    <Tasks>
+      <Task Name="MainTask" />
+    </Tasks>
+  </Controller>
+</RSLogix5000Content>
+

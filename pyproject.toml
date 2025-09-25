@@ -76,12 +76,6 @@ Changelog = "https://github.com/reh3376/acd-l5x-tool-lib/blob/main/CHANGELOG.md"
 "PyPI" = "https://pypi.org/project/plc-format-converter/"
 "Release Notes" = "https://github.com/reh3376/acd-l5x-tool-lib/releases/tag/v2.1.2"
 
-[project.scripts]
-acd2l5x = "plc_format_converter.cli:acd2l5x"
-l5x2acd = "plc_format_converter.cli:l5x2acd"
-plc-convert = "plc_format_converter.cli:main"
-plc-validate = "plc_format_converter.cli:validate"
-
 [tool.setuptools]
 package-dir = {"" = "src"}
 
@@ -228,12 +222,8 @@ exclude_lines = [
     "@(abc\\.)?abstractmethod",
 ]
 
-# Package metadata for build
-[tool.hatch.metadata.hooks.requirements]
-files = []
-
 # Entry points for CLI commands
-[project.entry-points."console_scripts"]
+[project.scripts]
 acd2l5x = "plc_format_converter.cli:acd2l5x"
 l5x2acd = "plc_format_converter.cli:l5x2acd"
 plc-convert = "plc_format_converter.cli:main"
@@ -241,12 +231,17 @@ plc-validate = "plc_format_converter.cli:validate"
 plc-capabilities = "plc_format_converter.cli:capabilities"
 
 # Plugin entry points for extensibility
+[project.entry-points]
+
 [project.entry-points."plc_format_converter.handlers"]
 acd = "plc_format_converter.formats.acd_handler:ACDHandler"
 l5x = "plc_format_converter.formats.l5x_handler:L5XHandler"
 
 [project.entry-points."plc_format_converter.validators"]
 default = "plc_format_converter.utils.validation:PLCValidator"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/plc_format_converter"]
 
 # Build configuration
 [tool.setuptools_scm]

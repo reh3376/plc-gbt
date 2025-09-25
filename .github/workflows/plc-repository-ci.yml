@@ -46,13 +46,15 @@ jobs:
             echo "No plc directory found, skipping ACD validation"
           fi
 
-      - name: Run conversion tests
+      - name: Run ruff lint on backend files
         run: |
-          if [ -d "tests" ]; then
-            python -m pytest tests/ -v --tb=short || echo "Some tests failed but continuing"
-          else
-            echo "No tests directory found, skipping tests"
-          fi
+          uv pip install --system ruff
+          ruff check plc-gbt-stack/api/cli_api_bridge.py plc-gbt-stack/api/plc_conversion.py plc-gbt-stack/tests/test_cli_api_bridge_smoke.py
+
+      - name: Run backend smoke tests
+        run: |
+          source .venv/bin/activate
+          python -m pytest plc-gbt-stack/tests/test_cli_api_bridge_smoke.py -v --tb=short
 
       - name: Generate validation report
         run: |

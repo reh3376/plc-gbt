@@ -37,8 +37,14 @@ class ConversionRequest(BaseModel):
     )
 
 
+ConversionRequest.model_rebuild()
+
+
 class ValidationRequest(BaseModel):
     file_path: str = Field(..., description="Path to file (.acd or .l5x)")
+
+
+ValidationRequest.model_rebuild()
 
 
 class ConversionResponse(BaseModel):
@@ -46,6 +52,9 @@ class ConversionResponse(BaseModel):
     message: str
     data: dict[str, Any] | None = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+ConversionResponse.model_rebuild()
 
 
 def _safe_mkdir(path: Path) -> None:
