@@ -38,4 +38,4 @@ n8n-framework/**/*
 *.config.ts
 next.config.js
 tailwind.config.js
-postcss.config.js 
+postcss.config.js plc-gbt/docs/mmd/.html

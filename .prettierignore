@@ -36,4 +36,4 @@ n8n-framework/**/*
 # Exclude configuration backups
 *.bak
 *.bak2
-*.orig 
+*.orig plc-gbt/docs/mmd/.html
