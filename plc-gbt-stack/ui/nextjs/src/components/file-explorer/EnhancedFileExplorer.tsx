@@ -176,6 +176,17 @@ export default function EnhancedFileExplorer({
     defaultSortMethod: 'a-z',
   });
 
+  // Debug logging to diagnose display issue
+  React.useEffect(() => {
+    console.log('🔍 FILE EXPLORER DEBUG:', {
+      filesLength: files.length,
+      sortedFilesLength: sortedFiles.length,
+      isLoading,
+      sampleFile: files[0],
+      sampleSortedFile: sortedFiles[0],
+    });
+  }, [files, sortedFiles, isLoading]);
+
   // Debug: Only log when files change, not on every render (throttled)
   React.useEffect(() => {
     // Only log occasionally to prevent console spam

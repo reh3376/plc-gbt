@@ -4,15 +4,15 @@ import type { MainContentMode } from '@/lib/stores/layout-store';
 import { useLayoutStore } from '@/lib/stores/layout-store';
 import { cn } from '@/lib/utils/cn';
 import { Loader2 } from 'lucide-react';
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 
-// Lazy load content components for performance optimization
-const TabbedEditor = lazy(() => import('@/components/editor/tabbed-editor'));
-const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
-const WorkflowCanvas = lazy(() => import('@/components/workflow/workflow-canvas'));
-const ControlLoopDashboard = lazy(() => import('@/components/control-loop/ControlLoopDashboard'));
-const SettingsConfiguration = lazy(() => import('./SettingsConfiguration'));
-const GitMainIntegration = lazy(() => import('./git-integration/GitMainIntegrationEnhanced'));
+// Import content components directly (temporarily removing lazy loading to debug)
+import ControlLoopDashboard from '@/components/control-loop/ControlLoopDashboard';
+import TabbedEditor from '@/components/editor/tabbed-editor';
+import WorkflowCanvas from '@/components/workflow/workflow-canvas';
+import AnalyticsDashboard from './AnalyticsDashboard';
+import SettingsConfiguration from './SettingsConfiguration';
+import GitMainIntegration from './git-integration/GitMainIntegrationEnhanced';
 
 interface MainContentRouterProps {
   readonly className?: string;
@@ -107,9 +107,7 @@ export function MainContentRouter({ className }: MainContentRouterProps) {
       className={cn('h-full w-full flex flex-col overflow-hidden bg-[#1e1e1e]', className)}
     >
       {/* Content area with proper error boundaries */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <Suspense fallback={<LoadingSkeleton />}>{renderContent()}</Suspense>
-      </div>
+      <div className="flex-1 min-h-0 overflow-hidden">{renderContent()}</div>
     </main>
   );
 }

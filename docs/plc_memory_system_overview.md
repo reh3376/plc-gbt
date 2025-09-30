@@ -57,7 +57,7 @@ This document serves as the canonical reference for the PLC Memory subsystem tha
 - For long-running tasks, use asynchronous node variants that stream logs via Redis pub/sub.
 
 ### 5.2 UI/IDE
-- Theia extensions will consume REST endpoints mirroring the CLI; ensure parity tests confirm identical responses for equivalent commands.
+- Next.js frontend consumes REST endpoints mirroring the CLI; ensure parity tests confirm identical responses for equivalent commands.
 - Provide mock adapters for offline development to avoid requiring all databases locally.
 
 ### 5.3 External Repositories

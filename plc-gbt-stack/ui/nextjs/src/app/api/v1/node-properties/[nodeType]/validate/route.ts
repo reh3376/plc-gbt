@@ -115,10 +115,10 @@ export async function POST(
     }
 
     // Continue with validation logic using validated data
-    const { configuration, context } = validatedRequest!;
+    const { configuration } = validatedRequest!;
     const validationResults: ValidationResult[] = [];
     let hasErrors = false;
-    let hasWarnings = false;
+    const hasWarnings = false;
 
     // Validate each field in each group using the schema
     if (nodeSchema) {

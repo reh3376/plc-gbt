@@ -1,4 +1,4 @@
-## Frontend prompt
+## For tasks related to Frontend dev use this prompt:
 1. Review the latest UI architecture, design system, and accessibility requirements documented in `@ui/docs/architecture/THEIA_ARCHITECTURE_SPECIFICATION.md` 
 and related guides before making any interface changes.
 
@@ -12,7 +12,7 @@ hypothesis about required changes is grounded in actual project data.
 4. Consult @DEVELOPMENT_GUIDE.md after the initial scan. Use it to confirm architecture expectations, naming conventions, and any in-progress 
 initiatives that should influence the solution before drafting implementation notes.
 
-5. Coordinate implementation with Theia extension guidelines and shared components to keep the shell, panels, and workflows consistent across the IDE.
+5. Coordinate implementation with Next.js component patterns and shared components to keep panels, layouts, and workflows consistent across the IDE.
 
 6. Decide whether you are prototyping or delivering production-ready UI work, documenting exploratory branches clearly and polishing production 
 code to meet linting and UX quality bars.
@@ -22,7 +22,7 @@ code to meet linting and UX quality bars.
 8. Once automnated and user interactive testing comfirms task(s) are complete Apply the planned changes, keep commits focused, run all mandatory 
 frontend and backend tests (including linting, type checks, and unit suites), and summarize results before handing off the task.
 
-## Backend and scripting prompt
+## For tasks related to general up keep, iteraction with integrations, scripting, or backend dev use this prompt:
 1. Review `@DEVELOPMENT_GUIDE.md`, `@plc_memory_system_overview.md`, and `plc-gbt-stack/DOCKER_ENVIRONMENT_STATUS.md` to ground yourself in the 
 PLC Memory architecture (Redis, Neo4j, PostgreSQL, Qdrant), confirm the Docker MCP server on `http://localhost:8811`, and note the CLI entry point 
 at `plc-gbt-stack/scripts/ai/plc_memory_cli.py` before planning work.
@@ -38,3 +38,5 @@ running Socket MCP Docker environment when planning and executing your work.
 
 5. Run the required validation for the scope you touch—`pytest`/`ruff` suites, orchestrator or CLI smoke commands (e.g., `python plc-gbt-stack/scripts/ai/plc_memory_cli.py status`)
 , and Docker MCP connectivity checks—and resolve every failure before requesting review.
+
+**Assigned task(s) follow**:

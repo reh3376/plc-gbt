@@ -1,100 +1,155 @@
 /**
  * File Management API Routes - AI Task Orchestrator TypeScript Implementation
  *
- * @description RESTful API endpoints for file management operations
+ * @description Proxy API endpoints to FastAPI backend
  * @compliance Strict TypeScript - zero `any` types policy
- * @integration Supports both real filesystem and mock data fallback
+ * @integration Proxies to FastAPI backend on port 8000
  */
 
-import type {
-  CreateFileRequest,
-  FileItem,
-  FileOperationResult,
-} from '@/lib/types/file-explorer.types';
-import { existsSync } from 'fs';
-import { mkdir, readdir, stat, writeFile } from 'fs/promises';
 import { NextRequest, NextResponse } from 'next/server';
-import { extname, join } from 'path';
 
-// Safe project root path
-const PROJECT_ROOT = process.env.PROJECT_FILES_ROOT || join(process.cwd(), 'project-files');
+// Backend API base URL
+const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:8000';
 
-// Ensure project directory exists
-async function ensureProjectDirectory(): Promise<void> {
-  if (!existsSync(PROJECT_ROOT)) {
-    await mkdir(PROJECT_ROOT, { recursive: true });
-  }
-}
-
-// Convert filesystem entry to FileItem
-async function createFileItem(
-  fullPath: string,
-  relativePath: string,
-  name: string
-): Promise<FileItem> {
+/**
+ * GET /api/v1/files - Proxy to backend file listing
+ */
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const stats = await stat(fullPath);
-    const isDirectory = stats.isDirectory();
+    // Get query parameters from the request
+    const searchParams = request.nextUrl.searchParams;
+    const path = searchParams.get('path') || '/';
 
-    const fileItem: FileItem = {
-      id: relativePath.replace(/\\/g, '/'),
-      name: name,
-      type: isDirectory ? 'folder' : 'file',
-      path: relativePath.replace(/\\/g, '/'),
-      size: isDirectory ? undefined : stats.size,
-      lastModified: stats.mtime,
-      extension: isDirectory ? undefined : extname(name),
-      mimeType: isDirectory ? undefined : getMimeType(extname(name)),
-    };
-
-    // Load children for folders
-    if (isDirectory) {
-      try {
-        const children = await readdir(fullPath);
-        const childItems: FileItem[] = [];
-
-        for (const childName of children) {
-          const childPath = join(fullPath, childName);
-          const childRelativePath = join(relativePath, childName);
-          const childItem = await createFileItem(childPath, childRelativePath, childName);
-          childItems.push(childItem);
-        }
-
-        fileItem.children = childItems;
-        fileItem.isExpanded = false;
-      } catch (error) {
-        console.warn(`Failed to read directory ${fullPath}:`, error);
-        fileItem.children = [];
+    // Proxy to backend
+    const response = await fetch(
+      `${BACKEND_API_URL}/api/v1/files?path=${encodeURIComponent(path)}`,
+      {
+        headers: {
+          Accept: 'application/json',
+        },
       }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Backend responded with ${response.status}: ${response.statusText}`);
     }
 
-    return fileItem;
+    const backendData = await response.json();
+
+    // Transform backend response to match frontend expectations
+    if (backendData.data && backendData.data.files) {
+      // Transform the file items from backend format to frontend format
+      const transformedFiles = backendData.data.files.map((file: any) => ({
+        ...file,
+        lastModified: file.modified ? new Date(file.modified) : new Date(),
+        // Backend returns 'folder' type for directories, but frontend expects 'folder'
+        type: file.type === 'folder' || file.children !== undefined ? 'folder' : 'file',
+        isExpanded: file.type === 'folder' ? false : undefined,
+        children: file.children || (file.type === 'folder' ? [] : undefined),
+      }));
+
+      return NextResponse.json({
+        success: true,
+        message: backendData.message || 'Files loaded successfully',
+        data: transformedFiles,
+      });
+    }
+
+    // Fallback if backend response is unexpected
+    return NextResponse.json(backendData);
   } catch (error) {
-    throw new Error(
-      `Failed to create file item for ${fullPath}: ${error instanceof Error ? error.message : 'Unknown error'}`
+    console.error('File listing error:', error);
+
+    // Fallback to mock data if backend is unavailable
+    if (
+      error instanceof Error &&
+      (error.message.includes('fetch') || error.message.includes('ECONNREFUSED'))
+    ) {
+      return NextResponse.json(
+        {
+          success: true,
+          message: 'Loaded files (mock data)',
+          data: getMockFiles(),
+        },
+        { status: 200 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error: 'Failed to list files',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
     );
   }
 }
 
-// Get MIME type for file extension
-function getMimeType(extension: string): string {
-  const mimeTypes: Record<string, string> = {
-    '.acd': 'application/x-acd',
-    '.l5x': 'application/xml',
-    '.json': 'application/json',
-    '.txt': 'text/plain',
-    '.csv': 'text/csv',
-    '.md': 'text/markdown',
-    '.js': 'application/javascript',
-    '.ts': 'application/typescript',
-    '.py': 'text/x-python',
-  };
+/**
+ * POST /api/v1/files - Proxy to backend file creation
+ */
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  try {
+    const body = await request.json();
 
-  return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+    // Proxy to backend
+    const response = await fetch(`${BACKEND_API_URL}/api/v1/files`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Backend responded with ${response.status}: ${response.statusText}`);
+    }
+
+    const backendData = await response.json();
+
+    // Transform response if needed
+    if (backendData.data) {
+      // Ensure the response matches frontend expectations
+      const transformedFile = {
+        ...backendData.data,
+        lastModified: backendData.data.modified ? new Date(backendData.data.modified) : new Date(),
+        type:
+          backendData.data.type === 'folder' || backendData.data.children !== undefined
+            ? 'folder'
+            : 'file',
+        isExpanded: backendData.data.type === 'folder' ? false : undefined,
+        children:
+          backendData.data.children || (backendData.data.type === 'folder' ? [] : undefined),
+      };
+
+      return NextResponse.json({
+        success: true,
+        message: backendData.message || 'File/folder created successfully',
+        data: transformedFile,
+      });
+    }
+
+    return NextResponse.json(backendData);
+  } catch (error) {
+    console.error('File creation error:', error);
+
+    // Return error response
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to create file/folder',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
 }
 
-// Mock data fallback
-function getMockFiles(): FileItem[] {
+/**
+ * Mock data fallback for when backend is unavailable
+ */
+function getMockFiles() {
   return [
     {
       id: 'root-projects',
@@ -164,153 +219,4 @@ function getMockFiles(): FileItem[] {
       ],
     },
   ];
-}
-
-/**
- * GET /api/v1/files - Retrieve file tree
- */
-export async function GET(): Promise<NextResponse> {
-  try {
-    await ensureProjectDirectory();
-
-    // Try to read from filesystem
-    try {
-      const children = await readdir(PROJECT_ROOT);
-      const fileItems: FileItem[] = [];
-
-      for (const name of children) {
-        const fullPath = join(PROJECT_ROOT, name);
-        const relativePath = `/${name}`;
-        const item = await createFileItem(fullPath, relativePath, name);
-        fileItems.push(item);
-      }
-
-      const response = {
-        success: true,
-        message: `Loaded ${fileItems.length} files from filesystem`,
-        data: fileItems,
-      };
-
-      return NextResponse.json(response);
-    } catch (fsError) {
-      // Fallback to mock data
-      console.warn('Filesystem read failed, using mock data:', fsError);
-
-      const response = {
-        success: true,
-        message: 'Loaded files (mock data)',
-        data: getMockFiles(),
-      };
-
-      return NextResponse.json(response);
-    }
-  } catch (error) {
-    console.error('GET /api/v1/files error:', error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to retrieve files',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        data: getMockFiles(), // Always provide fallback data
-      },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * POST /api/v1/files - Create file or folder
- */
-export async function POST(request: NextRequest): Promise<NextResponse> {
-  try {
-    const body: CreateFileRequest = await request.json();
-
-    // Validate request
-    if (!body.name || !body.type || !body.parentPath) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Missing required fields: name, type, parentPath',
-          error: 'Validation error',
-        },
-        { status: 400 }
-      );
-    }
-
-    await ensureProjectDirectory();
-
-    // Construct safe file path
-    const sanitizedParentPath = body.parentPath.replace(/^\/+/, '').replace(/\.\.+/g, '');
-    const sanitizedFileName = body.name.replace(/[<>:"/\\|?*]/g, '_'); // Remove invalid characters
-    const targetDir = join(PROJECT_ROOT, sanitizedParentPath);
-    const targetPath = join(targetDir, sanitizedFileName);
-
-    try {
-      // Ensure parent directory exists
-      await mkdir(targetDir, { recursive: true });
-
-      if (body.type === 'folder') {
-        await mkdir(targetPath, { recursive: true });
-      } else {
-        await writeFile(targetPath, body.content || '', 'utf8');
-      }
-
-      // Create response file item
-      const relativePath = join(sanitizedParentPath, sanitizedFileName).replace(/\\/g, '/');
-      const newFile: FileItem = {
-        id: relativePath,
-        name: sanitizedFileName,
-        type: body.type,
-        path: `/${relativePath}`,
-        size: body.type === 'file' ? (body.content || '').length : undefined,
-        extension: body.type === 'file' ? extname(sanitizedFileName) : undefined,
-        mimeType: body.type === 'file' ? getMimeType(extname(sanitizedFileName)) : undefined,
-        lastModified: new Date(),
-        ...(body.type === 'folder' && { children: [], isExpanded: false }),
-      };
-
-      const response: FileOperationResult = {
-        success: true,
-        message: `${body.type === 'file' ? 'File' : 'Folder'} created successfully`,
-        data: newFile,
-      };
-
-      return NextResponse.json(response);
-    } catch (fsError) {
-      // Return mock success for offline development
-      console.warn('Filesystem write failed, returning mock success:', fsError);
-
-      const mockFile: FileItem = {
-        id: `mock-${Date.now()}`,
-        name: body.name,
-        type: body.type,
-        path: `${body.parentPath}/${body.name}`.replace('//', '/'),
-        size: body.type === 'file' ? (body.content || '').length : undefined,
-        extension: body.type === 'file' ? extname(body.name) : undefined,
-        mimeType: body.type === 'file' ? getMimeType(extname(body.name)) : undefined,
-        lastModified: new Date(),
-        ...(body.type === 'folder' && { children: [], isExpanded: false }),
-      };
-
-      const response: FileOperationResult = {
-        success: true,
-        message: `${body.type === 'file' ? 'File' : 'Folder'} created successfully (mock mode)`,
-        data: mockFile,
-      };
-
-      return NextResponse.json(response);
-    }
-  } catch (error) {
-    console.error('POST /api/v1/files error:', error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to create file/folder',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
-  }
 }

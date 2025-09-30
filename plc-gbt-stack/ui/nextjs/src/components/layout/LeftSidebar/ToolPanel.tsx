@@ -4,16 +4,16 @@ import type { MainContentMode, ToolType } from '@/lib/stores/layout-store';
 import { useLayoutStore } from '@/lib/stores/layout-store';
 import { cn } from '@/lib/utils/cn';
 import { Loader2 } from 'lucide-react';
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 
-// Lazy load tool components for performance
-const EnhancedFileExplorer = lazy(() => import('../../file-explorer/EnhancedFileExplorer'));
-const SearchPanel = lazy(() => import('../tools/SearchPanel'));
-const AnalyticsPanel = lazy(() => import('../tools/AnalyticsPanel'));
-const WorkflowPanel = lazy(() => import('../tools/WorkflowPanel'));
-const ControlLoopPanel = lazy(() => import('../tools/ControlLoopPanel'));
-const SettingsPanel = lazy(() => import('../tools/SettingsPanel'));
-const PLCGitPanelEnhanced = lazy(() => import('../tools/PLCGitPanelEnhanced'));
+// Import tool components directly (temporarily removing lazy loading to debug)
+import EnhancedFileExplorer from '../../file-explorer/EnhancedFileExplorer';
+import AnalyticsPanel from '../tools/AnalyticsPanel';
+import ControlLoopPanel from '../tools/ControlLoopPanel';
+import PLCGitPanelEnhanced from '../tools/PLCGitPanelEnhanced';
+import SearchPanel from '../tools/SearchPanel';
+import SettingsPanel from '../tools/SettingsPanel';
+import WorkflowPanel from '../tools/WorkflowPanel';
 
 interface ToolPanelProps {
   className?: string;
@@ -115,9 +115,7 @@ export function ToolPanel({ className }: Readonly<ToolPanelProps>) {
       </div>
 
       {/* Panel Content */}
-      <div className="flex-1 w-full overflow-hidden">
-        <Suspense fallback={<ToolPanelSkeleton />}>{renderContent()}</Suspense>
-      </div>
+      <div className="flex-1 w-full overflow-hidden">{renderContent()}</div>
     </div>
   );
 }
