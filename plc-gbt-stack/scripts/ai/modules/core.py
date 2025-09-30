@@ -21,7 +21,7 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 
 # Database imports
 try:
@@ -31,6 +31,8 @@ try:
     DATABASE_LIBRARIES_AVAILABLE = True
 except ImportError:
     DATABASE_LIBRARIES_AVAILABLE = False
+    if TYPE_CHECKING:
+        import redis  # For type hints only
 
 @dataclass
 class TaskAnalysis:
@@ -199,7 +201,7 @@ class DatabaseManager:
 
         return self._postgres_conn
 
-    def get_redis_client(self) -> Optional[redis.Redis]:
+    def get_redis_client(self) -> Optional["redis.Redis"]:
         """Get Redis client with retry logic"""
         if not DATABASE_LIBRARIES_AVAILABLE:
             self.logger.warning("Database libraries not available")
