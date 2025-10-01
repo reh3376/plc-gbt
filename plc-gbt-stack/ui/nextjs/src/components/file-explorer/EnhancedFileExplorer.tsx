@@ -13,6 +13,7 @@ import { useFileOperations } from '@/lib/hooks/useFileOperations';
 import { useFileSorting } from '@/lib/hooks/useFileSorting';
 import { useFileStore } from '@/lib/stores/file-store';
 import { useLayoutStore } from '@/lib/stores/layout-store';
+import { fileOperationsAPI } from '@/lib/api/file-operations';
 import type {
   CreateFileRequest,
   FileItem,
@@ -212,6 +213,28 @@ export default function EnhancedFileExplorer({
     [selectFile, onFileSelect]
   );
 
+  // Helper function to get Monaco language from file extension
+  const getLanguageFromExtension = useCallback((extension: string): string => {
+    const ext = extension.toLowerCase().replace('.', '');
+    const languageMap: Record<string, string> = {
+      'ts': 'typescript',
+      'tsx': 'typescript',
+      'js': 'javascript',
+      'jsx': 'javascript',
+      'json': 'json',
+      'py': 'python',
+      'md': 'markdown',
+      'txt': 'plaintext',
+      'css': 'css',
+      'html': 'html',
+      'xml': 'xml',
+      'l5x': 'xml',
+      'yaml': 'yaml',
+      'yml': 'yaml',
+    };
+    return languageMap[ext] || 'plaintext';
+  }, []);
+
   // Convert FileItem to FileNode for editor compatibility
   const convertFileItemToFileNode = useCallback(
     (file: FileItem): import('@/lib/stores/file-store').FileNode => {
@@ -234,7 +257,7 @@ export default function EnhancedFileExplorer({
 
   // Handle file double-click to open in editor
   const handleFileDoubleClick = useCallback(
-    (fileId: string) => {
+    async (fileId: string) => {
       const file = findFileById(fileId);
       if (file && file.type === 'file') {
         console.log('📂 DOUBLE CLICK - Opening file in editor:', file.name);
@@ -242,6 +265,44 @@ export default function EnhancedFileExplorer({
         // Update file explorer selection
         selectFile(fileId);
         onFileSelect?.(fileId);
+
+        try {
+          // Load file content from backend
+          console.log('📥 Loading file content from backend...', fileId);
+          const fileContent = await fileOperationsAPI.getFileContent(fileId);
+          
+          if (fileContent.success) {
+            console.log('✅ File content loaded successfully');
+            
+            // Add file to editor store with actual content
+            fileStore.openFile({
+              id: fileId,
+              name: file.name,
+              path: file.path || fileId,
+              content: fileContent.content,
+              language: getLanguageFromExtension(file.extension || ''),
+              isDirty: false,
+            });
+            
+            // Switch to editor mode
+            import('@/lib/stores/layout-store').then(({ useLayoutStore }) => {
+              useLayoutStore.getState().setMainContentMode('editor');
+            });
+          } else {
+            console.error('Failed to load file content');
+          }
+        } catch (error) {
+          console.error('Error loading file content:', error);
+          // Fallback to empty content if load fails
+          fileStore.openFile({
+            id: fileId,
+            name: file.name,
+            path: file.path || fileId,
+            content: '',
+            language: getLanguageFromExtension(file.extension || ''),
+            isDirty: false,
+          });
+        }
 
         // Add file to editor's file store if it doesn't exist
         const editorFiles = fileStore.files;

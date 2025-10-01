@@ -141,6 +141,22 @@ export function MonacoEditor({
       monaco.editor.setTheme('vs-dark');
     }
 
+    // Add Ctrl+S / Cmd+S save keyboard shortcut
+    editor.addAction({
+      id: 'save-file',
+      label: 'Save File',
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS
+      ],
+      run: (ed) => {
+        if (onSave) {
+          const content = ed.getValue();
+          onSave(content);
+        }
+        return null;
+      }
+    });
+
     // Configure editor options
     editor.updateOptions({
       minimap: { enabled: true },

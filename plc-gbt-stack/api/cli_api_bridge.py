@@ -1163,6 +1163,115 @@ async def delete_file(file_id: str):
             message=f"Failed to delete file: {str(e)}"
         )
 
+@app.get("/api/v1/files/{file_id}/content", response_model=APIResponse, tags=["File Operations"])
+async def get_file_content(file_id: str):
+    """
+    Get the content of a specific file
+    
+    Args:
+        file_id: Relative path to file from workspace root
+        
+    Returns:
+        APIResponse with file content, encoding info, and metadata
+    """
+    try:
+        workspace_path = Path("./mock_files")
+        target_path = workspace_path / file_id
+
+        if not target_path.exists():
+            return APIResponse(
+                success=False,
+                message=f"File not found: {file_id}",
+                data=None
+            )
+
+        if target_path.is_dir():
+            return APIResponse(
+                success=False,
+                message=f"Cannot read content of directory: {file_id}",
+                data=None
+            )
+
+        # Read file content
+        try:
+            # Try UTF-8 first
+            content = target_path.read_text(encoding='utf-8')
+            encoding = 'utf-8'
+        except UnicodeDecodeError:
+            # Fallback to latin-1 for binary-ish files
+            content = target_path.read_text(encoding='latin-1')
+            encoding = 'latin-1'
+
+        return APIResponse(
+            success=True,
+            message=f"File content retrieved: {file_id}",
+            data={
+                "id": file_id,
+                "name": target_path.name,
+                "path": file_id,
+                "content": content,
+                "encoding": encoding,
+                "size": target_path.stat().st_size,
+                "modified": datetime.fromtimestamp(target_path.stat().st_mtime, UTC).isoformat(),
+                "extension": target_path.suffix
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error reading file content: {e}")
+        return APIResponse(
+            success=False,
+            message=f"Failed to read file: {str(e)}",
+            data=None
+        )
+
+@app.put("/api/v1/files/{file_id}/content", response_model=APIResponse, tags=["File Operations"])
+async def update_file_content(file_id: str, content_data: dict[str, Any]):
+    """
+    Update the content of a specific file
+    
+    Args:
+        file_id: Relative path to file from workspace root
+        content_data: Dict with 'content' key containing new file content
+        
+    Returns:
+        APIResponse with updated file metadata
+    """
+    try:
+        workspace_path = Path("./mock_files")
+        workspace_path.mkdir(exist_ok=True)
+        target_path = workspace_path / file_id
+
+        # Get content from request body
+        content = content_data.get("content", "")
+        encoding = content_data.get("encoding", "utf-8")
+
+        # Ensure parent directory exists
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write file content
+        target_path.write_text(content, encoding=encoding)
+
+        return APIResponse(
+            success=True,
+            message=f"File saved: {file_id}",
+            data={
+                "id": file_id,
+                "name": target_path.name,
+                "path": file_id,
+                "size": target_path.stat().st_size,
+                "modified": datetime.fromtimestamp(target_path.stat().st_mtime, UTC).isoformat(),
+                "extension": target_path.suffix,
+                "saved": True
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error saving file: {e}")
+        return APIResponse(
+            success=False,
+            message=f"Failed to save file: {str(e)}",
+            data=None
+        )
+
 # =============================================================================
 # APPLICATION STARTUP
 # =============================================================================

@@ -21,7 +21,7 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 # Database imports
 try:
@@ -41,10 +41,10 @@ class TaskAnalysis:
     complexity: str  # simple, moderate, complex
     estimated_time: str
     estimated_lines: int
-    requirements: List[str]
-    risks: List[str]
-    dependencies: List[str]
-    success_criteria: List[str]
+    requirements: list[str]
+    risks: list[str]
+    dependencies: list[str]
+    success_criteria: list[str]
 
 class LoggingManager:
     """Centralized logging configuration"""
@@ -52,8 +52,8 @@ class LoggingManager:
     @staticmethod
     def setup_logging(
         level: str = "INFO",
-        log_file: Optional[str] = None,
-        format_string: Optional[str] = None
+        log_file: str | None = None,
+        format_string: str | None = None
     ) -> logging.Logger:
         """
         Setup standardized logging configuration
@@ -90,11 +90,11 @@ class LoggingManager:
 class ConfigurationManager:
     """Centralized configuration management"""
 
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: str | None = None):
         self.config_file = config_file
         self.config = self._load_config()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load configuration from file or environment"""
         config = {
             # Database configuration
@@ -225,7 +225,7 @@ class DatabaseManager:
 
         return self._redis_client
 
-    def execute_postgres_query(self, query: str, params: Optional[tuple] = None) -> Optional[List[Dict]]:
+    def execute_postgres_query(self, query: str, params: tuple | None = None) -> list[dict] | None:
         """Execute PostgreSQL query with error handling"""
         conn = self.get_postgres_connection()
         if not conn:
@@ -243,7 +243,7 @@ class DatabaseManager:
             conn.rollback()
             return None
 
-    def set_redis_value(self, key: str, value: Union[str, Dict], expiry: Optional[int] = None) -> bool:
+    def set_redis_value(self, key: str, value: str | dict, expiry: int | None = None) -> bool:
         """Set Redis value with error handling"""
         client = self.get_redis_client()
         if not client:
@@ -259,7 +259,7 @@ class DatabaseManager:
             self.logger.error(f"Redis set failed: {e}")
             return False
 
-    def get_redis_value(self, key: str, as_json: bool = False) -> Optional[Union[str, Dict]]:
+    def get_redis_value(self, key: str, as_json: bool = False) -> str | dict | None:
         """Get Redis value with error handling"""
         client = self.get_redis_client()
         if not client:
@@ -296,7 +296,7 @@ class BaseOrchestrator(ABC):
     - Error handling patterns
     """
 
-    def __init__(self, task_id: str, config_file: Optional[str] = None):
+    def __init__(self, task_id: str, config_file: str | None = None):
         self.task_id = task_id
         self.session_id = f"{task_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.start_time = datetime.now()
@@ -329,11 +329,11 @@ class BaseOrchestrator(ABC):
         pass
 
     @abstractmethod
-    def execute(self) -> Dict[str, Any]:
+    def execute(self) -> dict[str, Any]:
         """Execute the main task logic"""
         pass
 
-    def log_execution_step(self, step: str, status: str, details: Optional[Dict] = None):
+    def log_execution_step(self, step: str, status: str, details: dict | None = None):
         """Log execution step with standardized format"""
         log_entry = {
             "timestamp": datetime.now().isoformat(),
@@ -349,7 +349,7 @@ class BaseOrchestrator(ABC):
             for key, value in details.items():
                 self.logger.info(f"   {key}: {value}")
 
-    def log_error(self, error: str, exception: Optional[Exception] = None):
+    def log_error(self, error: str, exception: Exception | None = None):
         """Log error with standardized format"""
         error_entry = {
             "timestamp": datetime.now().isoformat(),
@@ -363,12 +363,12 @@ class BaseOrchestrator(ABC):
         if exception:
             self.logger.error(f"   Exception: {exception}")
 
-    def add_performance_metric(self, metric_name: str, value: Union[float, int, str]):
+    def add_performance_metric(self, metric_name: str, value: float | int | str):
         """Add performance metric to results"""
         self.results["performance_metrics"][metric_name] = value
         self.logger.info(f"📊 {metric_name}: {value}")
 
-    def save_results(self, results_dir: Optional[str] = None) -> str:
+    def save_results(self, results_dir: str | None = None) -> str:
         """Save execution results to file"""
         if results_dir is None:
             results_dir = self.config.get("system.results_directory", "results")
