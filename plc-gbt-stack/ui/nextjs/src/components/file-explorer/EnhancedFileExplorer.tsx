@@ -9,11 +9,11 @@
 'use client';
 
 // FileOperationAPIError import removed - not used
+import { fileOperationsAPI } from '@/lib/api/file-operations';
 import { useFileOperations } from '@/lib/hooks/useFileOperations';
 import { useFileSorting } from '@/lib/hooks/useFileSorting';
 import { useFileStore } from '@/lib/stores/file-store';
 import { useLayoutStore } from '@/lib/stores/layout-store';
-import { fileOperationsAPI } from '@/lib/api/file-operations';
 import type {
   CreateFileRequest,
   FileItem,
@@ -217,20 +217,20 @@ export default function EnhancedFileExplorer({
   const getLanguageFromExtension = useCallback((extension: string): string => {
     const ext = extension.toLowerCase().replace('.', '');
     const languageMap: Record<string, string> = {
-      'ts': 'typescript',
-      'tsx': 'typescript',
-      'js': 'javascript',
-      'jsx': 'javascript',
-      'json': 'json',
-      'py': 'python',
-      'md': 'markdown',
-      'txt': 'plaintext',
-      'css': 'css',
-      'html': 'html',
-      'xml': 'xml',
-      'l5x': 'xml',
-      'yaml': 'yaml',
-      'yml': 'yaml',
+      ts: 'typescript',
+      tsx: 'typescript',
+      js: 'javascript',
+      jsx: 'javascript',
+      json: 'json',
+      py: 'python',
+      md: 'markdown',
+      txt: 'plaintext',
+      css: 'css',
+      html: 'html',
+      xml: 'xml',
+      l5x: 'xml',
+      yaml: 'yaml',
+      yml: 'yaml',
     };
     return languageMap[ext] || 'plaintext';
   }, []);
@@ -270,10 +270,10 @@ export default function EnhancedFileExplorer({
           // Load file content from backend
           console.log('📥 Loading file content from backend...', fileId);
           const fileContent = await fileOperationsAPI.getFileContent(fileId);
-          
+
           if (fileContent.success) {
             console.log('✅ File content loaded successfully');
-            
+
             // Add file to editor store with actual content
             fileStore.openFile({
               id: fileId,
@@ -283,7 +283,7 @@ export default function EnhancedFileExplorer({
               language: getLanguageFromExtension(file.extension || ''),
               isDirty: false,
             });
-            
+
             // Switch to editor mode
             import('@/lib/stores/layout-store').then(({ useLayoutStore }) => {
               useLayoutStore.getState().setMainContentMode('editor');

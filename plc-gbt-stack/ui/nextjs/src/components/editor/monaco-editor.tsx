@@ -145,16 +145,14 @@ export function MonacoEditor({
     editor.addAction({
       id: 'save-file',
       label: 'Save File',
-      keybindings: [
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS
-      ],
-      run: (ed) => {
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+      run: ed => {
         if (onSave) {
           const content = ed.getValue();
           onSave(content);
         }
         return null;
-      }
+      },
     });
 
     // Configure editor options
