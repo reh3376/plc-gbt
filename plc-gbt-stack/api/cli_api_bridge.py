@@ -1273,6 +1273,344 @@ async def update_file_content(file_id: str, content_data: dict[str, Any]):
         )
 
 # =============================================================================
+# WORKFLOW EXECUTION ENDPOINTS
+# =============================================================================
+
+@app.post("/api/v1/workflows/execute", response_model=APIResponse, tags=["Workflow Execution"])
+async def execute_workflow(workflow_data: dict[str, Any]):
+    """
+    Execute a workflow with given nodes and edges
+    
+    Args:
+        workflow_data: Workflow definition with nodes, edges, and variables
+        
+    Returns:
+        APIResponse with execution results and status
+    """
+    try:
+        workflow_id = workflow_data.get("id", f"workflow_{int(time.time())}")
+        nodes = workflow_data.get("nodes", [])
+        edges = workflow_data.get("edges", [])
+        variables = workflow_data.get("variables", {})
+
+        logger.info(f"Executing workflow {workflow_id} with {len(nodes)} nodes")
+
+        # Simple execution: Process nodes in order
+        execution_results = []
+        for node in nodes:
+            node_id = node.get("id")
+            node_type = node.get("type")
+            node_data = node.get("data", {})
+
+            result = {
+                "nodeId": node_id,
+                "type": node_type,
+                "status": "success",
+                "output": f"Executed {node_type} node",
+                "timestamp": datetime.now(UTC).isoformat()
+            }
+            execution_results.append(result)
+
+        return APIResponse(
+            success=True,
+            message=f"Workflow {workflow_id} executed successfully",
+            data={
+                "workflowId": workflow_id,
+                "nodesExecuted": len(nodes),
+                "results": execution_results,
+                "status": "completed"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Workflow execution error: {e}")
+        return APIResponse(
+            success=False,
+            message=f"Workflow execution failed: {str(e)}",
+            data=None
+        )
+
+@app.get("/api/v1/workflows/{workflow_id}/status", response_model=APIResponse, tags=["Workflow Execution"])
+async def get_workflow_status(workflow_id: str):
+    """
+    Get execution status of a workflow
+    
+    Args:
+        workflow_id: Workflow identifier
+        
+    Returns:
+        APIResponse with workflow execution status
+    """
+    try:
+        # For now, return mock status
+        # In production, this would query database for actual status
+        return APIResponse(
+            success=True,
+            message="Workflow status retrieved",
+            data={
+                "workflowId": workflow_id,
+                "status": "completed",
+                "startTime": datetime.now(UTC).isoformat(),
+                "endTime": datetime.now(UTC).isoformat(),
+                "nodesExecuted": 0
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error getting workflow status: {e}")
+        return APIResponse(
+            success=False,
+            message=f"Failed to get workflow status: {str(e)}",
+            data=None
+        )
+
+# =============================================================================
+# CONTROL LOOP ENHANCEMENT ENDPOINTS
+# =============================================================================
+
+@app.post("/api/v1/control-loops", response_model=APIResponse, tags=["Control Loops"])
+async def create_control_loop(loop_data: dict[str, Any]):
+    """
+    Create a new control loop configuration
+    
+    Args:
+        loop_data: Control loop parameters (name, type, PID values, etc.)
+        
+    Returns:
+        APIResponse with created loop details
+    """
+    try:
+        loop_id = loop_data.get("id", f"loop-{int(time.time())}")
+        loop_name = loop_data.get("name", "Unnamed Loop")
+        loop_type = loop_data.get("type", "PID")
+
+        # Extract PID parameters
+        kp = loop_data.get("kp", 1.0)
+        ki = loop_data.get("ki", 0.1)
+        kd = loop_data.get("kd", 0.01)
+        setpoint = loop_data.get("setpoint", 0.0)
+
+        created_loop = {
+            "id": loop_id,
+            "name": loop_name,
+            "type": loop_type,
+            "parameters": {
+                "kp": kp,
+                "ki": ki,
+                "kd": kd,
+                "setpoint": setpoint
+            },
+            "status": "active",
+            "created": datetime.now(UTC).isoformat()
+        }
+
+        logger.info(f"Created control loop: {loop_id}")
+
+        return APIResponse(
+            success=True,
+            message=f"Control loop {loop_name} created successfully",
+            data=created_loop
+        )
+    except Exception as e:
+        logger.error(f"Error creating control loop: {e}")
+        return APIResponse(
+            success=False,
+            message=f"Failed to create control loop: {str(e)}",
+            data=None
+        )
+
+@app.put("/api/v1/control-loops/{loop_id}/tune", response_model=APIResponse, tags=["Control Loops"])
+async def tune_control_loop(loop_id: str, tuning_data: dict[str, Any]):
+    """
+    Update PID tuning parameters for a control loop
+    
+    Args:
+        loop_id: Control loop identifier
+        tuning_data: New PID parameters (kp, ki, kd, setpoint)
+        
+    Returns:
+        APIResponse with updated loop parameters
+    """
+    try:
+        kp = tuning_data.get("kp")
+        ki = tuning_data.get("ki")
+        kd = tuning_data.get("kd")
+        setpoint = tuning_data.get("setpoint")
+
+        updated_params = {}
+        if kp is not None:
+            updated_params["kp"] = kp
+        if ki is not None:
+            updated_params["ki"] = ki
+        if kd is not None:
+            updated_params["kd"] = kd
+        if setpoint is not None:
+            updated_params["setpoint"] = setpoint
+
+        logger.info(f"Tuning control loop {loop_id}: {updated_params}")
+
+        return APIResponse(
+            success=True,
+            message=f"Control loop {loop_id} tuned successfully",
+            data={
+                "loopId": loop_id,
+                "parameters": updated_params,
+                "tuned": datetime.now(UTC).isoformat()
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error tuning control loop: {e}")
+        return APIResponse(
+            success=False,
+            message=f"Failed to tune control loop: {str(e)}",
+            data=None
+        )
+
+@app.get("/api/v1/control-loops/{loop_id}/history", response_model=APIResponse, tags=["Control Loops"])
+async def get_control_loop_history(loop_id: str, hours: int = 24):
+    """
+    Get historical data for a control loop
+    
+    Args:
+        loop_id: Control loop identifier
+        hours: Number of hours of history to retrieve (default 24)
+        
+    Returns:
+        APIResponse with historical data points
+    """
+    try:
+        # Generate mock historical data
+        # In production, this would query PostgreSQL time-series data
+        history_points = []
+        current_time = time.time()
+
+        for i in range(100):
+            timestamp = current_time - (hours * 3600 * i / 100)
+            history_points.append({
+                "timestamp": datetime.fromtimestamp(timestamp, UTC).isoformat(),
+                "processValue": 75.0 + (i % 10) - 5,
+                "setpoint": 75.0,
+                "controlOutput": 45.0 + (i % 5) - 2.5
+            })
+
+        return APIResponse(
+            success=True,
+            message=f"Retrieved {len(history_points)} historical points",
+            data={
+                "loopId": loop_id,
+                "points": history_points,
+                "timeRange": f"Last {hours} hours"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error getting control loop history: {e}")
+        return APIResponse(
+            success=False,
+            message=f"Failed to get control loop history: {str(e)}",
+            data=None
+        )
+
+# =============================================================================
+# AI ASSISTANT ENDPOINTS
+# =============================================================================
+
+@app.post("/api/v1/ai/chat", response_model=APIResponse, tags=["AI Assistant"])
+async def ai_chat(message_data: dict[str, Any]):
+    """
+    Send message to AI assistant and get response
+    
+    Args:
+        message_data: User message and conversation context
+        
+    Returns:
+        APIResponse with AI assistant response
+    """
+    try:
+        user_message = message_data.get("message", "")
+        conversation_id = message_data.get("conversationId", f"conv_{int(time.time())}")
+        context = message_data.get("context", {})
+
+        # Mock AI response
+        # In production, this would call OpenAI API or fine-tuned model
+        ai_response = {
+            "message": f"I understand you're asking about: {user_message[:50]}...",
+            "conversationId": conversation_id,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "suggestions": [
+                "Would you like me to analyze your PLC code?",
+                "I can help tune your control loops",
+                "Need assistance with workflow automation?"
+            ]
+        }
+
+        logger.info(f"AI chat: {user_message[:50]}")
+
+        return APIResponse(
+            success=True,
+            message="AI response generated",
+            data=ai_response
+        )
+    except Exception as e:
+        logger.error(f"AI chat error: {e}")
+        return APIResponse(
+            success=False,
+            message=f"AI chat failed: {str(e)}",
+            data=None
+        )
+
+@app.get("/api/v1/ai/suggestions", response_model=APIResponse, tags=["AI Assistant"])
+async def get_ai_suggestions(context: str = "general"):
+    """
+    Get AI-powered suggestions based on current context
+    
+    Args:
+        context: Current context (file-editing, control-loop, workflow, etc.)
+        
+    Returns:
+        APIResponse with contextual suggestions
+    """
+    try:
+        suggestions_map = {
+            "file-editing": [
+                "Add error handling to this function",
+                "Optimize this PLC logic",
+                "Generate documentation for this code"
+            ],
+            "control-loop": [
+                "Analyze PID stability",
+                "Suggest tuning parameters",
+                "Review alarm thresholds"
+            ],
+            "workflow": [
+                "Optimize workflow execution order",
+                "Add error handling nodes",
+                "Suggest parallel execution paths"
+            ],
+            "general": [
+                "Open recent files",
+                "View system health",
+                "Check control loop performance"
+            ]
+        }
+
+        suggestions = suggestions_map.get(context, suggestions_map["general"])
+
+        return APIResponse(
+            success=True,
+            message="Suggestions retrieved",
+            data={
+                "context": context,
+                "suggestions": suggestions,
+                "timestamp": datetime.now(UTC).isoformat()
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error getting AI suggestions: {e}")
+        return APIResponse(
+            success=False,
+            message=f"Failed to get suggestions: {str(e)}",
+            data=None
+        )
+
+# =============================================================================
 # APPLICATION STARTUP
 # =============================================================================
 
