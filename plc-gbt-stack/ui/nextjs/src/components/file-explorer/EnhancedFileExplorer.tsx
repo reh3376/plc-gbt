@@ -127,6 +127,15 @@ export default function EnhancedFileExplorer({
   // Project Template Wizard state
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
+  // Delete confirmation modal state
+  const [deleteModalState, setDeleteModalState] = useState<{
+    isOpen: boolean;
+    file: FileItem | null;
+  }>({
+    isOpen: false,
+    file: null,
+  });
+
   // Context menu state
   const {
     isOpen: isContextMenuOpen,
@@ -722,16 +731,30 @@ export default function EnhancedFileExplorer({
 
   const handleContextMenuDelete = useCallback(
     async (file: FileItem) => {
-      if (window.confirm(`Are you sure you want to delete "${file.name}"?`)) {
-        try {
-          await deleteFile({ id: file.id, recursive: file.type === 'folder' });
-        } catch (error) {
-          console.error('Delete operation failed:', error);
-        }
-      }
+      // Open delete confirmation modal instead of window.confirm
+      setDeleteModalState({
+        isOpen: true,
+        file: file,
+      });
     },
-    [deleteFile]
+    []
   );
+
+  // Handle delete confirmation
+  const handleConfirmDelete = useCallback(async () => {
+    const fileToDelete = deleteModalState.file;
+    if (!fileToDelete) return;
+
+    try {
+      await deleteFile({ id: fileToDelete.id, recursive: fileToDelete.type === 'folder' });
+      
+      // Close modal on success
+      setDeleteModalState({ isOpen: false, file: null });
+    } catch (error) {
+      console.error('Delete operation failed:', error);
+      // Keep modal open to show error
+    }
+  }, [deleteModalState.file, deleteFile]);
 
   const handleContextMenuCopy = useCallback((file: FileItem) => {
     setClipboardState({
@@ -1204,6 +1227,52 @@ export default function EnhancedFileExplorer({
                 disabled={!renameModalState.newName.trim()}
               >
                 Rename
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalState.isOpen && deleteModalState.file && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#2d2d30] rounded-lg shadow-xl border border-[#5a5a5a] max-w-md w-full mx-4">
+            <div className="p-4 border-b border-[#5a5a5a]">
+              <h3 className="text-lg font-semibold text-[#cccccc]">Confirm Delete</h3>
+            </div>
+
+            <div className="p-4">
+              <p className="text-[#cccccc] mb-4">
+                Are you sure you want to delete{' '}
+                <span className="font-semibold text-[#007acc]">"{deleteModalState.file.name}"</span>?
+              </p>
+              
+              {deleteModalState.file.type === 'folder' && (
+                <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded text-yellow-200 text-sm">
+                  <AlertCircle className="w-4 h-4 inline mr-2" />
+                  This folder and all its contents will be permanently deleted.
+                </div>
+              )}
+              
+              {deleteModalState.file.type === 'file' && (
+                <p className="text-sm text-[#969696]">
+                  This action cannot be undone.
+                </p>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-[#5a5a5a] flex justify-end space-x-2">
+              <button
+                onClick={() => setDeleteModalState({ isOpen: false, file: null })}
+                className="px-4 py-2 text-[#cccccc] hover:bg-[#3c3c3c] rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              >
+                Delete
               </button>
             </div>
           </div>
