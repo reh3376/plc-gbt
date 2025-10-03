@@ -9,6 +9,7 @@ import { Footer } from './Footer';
 import { Header } from './Header';
 import { LeftSidebar } from './LeftSidebar';
 import { MainContent } from './MainContent';
+import { BottomPanel } from './bottom-panel';
 // import { cn } from '@/lib/utils/cn' // Unused
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
@@ -22,6 +23,7 @@ export function WorkspaceGrid() {
     setAIAssistantPosition,
     toggleAIAssistantMinimized,
     setAIAssistantWidth,
+    bottomPanel,
   } = useLayoutStore();
 
   // Remove dependency on old AI assistant store mode system
@@ -376,6 +378,9 @@ export function WorkspaceGrid() {
           </div>
         )}
       </div>
+
+      {/* Bottom Panel - Terminal, Output, Problems */}
+      <BottomPanel isOpen={bottomPanel.isOpen} height={bottomPanel.height} />
 
       {/* Footer Row - Fixed 24px */}
       <Footer />

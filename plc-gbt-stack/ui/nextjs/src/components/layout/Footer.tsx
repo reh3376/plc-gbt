@@ -1,5 +1,7 @@
 'use client';
 
+import { useLayoutStore } from '@/lib/stores/layout-store';
+import { useTerminalStore } from '@/lib/stores/terminal-store';
 import { cn } from '@/lib/utils/cn';
 import { Clock, Cpu, Database, MemoryStick, Wifi, WifiOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -17,6 +19,8 @@ interface SystemStatus {
 }
 
 export function Footer({ className }: FooterProps) {
+  const { setBottomPanelOpen } = useLayoutStore();
+  const { currentDirectory } = useTerminalStore();
   const [status, setStatus] = useState<SystemStatus>({
     connected: true,
     activeConnections: 3,
@@ -93,14 +97,21 @@ export function Footer({ className }: FooterProps) {
         </div>
       </div>
 
-      {/* Center - Quick actions */}
-      <div className="flex items-center space-x-2">
+      {/* Center - Terminal button and current path */}
+      <div className="flex items-center space-x-2 ml-[10px]">
         <button
+          onClick={() => {
+            setBottomPanelOpen(true);
+            // The bottom panel component will handle setting the active tab to 'terminal'
+          }}
           className="hover:bg-[#005a9e] px-2 py-1 rounded transition-colors"
           title="Toggle Terminal"
         >
           Terminal
         </button>
+        <div className="flex items-center px-3 py-0.5 bg-[#005a9e] rounded text-[#cce7f0]">
+          <span className="font-mono">plc-gbt-user@{currentDirectory}</span>
+        </div>
       </div>
 
       {/* Right side - System info */}
