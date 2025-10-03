@@ -1,0 +1,16 @@
+# Chat Histories Directory
+
+This directory stores saved AI Assistant chat conversations.
+
+Each chat history is saved as a JSON file containing:
+- Chat name
+- Messages array with role, content, and timestamps
+- Metadata (saved date, message count, etc.)
+
+These files can be accessed through:
+1. The AI Assistant "History" button in the chat interface
+2. The File Explorer in the left sidebar
+3. Direct file system access at: plc-gbt-stack/chat-histories/
+
+Format: {chat_name}_{timestamp}.json
+

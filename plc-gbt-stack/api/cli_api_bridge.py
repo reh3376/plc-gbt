@@ -26,6 +26,7 @@ import asyncio
 import importlib.util
 import json
 import logging
+import os
 import sys
 import time
 from dataclasses import dataclass
@@ -35,6 +36,7 @@ from pathlib import Path
 from typing import Any
 
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import Body, Depends, FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -47,6 +49,22 @@ logger = logging.getLogger(__name__)
 # Add project paths
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
+# Load environment variables from .env file
+env_path = project_root / '.env'
+if env_path.exists():
+    load_dotenv(env_path)
+    logger.info(f"Loaded environment variables from {env_path}")
+else:
+    logger.warning(f".env file not found at {env_path}")
+
+# Import file storage service
+from api.services.file_storage_service import FileStorageService
+
+# Initialize file storage service
+storage_root = os.getenv('FILE_STORAGE_ROOT', '/Users/reh3376/repos/plc-gbt/file-storage')
+db_url = os.getenv('DATABASE_URL', 'postgresql://plc_user:postgres_password@localhost:5432/plc_gbt')
+file_storage_service = FileStorageService(db_url, storage_root)
 
 # =============================================================================
 # CONFIGURATION AND MODELS
@@ -1043,47 +1061,123 @@ async def websocket_endpoint(websocket: WebSocket):
 
 # =============================================================================
 # FILE OPERATIONS ENDPOINTS - Phase 31.3 Implementation
+# Updated to use PostgreSQL-backed file storage
 # =============================================================================
+
+def build_file_tree(folders: list[dict], files_list: list[dict]) -> list[dict]:
+    """
+    Build hierarchical file tree from flat database results
+    
+    Args:
+        folders: List of folder records from database
+        files_list: List of file records from database
+        
+    Returns:
+        Hierarchical tree structure
+    """
+    # Create lookup dictionaries
+    folder_dict = {f['path']: {
+        "id": str(f['id']),
+        "name": f['name'],
+        "type": "folder",
+        "path": f['path'],
+        "children": [],
+        "isExpanded": False,
+        "isImmutable": f.get('is_system', False),  # System folders are immutable
+        "isSystem": f.get('is_system', False),
+        "metadata": f.get('metadata', {})
+    } for f in folders}
+
+    # Add files to their parent folders
+    for file in files_list:
+        file_node = {
+            "id": str(file['id']),
+            "name": file['name'],
+            "type": "file",
+            "path": file.get('storage_path', ''),
+            "size": file.get('file_size', 0),
+            "modified": file.get('updated_at', file.get('created_at', '')),
+            "extension": file.get('file_extension', ''),
+            "mimeType": file.get('mime_type', ''),
+        }
+
+        # Get folder for this file
+        folder_id = file.get('folder_id')
+        parent_folder = next((f for f in folders if str(f['id']) == str(folder_id)), None)
+
+        if parent_folder and parent_folder['path'] in folder_dict:
+            folder_dict[parent_folder['path']]['children'].append(file_node)
+
+    # Build hierarchy: add child folders to parents
+    root_children = []
+    for folder_path, folder_node in folder_dict.items():
+        if folder_path == '/':
+            # Root folder - we'll return its children at the end
+            continue
+
+        # Find parent folder
+        parent_path = '/'.join(folder_path.rsplit('/', 1)[:-1]) or '/'
+        if parent_path in folder_dict:
+            folder_dict[parent_path]['children'].append(folder_node)
+        elif parent_path == '/':
+            # Direct child of root
+            root_children.append(folder_node)
+
+    # If we have a root folder, return its children; otherwise return top-level folders
+    if '/' in folder_dict:
+        return folder_dict['/']['children']
+    return root_children if root_children else list(folder_dict.values())
+
 
 @app.get("/api/v1/files", response_model=APIResponse, tags=["File Operations"])
 async def list_files():
     """
-    List all files in the workspace directory
-    Phase 31.3: File Explorer functionality
+    List all files in the workspace directory from PostgreSQL storage
+    Phase 31.3: File Explorer functionality with PostgreSQL backend
+    Returns files wrapped in WHK01 immutable root structure
     """
     try:
-        workspace_path = Path("./mock_files")  # Using mock files directory
-        if not workspace_path.exists():
-            workspace_path.mkdir(exist_ok=True)
+        # Get all folders from database
+        folders = file_storage_service.list_folders('/')
 
-        files = []
-        for item in workspace_path.rglob("*"):
-            if item.is_file():
-                files.append({
-                    "id": str(item.relative_to(workspace_path)),
-                    "name": item.name,
-                    "type": "file",
-                    "path": str(item.relative_to(workspace_path)),
-                    "size": item.stat().st_size,
-                    "modified": datetime.fromtimestamp(item.stat().st_mtime, UTC).isoformat(),
-                    "extension": item.suffix
-                })
-            elif item.is_dir() and item != workspace_path:
-                files.append({
-                    "id": str(item.relative_to(workspace_path)),
-                    "name": item.name,
-                    "type": "folder",
-                    "path": str(item.relative_to(workspace_path)),
-                    "children": []
-                })
+        # Get all files from database
+        all_files = []
+        for folder in folders:
+            folder_files = file_storage_service.list_files(folder['path'], limit=1000)
+            all_files.extend(folder_files)
+
+        # Also get root-level files
+        root_files = file_storage_service.list_files('/', limit=1000)
+        all_files.extend(root_files)
+
+        # Build hierarchical tree
+        file_tree = build_file_tree(folders, all_files)
+
+        # Wrap in WHK01 immutable root folder
+        whk01_root = {
+            "id": "whk01-root",
+            "name": "WHK01",
+            "type": "folder",
+            "path": "/WHK01",
+            "children": file_tree,
+            "isExpanded": True,  # Start expanded by default
+            "isImmutable": True,  # Cannot be deleted or renamed
+            "isSystem": True,
+            "metadata": {
+                "description": "PLC-GBT System Root - Immutable base structure",
+                "icon": "building",
+                "color": "#0ea5e9"
+            }
+        }
 
         return APIResponse(
             success=True,
-            message=f"Retrieved {len(files)} files and folders",
-            data={"files": files}
+            message=f"Retrieved {len(all_files)} files and {len(folders)} folders in WHK01 root",
+            data={"files": [whk01_root]}  # Return as array with single root
         )
     except Exception as e:
         logger.error(f"Error listing files: {e}")
+        logger.exception("Full traceback:")
         return APIResponse(
             success=False,
             message=f"Failed to list files: {str(e)}",
@@ -1166,58 +1260,63 @@ async def delete_file(file_id: str):
 @app.get("/api/v1/files/{file_id}/content", response_model=APIResponse, tags=["File Operations"])
 async def get_file_content(file_id: str):
     """
-    Get the content of a specific file
+    Get the content of a specific file from PostgreSQL storage
     
     Args:
-        file_id: Relative path to file from workspace root
+        file_id: File UUID from PostgreSQL database
         
     Returns:
         APIResponse with file content, encoding info, and metadata
     """
     try:
-        workspace_path = Path("./mock_files")
-        target_path = workspace_path / file_id
+        # Get file metadata from database
+        file_record = file_storage_service.get_file(file_id)
 
-        if not target_path.exists():
+        if not file_record:
             return APIResponse(
                 success=False,
                 message=f"File not found: {file_id}",
                 data=None
             )
 
-        if target_path.is_dir():
+        # Get the physical file path
+        storage_path = file_storage_service.storage_root / file_record['storage_path']
+
+        if not storage_path.exists():
+            logger.error(f"Physical file not found: {storage_path}")
             return APIResponse(
                 success=False,
-                message=f"Cannot read content of directory: {file_id}",
+                message="Physical file not found on disk",
                 data=None
             )
 
         # Read file content
         try:
             # Try UTF-8 first
-            content = target_path.read_text(encoding='utf-8')
+            content = storage_path.read_text(encoding='utf-8')
             encoding = 'utf-8'
         except UnicodeDecodeError:
             # Fallback to latin-1 for binary-ish files
-            content = target_path.read_text(encoding='latin-1')
+            content = storage_path.read_text(encoding='latin-1')
             encoding = 'latin-1'
 
         return APIResponse(
             success=True,
-            message=f"File content retrieved: {file_id}",
+            message=f"File content retrieved: {file_record['name']}",
             data={
-                "id": file_id,
-                "name": target_path.name,
-                "path": file_id,
+                "id": str(file_record['id']),
+                "name": file_record['name'],
+                "path": file_record['storage_path'],
                 "content": content,
                 "encoding": encoding,
-                "size": target_path.stat().st_size,
-                "modified": datetime.fromtimestamp(target_path.stat().st_mtime, UTC).isoformat(),
-                "extension": target_path.suffix
+                "size": file_record['file_size'],
+                "modified": file_record.get('updated_at', file_record.get('created_at', '')),
+                "extension": file_record.get('file_extension', '')
             }
         )
     except Exception as e:
         logger.error(f"Error reading file content: {e}")
+        logger.exception("Full traceback:")
         return APIResponse(
             success=False,
             message=f"Failed to read file: {str(e)}",
@@ -1515,7 +1614,9 @@ async def get_control_loop_history(loop_id: str, hours: int = 24):
 @app.post("/api/v1/ai/chat", response_model=APIResponse, tags=["AI Assistant"])
 async def ai_chat(message_data: dict[str, Any]):
     """
-    Send message to AI assistant and get response
+    Send message to AI assistant and get response using fine-tuned OpenAI model
+    
+    Model: ft:gpt-4o:industrial-control:20250117
     
     Args:
         message_data: User message and conversation context
@@ -1524,24 +1625,39 @@ async def ai_chat(message_data: dict[str, Any]):
         APIResponse with AI assistant response
     """
     try:
+        from api.services.openai_service import get_openai_service
+
         user_message = message_data.get("message", "")
         conversation_id = message_data.get("conversationId", f"conv_{int(time.time())}")
         context = message_data.get("context", {})
+        conversation_history = message_data.get("history", [])
 
-        # Mock AI response
-        # In production, this would call OpenAI API or fine-tuned model
-        ai_response = {
-            "message": f"I understand you're asking about: {user_message[:50]}...",
-            "conversationId": conversation_id,
-            "timestamp": datetime.now(UTC).isoformat(),
-            "suggestions": [
-                "Would you like me to analyze your PLC code?",
-                "I can help tune your control loops",
-                "Need assistance with workflow automation?"
-            ]
-        }
+        if not user_message.strip():
+            return APIResponse(
+                success=False,
+                message="Message cannot be empty",
+                data=None
+            )
 
-        logger.info(f"AI chat: {user_message[:50]}")
+        logger.info(f"AI chat request: {user_message[:100]}")
+
+        # Get OpenAI service and generate response
+        openai_service = get_openai_service()
+        ai_response = await openai_service.chat_completion(
+            message=user_message,
+            conversation_history=conversation_history,
+            context=context,
+            stream=False
+        )
+
+        # Add conversation metadata
+        ai_response["conversationId"] = conversation_id
+
+        # Add helpful suggestions based on message content
+        if not ai_response.get("fallback"):
+            ai_response["suggestions"] = _generate_suggestions(user_message, ai_response.get("message", ""))
+
+        logger.info(f"AI response generated successfully (model: {ai_response.get('model', 'unknown')})")
 
         return APIResponse(
             success=True,
@@ -1549,12 +1665,55 @@ async def ai_chat(message_data: dict[str, Any]):
             data=ai_response
         )
     except Exception as e:
-        logger.error(f"AI chat error: {e}")
+        logger.error(f"AI chat error: {e}", exc_info=True)
         return APIResponse(
             success=False,
             message=f"AI chat failed: {str(e)}",
             data=None
         )
+
+def _generate_suggestions(user_message: str, _ai_response: str = "") -> list[str]:
+    """Generate contextual suggestions based on conversation"""
+    message_lower = user_message.lower()
+    suggestions = []
+
+    # PID tuning related
+    if any(word in message_lower for word in ["pid", "tune", "tuning", "controller"]):
+        suggestions.extend([
+            "Would you like help analyzing your PID parameters?",
+            "I can explain different tuning methods (Ziegler-Nichols, IMC, etc.)"
+        ])
+
+    # PLC programming related
+    elif any(word in message_lower for word in ["plc", "ladder", "logic", "rung"]):
+        suggestions.extend([
+            "Need help optimizing your ladder logic?",
+            "I can review your PLC code for best practices"
+        ])
+
+    # Control loops
+    elif any(word in message_lower for word in ["control", "loop", "setpoint"]):
+        suggestions.extend([
+            "Want me to analyze your control loop performance?",
+            "I can help troubleshoot control instability"
+        ])
+
+    # Workflows
+    elif any(word in message_lower for word in ["workflow", "automation", "sequence"]):
+        suggestions.extend([
+            "Need assistance creating a workflow?",
+            "I can help optimize your automation sequence"
+        ])
+
+    # Default suggestions
+    else:
+        suggestions.extend([
+            "Would you like me to analyze your PLC code?",
+            "I can help with control loop tuning",
+            "Need assistance with workflow automation?"
+        ])
+
+    return suggestions[:3]  # Return max 3 suggestions
 
 @app.get("/api/v1/ai/suggestions", response_model=APIResponse, tags=["AI Assistant"])
 async def get_ai_suggestions(context: str = "general"):
@@ -1607,6 +1766,197 @@ async def get_ai_suggestions(context: str = "general"):
         return APIResponse(
             success=False,
             message=f"Failed to get suggestions: {str(e)}",
+            data=None
+        )
+
+@app.post("/api/v1/ai/chat/history/save", response_model=APIResponse, tags=["AI Assistant"])
+async def save_chat_history(history_data: dict[str, Any]):
+    """
+    Save chat history to PostgreSQL-backed file storage system
+    
+    Args:
+        history_data: Chat history data including name, messages, and metadata
+        
+    Returns:
+        APIResponse with saved file path
+    """
+    try:
+        chat_name = history_data.get("name", f"chat_{int(time.time())}")
+        messages = history_data.get("messages", [])
+        metadata_in = history_data.get("metadata", {})
+
+        # Generate safe filename
+        safe_filename = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in chat_name)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{safe_filename}_{timestamp}.json"
+
+        # Prepare chat history data
+        chat_history = {
+            "name": chat_name,
+            "messages": messages,
+            "metadata": {
+                **metadata_in,
+                "savedAt": datetime.now(UTC).isoformat()
+            }
+        }
+
+        # Convert to JSON bytes
+        file_content = json.dumps(chat_history, indent=2, ensure_ascii=False).encode('utf-8')
+
+        # Save using PostgreSQL file storage service
+        file_record = file_storage_service.upload_file(
+            file_content=file_content,
+            filename=filename,
+            folder_path="/chat-histories",
+            category_name="chat-histories",
+            created_by="ai-assistant",
+            description=f"AI Assistant chat history: {chat_name}",
+            tags=["ai-chat", "conversation"],
+            metadata={
+                "messageCount": len(messages),
+                "chatName": chat_name
+            }
+        )
+
+        logger.info(f"Chat history saved: {filename} (ID: {file_record['id']})")
+
+        return APIResponse(
+            success=True,
+            message="Chat history saved successfully",
+            data={
+                "fileId": str(file_record['id']),
+                "filename": filename,
+                "messageCount": len(messages),
+                "path": "/chat-histories/" + filename
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error saving chat history: {e}")
+        logger.exception("Full traceback:")
+        return APIResponse(
+            success=False,
+            message=f"Failed to save chat history: {str(e)}",
+            data=None
+        )
+
+@app.get("/api/v1/ai/chat/history/list", response_model=APIResponse, tags=["AI Assistant"])
+async def list_chat_histories():
+    """
+    List all saved chat histories from PostgreSQL storage
+    
+    Returns:
+        APIResponse with list of chat history files
+    """
+    try:
+        # Get all files from chat-histories folder
+        files = file_storage_service.list_files("/chat-histories", limit=1000)
+
+        histories = []
+        for file_record in files:
+            try:
+                histories.append({
+                    "fileId": str(file_record['id']),
+                    "filename": file_record['name'],
+                    "name": file_record.get('description', file_record['name']).replace("AI Assistant chat history: ", ""),
+                    "messageCount": file_record.get('metadata', {}).get('messageCount', 0),
+                    "savedAt": file_record.get('created_at', ''),
+                    "path": file_record.get('storage_path', '')
+                })
+            except Exception as e:
+                logger.warning(f"Error processing chat history {file_record.get('name')}: {e}")
+                continue
+
+        return APIResponse(
+            success=True,
+            message=f"Found {len(histories)} chat histories",
+            data={"histories": histories}
+        )
+    except Exception as e:
+        logger.error(f"Error listing chat histories: {e}")
+        logger.exception("Full traceback:")
+        return APIResponse(
+            success=False,
+            message=f"Failed to list chat histories: {str(e)}",
+            data={"histories": []}
+        )
+
+@app.get("/api/v1/ai/chat/history/{file_id}", response_model=APIResponse, tags=["AI Assistant"])
+async def load_chat_history(file_id: str):
+    """
+    Load a specific chat history from PostgreSQL storage
+    
+    Args:
+        file_id: UUID of the chat history file
+        
+    Returns:
+        APIResponse with chat history data
+    """
+    try:
+        # Get file content using file storage service
+        # download_file returns tuple: (content_bytes, metadata_dict)
+        file_content, file_metadata = file_storage_service.download_file(file_id)
+
+        if not file_content:
+            return APIResponse(
+                success=False,
+                message="Chat history not found",
+                data=None
+            )
+
+        # Parse JSON content from bytes
+        chat_history = json.loads(file_content.decode('utf-8'))
+
+        logger.info(f"Chat history loaded: {file_id}")
+
+        return APIResponse(
+            success=True,
+            message="Chat history loaded successfully",
+            data=chat_history
+        )
+    except Exception as e:
+        logger.error(f"Error loading chat history: {e}")
+        logger.exception("Full traceback:")
+        return APIResponse(
+            success=False,
+            message=f"Failed to load chat history: {str(e)}",
+            data=None
+        )
+
+@app.delete("/api/v1/ai/chat/history/{file_id}", response_model=APIResponse, tags=["AI Assistant"])
+async def delete_chat_history(file_id: str):
+    """
+    Delete a specific chat history from PostgreSQL storage
+    
+    Args:
+        file_id: UUID of the chat history file
+        
+    Returns:
+        APIResponse confirming deletion
+    """
+    try:
+        # Delete using file storage service
+        result = file_storage_service.delete_file(file_id, deleted_by="ai-assistant")
+
+        if not result:
+            return APIResponse(
+                success=False,
+                message="Chat history not found or already deleted",
+                data=None
+            )
+
+        logger.info(f"Chat history deleted: {file_id}")
+
+        return APIResponse(
+            success=True,
+            message="Chat history deleted successfully",
+            data={"fileId": file_id}
+        )
+    except Exception as e:
+        logger.error(f"Error deleting chat history: {e}")
+        logger.exception("Full traceback:")
+        return APIResponse(
+            success=False,
+            message=f"Failed to delete chat history: {str(e)}",
             data=None
         )
 

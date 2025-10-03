@@ -1,0 +1,40 @@
+{
+  "name": "Chat 10/3/2025, 4:04:26 AM",
+  "messages": [
+    {
+      "role": "user",
+      "content": "what is 3 + 3?",
+      "timestamp": "2025-10-03T07:53:17.668Z"
+    },
+    {
+      "role": "assistant",
+      "content": "I understand you're asking about: what is 3 + 3?...",
+      "timestamp": "2025-10-03T07:53:17.668Z"
+    },
+    {
+      "role": "user",
+      "content": "Can you answer questions, or just parrot my question back to me?",
+      "timestamp": "2025-10-03T07:53:41.643Z"
+    },
+    {
+      "role": "assistant",
+      "content": "I understand you're asking about: Can you answer questions, or just parrot my questi...",
+      "timestamp": "2025-10-03T07:53:41.643Z"
+    },
+    {
+      "role": "user",
+      "content": "test 1",
+      "timestamp": "2025-10-03T08:00:41.308Z"
+    },
+    {
+      "role": "assistant",
+      "content": "I understand you're asking about: test 1...",
+      "timestamp": "2025-10-03T08:00:41.308Z"
+    }
+  ],
+  "metadata": {
+    "savedAt": "2025-10-03T08:04:28.221126+00:00",
+    "messageCount": 6,
+    "filepath": "chat-histories/Chat 10_3_2025_ 4_04_26 AM_20251003_040428.json"
+  }
+}

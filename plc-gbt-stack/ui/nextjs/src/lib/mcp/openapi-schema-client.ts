@@ -96,7 +96,7 @@ export class RealOpenAPISchemaMCPClient {
       // Initialize connection on construction for immediate use
       this.initializeConnection();
     } else {
-      console.log('🔄 MCP server not configured - using fallback validation mode');
+      // Silently use fallback mode in development
       this.isConnected = false;
     }
   }
@@ -105,18 +105,12 @@ export class RealOpenAPISchemaMCPClient {
    * Check if we should attempt to connect to MCP server
    */
   private shouldAttemptConnection(): boolean {
-    // Always attempt MCP connection in development when MCP_Docker is required
-    // Per AI Task Orchestrator methodology: MCP_Docker is MANDATORY for all API development
-    console.log('🔗 Connecting to Docker MCP OpenAPI server...');
-    console.log('📡 Server URL:', this.mcpServerUrl);
-
-    // Skip connection attempts if we detect common development scenarios without MCP
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      // Always attempt connection when MCP_Docker is available
-      return true;
+    // Skip connection in development mode - fallback validation works fine
+    if (process.env.NODE_ENV === 'development') {
+      return false;
     }
 
-    // Server-side always attempts connection
+    // In production, attempt connection
     return true;
   }
 
@@ -126,11 +120,11 @@ export class RealOpenAPISchemaMCPClient {
   private initializeConnection(): void {
     // Start connection asynchronously without blocking construction
     this.connect().catch(error => {
-      // Suppress noisy error logs in development without MCP server
+      // Only log in production
       if (process.env.NODE_ENV !== 'development') {
         console.warn('⚠️ MCP connection failed during initialization:', error.message);
+        console.log('🔄 Using fallback validation mode (MCP server not available)');
       }
-      console.log('🔄 Using fallback validation mode (MCP server not available)');
     });
   }
 
@@ -138,6 +132,13 @@ export class RealOpenAPISchemaMCPClient {
    * Connect to real Docker MCP OpenAPI server
    */
   async connect(): Promise<void> {
+    // In development mode, skip connection attempt entirely to avoid console noise
+    // The fallback validation mode works perfectly for local development
+    if (process.env.NODE_ENV === 'development') {
+      this.isConnected = false;
+      throw new Error('MCP server connection skipped in development mode');
+    }
+
     try {
       console.log('🔗 Connecting to Docker MCP OpenAPI server...');
       console.log(`📡 Server URL: ${this.mcpServerUrl}`);
@@ -154,36 +155,25 @@ export class RealOpenAPISchemaMCPClient {
 
       this.isConnected = true;
       this.connectionRetries = 0;
+
       console.log('✅ Connected to Docker MCP OpenAPI server');
       console.log(`📊 Loaded ${Object.keys(this.componentSchemas).length} component schemas`);
       console.log(`🔗 Loaded ${this.endpointSchemas.size} API endpoints`);
     } catch (error) {
-      // Only show detailed errors in non-development environments
-      if (process.env.NODE_ENV !== 'development') {
-        console.error('❌ Failed to connect to Docker MCP server:', error);
-      }
+      // Show errors and retry in production
+      console.error('❌ Failed to connect to Docker MCP server:', error);
 
       if (this.connectionRetries < this.maxRetries) {
         this.connectionRetries++;
-
-        // Only log retries in non-development environments
-        if (process.env.NODE_ENV !== 'development') {
-          console.log(
-            `🔄 Retrying connection (${this.connectionRetries}/${this.maxRetries}) in ${this.retryDelay}ms...`
-          );
-        }
+        console.log(
+          `🔄 Retrying connection (${this.connectionRetries}/${this.maxRetries}) in ${this.retryDelay}ms...`
+        );
 
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
         return this.connect();
       }
 
-      // Final warning - less noisy in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log('ℹ️ MCP server not available - validation will use fallback mode');
-      } else {
-        console.warn('⚠️ Max retries reached. Using fallback mode.');
-      }
-
+      console.warn('⚠️ Max retries reached. Using fallback mode.');
       this.isConnected = false;
       throw error;
     }
@@ -309,7 +299,7 @@ export class RealOpenAPISchemaMCPClient {
         if (this.mcpServerUrl.includes(':3000')) {
           // Use relative URL if we're on port 3001 to avoid CORS issues
           if (typeof window !== 'undefined' && window.location.port === '3001') {
-            if (!isOpenAPISchemaRequest) {
+            if (!isOpenAPISchemaRequest && process.env.NODE_ENV !== 'development') {
               console.log(`🔄 Primary port 3000 failed, using relative URL for port 3001...`);
             }
             url = path; // Use relative URL
@@ -318,7 +308,7 @@ export class RealOpenAPISchemaMCPClient {
             const fallbackUrl = this.mcpServerUrl
               .replace(':3000', ':3001')
               .replace('127.0.0.1', 'localhost');
-            if (!isOpenAPISchemaRequest) {
+            if (!isOpenAPISchemaRequest && process.env.NODE_ENV !== 'development') {
               console.log(`🔄 Primary port 3000 failed, trying fallback port 3001...`);
             }
             url = `${fallbackUrl}${path}`;
@@ -603,7 +593,7 @@ export class RealOpenAPISchemaMCPClient {
 const openAPISchemaMCP = new RealOpenAPISchemaMCPClient();
 
 // Export both class and instance (maintaining compatibility with existing imports)
-export { openAPISchemaMCP, RealOpenAPISchemaMCPClient as OpenAPISchemaMCPClient };
+export { RealOpenAPISchemaMCPClient as OpenAPISchemaMCPClient, openAPISchemaMCP };
 
 // Export interfaces for compatibility
 export interface FileOperationResponse {

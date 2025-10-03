@@ -180,6 +180,9 @@ export function ContextMenu({
     }
 
     // Common operations for both files and folders
+    // Disable copy, cut, rename, and delete for immutable items
+    const isImmutable = targetFile.isImmutable === true;
+
     items.push(
       {
         id: 'copy',
@@ -189,6 +192,7 @@ export function ContextMenu({
           onCopy(targetFile);
           onClose();
         },
+        disabled: isImmutable,
       },
       {
         id: 'cut',
@@ -198,6 +202,7 @@ export function ContextMenu({
           onCut(targetFile);
           onClose();
         },
+        disabled: isImmutable,
       },
       {
         id: 'separator-2',
@@ -214,6 +219,7 @@ export function ContextMenu({
           onRename(targetFile);
           onClose();
         },
+        disabled: isImmutable,
       },
       {
         id: 'delete',
@@ -224,6 +230,7 @@ export function ContextMenu({
           onClose();
         },
         danger: true,
+        disabled: isImmutable,
       },
       {
         id: 'separator-3',
@@ -351,11 +358,10 @@ export function ContextMenu({
             data-item-id={item.id}
             className={cn(
               'w-full px-3 py-2 flex items-center text-left text-sm transition-colors',
-              'hover:bg-[#094771] focus:bg-[#094771] focus:outline-none',
-              item.disabled && 'opacity-50 cursor-not-allowed',
-              item.danger
-                ? 'text-[#f14c4c] hover:text-white focus:text-white'
-                : 'text-[#cccccc] hover:text-white focus:text-white'
+              !item.disabled && 'hover:bg-[#094771] focus:bg-[#094771] focus:outline-none',
+              item.disabled && 'opacity-40 cursor-not-allowed pointer-events-none text-[#505050]',
+              !item.disabled && item.danger && 'text-[#f14c4c] hover:text-white focus:text-white',
+              !item.disabled && !item.danger && 'text-[#cccccc] hover:text-white focus:text-white'
             )}
             onClick={event => handleItemClick(item, event)}
             disabled={item.disabled}
