@@ -1099,6 +1099,8 @@ def build_file_tree(folders: list[dict], files_list: list[dict]) -> list[dict]:
             "modified": file.get('updated_at', file.get('created_at', '')),
             "extension": file.get('file_extension', ''),
             "mimeType": file.get('mime_type', ''),
+            "isImmutable": False,  # Files created by users are not immutable
+            "isSystem": False,
         }
 
         # Get folder for this file
@@ -1109,24 +1111,26 @@ def build_file_tree(folders: list[dict], files_list: list[dict]) -> list[dict]:
             folder_dict[parent_folder['path']]['children'].append(file_node)
 
     # Build hierarchy: add child folders to parents
-    root_children = []
+    processed = set()  # Track processed folders to avoid duplicates
+
     for folder_path, folder_node in folder_dict.items():
-        if folder_path == '/':
-            # Root folder - we'll return its children at the end
+        if folder_path == '/' or folder_path in processed:
             continue
 
         # Find parent folder
         parent_path = '/'.join(folder_path.rsplit('/', 1)[:-1]) or '/'
+
+        # Only add to parent if parent exists and this hasn't been processed
         if parent_path in folder_dict:
             folder_dict[parent_path]['children'].append(folder_node)
-        elif parent_path == '/':
-            # Direct child of root
-            root_children.append(folder_node)
+            processed.add(folder_path)
 
-    # If we have a root folder, return its children; otherwise return top-level folders
+    # If we have a root folder, return its children; otherwise return top-level unprocessed folders
     if '/' in folder_dict:
         return folder_dict['/']['children']
-    return root_children if root_children else list(folder_dict.values())
+
+    # Fallback: return only folders that weren't added to a parent
+    return [node for path, node in folder_dict.items() if path not in processed]
 
 
 @app.get("/api/v1/files", response_model=APIResponse, tags=["File Operations"])
@@ -1140,15 +1144,25 @@ async def list_files():
         # Get all folders from database
         folders = file_storage_service.list_folders('/')
 
-        # Get all files from database
+        # Get all files from database (deduplicate by file ID)
         all_files = []
+        seen_file_ids = set()
+
         for folder in folders:
             folder_files = file_storage_service.list_files(folder['path'], limit=1000)
-            all_files.extend(folder_files)
+            for file in folder_files:
+                file_id = str(file['id'])
+                if file_id not in seen_file_ids:
+                    all_files.append(file)
+                    seen_file_ids.add(file_id)
 
-        # Also get root-level files
+        # Also get root-level files (avoid duplicates)
         root_files = file_storage_service.list_files('/', limit=1000)
-        all_files.extend(root_files)
+        for file in root_files:
+            file_id = str(file['id'])
+            if file_id not in seen_file_ids:
+                all_files.append(file)
+                seen_file_ids.add(file_id)
 
         # Build hierarchical tree
         file_tree = build_file_tree(folders, all_files)
@@ -1187,74 +1201,242 @@ async def list_files():
 @app.post("/api/v1/files", response_model=APIResponse, tags=["File Operations"])
 async def create_file(file_data: dict[str, Any]):
     """
-    Create a new file or folder
-    Phase 31.3: File Explorer functionality
+    Create a new file or folder using PostgreSQL storage
+    Phase 31.3: File Explorer functionality with database persistence
     """
     try:
-        workspace_path = Path("./mock_files")
-        workspace_path.mkdir(exist_ok=True)
-
         file_name = file_data.get("name", "new_file.txt")
         file_type = file_data.get("type", "file")
-        parent_path = file_data.get("parentPath", "")
+        parent_path = file_data.get("parentPath", "/")
+        content = file_data.get("content", "")
 
-        target_path = workspace_path / parent_path / file_name
-        target_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Creating {file_type}: {file_name} in {parent_path}")
 
         if file_type == "folder":
-            target_path.mkdir(exist_ok=True)
-        else:
-            target_path.write_text(file_data.get("content", ""))
+            # Create folder in database
+            folder = file_storage_service.create_folder(
+                name=file_name,
+                parent_path=parent_path,
+                created_by="terminal",
+                description="Folder created via terminal"
+            )
 
-        return APIResponse(
-            success=True,
-            message=f"Created {file_type}: {file_name}",
-            data={
-                "id": str(target_path.relative_to(workspace_path)),
-                "name": file_name,
-                "type": file_type,
-                "path": str(target_path.relative_to(workspace_path))
-            }
-        )
+            return APIResponse(
+                success=True,
+                message=f"Created folder: {file_name}",
+                data={
+                    "id": str(folder['id']),
+                    "name": folder['name'],
+                    "type": "folder",
+                    "path": folder['path'],
+                    "created": folder.get('created_at'),
+                }
+            )
+        else:
+            # Create file in database
+            file_content = content.encode('utf-8')
+            file_record = file_storage_service.upload_file(
+                file_content=file_content,
+                filename=file_name,
+                folder_path=parent_path,
+                created_by="terminal",
+                description="File created via terminal"
+            )
+
+            return APIResponse(
+                success=True,
+                message=f"Created file: {file_name}",
+                data={
+                    "id": str(file_record['id']),
+                    "name": file_record['file_name'],
+                    "type": "file",
+                    "path": file_record['folder_path'] + '/' + file_record['file_name'],
+                    "size": file_record['size'],
+                    "created": file_record.get('created_at'),
+                }
+            )
     except Exception as e:
-        logger.error(f"Error creating file: {e}")
+        logger.error(f"Error creating {file_type}: {e}")
+        logger.exception("Full traceback:")
         return APIResponse(
             success=False,
-            message=f"Failed to create file: {str(e)}"
+            message=f"Failed to create {file_type}: {str(e)}"
         )
 
 @app.delete("/api/v1/files/{file_id:path}", response_model=APIResponse, tags=["File Operations"])
 async def delete_file(file_id: str):
     """
-    Delete a file or folder
-    Phase 31.3: File Explorer functionality
+    Delete a file or folder using PostgreSQL storage
+    Phase 31.3: File Explorer functionality with database persistence
     """
     try:
-        workspace_path = Path("./mock_files")
-        target_path = workspace_path / file_id
+        from uuid import UUID
 
-        if target_path.exists():
-            if target_path.is_dir():
-                import shutil
-                shutil.rmtree(target_path)
-            else:
-                target_path.unlink()
+        logger.info(f"Deleting file/folder with ID: {file_id}")
 
-            return APIResponse(
-                success=True,
-                message=f"Deleted: {file_id}",
-                data={"deleted": file_id}
-            )
-        else:
+        # Convert file_id to UUID
+        try:
+            file_uuid = UUID(file_id)
+        except ValueError:
             return APIResponse(
                 success=False,
-                message=f"File not found: {file_id}"
+                message=f"Invalid file ID format: {file_id}"
             )
+
+        # Try to delete as a file
+        try:
+            file_deleted = file_storage_service.delete_file(file_uuid, hard_delete=True)
+            if file_deleted:
+                logger.info(f"Deleted file: {file_id}")
+                return APIResponse(
+                    success=True,
+                    message=f"Deleted file: {file_id}",
+                    data={"deleted": file_id, "type": "file"}
+                )
+            else:
+                return APIResponse(
+                    success=False,
+                    message=f"File not found: {file_id}"
+                )
+        except Exception as e:
+            # TODO: Implement folder deletion
+            logger.warning(f"File deletion failed (might be a folder): {e}")
+            return APIResponse(
+                success=False,
+                message=f"Failed to delete: {str(e)}. Note: Folder deletion not yet implemented."
+            )
+
     except Exception as e:
-        logger.error(f"Error deleting file: {e}")
+        logger.error(f"Error deleting file/folder: {e}")
+        logger.exception("Full traceback:")
         return APIResponse(
             success=False,
-            message=f"Failed to delete file: {str(e)}"
+            message=f"Failed to delete: {str(e)}"
+        )
+
+@app.get("/api/v1/files/content", response_model=APIResponse, tags=["File Operations"])
+async def get_file_content_by_path(path: str):
+    """
+    Get the content of a file by its path
+    
+    Args:
+        path: File path (e.g., /documentation/README.md)
+        
+    Returns:
+        APIResponse with file content
+    """
+    try:
+        logger.info(f"Getting file content for path: {path}")
+
+        # Get all files to find the one matching the path
+        folders = file_storage_service.list_folders('/')
+        all_files = []
+        seen_file_ids = set()
+
+        for folder in folders:
+            folder_files = file_storage_service.list_files(folder['path'], limit=1000)
+            for file in folder_files:
+                file_id = str(file['id'])
+                if file_id not in seen_file_ids:
+                    all_files.append(file)
+                    seen_file_ids.add(file_id)
+
+        root_files = file_storage_service.list_files('/', limit=1000)
+        for file in root_files:
+            file_id = str(file['id'])
+            if file_id not in seen_file_ids:
+                all_files.append(file)
+                seen_file_ids.add(file_id)
+
+        # Build the file tree to find the file
+        file_tree = build_file_tree(folders, all_files)
+
+        # Find file by path in the tree
+        def find_file_by_path(nodes: list, target_path: str) -> dict | None:
+            # Remove /WHK01 prefix if present
+            search_path = target_path.replace('/WHK01/', '/').replace('/WHK01', '/')
+            segments = [s for s in search_path.split('/') if s]
+
+            if not segments:
+                return None
+
+            # Start at WHK01 root
+            current = nodes[0] if nodes else None
+
+            for i, segment in enumerate(segments):
+                if not current or not current.get('children'):
+                    return None
+
+                # Find the next segment
+                found = None
+                for child in current['children']:
+                    if child['name'] == segment:
+                        found = child
+                        break
+
+                if not found:
+                    return None
+
+                # Last segment - should be a file
+                if i == len(segments) - 1:
+                    if found['type'] == 'file':
+                        return found
+                    return None
+
+                # Intermediate segment - should be a folder
+                if found['type'] != 'folder':
+                    return None
+
+                current = found
+
+            return None
+
+        whk01_tree = [{
+            "id": "whk01-root",
+            "name": "WHK01",
+            "type": "folder",
+            "children": file_tree
+        }]
+
+        file_info = find_file_by_path(whk01_tree, path)
+
+        if not file_info:
+            return APIResponse(
+                success=False,
+                message=f"File not found: {path}",
+                data=None
+            )
+
+        # Get file content
+        from uuid import UUID
+        file_id = UUID(file_info['id'])
+        content, file_record = file_storage_service.download_file(file_id, user_id="terminal")
+
+        # Decode content
+        try:
+            content_str = content.decode('utf-8')
+        except UnicodeDecodeError:
+            content_str = content.decode('latin-1')
+
+        return APIResponse(
+            success=True,
+            message=f"Retrieved content for: {path}",
+            data={
+                "content": content_str,
+                "size": len(content),
+                "encoding": "utf-8",
+                "file_id": str(file_id),
+                "name": file_record['name']
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting file content: {e}")
+        logger.exception("Full traceback:")
+        return APIResponse(
+            success=False,
+            message=f"Failed to get file content: {str(e)}",
+            data=None
         )
 
 @app.get("/api/v1/files/{file_id}/content", response_model=APIResponse, tags=["File Operations"])
@@ -1326,40 +1508,82 @@ async def get_file_content(file_id: str):
 @app.put("/api/v1/files/{file_id}/content", response_model=APIResponse, tags=["File Operations"])
 async def update_file_content(file_id: str, content_data: dict[str, Any]):
     """
-    Update the content of a specific file
+    Update the content of a specific file in PostgreSQL storage
     
     Args:
-        file_id: Relative path to file from workspace root
+        file_id: File UUID from PostgreSQL database
         content_data: Dict with 'content' key containing new file content
         
     Returns:
         APIResponse with updated file metadata
     """
     try:
-        workspace_path = Path("./mock_files")
-        workspace_path.mkdir(exist_ok=True)
-        target_path = workspace_path / file_id
+        from uuid import UUID
+        logger.info(f"Updating file content for: {file_id}")
+
+        # Convert file_id to UUID
+        try:
+            file_uuid = UUID(file_id)
+        except ValueError:
+            return APIResponse(
+                success=False,
+                message=f"Invalid file ID format: {file_id}",
+                data=None
+            )
 
         # Get content from request body
         content = content_data.get("content", "")
         encoding = content_data.get("encoding", "utf-8")
 
-        # Ensure parent directory exists
-        target_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Content length: {len(content)}, encoding: {encoding}")
 
-        # Write file content
-        target_path.write_text(content, encoding=encoding)
+        # Get existing file record
+        file_record = file_storage_service.get_file(file_uuid, user_id="editor")
+        if not file_record:
+            return APIResponse(
+                success=False,
+                message=f"File not found: {file_id}",
+                data=None
+            )
+
+        # Get the physical file path
+        storage_path = file_storage_service.storage_root / file_record['storage_path']
+
+        # Write new content to file
+        storage_path.write_text(content, encoding=encoding)
+        logger.info(f"File content written to: {storage_path}")
+
+        # Update file metadata (size, checksum, etc.)
+        import hashlib
+        content_bytes = content.encode(encoding)
+        new_checksum = hashlib.sha256(content_bytes).hexdigest()
+        new_size = len(content_bytes)
+
+        # Update database record
+        with file_storage_service.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE files 
+                    SET file_size = %s, checksum = %s, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = %s
+                    """,
+                    (new_size, new_checksum, file_uuid)
+                )
+                conn.commit()
+
+        logger.info(f"Database updated: size={new_size}, checksum={new_checksum[:8]}...")
 
         return APIResponse(
             success=True,
-            message=f"File saved: {file_id}",
+            message=f"File saved: {file_record['name']}",
             data={
                 "id": file_id,
-                "name": target_path.name,
-                "path": file_id,
-                "size": target_path.stat().st_size,
-                "modified": datetime.fromtimestamp(target_path.stat().st_mtime, UTC).isoformat(),
-                "extension": target_path.suffix,
+                "name": file_record['name'],
+                "path": file_record['storage_path'],
+                "size": new_size,
+                "modified": datetime.now(UTC).isoformat(),
+                "extension": file_record.get('file_extension', ''),
                 "saved": True
             }
         )

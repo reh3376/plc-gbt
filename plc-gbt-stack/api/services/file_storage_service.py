@@ -14,6 +14,7 @@ Features:
 """
 
 import hashlib
+import logging
 import mimetypes
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,8 @@ from uuid import UUID, uuid4
 import psycopg2
 import psycopg2.extras
 from psycopg2.extras import Json, RealDictCursor
+
+logger = logging.getLogger(__name__)
 
 # Register UUID adapter for psycopg2
 psycopg2.extras.register_uuid()
@@ -384,6 +387,20 @@ class FileStorageService:
                 if not file_record:
                     return False
 
+                # Log deletion BEFORE deleting (to avoid foreign key constraint violation)
+                try:
+                    self._log_file_access(
+                        cur,
+                        file_id,
+                        user_id,
+                        'delete',
+                        True,
+                        metadata={'hard_delete': hard_delete}
+                    )
+                except Exception as e:
+                    # Log error but continue with deletion
+                    logger.warning(f"Could not log file access for deletion: {e}")
+
                 if hard_delete:
                     # Delete from database
                     cur.execute("DELETE FROM files WHERE id = %s", (file_id,))
@@ -402,16 +419,6 @@ class FileStorageService:
                         """,
                         (user_id, file_id)
                     )
-
-                # Log deletion
-                self._log_file_access(
-                    cur,
-                    file_id,
-                    user_id,
-                    'delete',
-                    True,
-                    metadata={'hard_delete': hard_delete}
-                )
 
                 conn.commit()
 

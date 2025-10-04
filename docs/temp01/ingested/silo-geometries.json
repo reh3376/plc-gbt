@@ -1,0 +1,237 @@
+{
+  "title": "Silo Volume and Weight Comparison",
+  "description": "Comparison of key characteristics and performance metrics of four different silo geometries used in grain storage applications. All calculations based on Python 2.7/Jython compatible scripts for industrial automation systems.",
+  "metadata": {
+    "python_compatibility": "Python 2.7/Jython",
+    "level_transmitter_range": "0-102.25%",
+    "grain_density_basis": "56 lb/bushel (corn)",
+    "calculation_method": "Piecewise cone + cylinder geometry",
+    "industrial_compatibility": "Jython automation systems",
+    "validation_status": "Silo1 script validated against reference CSV data"
+  },
+  "silos": {
+    "Silo1": {
+      "classification": "Large Commercial Storage",
+      "best_for": "High-volume grain handling operations",
+      "geometry": {
+        "total_height": { "value": 35.984, "units": "ft" },
+        "cone_height": { "value": 10.516, "units": "ft" },
+        "cylinder_height": { "value": 25.469, "units": "ft" },
+        "cone_bottom_radius": { "value": 0.563, "units": "ft" },
+        "cone_top_radius": { "value": 10.734, "units": "ft" },
+        "cylinder_diameter": { "value": 21.536, "units": "ft" },
+        "cylinder_cross_section": { "value": 364.28, "units": "ft²" }
+      },
+      "operational_parameters": {
+        "dead_volume_height": { "value": 3.15, "units": "ft" },
+        "safety_factor_height": { "value": 3.0, "units": "ft" },
+        "usable_height_range": { "value": 29.834, "units": "ft" }
+      },
+      "volume_capacity": {
+        "total_capacity_100_percent": { "value": 9525.07, "units": "ft³" },
+        "volume_at_0_percent": { "value": 50.72, "units": "ft³" },
+        "percent_when_cone_full": { "value": 24.69, "units": "%" },
+        "volume_when_cone_full": { "value": 1340.1, "units": "ft³" },
+        "cylinder_volume_only": { "value": 8184.98, "units": "ft³" },
+        "volume_per_1_percent_in_cylinder": { "value": 108.68, "units": "ft³/%" }
+      },
+      "grain_storage": {
+        "maximum_weight": { "value": 428628, "units": "lb" },
+        "maximum_bushels": { "value": 7654, "units": "bushels" },
+        "bushels_per_1_percent_cylinder": { "value": 87.3, "units": "bu/%" }
+      },
+      "performance": {
+        "cone_filling_behavior": "Medium cone fill (24.69% to reach cylinder)",
+        "cylindrical_efficiency": "Highest rate (108.68 ft³ per 1% level change)",
+        "characteristics": "Largest diameter, highest throughput efficiency"
+      },
+      "script": {
+        "location": "scripts/Silo1-vol-weight.py",
+        "status": "Active",
+        "validation": "Validated against reference CSV data"
+      }
+    },
+    "Silo3": {
+      "classification": "Medium Commercial Storage",
+      "best_for": "Medium-scale operations with space constraints",
+      "geometry": {
+        "total_height": { "value": 35.984, "units": "ft" },
+        "cone_height": { "value": 5.875, "units": "ft" },
+        "cylinder_height": { "value": 30.109, "units": "ft" },
+        "cone_bottom_radius": { "value": 0.563, "units": "ft" },
+        "cone_top_radius": { "value": 6.154, "units": "ft" },
+        "cylinder_diameter": { "value": 12.307, "units": "ft" },
+        "cylinder_cross_section": { "value": 118.89, "units": "ft²" }
+      },
+      "operational_parameters": {
+        "dead_volume_height": { "value": 4.35, "units": "ft" },
+        "safety_factor_height": { "value": 2.5, "units": "ft" },
+        "usable_height_range": { "value": 29.134, "units": "ft" }
+      },
+      "volume_capacity": {
+        "total_capacity_100_percent": { "value": 3541.98, "units": "ft³" },
+        "volume_at_0_percent": { "value": 114.22, "units": "ft³" },
+        "percent_when_cone_full": { "value": 5.23, "units": "%" },
+        "volume_when_cone_full": { "value": 257.46, "units": "ft³" },
+        "cylinder_volume_only": { "value": 3284.52, "units": "ft³" },
+        "volume_per_1_percent_in_cylinder": { "value": 34.66, "units": "ft³/%" }
+      },
+      "grain_storage": {
+        "maximum_weight": { "value": 159389, "units": "lb" },
+        "maximum_bushels": { "value": 2846, "units": "bushels" },
+        "bushels_per_1_percent_cylinder": { "value": 27.9, "units": "bu/%" }
+      },
+      "performance": {
+        "cone_filling_behavior": "Fastest cone fill (5.23% to reach cylinder)",
+        "cylindrical_efficiency": "Medium rate (34.66 ft³ per 1% level change)",
+        "volume_vs_silo1": "37.2%",
+        "characteristics": "Shorter cone, better headspace management"
+      },
+      "script": {
+        "location": "scripts/Silo3-vol-weight.py",
+        "status": "Active",
+        "validation": "Active"
+      }
+    },
+    "Silo4": {
+      "classification": "Medium Commercial Storage (Conservative)",
+      "best_for": "Medium-scale operations requiring conservative design",
+      "geometry": {
+        "total_height": { "value": 35.984, "units": "ft" },
+        "cone_height": { "value": 9.984, "units": "ft" },
+        "cylinder_height": { "value": 26.0, "units": "ft" },
+        "cone_bottom_radius": { "value": 0.563, "units": "ft" },
+        "cone_top_radius": { "value": 6.154, "units": "ft" },
+        "cylinder_diameter": { "value": 12.307, "units": "ft" },
+        "cylinder_cross_section": { "value": 118.89, "units": "ft²" }
+      },
+      "operational_parameters": {
+        "dead_volume_height": { "value": 3.924, "units": "ft" },
+        "safety_factor_height": { "value": 2.5, "units": "ft" },
+        "usable_height_range": { "value": 29.56, "units": "ft" }
+      },
+      "volume_capacity": {
+        "total_capacity_100_percent": { "value": 3232.32, "units": "ft³" },
+        "volume_at_0_percent": { "value": 40.23, "units": "ft³" },
+        "percent_when_cone_full": { "value": 20.5, "units": "%" },
+        "volume_when_cone_full": { "value": 436.68, "units": "ft³" },
+        "cylinder_volume_only": { "value": 2795.65, "units": "ft³" },
+        "volume_per_1_percent_in_cylinder": { "value": 35.17, "units": "ft³/%" }
+      },
+      "grain_storage": {
+        "maximum_weight": { "value": 145455, "units": "lb" },
+        "maximum_bushels": { "value": 2597, "units": "bushels" },
+        "bushels_per_1_percent_cylinder": { "value": 28.3, "units": "bu/%" }
+      },
+      "performance": {
+        "cone_filling_behavior": "Medium cone fill (20.50% to reach cylinder)",
+        "cylindrical_efficiency": "Medium rate (35.17 ft³ per 1% level change)",
+        "volume_vs_silo1": "34.0%",
+        "characteristics": "Taller cone, most conservative usable volume"
+      },
+      "script": {
+        "location": "scripts/silo4-vol-weight.py",
+        "status": "Active",
+        "validation": "Active"
+      }
+    },
+    "Silo60": {
+      "classification": "Laboratory/Small-Scale",
+      "best_for": "Laboratory testing, small-scale applications",
+      "geometry": {
+        "total_height": { "value": 6.213, "units": "ft" },
+        "cone_height": { "value": 1.885, "units": "ft" },
+        "cylinder_height": { "value": 4.328, "units": "ft" },
+        "cone_bottom_radius": { "value": 0.354, "units": "ft" },
+        "cone_top_radius": { "value": 1.99, "units": "ft" },
+        "cylinder_diameter": { "value": 3.979, "units": "ft" },
+        "cylinder_cross_section": { "value": 12.46, "units": "ft²" }
+      },
+      "operational_parameters": {
+        "dead_volume_height": { "value": 0.1, "units": "ft" },
+        "safety_factor_height": { "value": 1.1, "units": "ft" },
+        "usable_height_range": { "value": 5.014, "units": "ft" }
+      },
+      "volume_capacity": {
+        "total_capacity_100_percent": { "value": 50.22, "units": "ft³" },
+        "volume_at_0_percent": { "value": 0.05, "units": "ft³" },
+        "percent_when_cone_full": { "value": 35.61, "units": "%" },
+        "volume_when_cone_full": { "value": 10.08, "units": "ft³" },
+        "cylinder_volume_only": { "value": 40.14, "units": "ft³" },
+        "volume_per_1_percent_in_cylinder": { "value": 0.62, "units": "ft³/%" }
+      },
+      "grain_storage": {
+        "maximum_weight": { "value": 2260, "units": "lb" },
+        "maximum_bushels": { "value": 40, "units": "bushels" },
+        "bushels_per_1_percent_cylinder": { "value": 0.5, "units": "bu/%" }
+      },
+      "performance": {
+        "cone_filling_behavior": "Slowest cone fill (35.61% to reach cylinder)",
+        "cylindrical_efficiency": "Lowest rate (0.62 ft³ per 1% level change)",
+        "volume_vs_silo1": "0.5%",
+        "characteristics": "Compact design, precise measurement capability"
+      },
+      "script": {
+        "location": "scripts/docs/silo60-vol-weight.py",
+        "status": "Active",
+        "validation": "Active"
+      }
+    }
+  },
+  "comparison_metrics": {
+    "volume_ratios": {
+      "silo3_vs_silo1": "37.2%",
+      "silo4_vs_silo1": "34.0%",
+      "silo60_vs_silo1": "0.5%"
+    },
+    "cone_fill_ranking": {
+      "fastest": "Silo3 (5.23%)",
+      "medium_fast": "Silo4 (20.50%)",
+      "medium_slow": "Silo1 (24.69%)",
+      "slowest": "Silo60 (35.61%)"
+    },
+    "efficiency_ranking": {
+      "highest": "Silo1 (108.68 ft³/%)",
+      "medium_high": "Silo4 (35.17 ft³/%)",
+      "medium": "Silo3 (34.66 ft³/%)",
+      "lowest": "Silo60 (0.62 ft³/%)"
+    }
+  },
+  "applications": [
+    {
+      "silo_type": "Silo1",
+      "use_case": "Large Commercial Storage",
+      "capacity_bushels": 7654,
+      "recommended_for": "High-volume grain handling operations",
+      "key_advantages": ["Largest diameter", "Highest throughput efficiency"]
+    },
+    {
+      "silo_type": "Silo3",
+      "use_case": "Medium Commercial Storage",
+      "capacity_bushels": 2846,
+      "recommended_for": "Medium-scale operations with space constraints",
+      "key_advantages": ["Shorter cone", "Better headspace management"]
+    },
+    {
+      "silo_type": "Silo4",
+      "use_case": "Medium Commercial Storage (Conservative)",
+      "capacity_bushels": 2597,
+      "recommended_for": "Medium-scale operations requiring conservative design",
+      "key_advantages": ["Taller cone", "Most conservative usable volume"]
+    },
+    {
+      "silo_type": "Silo60",
+      "use_case": "Laboratory/Small-Scale",
+      "capacity_bushels": 40,
+      "recommended_for": "Laboratory testing, small-scale applications",
+      "key_advantages": ["Compact design", "Precise measurement capability"]
+    }
+  ],
+  "usage_notes": {
+    "level_transmitter": "All scripts assume 0-102.25% level transmitter input (extended range)",
+    "volume_calculations": "Use piecewise cone + cylinder geometry",
+    "weight_calculations": "Support any grain density in lb/bushel",
+    "industrial_compatibility": "All scripts compatible with Jython automation systems",
+    "validation": "Silo1 script validated against reference CSV data"
+  }
+}

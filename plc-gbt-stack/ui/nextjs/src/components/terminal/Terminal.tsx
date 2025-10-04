@@ -82,7 +82,14 @@ export function Terminal({ className }: TerminalProps) {
   date              - Show current date and time
   pwd               - Show current working directory
   cd <path>         - Change directory (default: /WHK01)
-  ls [path]         - List directory contents
+  ls [options] [path] - List directory contents
+    -l              Long format (permissions, size, date)
+    -a              Show all files (including hidden)
+    -A              Show hidden files (excluding . and ..)
+  cat <file>        - Display file contents
+  touch <file>      - Create a new empty file
+  mkdir <dir>       - Create a new directory
+  rm [-r] <path>    - Remove file or directory (-r for recursive)
   whoami            - Show current user
   version           - Show PLC-GBT version
   backend           - Check backend API status
@@ -164,21 +171,405 @@ Navigation:
         }
       } else if (trimmedCommand.startsWith('ls')) {
         const parts = trimmedCommand.split(/\s+/);
-        const targetPath = parts[1] || currentDirectory;
+        let targetPath = parts[1] || currentDirectory;
+        let longFormat = false;
+
+        // Parse ls flags
+        for (let i = 1; i < parts.length; i++) {
+          if (parts[i].startsWith('-')) {
+            const flags = parts[i].substring(1);
+            if (flags.includes('l')) longFormat = true;
+            // Note: -a and -A flags parsed but not yet implemented
+          } else if (!targetPath || targetPath === currentDirectory) {
+            targetPath = parts[i];
+          }
+        }
+
+        // Normalize path
+        if (!targetPath.startsWith('/')) {
+          targetPath =
+            currentDirectory === '/' ? `/${targetPath}` : `${currentDirectory}/${targetPath}`;
+        }
 
         try {
           const response = await fetch('http://localhost:8000/api/v1/files');
           if (response.ok) {
-            await response.json(); // Verify backend is accessible
-            output = `Listing directory: ${targetPath}\n(Directory listing from file explorer - implement full ls later)`;
-            status = 'info';
+            const data = await response.json();
+
+            // Find directory by building the path from root
+            const findDirectory = (nodes: any[], targetPath: string): any => {
+              // Special case: /WHK01 or / refers to root
+              if (targetPath === '/WHK01' || targetPath === '/') {
+                return nodes[0]; // WHK01 root is first node
+              }
+
+              // Remove /WHK01 prefix if present
+              const searchPath = targetPath.replace(/^\/WHK01/, '');
+
+              // Split path into segments
+              const segments = searchPath.split('/').filter(s => s);
+
+              // Navigate through tree
+              let current: any = nodes[0]; // Start at WHK01 root
+
+              for (const segment of segments) {
+                if (!current || !current.children) {
+                  return null;
+                }
+
+                current = current.children.find(
+                  (child: any) => child.name === segment && child.type === 'folder'
+                );
+
+                if (!current) {
+                  return null;
+                }
+              }
+
+              return current;
+            };
+
+            const directory = findDirectory(data.data.files, targetPath);
+
+            if (!directory) {
+              output = `ls: cannot access '${targetPath}': No such file or directory`;
+              status = 'error';
+            } else {
+              const items = directory.children || [];
+
+              if (items.length === 0) {
+                output = `(empty directory)`;
+                status = 'info';
+              } else {
+                if (longFormat) {
+                  // Long format: permissions, size, date, name
+                  const lines: string[] = [];
+                  lines.push(`total ${items.length}`);
+
+                  for (const item of items) {
+                    const type = item.type === 'folder' ? 'd' : '-';
+                    const perms = item.isImmutable ? 'r--r--r--' : 'rw-r--r--';
+                    const size = item.size || 0;
+                    const date = item.modified
+                      ? new Date(item.modified).toLocaleDateString()
+                      : new Date().toLocaleDateString();
+                    const name = item.type === 'folder' ? `${item.name}/` : item.name;
+
+                    lines.push(
+                      `${type}${perms}  1 plc-gbt-user  plc-gbt  ${size
+                        .toString()
+                        .padStart(8)} ${date} ${name}`
+                    );
+                  }
+
+                  output = lines.join('\n');
+                } else {
+                  // Simple format: just names in columns
+                  const names = items.map((item: any) =>
+                    item.type === 'folder' ? `${item.name}/` : item.name
+                  );
+
+                  // Display in columns (4 columns)
+                  const colWidth = 20;
+                  const cols = 4;
+                  const rows = Math.ceil(names.length / cols);
+                  const lines: string[] = [];
+
+                  for (let row = 0; row < rows; row++) {
+                    const rowItems: string[] = [];
+                    for (let col = 0; col < cols; col++) {
+                      const idx = row + col * rows;
+                      if (idx < names.length) {
+                        rowItems.push(names[idx].padEnd(colWidth));
+                      }
+                    }
+                    lines.push(rowItems.join(''));
+                  }
+
+                  output = lines.join('\n');
+                }
+                status = 'success';
+              }
+            }
           } else {
-            output = `ls: Unable to list directory`;
+            output = `ls: Unable to access file system`;
             status = 'error';
           }
         } catch (error) {
           output = `ls: ${error instanceof Error ? error.message : 'Failed to list directory'}`;
           status = 'error';
+        }
+      } else if (trimmedCommand.startsWith('cat')) {
+        // Read file contents
+        const parts = trimmedCommand.split(/\s+/);
+        const filePath = parts[1];
+
+        if (!filePath) {
+          output = 'cat: missing file operand\nUsage: cat <file>';
+          status = 'error';
+        } else {
+          try {
+            // Normalize path
+            let fullPath = filePath;
+            if (!fullPath.startsWith('/')) {
+              fullPath =
+                currentDirectory === '/' ? `/${fullPath}` : `${currentDirectory}/${fullPath}`;
+            }
+
+            const response = await fetch(
+              `http://localhost:8000/api/v1/files/content?path=${encodeURIComponent(fullPath)}`
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.data && data.data.content !== undefined) {
+                output = data.data.content || ''; // Empty string is valid for empty files
+                status = 'success';
+              } else {
+                output = `cat: ${filePath}: Unable to read file`;
+                status = 'error';
+              }
+            } else if (response.status === 404) {
+              output = `cat: ${filePath}: No such file or directory`;
+              status = 'error';
+            } else {
+              output = `cat: ${filePath}: Error reading file (HTTP ${response.status})`;
+              status = 'error';
+            }
+          } catch (error) {
+            output = `cat: ${error instanceof Error ? error.message : 'Failed to read file'}`;
+            status = 'error';
+          }
+        }
+      } else if (trimmedCommand.startsWith('touch')) {
+        // Create new file
+        const parts = trimmedCommand.split(/\s+/);
+        const fileName = parts[1];
+
+        if (!fileName) {
+          output = 'touch: missing file operand\nUsage: touch <file>';
+          status = 'error';
+        } else {
+          try {
+            // Normalize path
+            let fullPath = fileName;
+            if (!fullPath.startsWith('/')) {
+              fullPath =
+                currentDirectory === '/' ? `/${fullPath}` : `${currentDirectory}/${fullPath}`;
+            }
+
+            // Remove /WHK01 prefix if present (backend expects relative paths)
+            const normalizedPath = fullPath.replace(/^\/WHK01/, '');
+
+            // Determine folder from path
+            const pathParts = normalizedPath.split('/').filter(p => p);
+            const fileNameOnly = pathParts.pop() || fileName;
+            const parentPath = pathParts.length > 0 ? '/' + pathParts.join('/') : '/';
+
+            const response = await fetch('http://localhost:8000/api/v1/files', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: fileNameOnly,
+                type: 'file',
+                content: '',
+                parentPath: parentPath,
+              }),
+            });
+
+            if (response.ok) {
+              output = `Created file: ${fileName}`;
+              status = 'success';
+
+              // Trigger file explorer refresh
+              window.dispatchEvent(
+                new CustomEvent('fileSystemChange', {
+                  detail: { operation: 'touch', path: fileName },
+                })
+              );
+            } else {
+              const errorData = await response.json();
+              output = `touch: ${fileName}: ${errorData.message || 'Failed to create file'}`;
+              status = 'error';
+            }
+          } catch (error) {
+            output = `touch: ${error instanceof Error ? error.message : 'Failed to create file'}`;
+            status = 'error';
+          }
+        }
+      } else if (trimmedCommand.startsWith('mkdir')) {
+        // Create new directory
+        const parts = trimmedCommand.split(/\s+/);
+        const dirName = parts[1];
+
+        if (!dirName) {
+          output = 'mkdir: missing operand\nUsage: mkdir <directory>';
+          status = 'error';
+        } else {
+          try {
+            // Normalize path
+            let fullPath = dirName;
+            if (!fullPath.startsWith('/')) {
+              fullPath =
+                currentDirectory === '/' ? `/${fullPath}` : `${currentDirectory}/${fullPath}`;
+            }
+
+            // Remove /WHK01 prefix if present (backend expects relative paths)
+            const normalizedPath = fullPath.replace(/^\/WHK01/, '');
+
+            // Determine parent folder and directory name
+            const pathParts = normalizedPath.split('/').filter(p => p);
+            const dirNameOnly = pathParts.pop() || dirName;
+            const parentPath = pathParts.length > 0 ? '/' + pathParts.join('/') : '/';
+
+            const response = await fetch('http://localhost:8000/api/v1/files', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: dirNameOnly,
+                type: 'folder',
+                parentPath: parentPath,
+              }),
+            });
+
+            if (response.ok) {
+              output = `Created directory: ${dirName}`;
+              status = 'success';
+
+              // Trigger file explorer refresh
+              window.dispatchEvent(
+                new CustomEvent('fileSystemChange', {
+                  detail: { operation: 'mkdir', path: dirName },
+                })
+              );
+            } else {
+              const errorData = await response.json();
+              output = `mkdir: ${dirName}: ${errorData.message || 'Failed to create directory'}`;
+              status = 'error';
+            }
+          } catch (error) {
+            output = `mkdir: ${
+              error instanceof Error ? error.message : 'Failed to create directory'
+            }`;
+            status = 'error';
+          }
+        }
+      } else if (trimmedCommand.startsWith('rm')) {
+        // Delete file or directory
+        const parts = trimmedCommand.split(/\s+/);
+        let recursive = false;
+        let targetPath = '';
+
+        // Parse flags
+        for (let i = 1; i < parts.length; i++) {
+          if (parts[i] === '-r' || parts[i] === '-rf') {
+            recursive = true;
+          } else if (!parts[i].startsWith('-')) {
+            targetPath = parts[i];
+          }
+        }
+
+        if (!targetPath) {
+          output = 'rm: missing operand\nUsage: rm [-r] <file|directory>';
+          status = 'error';
+        } else {
+          try {
+            // Normalize path
+            let fullPath = targetPath;
+            if (!fullPath.startsWith('/')) {
+              fullPath =
+                currentDirectory === '/' ? `/${fullPath}` : `${currentDirectory}/${fullPath}`;
+            }
+
+            // First, check if it's a file or folder
+            const filesResponse = await fetch('http://localhost:8000/api/v1/files');
+            if (!filesResponse.ok) {
+              output = `rm: Unable to access file system`;
+              status = 'error';
+            } else {
+              const filesData = await filesResponse.json();
+
+              // Find item by navigating the tree structure
+              const findItem = (nodes: any[], targetPath: string): any => {
+                // Remove /WHK01 prefix if present
+                const searchPath = targetPath.replace(/^\/WHK01/, '');
+
+                // Split path into segments
+                const segments = searchPath.split('/').filter(s => s);
+
+                if (segments.length === 0) {
+                  return null; // Can't delete root
+                }
+
+                // Navigate through tree
+                let current: any = nodes[0]; // Start at WHK01 root
+
+                for (let i = 0; i < segments.length; i++) {
+                  const segment = segments[i];
+
+                  if (!current || !current.children) {
+                    return null;
+                  }
+
+                  // Last segment: find file or folder
+                  if (i === segments.length - 1) {
+                    return current.children.find((child: any) => child.name === segment);
+                  }
+
+                  // Intermediate segments: must be folders
+                  current = current.children.find(
+                    (child: any) => child.name === segment && child.type === 'folder'
+                  );
+
+                  if (!current) {
+                    return null;
+                  }
+                }
+
+                return null;
+              };
+
+              const item = findItem(filesData.data.files, fullPath);
+
+              if (!item) {
+                output = `rm: cannot remove '${targetPath}': No such file or directory`;
+                status = 'error';
+              } else if (item.isImmutable) {
+                output = `rm: cannot remove '${targetPath}': Permission denied (immutable system file)`;
+                status = 'error';
+              } else if (item.type === 'folder' && !recursive) {
+                output = `rm: cannot remove '${targetPath}': Is a directory (use -r for recursive delete)`;
+                status = 'error';
+              } else {
+                // Perform delete
+                const deleteResponse = await fetch(
+                  `http://localhost:8000/api/v1/files/${item.id}`,
+                  {
+                    method: 'DELETE',
+                  }
+                );
+
+                if (deleteResponse.ok) {
+                  output = `Removed: ${targetPath}`;
+                  status = 'success';
+
+                  // Trigger file explorer refresh
+                  window.dispatchEvent(
+                    new CustomEvent('fileSystemChange', {
+                      detail: { operation: 'rm', path: targetPath },
+                    })
+                  );
+                } else {
+                  const errorData = await deleteResponse.json();
+                  output = `rm: ${targetPath}: ${errorData.message || 'Failed to remove'}`;
+                  status = 'error';
+                }
+              }
+            }
+          } catch (error) {
+            output = `rm: ${error instanceof Error ? error.message : 'Failed to remove'}`;
+            status = 'error';
+          }
         }
       } else if (trimmedCommand === 'whoami') {
         output = 'plc-gbt-user';

@@ -14,10 +14,10 @@ const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:8000';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const fileId = params.id;
+    const { id: fileId } = await params;
 
     // Proxy to backend
     const response = await fetch(
@@ -54,10 +54,10 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const fileId = params.id;
+    const { id: fileId } = await params;
     const body = await request.json();
 
     // Proxy to backend

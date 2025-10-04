@@ -3,6 +3,8 @@
 
 **Model**: gpt-4o-mini-high (Process Control & Automation SME)  
 
+**Deliverable**: JSONL file
+
 #Properties of the LLM we will be fine-tuning with these docuemnts:
 **AGENT Core Competencies**:
 - Advanced process control theory (PID, cascade, feedforward, MPC)
@@ -37,20 +39,6 @@ This framework processes P&ID drawings and process documents to create high-qual
 - Infers control strategies from instrumentation
 - Builds a comprehensive process knowledge graph
 - Generates diverse, contextual training examples
-
----
-
-## 📁 Directory Structure
-
-```
-/Users/reh3376/repos/plc-gbt/docs/FT/
-├── README.md                      # This file
-├── MASTER_CONTEXT.md              # Persistent knowledge base (grows with each document)
-├── PROCESSING_METHODOLOGY.md      # Step-by-step extraction & inference guide
-├── document_name_ft.jsonl         # Training data for each processed document
-├── document_name_analysis.md      # Detailed analysis and relationships
-└── PROCESSING_LOG.md              # Session log with insights
-```
 
 ---
 

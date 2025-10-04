@@ -241,9 +241,11 @@ Start typing to begin...`;
           try {
             const response = await fetch(`/api/v1/files/${encodeURIComponent(fileId)}/content`);
             if (response.ok) {
-              const text = await response.text();
-              console.log('📂 OPEN FILE - Loaded file content, length:', text.length);
-              return text;
+              const jsonData = await response.json();
+              // Extract content from API response: { success: true, data: { content: "..." } }
+              const content = jsonData.success && jsonData.data ? jsonData.data.content : '';
+              console.log('📂 OPEN FILE - Loaded file content, length:', content.length);
+              return content;
             } else {
               console.warn('📂 OPEN FILE - Failed to load file content, using sample');
               return getSampleContent(file.name);
@@ -255,6 +257,9 @@ Start typing to begin...`;
         };
 
         const content = await loadFileContent();
+        console.log('📂 OPEN FILE - Content to be used in tab:', content);
+        console.log('📂 OPEN FILE - Content type:', typeof content);
+        console.log('📂 OPEN FILE - Content is empty string?', content === '');
 
         const newTab: EditorTab = {
           fileId,
@@ -413,38 +418,23 @@ Start typing to begin...`;
 
       console.log(`💾 SAVE TAB - Starting save for file: ${fileId}`);
       console.log(`💾 SAVE TAB - Content source:`, contentToSave ? 'Monaco Editor' : 'React State');
-      console.log(
-        `💾 SAVE TAB - All tabs:`,
-        tabs.map(t => ({ id: t.fileId, isDirty: t.isDirty }))
-      );
+      console.log(`💾 SAVE TAB - Content provided:`, contentToSave);
 
-      const tabToSave = tabs.find(t => t.fileId === fileId);
-      console.log(
-        `💾 SAVE TAB - Found tab:`,
-        tabToSave
-          ? {
-              fileId: tabToSave.fileId,
-              isDirty: tabToSave.isDirty,
-              contentLength: tabToSave.content.length,
-              fileName: tabToSave.fileName,
-            }
-          : 'NOT FOUND'
-      );
+      // When content is provided from Monaco, we don't need to check tabs state
+      // Just proceed with the save using the provided content
+      const finalContent = contentToSave || '';
 
-      if (!tabToSave) {
-        console.warn(`💾 SAVE TAB - Tab not found for fileId: ${fileId}`);
+      if (contentToSave) {
+        console.log(`💾 SAVE TAB - Using content from Monaco, length: ${contentToSave.length}`);
+      } else {
+        console.log(`💾 SAVE TAB - No content provided, would need to get from React state`);
+        // TODO: Implement getting content from React state if needed
+        console.warn(`💾 SAVE TAB - Save without Monaco content not yet implemented`);
         return;
       }
 
-      if (!tabToSave.isDirty) {
-        console.log(`💾 SAVE TAB - File ${fileId} is already saved, no action needed`);
-        return;
-      }
-
-      // Use content from Monaco Editor if provided, otherwise fall back to React state
-      const finalContent = contentToSave || tabToSave.content;
       console.log(
-        `💾 SAVE TAB - Final content length: ${finalContent.length} (source: ${contentToSave ? 'Monaco' : 'React State'})`
+        `💾 SAVE TAB - Final content length: ${finalContent.length} (source: Monaco Editor)`
       );
 
       try {

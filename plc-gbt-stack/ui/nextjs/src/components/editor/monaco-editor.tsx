@@ -266,22 +266,38 @@ export function MonacoEditor({
   };
 
   const handleEditorChange = (newValue: string | undefined) => {
+    console.log('📝 MONACO CHANGE - Value changed, new length:', newValue?.length);
+    console.log('📝 MONACO CHANGE - fileId:', fileId, 'file:', file?.name);
+    console.log('📝 MONACO CHANGE - Old value:', value, 'New value:', newValue);
+
     if (newValue !== undefined) {
       onChange?.(newValue);
 
       // Mark file as modified if content has changed
       if (fileId && file && newValue !== value) {
+        console.log('📝 MONACO CHANGE - Marking file as modified');
         markFileAsModified(fileId, true);
+      } else {
+        console.log(
+          '📝 MONACO CHANGE - NOT marking as modified. fileId:',
+          fileId,
+          'file:',
+          file,
+          'values match:',
+          newValue === value
+        );
       }
     }
   };
 
   // Get the appropriate file content
+  // Use value if it's defined (even if empty string), otherwise show loading/welcome message
   const editorValue =
-    value ||
-    (file
+    value !== undefined
+      ? value
+      : file
       ? 'Loading...'
-      : '// Welcome to PLC-GBT IDE\n// Select a file from the explorer to start editing');
+      : '// Welcome to PLC-GBT IDE\n// Select a file from the explorer to start editing';
 
   return (
     <div className="h-full w-full min-h-0 bg-[#1e1e1e]" style={{ height: '100%' }}>

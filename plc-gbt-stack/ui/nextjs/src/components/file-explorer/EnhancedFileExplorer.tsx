@@ -213,6 +213,28 @@ export default function EnhancedFileExplorer({
     }
   }, [files]);
 
+  // Listen for file system changes from terminal
+  React.useEffect(() => {
+    const handleFileSystemChange = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('📁 FILE EXPLORER - File system changed:', customEvent.detail);
+
+      // Small delay to ensure backend has completed the operation
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Refresh files when terminal modifies filesystem
+      await refreshFiles();
+
+      console.log('📁 FILE EXPLORER - Refresh completed after terminal operation');
+    };
+
+    window.addEventListener('fileSystemChange', handleFileSystemChange);
+
+    return () => {
+      window.removeEventListener('fileSystemChange', handleFileSystemChange);
+    };
+  }, [refreshFiles]);
+
   // Handle file selection
   const handleFileClick = useCallback(
     (fileId: string) => {
@@ -282,6 +304,8 @@ export default function EnhancedFileExplorer({
 
           if (fileContent.success) {
             console.log('✅ File content loaded successfully');
+            console.log('📄 File content object:', fileContent);
+            console.log('📝 Actual content:', fileContent.content);
 
             // Add file to editor store with actual content
             fileStore.openFile({
@@ -729,16 +753,13 @@ export default function EnhancedFileExplorer({
     });
   }, []);
 
-  const handleContextMenuDelete = useCallback(
-    async (file: FileItem) => {
-      // Open delete confirmation modal instead of window.confirm
-      setDeleteModalState({
-        isOpen: true,
-        file: file,
-      });
-    },
-    []
-  );
+  const handleContextMenuDelete = useCallback(async (file: FileItem) => {
+    // Open delete confirmation modal instead of window.confirm
+    setDeleteModalState({
+      isOpen: true,
+      file: file,
+    });
+  }, []);
 
   // Handle delete confirmation
   const handleConfirmDelete = useCallback(async () => {
@@ -747,7 +768,7 @@ export default function EnhancedFileExplorer({
 
     try {
       await deleteFile({ id: fileToDelete.id, recursive: fileToDelete.type === 'folder' });
-      
+
       // Close modal on success
       setDeleteModalState({ isOpen: false, file: null });
     } catch (error) {
@@ -1244,20 +1265,19 @@ export default function EnhancedFileExplorer({
             <div className="p-4">
               <p className="text-[#cccccc] mb-4">
                 Are you sure you want to delete{' '}
-                <span className="font-semibold text-[#007acc]">"{deleteModalState.file.name}"</span>?
+                <span className="font-semibold text-[#007acc]">"{deleteModalState.file.name}"</span>
+                ?
               </p>
-              
+
               {deleteModalState.file.type === 'folder' && (
                 <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded text-yellow-200 text-sm">
                   <AlertCircle className="w-4 h-4 inline mr-2" />
                   This folder and all its contents will be permanently deleted.
                 </div>
               )}
-              
+
               {deleteModalState.file.type === 'file' && (
-                <p className="text-sm text-[#969696]">
-                  This action cannot be undone.
-                </p>
+                <p className="text-sm text-[#969696]">This action cannot be undone.</p>
               )}
             </div>
 
