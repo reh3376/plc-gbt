@@ -426,19 +426,63 @@ CREATE TABLE folders (
 ## Next Steps
 
 ### Immediate (Ready to Implement)
-1. ✅ Tab completion for commands and paths
-2. ✅ Command history search (Ctrl+R)
-3. ✅ Syntax highlighting for terminal output
+**Priority 1 - Terminal Enhancements:**
+1. **Tab completion** for commands and paths
+   - Auto-complete file/folder names with Tab key
+   - Command name completion
+   - Path completion with context awareness
+
+2. **Command history search (Ctrl+R)**
+   - Reverse search through command history
+   - Interactive search with live filtering
+   - Match highlighting
+
+3. **Syntax highlighting for terminal output**
+   - Color-coded output (errors in red, success in green)
+   - File type detection for `ls` output
+   - Command syntax highlighting
 
 ### Medium Term
-1. `connect:` command backend integration
-2. Terminal session persistence
-3. Multiple terminal tabs/splits
+**Priority 2 - Enhanced Functionality:**
+1. **`connect:` command backend integration**
+   - PostgreSQL connection implementation
+   - Connection pooling and management
+   - Interactive database queries
+
+2. **Terminal session persistence**
+   - Save terminal state between sessions
+   - Restore command history
+   - Preserve working directory
+
+3. **Multiple terminal tabs/splits**
+   - Tabbed terminal interface
+   - Split panes (horizontal/vertical)
+   - Session management
 
 ### Long Term
-1. Command aliases and scripting
-2. Custom themes and preferences
-3. Advanced terminal features (job control, background processes)
+**Priority 3 - Advanced Features:**
+1. **Command aliases and scripting**
+   - User-defined aliases
+   - Shell script execution
+   - Batch command processing
+
+2. **Custom themes and preferences**
+   - Color scheme customization
+   - Font and size preferences
+   - UI layout options
+
+3. **Advanced terminal features**
+   - Job control (background/foreground)
+   - Process management
+   - Signal handling (SIGINT, SIGTERM)
+   - Environment variables
+
+### Remaining TODO Items from Session
+- [ ] Tab completion for commands and paths
+- [ ] Command history search (Ctrl+R)
+- [ ] Syntax highlighting for output
+- [ ] Backend integration for `connect:` command
+- [ ] Terminal session persistence
 
 ---
 
