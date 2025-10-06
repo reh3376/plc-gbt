@@ -72,6 +72,12 @@ export function Terminal({ className }: TerminalProps) {
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [searchResultIndex, setSearchResultIndex] = useState(0);
+  const [activeConnection, setActiveConnection] = useState<{
+    sessionId: string;
+    type: string;
+    database: string;
+    host: string;
+  } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const MAX_COMMAND_HISTORY = 10;
@@ -96,6 +102,52 @@ export function Terminal({ className }: TerminalProps) {
     'ping',
     'connect:',
   ];
+
+  // Format query results as ASCII table
+  const formatTable = (columns: string[], rows: any[]): string => {
+    if (rows.length === 0) {
+      return '(0 rows)\n';
+    }
+
+    // Calculate column widths
+    const colWidths: number[] = columns.map((col, idx) => {
+      const headerWidth = col.length;
+      const maxDataWidth = Math.max(
+        ...rows.map(row => {
+          const val = row[col];
+          return val === null || val === undefined ? 4 : String(val).length;
+        })
+      );
+      return Math.max(headerWidth, maxDataWidth);
+    });
+
+    // Build separator line
+    const separator = '+-' + colWidths.map(w => '-'.repeat(w)).join('-+-') + '-+\n';
+
+    // Build header
+    let table = separator;
+    table += '| ' + columns.map((col, idx) => col.padEnd(colWidths[idx])).join(' | ') + ' |\n';
+    table += separator;
+
+    // Build rows
+    rows.forEach(row => {
+      table +=
+        '| ' +
+        columns
+          .map((col, idx) => {
+            const val = row[col];
+            const str = val === null || val === undefined ? 'NULL' : String(val);
+            return str.padEnd(colWidths[idx]);
+          })
+          .join(' | ') +
+        ' |\n';
+    });
+    table += separator;
+
+    table += `\n(${rows.length} row${rows.length !== 1 ? 's' : ''})\n`;
+
+    return table;
+  };
 
   // Syntax highlighting for output
   const highlightOutput = (output: string, command: string): React.ReactNode => {
@@ -1217,11 +1269,57 @@ Options:
 Note: For security, use environment variables for credentials.`;
           status = 'info';
         } else if (input === 'disconnect') {
-          output = 'No active connection to disconnect.';
-          status = 'info';
+          if (!activeConnection) {
+            output = 'No active connection to disconnect.';
+            status = 'info';
+          } else {
+            try {
+              const response = await fetch('http://localhost:8000/api/v1/terminal/disconnect', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  sessionId: activeConnection.sessionId,
+                }),
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                  output = `✓ Disconnected from ${activeConnection.type} database\n`;
+                  output += `  Host: ${activeConnection.host}\n`;
+                  output += `  Database: ${activeConnection.database}`;
+                  setActiveConnection(null);
+                  status = 'success';
+                } else {
+                  output = `✗ Failed to disconnect: ${data.message}`;
+                  status = 'error';
+                }
+              } else {
+                output = `✗ Disconnect failed: Backend error (HTTP ${response.status})`;
+                status = 'error';
+              }
+            } catch (error) {
+              output = `✗ Disconnect error: ${
+                error instanceof Error ? error.message : 'Unknown error'
+              }`;
+              status = 'error';
+            }
+          }
         } else if (input === 'status') {
-          output = 'Connection status: Not connected';
-          status = 'info';
+          if (!activeConnection) {
+            output = 'Connection status: Not connected';
+            status = 'info';
+          } else {
+            output = `Connection status: ✓ Connected\n\n`;
+            output += `  Type: ${activeConnection.type}\n`;
+            output += `  Host: ${activeConnection.host}\n`;
+            output += `  Database: ${activeConnection.database}\n`;
+            output += `  Session ID: ${activeConnection.sessionId.substring(0, 8)}...\n\n`;
+            output += `Type SQL queries to execute them on this connection.`;
+            status = 'success';
+          }
         } else if (input.includes('://')) {
           // Parse connection string
           try {
@@ -1267,6 +1365,14 @@ Note: For security, use environment variables for credentials.`;
             if (response.ok) {
               const data = await response.json();
               if (data.success) {
+                // Store connection session
+                setActiveConnection({
+                  sessionId: data.data.sessionId,
+                  type: data.data.type,
+                  database: database || '',
+                  host: host,
+                });
+
                 output = `✓ Successfully connected to ${protocol}://${host}${
                   port ? ':' + port : ''
                 }\n\n`;
@@ -1276,9 +1382,12 @@ Note: For security, use environment variables for credentials.`;
                 output += `  Port: ${data.data.port}\n`;
                 if (database) output += `  Database: ${database}\n`;
                 if (data.data.version) output += `  Version: ${data.data.version}\n`;
-                output += `  Status: ${data.data.status}\n\n`;
-                output += `Connection successful! You can now execute queries.\n`;
-                output += `(Note: Interactive query session to be implemented)`;
+                output += `  Status: ${data.data.status}\n`;
+                output += `  Session ID: ${data.data.sessionId.substring(0, 8)}...\n\n`;
+                output += `✓ Interactive query session active!\n`;
+                output += `  - Type SQL queries directly (e.g., SELECT * FROM table_name;)\n`;
+                output += `  - Type 'connect:disconnect' to close connection\n`;
+                output += `  - Type 'connect:status' to view connection info`;
                 status = 'success';
               } else {
                 output = `✗ Connection failed: ${data.message}\n\n`;
@@ -1301,6 +1410,60 @@ Note: For security, use environment variables for credentials.`;
           }
         } else {
           output = `Invalid connection syntax. Type 'connect:?' for help.`;
+          status = 'error';
+        }
+      } else if (activeConnection) {
+        // If there's an active connection, treat the input as a SQL query
+        try {
+          setIsWaitingForOutput(true);
+          setHistory(prev => [
+            ...prev,
+            {
+              command: trimmedCommand,
+              output: 'Executing query...',
+              timestamp: new Date(),
+              status: 'info',
+              directory: currentDirectory,
+            },
+          ]);
+
+          const response = await fetch('http://localhost:8000/api/v1/terminal/query', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              sessionId: activeConnection.sessionId,
+              query: trimmedCommand,
+            }),
+          });
+
+          setIsWaitingForOutput(false);
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+              // Format query results
+              if (data.data.columns && data.data.rows) {
+                // SELECT query - format as table
+                output = `\n${data.message}\n\n`;
+                output += formatTable(data.data.columns, data.data.rows);
+              } else {
+                // Non-SELECT query
+                output = `✓ ${data.message}`;
+              }
+              status = 'success';
+            } else {
+              output = `✗ Query failed: ${data.message}`;
+              status = 'error';
+            }
+          } else {
+            output = `✗ Query failed: Backend error (HTTP ${response.status})`;
+            status = 'error';
+          }
+        } catch (error) {
+          setIsWaitingForOutput(false);
+          output = `✗ Query error: ${error instanceof Error ? error.message : 'Unknown error'}`;
           status = 'error';
         }
       } else {
