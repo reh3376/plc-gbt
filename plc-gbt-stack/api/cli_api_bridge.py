@@ -1865,13 +1865,14 @@ async def ai_chat(message_data: dict[str, Any]):
 
         logger.info(f"AI chat request: {user_message[:100]}")
 
-        # Get OpenAI service and generate response
+        # Get OpenAI service and generate response with RAG
         openai_service = get_openai_service()
         ai_response = await openai_service.chat_completion(
             message=user_message,
             conversation_history=conversation_history,
             context=context,
-            stream=False
+            stream=False,
+            use_rag=True  # Enable RAG retrieval
         )
 
         # Add conversation metadata
@@ -2181,6 +2182,142 @@ async def delete_chat_history(file_id: str):
         return APIResponse(
             success=False,
             message=f"Failed to delete chat history: {str(e)}",
+            data=None
+        )
+
+# =============================================================================
+# DATABASE CONNECTIONS (Terminal connect: command)
+# =============================================================================
+
+@app.post("/api/v1/terminal/connect", response_model=APIResponse, tags=["Terminal"])
+async def terminal_connect(connection_data: dict[str, Any]):
+    """
+    Connect to a database from the terminal
+    
+    Supports PostgreSQL, MySQL, Redis, MongoDB connections
+    
+    Args:
+        connection_data: {
+            "type": "postgresql" | "mysql" | "redis" | "mongodb",
+            "host": "hostname",
+            "port": 5432,
+            "database": "db_name",
+            "username": "user",
+            "password": "pass"
+        }
+        
+    Returns:
+        APIResponse with connection status
+    """
+    try:
+        import psycopg2
+
+        conn_type = connection_data.get("type", "").lower()
+        host = connection_data.get("host", "localhost")
+        port = connection_data.get("port")
+        database = connection_data.get("database")
+        username = connection_data.get("username")
+        password = connection_data.get("password")
+
+        if conn_type == "postgresql":
+            # Attempt PostgreSQL connection
+            try:
+                conn = psycopg2.connect(
+                    host=host,
+                    port=port or 5432,
+                    database=database,
+                    user=username,
+                    password=password,
+                    connect_timeout=5
+                )
+
+                # Test the connection
+                cursor = conn.cursor()
+                cursor.execute("SELECT version();")
+                version = cursor.fetchone()[0]
+                cursor.close()
+                conn.close()
+
+                return APIResponse(
+                    success=True,
+                    message=f"Successfully connected to PostgreSQL at {host}:{port or 5432}",
+                    data={
+                        "type": "postgresql",
+                        "host": host,
+                        "port": port or 5432,
+                        "database": database,
+                        "version": version,
+                        "status": "connected"
+                    }
+                )
+            except psycopg2.OperationalError as e:
+                return APIResponse(
+                    success=False,
+                    message=f"Failed to connect to PostgreSQL: {str(e)}",
+                    data={
+                        "type": "postgresql",
+                        "host": host,
+                        "port": port or 5432,
+                        "status": "failed",
+                        "error": str(e)
+                    }
+                )
+
+        elif conn_type == "redis":
+            # Redis connection (if redis-py is available)
+            try:
+                import redis
+                r = redis.Redis(
+                    host=host,
+                    port=port or 6379,
+                    password=password,
+                    socket_connect_timeout=5,
+                    decode_responses=True
+                )
+                info = r.info("server")
+                return APIResponse(
+                    success=True,
+                    message=f"Successfully connected to Redis at {host}:{port or 6379}",
+                    data={
+                        "type": "redis",
+                        "host": host,
+                        "port": port or 6379,
+                        "version": info.get("redis_version", "unknown"),
+                        "status": "connected"
+                    }
+                )
+            except ImportError:
+                return APIResponse(
+                    success=False,
+                    message="Redis client not installed. Install with: pip install redis",
+                    data={"type": "redis", "status": "error"}
+                )
+            except Exception as e:
+                return APIResponse(
+                    success=False,
+                    message=f"Failed to connect to Redis: {str(e)}",
+                    data={
+                        "type": "redis",
+                        "host": host,
+                        "port": port or 6379,
+                        "status": "failed",
+                        "error": str(e)
+                    }
+                )
+
+        else:
+            return APIResponse(
+                success=False,
+                message=f"Unsupported connection type: {conn_type}. Supported: postgresql, redis",
+                data={"supported_types": ["postgresql", "redis"]}
+            )
+
+    except Exception as e:
+        logger.error(f"Error in terminal connect: {e}")
+        logger.exception("Full traceback:")
+        return APIResponse(
+            success=False,
+            message=f"Connection error: {str(e)}",
             data=None
         )
 

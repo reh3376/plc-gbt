@@ -1231,19 +1231,69 @@ Note: For security, use environment variables for credentials.`;
             const port = url.port;
             const database = url.pathname.replace('/', '');
             const username = url.username;
+            const password = url.password;
 
-            // Build connection attempt message
-            let connectionDetails = `Protocol: ${protocol}\n`;
-            connectionDetails += `Host: ${host}\n`;
-            if (port) connectionDetails += `Port: ${port}\n`;
-            if (username) connectionDetails += `Username: ${username}\n`;
-            if (database) connectionDetails += `Database: ${database}\n`;
-
-            output = `Attempting to connect to ${protocol}://${host}${
-              port ? ':' + port : ''
-            }...\n\n${connectionDetails}\n⚠️  Connection functionality will be implemented with backend integration.\n✓  Connection string parsed successfully.`;
+            // Show attempting message
+            output = `Attempting to connect to ${protocol}://${host}${port ? ':' + port : ''}...`;
             status = 'info';
+            setHistory(prev => [
+              ...prev,
+              {
+                command: trimmedCommand,
+                output,
+                timestamp: new Date(),
+                status,
+                directory: currentDirectory,
+              },
+            ]);
+            setIsWaitingForOutput(true);
+
+            // Call backend to attempt connection
+            const response = await fetch('http://localhost:8000/api/v1/terminal/connect', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                type: protocol,
+                host: host,
+                port: port ? parseInt(port) : undefined,
+                database: database || undefined,
+                username: username || undefined,
+                password: password || undefined,
+              }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success) {
+                output = `✓ Successfully connected to ${protocol}://${host}${
+                  port ? ':' + port : ''
+                }\n\n`;
+                output += `Connection Details:\n`;
+                output += `  Type: ${data.data.type}\n`;
+                output += `  Host: ${data.data.host}\n`;
+                output += `  Port: ${data.data.port}\n`;
+                if (database) output += `  Database: ${database}\n`;
+                if (data.data.version) output += `  Version: ${data.data.version}\n`;
+                output += `  Status: ${data.data.status}\n\n`;
+                output += `Connection successful! You can now execute queries.\n`;
+                output += `(Note: Interactive query session to be implemented)`;
+                status = 'success';
+              } else {
+                output = `✗ Connection failed: ${data.message}\n\n`;
+                if (data.data && data.data.error) {
+                  output += `Error: ${data.data.error}`;
+                }
+                status = 'error';
+              }
+            } else {
+              output = `✗ Connection failed: Backend error (HTTP ${response.status})`;
+              status = 'error';
+            }
+            setIsWaitingForOutput(false);
           } catch (error) {
+            setIsWaitingForOutput(false);
             output = `Invalid connection string format. Type 'connect:?' for help.\n\nError: ${
               error instanceof Error ? error.message : 'Unknown error'
             }`;
