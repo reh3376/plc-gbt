@@ -151,7 +151,6 @@ export function MonacoEditor({
           const content = ed.getValue();
           onSave(content);
         }
-        return null;
       },
     });
 

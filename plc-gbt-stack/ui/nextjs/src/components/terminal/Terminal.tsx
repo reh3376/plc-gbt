@@ -17,24 +17,204 @@ interface TerminalProps {
 }
 
 export function Terminal({ className }: TerminalProps) {
-  const [history, setHistory] = useState<CommandHistory[]>([
-    {
-      command: '',
-      output: 'Welcome to PLC-GBT Terminal\nType "help" for available commands.',
-      timestamp: new Date(),
-      status: 'info',
-    },
-  ]);
+  // Check for saved session to determine initial state
+  const getInitialHistory = (): CommandHistory[] => {
+    try {
+      const savedSession = localStorage.getItem('plc-gbt-terminal-session');
+      if (savedSession) {
+        const session = JSON.parse(savedSession);
+        if (session.history && Array.isArray(session.history)) {
+          return session.history.map((entry: any) => ({
+            ...entry,
+            timestamp: new Date(entry.timestamp),
+          }));
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load initial session:', error);
+    }
+    // Default welcome message if no saved session
+    return [
+      {
+        command: '',
+        output: 'Welcome to PLC-GBT Terminal\nType "help" for available commands.',
+        timestamp: new Date(),
+        status: 'info' as const,
+      },
+    ];
+  };
+
+  const getInitialCommandHistory = (): string[] => {
+    try {
+      const savedSession = localStorage.getItem('plc-gbt-terminal-session');
+      if (savedSession) {
+        const session = JSON.parse(savedSession);
+        if (session.commandHistory && Array.isArray(session.commandHistory)) {
+          return session.commandHistory;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load command history:', error);
+    }
+    return [];
+  };
+
+  const [history, setHistory] = useState<CommandHistory[]>(getInitialHistory());
   const [currentInput, setCurrentInput] = useState('');
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [commandHistory, setCommandHistory] = useState<string[]>(getInitialCommandHistory());
   const [historyIndex, setHistoryIndex] = useState(-1);
   const { currentDirectory, setCurrentDirectory } = useTerminalStore();
   const [isRunningCommand, setIsRunningCommand] = useState(false);
   const [runningCommandAbort, setRunningCommandAbort] = useState<(() => void) | null>(null);
   const [isWaitingForOutput, setIsWaitingForOutput] = useState(false);
+  const [tabCompletions, setTabCompletions] = useState<string[]>([]);
+  const [tabCompletionIndex, setTabCompletionIndex] = useState(0);
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [searchResultIndex, setSearchResultIndex] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const MAX_COMMAND_HISTORY = 10;
+
+  // Available commands for tab completion
+  const AVAILABLE_COMMANDS = [
+    'help',
+    'clear',
+    'clear-session',
+    'echo',
+    'date',
+    'pwd',
+    'cd',
+    'ls',
+    'cat',
+    'touch',
+    'mkdir',
+    'rm',
+    'whoami',
+    'version',
+    'backend',
+    'ping',
+    'connect:',
+  ];
+
+  // Syntax highlighting for output
+  const highlightOutput = (output: string, command: string): React.ReactNode => {
+    const trimmedCommand = command.trim().split(/\s+/)[0];
+
+    // For ls command, highlight file types
+    if (trimmedCommand === 'ls') {
+      return highlightLsOutput(output);
+    }
+
+    // For cat command, highlight based on file extension
+    if (trimmedCommand === 'cat') {
+      const fileMatch = command.match(/cat\s+(.+)/);
+      if (fileMatch) {
+        const fileName = fileMatch[1].trim();
+        return highlightFileContent(output, fileName);
+      }
+    }
+
+    // Default: return plain text
+    return output;
+  };
+
+  // Highlight ls output with colors for different file types
+  const highlightLsOutput = (output: string): React.ReactNode => {
+    const lines = output.split('\n');
+    return (
+      <>
+        {lines.map((line, idx) => {
+          // Skip empty lines or header lines
+          if (!line.trim() || line.startsWith('total ')) {
+            return (
+              <span key={`line-${idx}`} className="text-[#cccccc]">
+                {line}
+                {'\n'}
+              </span>
+            );
+          }
+
+          // For column format, split by chunks of ~20 chars and highlight each item
+          // Check if this looks like a column format (multiple items padded)
+          const isColumnFormat = line.length > 25 && !line.includes('plc-gbt-user');
+
+          if (isColumnFormat) {
+            // Split into 20-char chunks (column width)
+            const colWidth = 20;
+            const items: string[] = [];
+            for (let i = 0; i < line.length; i += colWidth) {
+              const item = line.substring(i, i + colWidth);
+              if (item.trim()) {
+                items.push(item);
+              }
+            }
+
+            return (
+              <span key={`line-${idx}`}>
+                {items.map((item, itemIdx) => {
+                  const trimmedItem = item.trim();
+                  return (
+                    <span key={`item-${idx}-${itemIdx}`} className={getFileColor(trimmedItem)}>
+                      {item}
+                    </span>
+                  );
+                })}
+                {'\n'}
+              </span>
+            );
+          }
+
+          // For long format or single items, highlight the whole line
+          const parts = line.split(/\s+/);
+          const fileName = parts[parts.length - 1];
+          const color = getFileColor(fileName);
+
+          return (
+            <span key={`line-${idx}`} className={color}>
+              {line}
+              {'\n'}
+            </span>
+          );
+        })}
+      </>
+    );
+  };
+
+  // Get color class for a file/folder name
+  const getFileColor = (fileName: string): string => {
+    // Check if it's a directory (ends with /)
+    if (fileName.endsWith('/')) {
+      return 'text-[#569cd6] font-semibold';
+    }
+
+    // Check file extensions for syntax highlighting
+    if (fileName.match(/\.(md|txt|doc)$/i)) {
+      return 'text-[#dcdcaa]';
+    }
+
+    if (fileName.match(/\.(json|yaml|yml|xml)$/i)) {
+      return 'text-[#ce9178]';
+    }
+
+    if (fileName.match(/\.(js|ts|tsx|jsx|py|rb|go|rs)$/i)) {
+      return 'text-[#4ec9b0]';
+    }
+
+    if (fileName.match(/\.(jpg|jpeg|png|gif|svg|ico)$/i)) {
+      return 'text-[#c586c0]';
+    }
+
+    // Default color for other files (white)
+    return 'text-[#cccccc]';
+  };
+
+  // Highlight file content based on file type
+  const highlightFileContent = (content: string, fileName: string): React.ReactNode => {
+    // For now, return plain content
+    // Future: Add syntax highlighting for code files
+    return content;
+  };
 
   // Auto-scroll to bottom when new output is added
   useEffect(() => {
@@ -43,10 +223,208 @@ export function Terminal({ className }: TerminalProps) {
     }
   }, [history]);
 
-  // Focus input on mount
+  // Focus input on mount and restore current directory
   useEffect(() => {
     inputRef.current?.focus();
-  }, []);
+
+    // Restore current directory from saved session
+    try {
+      const savedSession = localStorage.getItem('plc-gbt-terminal-session');
+      if (savedSession) {
+        const session = JSON.parse(savedSession);
+        if (session.currentDirectory) {
+          setCurrentDirectory(session.currentDirectory);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to restore current directory:', error);
+    }
+  }, [setCurrentDirectory]);
+
+  // Save terminal session to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      const session = {
+        commandHistory,
+        currentDirectory,
+        history: history.slice(-20), // Save last 20 entries only
+        savedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('plc-gbt-terminal-session', JSON.stringify(session));
+    } catch (error) {
+      console.warn('Failed to save terminal session:', error);
+    }
+  }, [commandHistory, currentDirectory, history]);
+
+  // Get tab completion suggestions
+  const getTabCompletions = async (input: string): Promise<string[]> => {
+    const parts = input.trim().split(/\s+/);
+
+    // If empty or just starting, suggest commands
+    if (parts.length === 0 || input.trim() === '') {
+      return AVAILABLE_COMMANDS;
+    }
+
+    const firstPart = parts[0];
+
+    // If only one word and no space after, complete command name
+    if (parts.length === 1 && !input.endsWith(' ')) {
+      return AVAILABLE_COMMANDS.filter(cmd => cmd.startsWith(firstPart));
+    }
+
+    // For commands that take file/folder arguments, complete paths
+    const pathCommands = ['cd', 'ls', 'cat', 'rm', 'touch', 'mkdir'];
+    if (pathCommands.includes(firstPart)) {
+      const lastPart = parts[parts.length - 1];
+
+      // Fetch files/folders from current directory
+      try {
+        const response = await fetch('http://localhost:8000/api/v1/files');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data && data.data.files) {
+            // Navigate to current directory in the tree
+            const findDirectory = (nodes: any[], targetPath: string): any => {
+              if (targetPath === '/WHK01' || targetPath === '/') {
+                return nodes[0]; // WHK01 root
+              }
+              const searchPath = targetPath.replace(/^\/WHK01/, '');
+              const segments = searchPath.split('/').filter(s => s);
+              let current: any = nodes[0];
+              for (const segment of segments) {
+                if (!current || !current.children) return null;
+                current = current.children.find(
+                  (child: any) => child.name === segment && child.type === 'folder'
+                );
+                if (!current) return null;
+              }
+              return current;
+            };
+
+            const currentDir = findDirectory(data.data.files, currentDirectory);
+            if (currentDir && currentDir.children) {
+              // Get all file/folder names in current directory
+              const names = currentDir.children.map((item: any) => item.name);
+
+              // Filter by what user has typed
+              if (lastPart && lastPart !== firstPart) {
+                return names.filter((name: string) => name.startsWith(lastPart));
+              }
+              return names;
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Tab completion: Failed to fetch files', error);
+      }
+    }
+
+    return [];
+  };
+
+  // Search command history
+  const searchCommandHistory = (query: string): string[] => {
+    if (!query) return commandHistory;
+    return commandHistory.filter(cmd => cmd.toLowerCase().includes(query.toLowerCase()));
+  };
+
+  const handleSearchMode = () => {
+    if (!isSearchMode) {
+      // Enter search mode
+      setIsSearchMode(true);
+      setSearchResults(commandHistory);
+      setSearchResultIndex(commandHistory.length - 1);
+      if (commandHistory.length > 0) {
+        setCurrentInput(commandHistory[commandHistory.length - 1]);
+      }
+    } else {
+      // Cycle to next match (backwards in time)
+      if (searchResults.length > 0) {
+        const nextIndex = searchResultIndex > 0 ? searchResultIndex - 1 : searchResults.length - 1;
+        setSearchResultIndex(nextIndex);
+        setCurrentInput(searchResults[nextIndex]);
+      }
+    }
+  };
+
+  const exitSearchMode = () => {
+    setIsSearchMode(false);
+    setSearchResults([]);
+    setSearchResultIndex(0);
+  };
+
+  const handleInputChange = (value: string) => {
+    setCurrentInput(value);
+
+    if (isSearchMode) {
+      // Update search results as user types
+      const results = searchCommandHistory(value);
+      setSearchResults(results);
+      if (results.length > 0) {
+        setSearchResultIndex(results.length - 1);
+      }
+    }
+  };
+
+  const handleTabCompletion = async () => {
+    const completions = await getTabCompletions(currentInput);
+
+    if (completions.length === 0) {
+      // No completions available
+      return;
+    }
+
+    if (completions.length === 1) {
+      // Single completion - auto-complete
+      const parts = currentInput.trim().split(/\s+/);
+      if (parts.length === 1 && !currentInput.endsWith(' ')) {
+        // Completing command name
+        setCurrentInput(completions[0] + ' ');
+      } else {
+        // Completing file/folder name
+        const lastSpaceIndex = currentInput.lastIndexOf(' ');
+        const prefix = currentInput.substring(0, lastSpaceIndex + 1);
+        setCurrentInput(prefix + completions[0]);
+      }
+      setTabCompletions([]);
+      setTabCompletionIndex(0);
+    } else {
+      // Multiple completions - cycle through them
+      if (
+        tabCompletions.length === 0 ||
+        JSON.stringify(tabCompletions) !== JSON.stringify(completions)
+      ) {
+        // First tab or different completions
+        setTabCompletions(completions);
+        setTabCompletionIndex(0);
+
+        // Show available completions in output
+        setHistory(prev => [
+          ...prev,
+          {
+            command: '',
+            output: `Possible completions:\n${completions.join('  ')}`,
+            timestamp: new Date(),
+            status: 'info',
+          },
+        ]);
+      } else {
+        // Cycle to next completion
+        const nextIndex = (tabCompletionIndex + 1) % completions.length;
+        setTabCompletionIndex(nextIndex);
+
+        // Apply the completion
+        const parts = currentInput.trim().split(/\s+/);
+        if (parts.length === 1 && !currentInput.endsWith(' ')) {
+          setCurrentInput(completions[nextIndex] + ' ');
+        } else {
+          const lastSpaceIndex = currentInput.lastIndexOf(' ');
+          const prefix = currentInput.substring(0, lastSpaceIndex + 1);
+          setCurrentInput(prefix + completions[nextIndex]);
+        }
+      }
+    }
+  };
 
   const executeCommand = async (command: string) => {
     const trimmedCommand = command.trim();
@@ -78,6 +456,7 @@ export function Terminal({ className }: TerminalProps) {
         output = `Available commands:
   help              - Show this help message
   clear             - Clear the terminal
+  clear-session     - Clear saved terminal session from storage
   echo <text>       - Echo text to the terminal
   date              - Show current date and time
   pwd               - Show current working directory
@@ -98,8 +477,11 @@ export function Terminal({ className }: TerminalProps) {
   connect:?         - Show connection help and syntax
   
 Keyboard Shortcuts:
-  Ctrl+C            - Stop/interrupt running command
+  Tab               - Auto-complete commands and file/folder names
+  Ctrl+R            - Search command history (press again to cycle matches)
+  Ctrl+C            - Stop/interrupt running command or exit search
   Ctrl+L            - Clear terminal screen
+  Escape            - Exit search mode
   Shift+Enter       - Multi-line input (new line)
   Enter             - Execute command
   Arrow Up (↑)      - Cycle through command history (newest → oldest)
@@ -114,6 +496,19 @@ Navigation:
         setHistory([]);
         setCurrentInput('');
         return;
+      } else if (trimmedCommand === 'clear-session') {
+        // Clear saved session from localStorage
+        try {
+          localStorage.removeItem('plc-gbt-terminal-session');
+          output = 'Terminal session cleared from storage';
+          status = 'success';
+          setHistory([]);
+          setCommandHistory([]);
+          setCurrentDirectory('/WHK01');
+        } catch (error) {
+          output = 'Failed to clear terminal session';
+          status = 'error';
+        }
       } else if (trimmedCommand.startsWith('echo ')) {
         output = trimmedCommand.substring(5);
         status = 'success';
@@ -151,15 +546,50 @@ Navigation:
         try {
           const response = await fetch('http://localhost:8000/api/v1/files');
           if (response.ok) {
-            await response.json(); // Verify backend is accessible
-            // For now, accept any path under /WHK01
-            if (newPath === '/' || newPath.startsWith('/WHK01')) {
+            const data = await response.json();
+
+            // Function to find directory in tree
+            const findDirectory = (nodes: any[], targetPath: string): any => {
+              // Special case: /WHK01 or / refers to root
+              if (targetPath === '/WHK01' || targetPath === '/') {
+                return nodes[0]; // WHK01 root is first node
+              }
+
+              // Remove /WHK01 prefix if present
+              const searchPath = targetPath.replace(/^\/WHK01/, '');
+
+              // Split path into segments
+              const segments = searchPath.split('/').filter(s => s);
+
+              // Navigate through tree
+              let current: any = nodes[0]; // Start at WHK01 root
+
+              for (const segment of segments) {
+                if (!current || !current.children) {
+                  return null;
+                }
+
+                current = current.children.find(
+                  (child: any) => child.name === segment && child.type === 'folder'
+                );
+
+                if (!current) {
+                  return null;
+                }
+              }
+
+              return current;
+            };
+
+            const directory = findDirectory(data.data.files, newPath);
+
+            if (!directory) {
+              output = `cd: ${targetPath}: No such file or directory`;
+              status = 'error';
+            } else {
               setCurrentDirectory(newPath || '/WHK01');
               output = `Changed directory to: ${newPath || '/WHK01'}`;
               status = 'success';
-            } else {
-              output = `cd: ${targetPath}: No such directory\nNote: Root directory is /WHK01`;
-              status = 'error';
             }
           } else {
             output = `cd: Unable to verify directory`;
@@ -171,16 +601,17 @@ Navigation:
         }
       } else if (trimmedCommand.startsWith('ls')) {
         const parts = trimmedCommand.split(/\s+/);
-        let targetPath = parts[1] || currentDirectory;
+        let targetPath = currentDirectory;
         let longFormat = false;
 
-        // Parse ls flags
+        // Parse ls flags and path
         for (let i = 1; i < parts.length; i++) {
           if (parts[i].startsWith('-')) {
             const flags = parts[i].substring(1);
             if (flags.includes('l')) longFormat = true;
             // Note: -a and -A flags parsed but not yet implemented
-          } else if (!targetPath || targetPath === currentDirectory) {
+          } else {
+            // This is a path argument
             targetPath = parts[i];
           }
         }
@@ -851,10 +1282,40 @@ Note: For security, use environment variables for credentials.`;
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Ctrl+C: Stop running command
+    // Ctrl+R: Search command history
+    if (e.key === 'r' && e.ctrlKey) {
+      e.preventDefault();
+      handleSearchMode();
+      return;
+    }
+
+    // Escape: Exit search mode
+    if (e.key === 'Escape' && isSearchMode) {
+      e.preventDefault();
+      exitSearchMode();
+      return;
+    }
+
+    // Tab: Auto-completion (not in search mode)
+    if (e.key === 'Tab' && !isSearchMode) {
+      e.preventDefault();
+      handleTabCompletion();
+      return;
+    }
+
+    // Reset tab completions on any other key
+    if (e.key !== 'Tab' && tabCompletions.length > 0) {
+      setTabCompletions([]);
+      setTabCompletionIndex(0);
+    }
+
+    // Ctrl+C: Stop running command or exit search mode
     if (e.key === 'c' && e.ctrlKey) {
       e.preventDefault();
-      if (isRunningCommand && runningCommandAbort) {
+      if (isSearchMode) {
+        exitSearchMode();
+        setCurrentInput('');
+      } else if (isRunningCommand && runningCommandAbort) {
         runningCommandAbort();
         setHistory(prev => [
           ...prev,
@@ -872,6 +1333,9 @@ Note: For security, use environment variables for credentials.`;
 
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Prevent newline in textarea
+      if (isSearchMode) {
+        exitSearchMode();
+      }
       executeCommand(currentInput);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -965,7 +1429,9 @@ Note: For security, use environment variables for credentials.`;
                   getStatusColor(entry.status)
                 )}
               >
-                {entry.output}
+                {entry.status === 'success' && entry.command
+                  ? highlightOutput(entry.output, entry.command)
+                  : entry.output}
               </div>
             )}
           </div>
@@ -974,15 +1440,26 @@ Note: For security, use environment variables for credentials.`;
 
       {/* Fixed Input Line at Bottom - Reduced height by 50% */}
       <div className="flex-shrink-0 border-t border-[#1e1e1e] px-4 py-1">
+        {/* Search mode indicator */}
+        {isSearchMode && (
+          <div className="text-[#569cd6] text-xs mb-1">
+            (reverse-i-search)
+            {searchResults.length > 0
+              ? `: ${searchResultIndex + 1}/${searchResults.length} matches`
+              : ': no matches'}
+          </div>
+        )}
         <div className="flex items-center">
           <span className="text-[#4ec9b0] mr-2 flex-shrink-0">
-            ./{currentDirectory.split('/').pop() || currentDirectory}$
+            {isSearchMode
+              ? '(search)'
+              : `./${currentDirectory.split('/').pop() || currentDirectory}$`}
           </span>
           <div className="flex-1 relative">
             <textarea
               ref={inputRef}
               value={currentInput}
-              onChange={e => setCurrentInput(e.target.value)}
+              onChange={e => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
               className="w-full bg-transparent text-white resize-none overflow-hidden p-0 m-0"
