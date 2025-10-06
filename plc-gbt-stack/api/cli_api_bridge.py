@@ -35,6 +35,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+import psycopg2
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import Body, Depends, FastAPI, Query, WebSocket, WebSocketDisconnect
@@ -2189,6 +2190,10 @@ async def delete_chat_history(file_id: str):
 # DATABASE CONNECTIONS (Terminal connect: command)
 # =============================================================================
 
+# Active database connections storage
+# Format: {session_id: {"connection": conn_object, "type": "postgresql", "info": {...}}}
+active_connections: dict[str, dict[str, Any]] = {}
+
 @app.post("/api/v1/terminal/connect", response_model=APIResponse, tags=["Terminal"])
 async def terminal_connect(connection_data: dict[str, Any]):
     """
@@ -2222,6 +2227,8 @@ async def terminal_connect(connection_data: dict[str, Any]):
         if conn_type == "postgresql":
             # Attempt PostgreSQL connection
             try:
+                import uuid
+
                 conn = psycopg2.connect(
                     host=host,
                     port=port or 5432,
@@ -2236,7 +2243,22 @@ async def terminal_connect(connection_data: dict[str, Any]):
                 cursor.execute("SELECT version();")
                 version = cursor.fetchone()[0]
                 cursor.close()
-                conn.close()
+
+                # Generate session ID and store connection
+                session_id = str(uuid.uuid4())
+                active_connections[session_id] = {
+                    "connection": conn,
+                    "type": "postgresql",
+                    "info": {
+                        "host": host,
+                        "port": port or 5432,
+                        "database": database,
+                        "username": username,
+                        "version": version
+                    }
+                }
+
+                logger.info(f"PostgreSQL connection established: {session_id}")
 
                 return APIResponse(
                     success=True,
@@ -2247,7 +2269,8 @@ async def terminal_connect(connection_data: dict[str, Any]):
                         "port": port or 5432,
                         "database": database,
                         "version": version,
-                        "status": "connected"
+                        "status": "connected",
+                        "sessionId": session_id
                     }
                 )
             except psycopg2.OperationalError as e:
@@ -2318,6 +2341,216 @@ async def terminal_connect(connection_data: dict[str, Any]):
         return APIResponse(
             success=False,
             message=f"Connection error: {str(e)}",
+            data=None
+        )
+
+@app.post("/api/v1/terminal/query", response_model=APIResponse, tags=["Terminal"])
+async def terminal_query(query_data: dict[str, Any]):
+    """
+    Execute a SQL query on an active database connection
+    
+    Args:
+        query_data: {
+            "sessionId": "uuid",
+            "query": "SELECT * FROM table"
+        }
+        
+    Returns:
+        APIResponse with query results
+    """
+    try:
+        session_id = query_data.get("sessionId")
+        query = query_data.get("query", "").strip()
+
+        if not session_id:
+            return APIResponse(
+                success=False,
+                message="No session ID provided",
+                data=None
+            )
+
+        if not query:
+            return APIResponse(
+                success=False,
+                message="No query provided",
+                data=None
+            )
+
+        # Check if session exists
+        if session_id not in active_connections:
+            return APIResponse(
+                success=False,
+                message="Invalid or expired session. Please reconnect.",
+                data=None
+            )
+
+        session = active_connections[session_id]
+        conn_type = session["type"]
+
+        if conn_type == "postgresql":
+            try:
+                conn = session["connection"]
+                cursor = conn.cursor()
+
+                # Execute the query
+                cursor.execute(query)
+
+                # Check if it's a SELECT query (has results)
+                if cursor.description:
+                    # Fetch all results
+                    columns = [desc[0] for desc in cursor.description]
+                    rows = cursor.fetchall()
+
+                    # Convert to list of dicts
+                    results = []
+                    for row in rows:
+                        results.append(dict(zip(columns, row, strict=False)))
+
+                    cursor.close()
+
+                    return APIResponse(
+                        success=True,
+                        message=f"Query executed successfully. {len(results)} row(s) returned.",
+                        data={
+                            "columns": columns,
+                            "rows": results,
+                            "rowCount": len(results)
+                        }
+                    )
+                else:
+                    # Non-SELECT query (INSERT, UPDATE, DELETE, etc.)
+                    conn.commit()
+                    row_count = cursor.rowcount
+                    cursor.close()
+
+                    return APIResponse(
+                        success=True,
+                        message=f"Query executed successfully. {row_count} row(s) affected.",
+                        data={
+                            "rowCount": row_count,
+                            "type": "modification"
+                        }
+                    )
+
+            except psycopg2.Error as e:
+                # Rollback on error
+                if 'conn' in locals():
+                    conn.rollback()
+                return APIResponse(
+                    success=False,
+                    message=f"Query error: {str(e)}",
+                    data=None
+                )
+
+        else:
+            return APIResponse(
+                success=False,
+                message=f"Query execution not supported for {conn_type} connections yet",
+                data=None
+            )
+
+    except Exception as e:
+        logger.error(f"Error executing query: {e}")
+        logger.exception("Full traceback:")
+        return APIResponse(
+            success=False,
+            message=f"Query execution error: {str(e)}",
+            data=None
+        )
+
+@app.post("/api/v1/terminal/disconnect", response_model=APIResponse, tags=["Terminal"])
+async def terminal_disconnect(disconnect_data: dict[str, Any]):
+    """
+    Disconnect from an active database connection
+    
+    Args:
+        disconnect_data: {
+            "sessionId": "uuid"
+        }
+        
+    Returns:
+        APIResponse confirming disconnection
+    """
+    try:
+        session_id = disconnect_data.get("sessionId")
+
+        if not session_id:
+            return APIResponse(
+                success=False,
+                message="No session ID provided",
+                data=None
+            )
+
+        if session_id not in active_connections:
+            return APIResponse(
+                success=False,
+                message="No active connection found",
+                data=None
+            )
+
+        session = active_connections[session_id]
+        conn_type = session["type"]
+
+        # Close the connection
+        if conn_type == "postgresql":
+            try:
+                conn = session["connection"]
+                conn.close()
+            except Exception as e:
+                logger.warning(f"Error closing connection: {e}")
+
+        # Remove from active connections
+        del active_connections[session_id]
+
+        logger.info(f"Connection closed: {session_id}")
+
+        return APIResponse(
+            success=True,
+            message=f"Disconnected from {conn_type} database",
+            data={"sessionId": session_id}
+        )
+
+    except Exception as e:
+        logger.error(f"Error disconnecting: {e}")
+        logger.exception("Full traceback:")
+        return APIResponse(
+            success=False,
+            message=f"Disconnection error: {str(e)}",
+            data=None
+        )
+
+@app.get("/api/v1/terminal/connections", response_model=APIResponse, tags=["Terminal"])
+async def list_terminal_connections():
+    """
+    List all active database connections
+    
+    Returns:
+        APIResponse with list of active connections
+    """
+    try:
+        connections_list = []
+        for session_id, session in active_connections.items():
+            info = session["info"]
+            connections_list.append({
+                "sessionId": session_id,
+                "type": session["type"],
+                "host": info.get("host"),
+                "port": info.get("port"),
+                "database": info.get("database"),
+                "username": info.get("username")
+            })
+
+        return APIResponse(
+            success=True,
+            message=f"{len(connections_list)} active connection(s)",
+            data={"connections": connections_list}
+        )
+
+    except Exception as e:
+        logger.error(f"Error listing connections: {e}")
+        return APIResponse(
+            success=False,
+            message=f"Error listing connections: {str(e)}",
             data=None
         )
 
