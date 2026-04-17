@@ -22,7 +22,7 @@ l5x==1.6
 qdrant-client>=1.5.0
 langchain==0.2.6
 langchain-community==0.2.6
-langchain-openai==0.1.8
+langchain-openai==1.1.14
 
 # Data processing
 pandas>=2.0.0
