@@ -19,7 +19,7 @@ openai==1.35.7
 # Vector database clients
 qdrant-client==1.9.2
 langchain==0.2.6
-langchain-openai==0.1.8
+langchain-openai==1.1.14
 
 # Database and caching
 asyncpg==0.29.0
