@@ -18,7 +18,7 @@ openai==1.35.7
 
 # Vector database clients
 qdrant-client==1.9.2
-langchain==0.2.6
+langchain==0.3.30
 langchain-openai==0.1.8
 
 # Database and caching
